@@ -51,7 +51,7 @@ menu:
   #sitemap: /sitemap.xml
   #commonweal: /404.html
   shop: http://fashionentice.taobao.com/
-  about: /about/
+  about: /README.md
 
 
 # Enable/Disable menu icons.
