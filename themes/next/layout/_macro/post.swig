@@ -111,6 +111,10 @@
             </span>
           {% endif %}
 
+        <span id="busuanzi_container_page_pv">
+        &nbsp; | &nbsp; 热度&nbsp; <span id="busuanzi_value_page_pv"></span>°C
+        </span>
+
           {% if post.comments %}
             {% if (theme.duoshuo and theme.duoshuo.shortname) or theme.duoshuo_shortname %}
               <span class="post-comments-count">

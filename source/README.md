@@ -21,3 +21,11 @@ http://www.tuicool.com/articles/qEzEnyI
 
 Hexo博客配置优化
 http://blog.csdn.net/heqiangflytosky/article/details/54863166
+
+(node:6264) [DEP0061] DeprecationWarning: fs.SyncWriteStream is deprecated.报错
+http://www.abrocks.com/2017/06/17/node8.0%E6%96%B9%E6%B3%95%E5%BC%83%E7%94%A8%E5%A4%84%E7%90%86/
+解决方案：更新hexo-fs插件
+npm install hexo-fs --save
+
+搜索引擎+小插件+配置结构分析
+http://prozhuchen.com/2015/10/03/Hexo%E5%8D%9A%E5%AE%A2%E7%AC%AC%E5%9B%9B%E7%AB%99/
