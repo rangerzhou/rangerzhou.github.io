@@ -26,14 +26,18 @@
 
 <div class="count">
   <span id="busuanzi_container_site_pv" style='display:none'>
-    ★访问量 <span id="busuanzi_value_site_pv"></span>
+  <i class="fa fa-user" aria-hidden="true"></i>
+    <span id="busuanzi_value_site_pv"></span>&nbsp;&nbsp;
   </span>
 
   <span id="busuanzi_container_site_uv" style='display:none'>
-    ★访客数 <span id="busuanzi_value_site_uv"></span>
+  <i class="fa fa-eye" aria-hidden="true"></i>
+    <span id="busuanzi_value_site_uv"></span>&nbsp;&nbsp;
   </span>
 
   <span id="busuanzi_container_page_pv" style='display:none'>
-    ★阅读量<span id="busuanzi_value_page_pv"></span>
+    ★阅读量<span id="busuanzi_value_page_pv"></span>&nbsp;&nbsp;
   </span>
+
+  <span class="post-count">全站共{{ totalcount(site) }}字</span>
 </div>
