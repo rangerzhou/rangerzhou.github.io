@@ -49,9 +49,8 @@ menu:
   archives: /archives/
   tags: /tags/
   #sitemap: /sitemap.xml
-  #feed: /atom.xml
-  about: /about
   shop: http://fashionentice.taobao.com/
+  about: /about
   commonweal: /404.html
 
 
@@ -71,7 +70,6 @@ menu_icons:
   tags: tags
   archives: archive
   sitemap: sitemap
-  feed: feed
   commonweal: heartbeat
 
 
@@ -255,10 +253,10 @@ post_wordcount:
   separated_meta: true
 
 # Wechat Subscriber
-wechat_subscriber:
-  enabled: true
-  qcode: /images/wechat-qrcode.jpg
-  description: 欢迎您扫一扫上面的微信公众号，订阅我的博客！
+#wechat_subscriber:
+  #enabled: true
+  #qcode: /path/to/your/wechatqcode ex. /uploads/wechat-qcode.jpg
+  #description: ex. subscribe to my blog by scanning my public wechat account
 
 # Declare license on posts
 post_copyright:
@@ -526,7 +524,7 @@ pace: false
 pace_theme: pace-theme-minimal
 
 # Canvas-nest
-canvas_nest: true
+canvas_nest: false
 
 # three_waves
 three_waves: false
@@ -628,10 +626,6 @@ vendors:
 css: css
 js: js
 images: images
-
-reward_comment: 坚持原创技术分享，您的支持将鼓励我继续创作！
-wechatpay: /images/wechat.jpg
-alipay: /images/alipay.jpg
 
 # Theme version
 version: 5.1.1
