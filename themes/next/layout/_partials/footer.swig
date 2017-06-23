@@ -21,7 +21,7 @@
 </div>
 {% endif %}
 
-<script async src="//dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js">
+<!--<script async src="//dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js">
 </script>
 
 <div class="count">
@@ -40,4 +40,4 @@
   </span>
 
   <span class="post-count">全站共{{ totalcount(site) }}字</span>
-</div>
+</div>-->

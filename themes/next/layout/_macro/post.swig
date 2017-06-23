@@ -111,9 +111,9 @@
             </span>
           {% endif %}
 
-        <span id="busuanzi_container_page_pv">
+        <!--<span id="busuanzi_container_page_pv">
         &nbsp; | &nbsp; 热度&nbsp; <span id="busuanzi_value_page_pv"></span>°C
-        </span>
+        </span>-->
 
           {% if post.comments %}
             {% if (theme.duoshuo and theme.duoshuo.shortname) or theme.duoshuo_shortname %}
@@ -210,7 +210,7 @@
 
           {% if theme.post_wordcount.wordcount or theme.post_wordcount.min2read %}
             <div class="post-wordcount">
-              {% if theme.post_wordcount.wordcount %}
+              &nbsp;|&nbsp{% if theme.post_wordcount.wordcount %}
                 {% if not theme.post_wordcount.separated_meta %}
                   <span class="post-meta-divider">|</span>
                 {% endif %}

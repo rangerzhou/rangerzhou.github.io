@@ -5,7 +5,7 @@
 # Site
 title: RangerZhou
 subtitle: Read the fucking source code
-description: IT流氓
+description: 我是一个小流氓我从来也不坏，有一天我心血来潮耍了个流氓，我嘴里吹着小口哨我心里好得意，不知怎么哗啦啦啦啦我摔了一身泥
 author: Ranger Zhou
 email: rangerzhou.life@gmail.com
 language: zh-Hans
@@ -28,6 +28,7 @@ code_dir: downloads/code
 i18n_dir: :lang
 skip_render: 
   - README.md
+  - 404.html
   - googlee3d95c561b83a8f9.html
 
 # Writing
