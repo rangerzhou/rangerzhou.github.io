@@ -1,16 +1,101 @@
 ---
-title: Markdown 高阶语法手册
-date: 2017-06-14 21:42:26
-tags: [markdown高级]
-categories: "Others"
-top: 3
+title: Markdown语法手册
+date: 2017-06-14 19:36:15
+tags: markdown
+categories: Other
 ---
 
----
+# 1 Markdown 简明语法
+### 1. 斜体和粗体
+
+使用 \* 和 \*\* 表示斜体和粗体。
+<!--more-->
+
+示例：
+
+这是 *斜体*，这是 **粗体**。
+
+### 2. 分级标题
+
+使用 === 表示一级标题，使用 --- 表示二级标题。
+
+示例：
+
+```
+这是一个一级标题
+============================
+
+这是一个二级标题
+--------------------------------------------------
+
+### 这是一个三级标题
+```
+
+你也可以选择在行首加井号表示不同级别的标题 (H1-H6)，例如：# H1, ## H2, ### H3，#### H4。
+
+### 3. 外链接
+
+使用 \[描述](链接地址) 为文字增加外链接。
+
+示例：
+
+这是去往 [本人博客](http://rangerzhou.top) 的链接。
+
+### 4. 无序列表
+
+使用 *，+，- 表示无序列表。
+
+示例：
+
+- 无序列表项 一
+- 无序列表项 二
+- 无序列表项 三
+
+### 5. 有序列表
+
+使用数字和点表示有序列表。
+
+示例：
+
+1. 有序列表项 一
+2. 有序列表项 二
+3. 有序列表项 三
+
+### 6. 文字引用
+
+使用 > 表示文字引用。
+
+示例：
+
+> 野火烧不尽，春风吹又生。
+
+### 7. 行内代码块
+
+使用 \`代码` 表示行内代码块。
+
+示例：
+
+让我们聊聊 `html`。
+
+### 8.  代码块
+
+使用 四个缩进空格 表示代码块。
+
+示例：
+
+    这是一个代码块，此行左侧有四个不可见的空格。
+
+### 9.  插入图像
+
+使用 \!\[描述](图片链接地址) 插入图像。
+
+
+# 2 Markdown 高阶语法
+
 ### 1. 内容目录
 
 在段落中填写 `[TOC]` 以显示全文内容的目录结构。
-<!--more-->
+
 [TOC]
 
 ### 2. 标签分类
@@ -57,56 +142,35 @@ $$\sum^{j-1}_{k=0}{\widehat{\gamma}_{kj} z_k}$$
 
 支持四十一种编程语言的语法高亮的显示，行号显示。
 
-非代码示例：
+使用方法为\`\`\` c++
+#### 示例
+``` c++
+static int uninstall_app_legacy(TransportType transport, const char* serial, int argc, const char** argv) {
+    /* if the user choose the -k option, we refuse to do it until devices are
+       out with the option to uninstall the remaining data somehow (adb/ui) */
+    int i;
+    for (i = 1; i < argc; i++) {
+        if (!strcmp(argv[i], "-k")) {
+            printf(
+                "The -k option uninstalls the application while retaining the data/cache.\n"
+                "At the moment, there is no way to remove the remaining data.\n"
+                "You will have to reinstall the application with the same signature, and fully uninstall it.\n"
+                "If you truly wish to continue, execute 'adb shell pm uninstall -k'\n.");
+            return EXIT_FAILURE;
+        }
+    }
 
-```
-$ sudo apt-get install vim-gnome
-```
-
-Python 示例：
-
-```python
-@requires_authorization
-def somefunc(param1='', param2=0):
-    '''A docstring'''
-    if param1 > param2: # interesting
-        print 'Greater'
-    return (param2 - param1 + 1) or None
-
-class SomeClass:
-    pass
-
->>> message = '''interpreter
-... prompt'''
-```
-
-JavaScript 示例：
-
-``` javascript
-/**
-* nth element in the fibonacci series.
-* @param n >= 0
-* @return the nth element, >= 0.
-*/
-function fib(n) {
-  var a = 1, b = 1;
-  var tmp;
-  while (--n >= 0) {
-    tmp = a;
-    a += b;
-    b = tmp;
-  }
-  return a;
+    /* 'adb uninstall' takes the same arguments as 'pm uninstall' on device */
+    return pm_command(transport, serial, argc, argv);
 }
-
-document.write(fib(10));
 ```
+
 
 ### 7. 流程图
-
+使用方法为\`\`\` flow
 #### 示例
 
-```flow
+``` flow
 st=>start: Start:>https://www.zybuluo.com
 io=>inputoutput: verification
 op=>operation: Your Operation
@@ -122,7 +186,7 @@ cond(no)->sub->io
 #### 更多语法参考：[流程图语法参考](http://adrai.github.io/flowchart.js/)
 
 ### 8. 序列图
-
+使用方法为\`\`\` seq
 #### 示例 1
 
 ```seq
@@ -146,7 +210,8 @@ D-->>A: Dashed open arrow
 ### 9. 甘特图
 
 甘特图内在思想简单。基本是一条线条图，横轴表示时间，纵轴表示活动（项目），线条表示在整个期间上计划和实际的活动完成情况。它直观地表明任务计划在什么时候进行，及实际进展与计划要求的对比。
-
+使用方法为\`\`\` gantt
+####示例
 ```gantt
     title 项目开发流程
     section 项目确定
@@ -166,7 +231,8 @@ D-->>A: Dashed open arrow
 #### 更多语法参考：[甘特图语法参考](https://knsv.github.io/mermaid/#gant-diagrams)
 
 ### 10. Mermaid 流程图
-
+使用方法\`\`\` graphLR
+####示例
 ```graphLR
     A[Hard edge] -->|Link text| B(Round edge)
     B --> C{Decision}
@@ -177,7 +243,8 @@ D-->>A: Dashed open arrow
 #### 更多语法参考：[Mermaid 流程图语法参考](https://knsv.github.io/mermaid/#flowcharts-basic-syntax)
 
 ### 11. Mermaid 序列图
-
+使用方法\`\`\` sequence
+####示例
 ```sequence
     Alice->John: Hello John, how are you?
     loop every minute
