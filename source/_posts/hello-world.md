@@ -2,7 +2,7 @@
 title: Hello World
 date: 2017-06-13 23:50:00
 tags:
-categories: Other
+categories: Others
 reward: true
 top:
 ---

@@ -2,7 +2,7 @@
 title: Markdown语法手册
 date: 2017-06-14 19:36:15
 tags: markdown
-categories: Other
+categories: Others
 ---
 
 # 1 Markdown 简明语法
