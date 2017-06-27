@@ -123,7 +123,7 @@ static int install_app(TransportType transport, const char* serial, int argc, co
 }
 ```
 
-从代码中了解`install_app`就是将源机器中的文件copy到了目的机器（手机）中，可能是因为这个支持Feature的流程PKMS能够监听到这个copy，接下来继续看传动的安装方式`install_app_legacy`。
+从代码中了解`install_app`就是将源机器中的文件copy到了目的机器（手机）中，可能是因为这个支持Feature的流程PKMS能够监听到这个copy，接下来继续看传统的安装方式`install_app_legacy`。
 
 #### 1.2 install_app_legacy
 
@@ -194,7 +194,7 @@ static int pm_command(TransportType transport, const char* serial, int argc, con
     std::string cmd = "pm";
 
     while (argc-- > 0) {
-        // 根据参数构造pm命令
+        // 根据参数argv构造pm命令
         cmd += " " + escape_arg(*argv++);
     }
 
