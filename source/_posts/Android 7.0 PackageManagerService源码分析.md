@@ -3,6 +3,7 @@ title: Android 7.0 PackageManagerService源码分析
 date: 2017-06-26 13:56:01
 tags:
 categories: "Frameworks"
+copyright: true
 ---
 
 ********************占位符*****************
@@ -199,6 +200,7 @@ static int pm_command(TransportType transport, const char* serial, int argc, con
     }
 
     // 向adbd发送shell命令
+    // 手机端的adbd在收到客户端发来的shell pm命令时会启动一个shell，然后在其中执行pm
     return send_shell_command(transport, serial, cmd, false);
 }
 ... ...
@@ -211,10 +213,12 @@ int send_shell_command(TransportType transport_type, const char* serial, const s
 
         // Use shell protocol if it's supported and the caller doesn't explicitly
         // disable it.
+        // 如果支持shell协议，并且调用者没有明确禁用它，则使用shell协议
         if (!disable_shell_protocol) {
             FeatureSet features;
             std::string error;
             if (adb_get_feature_set(&features, &error)) {
+                // 如果定义了Feature，则使用shell协议
                 use_shell_protocol = CanUseFeature(features, kFeatureShell2);
             } else {
                 // Device was unreachable.
@@ -224,8 +228,10 @@ int send_shell_command(TransportType transport_type, const char* serial, const s
 
         if (attempt_connection) {
             std::string error;
+            // command已是pm开头的命令
             std::string service_string = ShellServiceString(use_shell_protocol, "", command);
 
+            // 向shell服务发送命令
             fd = adb_connect(service_string, &error);
             if (fd >= 0) {
                 break;
@@ -247,6 +253,100 @@ int send_shell_command(TransportType transport_type, const char* serial, const s
     return exit_code;
 }
 ```
+
+从代码可知，pm_command就是向shell服务发送pm命令。
+
+pm实际上是一个脚本，定义在[/frameworks/base/cmds/pm/](http://androidxref.com/7.1.1_r6/xref/frameworks/base/cmds/pm/) 中：
+
+``` shell
+# Script to start "pm" on the device, which has a very rudimentary
+# shell.
+#
+base=/system
+export CLASSPATH=$base/framework/pm.jar
+exec app_process $base/bin com.android.commands.pm.Pm "$@"
+# $@ 表示传给脚本的所有参数的列表
+
+```
+
+在编译system.img时，[frameworks](http://androidxref.com/7.1.1_r6/xref/frameworks/)/[base](http://androidxref.com/7.1.1_r6/xref/frameworks/base/)/[cmds](http://androidxref.com/7.1.1_r6/xref/frameworks/base/cmds/)/[pm](http://androidxref.com/7.1.1_r6/xref/frameworks/base/cmds/pm/)/[Android.mk](http://androidxref.com/7.1.1_r6/xref/frameworks/base/cmds/pm/Android.mk) 中会将该脚本复制到`system/bin`目录下。从脚本内容来看，首先export pm.jar到环境变量，然后通过app_process去执行pm.jar包中的main函数并将参数传给main函数，即/[frameworks](http://androidxref.com/7.1.1_r6/xref/frameworks/)/[base](http://androidxref.com/7.1.1_r6/xref/frameworks/base/)/[cmds](http://androidxref.com/7.1.1_r6/xref/frameworks/base/cmds/)/[pm](http://androidxref.com/7.1.1_r6/xref/frameworks/base/cmds/pm/)/[src](http://androidxref.com/7.1.1_r6/xref/frameworks/base/cmds/pm/src/)/[com](http://androidxref.com/7.1.1_r6/xref/frameworks/base/cmds/pm/src/com/)/[android](http://androidxref.com/7.1.1_r6/xref/frameworks/base/cmds/pm/src/com/android/)/[commands](http://androidxref.com/7.1.1_r6/xref/frameworks/base/cmds/pm/src/com/android/commands/)/[pm](http://androidxref.com/7.1.1_r6/xref/frameworks/base/cmds/pm/src/com/android/commands/pm/)/[Pm.java](http://androidxref.com/7.1.1_r6/xref/frameworks/base/cmds/pm/src/com/android/commands/pm/Pm.java) 中的main函数，根据不同参数处理不同事件。app_process是一个native进程，它通过创建虚拟机启动了Zygote，从而转变为一个Java进程，接下来我们看如何从执行pm脚本到启动Java进程。
+
+首先看/[frameworks](http://androidxref.com/7.1.1_r6/xref/frameworks/)/[base](http://androidxref.com/7.1.1_r6/xref/frameworks/base/)/[cmds](http://androidxref.com/7.1.1_r6/xref/frameworks/base/cmds/)/[app_process](http://androidxref.com/7.1.1_r6/xref/frameworks/base/cmds/app_process/)/[app_main.cpp](http://androidxref.com/7.1.1_r6/xref/frameworks/base/cmds/app_process/app_main.cpp) 的main函数：
+
+``` c++
+int main(int argc, char* const argv[])
+{
+    ... ...
+
+    // Parse runtime arguments.  Stop at first unrecognized option.
+    bool zygote = false;
+    bool startSystemServer = false;
+    bool application = false;
+    String8 niceName;
+    String8 className;
+
+    ++i;  // Skip unused "parent dir" argument.
+    while (i < argc) {
+        const char* arg = argv[i++];
+        if (strcmp(arg, "--zygote") == 0) {
+            zygote = true;
+            niceName = ZYGOTE_NICE_NAME;
+        } else if (strcmp(arg, "--start-system-server") == 0) {
+            startSystemServer = true;
+        } else if (strcmp(arg, "--application") == 0) {
+            application = true;
+        } else if (strncmp(arg, "--nice-name=", 12) == 0) {
+            niceName.setTo(arg + 12);
+        } else if (strncmp(arg, "--", 2) != 0) {
+            // 如果arg的前2个字符不为"--"，进入该条件分支设置className
+            className.setTo(arg);
+            break;
+        } else {
+            --i;
+            break;
+        }
+    }
+
+    ... ...
+    }
+    ... ...
+    if (zygote) {
+        runtime.start("com.android.internal.os.ZygoteInit", args, zygote);
+    } else if (className) {
+        启动className对应的类
+        runtime.start("com.android.internal.os.RuntimeInit", args, zygote);
+    } else {
+        fprintf(stderr, "Error: no class name or --zygote supplied.\n");
+        app_usage();
+        LOG_ALWAYS_FATAL("app_process: no class name or --zygote supplied.");
+        return 10;
+    }
+}
+```
+
+/[frameworks](http://androidxref.com/7.1.1_r6/xref/frameworks/)/[base](http://androidxref.com/7.1.1_r6/xref/frameworks/base/)/[core](http://androidxref.com/7.1.1_r6/xref/frameworks/base/core/)/[jni](http://androidxref.com/7.1.1_r6/xref/frameworks/base/core/jni/)/[AndroidRuntime.cpp](http://androidxref.com/7.1.1_r6/xref/frameworks/base/core/jni/AndroidRuntime.cpp) 
+
+``` c++
+void AndroidRuntime::start(const char* className, const Vector<String8>& options, bool zygote)
+{
+    ... ...
+    jmethodID startMeth = env->GetStaticMethodID(startClass, "main",
+            "([Ljava/lang/String;)V");
+    if (startMeth == NULL) {
+        ALOGE("JavaVM unable to find main() in '%s'\n", className);
+    } else {
+        //反射调用main函数，从native层进入java世界
+        env->CallStaticVoidMethod(startClass, startMeth, strArray);
+        #if 0
+        if (env->ExceptionCheck())
+            threadExitUncaughtException(env);
+        #endif
+    }
+    .........
+}
+```
+
+
 
 
 
