@@ -266,25 +266,89 @@ base=/system
 export CLASSPATH=$base/framework/pm.jar
 exec app_process $base/bin com.android.commands.pm.Pm "$@"
 # $@ 表示传给脚本的所有参数的列表
-
 ```
 
 在编译system.img时，[frameworks](http://androidxref.com/7.1.1_r6/xref/frameworks/)/[base](http://androidxref.com/7.1.1_r6/xref/frameworks/base/)/[cmds](http://androidxref.com/7.1.1_r6/xref/frameworks/base/cmds/)/[pm](http://androidxref.com/7.1.1_r6/xref/frameworks/base/cmds/pm/)/[Android.mk](http://androidxref.com/7.1.1_r6/xref/frameworks/base/cmds/pm/Android.mk) 中会将该脚本复制到`system/bin`目录下。从脚本内容来看，首先export pm.jar到环境变量，然后通过app_process去执行pm.jar包中的main函数并将参数传给main函数，即/[frameworks](http://androidxref.com/7.1.1_r6/xref/frameworks/)/[base](http://androidxref.com/7.1.1_r6/xref/frameworks/base/)/[cmds](http://androidxref.com/7.1.1_r6/xref/frameworks/base/cmds/)/[pm](http://androidxref.com/7.1.1_r6/xref/frameworks/base/cmds/pm/)/[src](http://androidxref.com/7.1.1_r6/xref/frameworks/base/cmds/pm/src/)/[com](http://androidxref.com/7.1.1_r6/xref/frameworks/base/cmds/pm/src/com/)/[android](http://androidxref.com/7.1.1_r6/xref/frameworks/base/cmds/pm/src/com/android/)/[commands](http://androidxref.com/7.1.1_r6/xref/frameworks/base/cmds/pm/src/com/android/commands/)/[pm](http://androidxref.com/7.1.1_r6/xref/frameworks/base/cmds/pm/src/com/android/commands/pm/)/[Pm.java](http://androidxref.com/7.1.1_r6/xref/frameworks/base/cmds/pm/src/com/android/commands/pm/Pm.java) 中的main函数，根据不同参数处理不同事件。app_process是一个native进程，它通过创建虚拟机启动了Zygote，从而转变为一个Java进程，接下来我们看如何从执行pm脚本到启动Java进程。
 
+app_process参数格式如下：
+
+``` shell
+app_process [vm-options] cmd-dir [options] start-class-name [main-options]
+```
+
+- vm-options：虚拟机选项参数
+- cmd-dir：当前未使用的父目录（如上述/system/bin），文件操作的父路径将为此路径
+- options：
+  - --zygote：以zygote模式开始
+  - --start-system-server：启动System Server
+  - --application：以应用模式（独立，非zygote）开始
+  - --nice-name：这个进程的名字（应该是启动后的正式名字吧？）
+- start-class-name：包含main方法的主类
+- main-options：对于非zygote开始的，options参数后面跟着主类名称，所有剩余的参数传递给这个类的main方法，对于zygote开始的，所有剩余参数都将传递给zygote
+
 首先看/[frameworks](http://androidxref.com/7.1.1_r6/xref/frameworks/)/[base](http://androidxref.com/7.1.1_r6/xref/frameworks/base/)/[cmds](http://androidxref.com/7.1.1_r6/xref/frameworks/base/cmds/)/[app_process](http://androidxref.com/7.1.1_r6/xref/frameworks/base/cmds/app_process/)/[app_main.cpp](http://androidxref.com/7.1.1_r6/xref/frameworks/base/cmds/app_process/app_main.cpp) 的main函数：
 
-``` c++
+``` java
 int main(int argc, char* const argv[])
 {
-    ... ...
-
+    if (prctl(PR_SET_NO_NEW_PRIVS, 1, 0, 0, 0) < 0) {
+        // Older kernels don't understand PR_SET_NO_NEW_PRIVS and return
+        // EINVAL. Don't die on such kernels.
+        if (errno != EINVAL) {
+            LOG_ALWAYS_FATAL("PR_SET_NO_NEW_PRIVS failed: %s", strerror(errno));
+            return 12;
+        }
+    }
+    AppRuntime runtime(argv[0], computeArgBlockSize(argc, argv));
+    // Process command line arguments
+    // ignore argv[0]（argv[0]应该就是指app_process吧）
+    argc--;
+    argv++;
+    // Everything up to '--' or first non '-' arg goes to the vm.
+    // 把'--'开头之前的参数，或者第一个非'-'开头的参数传递给虚拟机
+    //
+    // The first argument after the VM args is the "parent dir", which
+    // is currently unused.
+    // 虚拟机参数之后的第一个参数是当前未使用的“父目录”
+    //
+    // After the parent dir, we expect one or more the following internal
+    // arguments :
+    //
+    // --zygote : Start in zygote mode
+    // --start-system-server : Start the system server.
+    // --application : Start in application (stand alone, non zygote) mode.
+    // --nice-name : The nice name for this process.
+    //
+    // For non zygote starts, these arguments will be followed by
+    // the main class name. All remaining arguments are passed to
+    // the main method of this class.
+    // 对于非zygote开始的，这些参数后面跟着主类名称，所有剩余的参数传递给这个类的main方法
+    //
+    // For zygote starts, all remaining arguments are passed to the zygote.
+    // main function.
+    // 对于zygote开始的，所有剩余参数都将传递给zygote
+    //
+    // Note that we must copy argument string values since we will rewrite the
+    // entire argument block when we apply the nice name to argv0.
+    // 请注意，我们必须复制参数字符串值，因为当我们将nice名称应用于argv0（app_process？）时，我们将重写
+    // 整个参数块。
+    int i;
+    for (i = 0; i < argc; i++) {
+        if (argv[i][0] != '-') {
+            break;// 不是以'-'开头，跳出循环
+        }
+        if (argv[i][1] == '-' && argv[i][2] == 0) {
+            ++i; // Skip --.
+            break;
+        }
+        runtime.addOption(strdup(argv[i]));
+    }
     // Parse runtime arguments.  Stop at first unrecognized option.
     bool zygote = false;
     bool startSystemServer = false;
     bool application = false;
     String8 niceName;
     String8 className;
-
     ++i;  // Skip unused "parent dir" argument.
     while (i < argc) {
         const char* arg = argv[i++];
@@ -306,14 +370,13 @@ int main(int argc, char* const argv[])
             break;
         }
     }
-
     ... ...
     }
     ... ...
     if (zygote) {
         runtime.start("com.android.internal.os.ZygoteInit", args, zygote);
     } else if (className) {
-        启动className对应的类
+        // 不是启动zygote，而是启动className对应的类RuntimeInit
         runtime.start("com.android.internal.os.RuntimeInit", args, zygote);
     } else {
         fprintf(stderr, "Error: no class name or --zygote supplied.\n");
@@ -324,25 +387,157 @@ int main(int argc, char* const argv[])
 }
 ```
 
+
+
 /[frameworks](http://androidxref.com/7.1.1_r6/xref/frameworks/)/[base](http://androidxref.com/7.1.1_r6/xref/frameworks/base/)/[core](http://androidxref.com/7.1.1_r6/xref/frameworks/base/core/)/[jni](http://androidxref.com/7.1.1_r6/xref/frameworks/base/core/jni/)/[AndroidRuntime.cpp](http://androidxref.com/7.1.1_r6/xref/frameworks/base/core/jni/AndroidRuntime.cpp) 
 
 ``` c++
 void AndroidRuntime::start(const char* className, const Vector<String8>& options, bool zygote)
 {
     ... ...
-    jmethodID startMeth = env->GetStaticMethodID(startClass, "main",
-            "([Ljava/lang/String;)V");
-    if (startMeth == NULL) {
-        ALOGE("JavaVM unable to find main() in '%s'\n", className);
+    /*
+     * Start VM.  This thread becomes the main thread of the VM, and will
+     * not return until the VM exits.
+     */
+    char* slashClassName = toSlashClassName(className);
+    jclass startClass = env->FindClass(slashClassName);
+    if (startClass == NULL) {
+        ALOGE("JavaVM unable to locate class '%s'\n", slashClassName);
+        /* keep going */
     } else {
-        //反射调用main函数，从native层进入java世界
-        env->CallStaticVoidMethod(startClass, startMeth, strArray);
-        #if 0
-        if (env->ExceptionCheck())
-            threadExitUncaughtException(env);
-        #endif
+        jmethodID startMeth = env->GetStaticMethodID(startClass, "main",
+            "([Ljava/lang/String;)V");
+        if (startMeth == NULL) {
+            ALOGE("JavaVM unable to find main() in '%s'\n", className);
+            /* keep going */
+        } else {
+            // 反射调用main函数，从native层进入java世界
+            env->CallStaticVoidMethod(startClass, startMeth, strArray);
+
+#if 0
+            if (env->ExceptionCheck())
+                threadExitUncaughtException(env);
+#endif
+        }
     }
-    .........
+    free(slashClassName);
+
+    ALOGD("Shutting down VM\n");
+    if (mJavaVM->DetachCurrentThread() != JNI_OK)
+        ALOGW("Warning: unable to detach main thread\n");
+    if (mJavaVM->DestroyJavaVM() != 0)
+        ALOGW("Warning: VM did not shut down cleanly\n");
+}
+```
+
+start方法通过反射启动RuntimeInit类，进入到RuntimeInit的main函数：
+
+/[frameworks](http://androidxref.com/7.1.1_r6/xref/frameworks/)/[base](http://androidxref.com/7.1.1_r6/xref/frameworks/base/)/[core](http://androidxref.com/7.1.1_r6/xref/frameworks/base/core/)/[java](http://androidxref.com/7.1.1_r6/xref/frameworks/base/core/java/)/[com](http://androidxref.com/7.1.1_r6/xref/frameworks/base/core/java/com/)/[android](http://androidxref.com/7.1.1_r6/xref/frameworks/base/core/java/com/android/)/[internal](http://androidxref.com/7.1.1_r6/xref/frameworks/base/core/java/com/android/internal/)/[os](http://androidxref.com/7.1.1_r6/xref/frameworks/base/core/java/com/android/internal/os/)/[RuntimeInit.java](http://androidxref.com/7.1.1_r6/xref/frameworks/base/core/java/com/android/internal/os/RuntimeInit.java) 
+
+``` java
+    public static final void main(String[] argv) {
+        enableDdms();
+        if (argv.length == 2 && argv[1].equals("application")) {
+            if (DEBUG) Slog.d(TAG, "RuntimeInit: Starting application");
+            redirectLogStreams();
+        } else {
+            if (DEBUG) Slog.d(TAG, "RuntimeInit: Starting tool");
+        }
+
+        commonInit();// 进行一些常规的初始化工作
+
+        /*
+         * Now that we're running in interpreted code, call back into native code
+         * to run the system.
+         */
+        nativeFinishInit();
+
+        if (DEBUG) Slog.d(TAG, "Leaving RuntimeInit!");
+    }
+```
+
+nativeFinishInit函数如下：
+
+/[frameworks](http://androidxref.com/7.1.1_r6/xref/frameworks/)/[base](http://androidxref.com/7.1.1_r6/xref/frameworks/base/)/[core](http://androidxref.com/7.1.1_r6/xref/frameworks/base/core/)/[jni](http://androidxref.com/7.1.1_r6/xref/frameworks/base/core/jni/)/[AndroidRuntime.cpp](http://androidxref.com/7.1.1_r6/xref/frameworks/base/core/jni/AndroidRuntime.cpp) 
+
+``` c++
+static AndroidRuntime* gCurRuntime = NULL;
+
+/*
+ * Code written in the Java Programming Language calls here from main().
+ * 从用java写的RuntimeInit的main函数调用此处
+ */
+static void com_android_internal_os_RuntimeInit_nativeFinishInit(JNIEnv* env, jobject clazz)
+{
+    gCurRuntime->onStarted();
+}
+```
+
+app_main.cpp中定义的AppRuntime继承AndroidRuntime，实现onStarted函数：
+
+/[frameworks](http://androidxref.com/7.1.1_r6/xref/frameworks/)/[base](http://androidxref.com/7.1.1_r6/xref/frameworks/base/)/[cmds](http://androidxref.com/7.1.1_r6/xref/frameworks/base/cmds/)/[app_process](http://androidxref.com/7.1.1_r6/xref/frameworks/base/cmds/app_process/)/[app_main.cpp](http://androidxref.com/7.1.1_r6/xref/frameworks/base/cmds/app_process/app_main.cpp) 
+
+``` c++
+class AppRuntime : public AndroidRuntime
+{
+  ... ...
+  virtual void onStarted()
+    {
+        sp<ProcessState> proc = ProcessState::self();
+        ALOGV("App process: starting thread pool.\n");
+        proc->startThreadPool();
+
+        AndroidRuntime* ar = AndroidRuntime::getRuntime();
+        // 调用AndroidRuntime.callMain函数
+        ar->callMain(mClassName, mClass, mArgs);
+
+        IPCThreadState::self()->stopProcess();
+    }
+    ... ...
+}
+```
+
+/[frameworks](http://androidxref.com/7.1.1_r6/xref/frameworks/)/[base](http://androidxref.com/7.1.1_r6/xref/frameworks/base/)/[core](http://androidxref.com/7.1.1_r6/xref/frameworks/base/core/)/[jni](http://androidxref.com/7.1.1_r6/xref/frameworks/base/core/jni/)/[AndroidRuntime.cpp](http://androidxref.com/7.1.1_r6/xref/frameworks/base/core/jni/AndroidRuntime.cpp) 
+
+``` c++
+status_t AndroidRuntime::callMain(const String8& className, jclass clazz,
+    const Vector<String8>& args)
+{
+    JNIEnv* env;
+    jmethodID methodId;
+
+    ALOGD("Calling main entry %s", className.string());
+
+    env = getJNIEnv();
+    if (clazz == NULL || env == NULL) {
+        return UNKNOWN_ERROR;
+    }
+
+    methodId = env->GetStaticMethodID(clazz, "main", "([Ljava/lang/String;)V");
+    if (methodId == NULL) {
+        ALOGE("ERROR: could not find method %s.main(String[])\n", className.string());
+        return UNKNOWN_ERROR;
+    }
+
+    /*
+     * We want to call main() with a String array with our arguments in it.
+     * Create an array and populate it.
+     */
+    jclass stringClass;
+    jobjectArray strArray;
+
+    const size_t numArgs = args.size();
+    stringClass = env->FindClass("java/lang/String");
+    strArray = env->NewObjectArray(numArgs, stringClass, NULL);
+
+    for (size_t i = 0; i < numArgs; i++) {
+        jstring argStr = env->NewStringUTF(args[i].string());
+        env->SetObjectArrayElement(strArray, i, argStr);
+    }
+
+    // 最后在此处调用Pm.java的main函数
+    env->CallStaticVoidMethod(clazz, methodId, strArray);
+    return NO_ERROR;
 }
 ```
 
