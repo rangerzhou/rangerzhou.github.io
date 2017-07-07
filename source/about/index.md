@@ -1,33 +1,24 @@
 ---
 title: about
 date: 2017-06-22 11:30:26
+categories: "Freedom"
 ---
 
-最初
-https://zhuanlan.zhihu.com/p/25471760
 
-Hexo常见问题解决方案
-http://wp.huangshiyang.com/hexo%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88
 
-Hexo博客主题从Jacman切换到NexT.Mist
-http://codepub.cn/2016/03/20/Hexo-blog-theme-switching-from-Jacman-to-NexT-Mist/
+##### 关于我
 
-知行合一 | 用 Hexo 搭建博客
-http://lowrank.science/Hexo-Github/
+- 小白程序员，Andriod Framework工程师
+- 专注于Android系统原理、架构分析学习
+- 当前学习目标：Framework, Performance, Stability
+- Email: rangerzhou.life@gmail.com
 
-NEXT主题
-http://theme-next.iissnan.com/getting-started.html
+##### 打赏我
 
-把hexo配置部署到github（src refspec xxx does not match any 错误处理办法）
-http://blog.csdn.net/zhu1500527791/article/details/53119579
+- 如果觉得文章对您有所帮助或者启发，可随意打赏我 [**¥打赏我** ](/images/wechat.jpg)，给予更多的支持与鼓励，谢谢大家。
+- 也可以去[小哥哥淘宝店](http://fashionentice.taobao.com/)买买买。
 
-Hexo利用Github分支在不同电脑上写博客
-http://www.tuicool.com/articles/qEzEnyI
+##### 小哥哥微信
 
-Hexo博客配置优化
-http://blog.csdn.net/heqiangflytosky/article/details/54863166
+![微信](/images/wx.jpg)
 
-(node:6264) [DEP0061] DeprecationWarning: fs.SyncWriteStream is deprecated.报错
-http://www.abrocks.com/2017/06/17/node8.0%E6%96%B9%E6%B3%95%E5%BC%83%E7%94%A8%E5%A4%84%E7%90%86/
-解决方案：更新hexo-fs插件
-npm install hexo-fs --save
