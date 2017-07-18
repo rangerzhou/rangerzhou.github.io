@@ -10,6 +10,8 @@ copyright: true
 
 Windows平台有三种方法可以抓取systrace，分别是通过Eclipse，AndriodStudio和cmd命令，这里我们只介绍通过命令抓取。
 
+<!--more-->
+
 - 因为命令都是运行systrace.py脚本，所以首先电脑要安装Python，[Python官网](https://www.python.org/downloads/) 下载进行安装，安装完后在系统环境变量Path中添加`D:\Program Files\Python27\Scripts\;D:\Program Files\Python27\;` ，之后在cmd命令行窗口中运行python命令可查询python是否安装成功以及python版本，这里要注意的是**安装的版本要是2开头的版本，systrace不支持3开头的python**。
 
   ``` powershell
