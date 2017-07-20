@@ -53,6 +53,7 @@ menu:
   about: /about
   shop: http://fashionentice.taobao.com/
   commonweal: /404.html
+  movies: /movies
 
 
 # Enable/Disable menu icons.
@@ -73,6 +74,7 @@ menu_icons:
   sitemap: sitemap
   feed: feed
   commonweal: heartbeat
+  movies: user
 
 
 

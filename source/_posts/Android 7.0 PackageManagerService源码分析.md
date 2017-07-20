@@ -541,7 +541,312 @@ status_t AndroidRuntime::callMain(const String8& className, jclass clazz,
 }
 ```
 
+#### 1.4 Pm.java流程
 
+进入Pm.java的main函数：
+
+/[frameworks](http://androidxref.com/7.1.1_r6/xref/frameworks/)/[base](http://androidxref.com/7.1.1_r6/xref/frameworks/base/)/[cmds](http://androidxref.com/7.1.1_r6/xref/frameworks/base/cmds/)/[pm](http://androidxref.com/7.1.1_r6/xref/frameworks/base/cmds/pm/)/[src](http://androidxref.com/7.1.1_r6/xref/frameworks/base/cmds/pm/src/)/[com](http://androidxref.com/7.1.1_r6/xref/frameworks/base/cmds/pm/src/com/)/[android](http://androidxref.com/7.1.1_r6/xref/frameworks/base/cmds/pm/src/com/android/)/[commands](http://androidxref.com/7.1.1_r6/xref/frameworks/base/cmds/pm/src/com/android/commands/)/[pm](http://androidxref.com/7.1.1_r6/xref/frameworks/base/cmds/pm/src/com/android/commands/pm/)/[Pm.java](http://androidxref.com/7.1.1_r6/xref/frameworks/base/cmds/pm/src/com/android/commands/pm/Pm.java)
+
+``` java
+    private String[] mArgs;
+    IPackageInstaller mInstaller;
+    public static void main(String[] args) {
+        int exitCode = 1;
+        try {
+            exitCode = new Pm().run(args); // 调用run方法
+        } catch (Exception e) {
+            Log.e(TAG, "Error", e);
+            System.err.println("Error: " + e);
+            if (e instanceof RemoteException) {
+                System.err.println(PM_NOT_RUNNING_ERR);
+            }
+        }
+        System.exit(exitCode);
+    }
+
+    public int run(String[] args) throws RemoteException {
+        boolean validCommand = false;
+        if (args.length < 1) {
+            // 如果没有参数，则显示命令用法
+            return showUsage();
+        }
+        mAm = IAccountManager.Stub.asInterface(ServiceManager.getService(Context.ACCOUNT_SERVICE));
+        mUm = IUserManager.Stub.asInterface(ServiceManager.getService(Context.USER_SERVICE));
+        // 利用Binder通信，得到PKMS服务端代理
+        mPm = IPackageManager.Stub.asInterface(ServiceManager.getService("package"));
+
+        if (mPm == null) {
+            System.err.println(PM_NOT_RUNNING_ERR);
+            return 1;
+        }
+        mInstaller = mPm.getPackageInstaller();
+
+        mArgs = args;
+        String op = args[0];
+        mNextArg = 1;
+
+        if ("list".equals(op)) {
+            return runList();
+        }
+
+        if ("path".equals(op)) {
+            return runPath();
+        }
+      ... ...
+        if ("install".equals(op)) {
+            // 这里我们是安装，则调用runInstall
+            return runInstall();
+        }
+      ... ...
+        if ("uninstall".equals(op)) {
+            // 如果是卸载则调用runUnistall
+            return runUninstall();
+        }
+      ... ...
+    }
+```
+
+接下来看runInstall函数：
+
+``` java
+    /*
+     * Keep this around to support existing users of the "pm install" command that may not be
+     * able to be updated [or, at least informed the API has changed] such as ddmlib.
+     *
+     * Moving the implementation of "pm install" to "cmd package install" changes the executing
+     * context. Instead of being a stand alone process, "cmd package install" runs in the
+     * system_server process. Due to SELinux rules, system_server cannot access many directories;
+     * one of which being the package install staging directory [/data/local/tmp].
+     *
+     * The use of "adb install" or "cmd package install" over "pm install" is highly encouraged.
+     */
+    private int runInstall() throws RemoteException {
+        // 根据install后面的参数创建InstallParams，也包含了SessionParams，标志为MODE_FULL_INSTALL
+        // Mode for an install session whose staged APKs should fully replace any existing APKs for the target app.
+        final InstallParams params = makeInstallParams();
+        // InstallParams之后的参数，就是所要安装的APK文件，即inPath
+        final String inPath = nextArg();
+        // 是否安装到外置存储
+        boolean installExternal =
+                (params.sessionParams.installFlags & PackageManager.INSTALL_EXTERNAL) != 0;
+        if (params.sessionParams.sizeBytes < 0 && inPath != null) {
+            File file = new File(inPath);
+            if (file.isFile()) {
+                if (installExternal) {
+                    try {
+                        ApkLite baseApk = PackageParser.parseApkLite(file, 0);
+                        PackageLite pkgLite = new PackageLite(null, baseApk, null, null, null);
+                        params.sessionParams.setSize(
+                                PackageHelper.calculateInstalledSize(pkgLite, false,
+                                        params.sessionParams.abiOverride));
+                    } catch (PackageParserException | IOException e) {
+                        System.err.println("Error: Failed to parse APK file : " + e);
+                        return 1;
+                    }
+                } else {
+                    params.sessionParams.setSize(file.length());
+                }
+            }
+        }
+
+        // 1 Create Session
+        final int sessionId = doCreateSession(params.sessionParams,
+                params.installerPackageName, params.userId);
+
+        try {
+            if (inPath == null && params.sessionParams.sizeBytes == 0) {
+                System.err.println("Error: must either specify a package size or an APK file");
+                return 1;
+            }
+            // 2 Write Session
+            if (doWriteSession(sessionId, inPath, params.sessionParams.sizeBytes, "base.apk",
+                    false /*logSuccess*/) != PackageInstaller.STATUS_SUCCESS) {
+                return 1;
+            }
+            // 3 Commit Session
+            if (doCommitSession(sessionId, false /*logSuccess*/)
+                    != PackageInstaller.STATUS_SUCCESS) {
+                return 1;
+            }
+            // 安装成功打印"Success"
+            System.out.println("Success");
+            return 0;
+        } finally {
+            try {
+                mInstaller.abandonSession(sessionId);
+            } catch (Exception ignore) {
+            }
+        }
+    }
+```
+
+从代码中看，runInstall方法主要做了三件事：创建Session，对Session进行写操作，提交Session。接下来看每一步的详细工作：
+
+##### 1.4.1 Create Session
+
+``` java
+    private int doCreateSession(SessionParams params, String installerPackageName, int userId)
+            throws RemoteException {
+        // 通过AMS得到"runInstallCreate"(作为Context对应的字符串)对应的uid
+        userId = translateUserId(userId, "runInstallCreate");
+        if (userId == UserHandle.USER_ALL) {
+            userId = UserHandle.USER_SYSTEM;
+            params.installFlags |= PackageManager.INSTALL_ALL_USERS;
+        }
+
+        // 通过mInstaller(IPackageInstaller)，即通过PakcageInstallerService创建Session
+        final int sessionId = mInstaller.createSession(params, installerPackageName, userId);
+        return sessionId;
+    }
+```
+
+查看PackageInstallerService中的createSession函数：
+
+/[frameworks](http://androidxref.com/7.1.1_r6/xref/frameworks/)/[base](http://androidxref.com/7.1.1_r6/xref/frameworks/base/)/[services](http://androidxref.com/7.1.1_r6/xref/frameworks/base/services/)/[core](http://androidxref.com/7.1.1_r6/xref/frameworks/base/services/core/)/[java](http://androidxref.com/7.1.1_r6/xref/frameworks/base/services/core/java/)/[com](http://androidxref.com/7.1.1_r6/xref/frameworks/base/services/core/java/com/)/[android](http://androidxref.com/7.1.1_r6/xref/frameworks/base/services/core/java/com/android/)/[server](http://androidxref.com/7.1.1_r6/xref/frameworks/base/services/core/java/com/android/server/)/[pm](http://androidxref.com/7.1.1_r6/xref/frameworks/base/services/core/java/com/android/server/pm/)/[PackageInstallerService.java](http://androidxref.com/7.1.1_r6/xref/frameworks/base/services/core/java/com/android/server/pm/PackageInstallerService.java)
+
+``` java
+    @Override
+    public int createSession(SessionParams params, String installerPackageName, int userId) {
+        try {
+            return createSessionInternal(params, installerPackageName, userId);
+        } catch (IOException e) {
+            throw ExceptionUtils.wrap(e);
+        }
+    }
+
+    private int createSessionInternal(SessionParams params, String installerPackageName, int userId) throws IOException {
+        final int callingUid = Binder.getCallingUid();
+        mPm.enforceCrossUserPermission(callingUid, userId, true, true, "createSession");
+
+        if (mPm.isUserRestricted(userId, UserManager.DISALLOW_INSTALL_APPS)) {
+            throw new SecurityException("User restriction prevents installing");
+        }
+
+        // 修改SessionParams的installFlags
+        if ((callingUid == Process.SHELL_UID) || (callingUid == Process.ROOT_UID)) {
+            params.installFlags |= PackageManager.INSTALL_FROM_ADB;
+
+        } else {
+            mAppOps.checkPackage(callingUid, installerPackageName);
+
+            params.installFlags &= ~PackageManager.INSTALL_FROM_ADB;
+            params.installFlags &= ~PackageManager.INSTALL_ALL_USERS;
+            params.installFlags |= PackageManager.INSTALL_REPLACE_EXISTING;
+        }
+
+        // Only system components can circumvent runtime permissions when installing.
+        if ((params.installFlags & PackageManager.INSTALL_GRANT_RUNTIME_PERMISSIONS) != 0
+                && mContext.checkCallingOrSelfPermission(Manifest.permission
+                .INSTALL_GRANT_RUNTIME_PERMISSIONS) == PackageManager.PERMISSION_DENIED) {
+            throw new SecurityException("You need the "
+                    + "android.permission.INSTALL_GRANT_RUNTIME_PERMISSIONS permission "
+                    + "to use the PackageManager.INSTALL_GRANT_RUNTIME_PERMISSIONS flag");
+        }
+
+        // Defensively resize giant app icons
+        // 调整app图标大小
+        if (params.appIcon != null) {
+            final ActivityManager am = (ActivityManager) mContext.getSystemService(
+                    Context.ACTIVITY_SERVICE);
+            final int iconSize = am.getLauncherLargeIconSize();
+            if ((params.appIcon.getWidth() > iconSize * 2)
+                    || (params.appIcon.getHeight() > iconSize * 2)) {
+                params.appIcon = Bitmap.createScaledBitmap(params.appIcon, iconSize, iconSize,
+                        true);
+            }
+        }
+
+        switch (params.mode) {
+            case SessionParams.MODE_FULL_INSTALL:
+            case SessionParams.MODE_INHERIT_EXISTING:
+                break;
+            default:
+                throw new IllegalArgumentException("Invalid install mode: " + params.mode);
+        }
+
+        // If caller requested explicit location, sanity check it, otherwise
+        // resolve the best internal or adopted location.
+        // 根据SessionParams的installFlags进行一些操作
+        if ((params.installFlags & PackageManager.INSTALL_INTERNAL) != 0) {
+            if (!PackageHelper.fitsOnInternal(mContext, params.sizeBytes)) {
+                throw new IOException("No suitable internal storage available");
+            }
+
+        } else if ((params.installFlags & PackageManager.INSTALL_EXTERNAL) != 0) {
+            if (!PackageHelper.fitsOnExternal(mContext, params.sizeBytes)) {
+                throw new IOException("No suitable external storage available");
+            }
+
+        } else if ((params.installFlags & PackageManager.INSTALL_FORCE_VOLUME_UUID) != 0) {
+            // For now, installs to adopted media are treated as internal from
+            // an install flag point-of-view.
+            params.setInstallFlagsInternal();
+
+        } else {
+            // 通过adb安装会进入到这个分支，为SessionParams设置InstallInternal Flag
+            // For now, installs to adopted media are treated as internal from
+            // an install flag point-of-view.
+            params.setInstallFlagsInternal();
+
+            // Resolve best location for install, based on combination of
+            // requested install flags, delta size, and manifest settings.
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                params.volumeUuid = PackageHelper.resolveInstallVolume(mContext,
+                        params.appPackageName, params.installLocation, params.sizeBytes);
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+
+        final int sessionId;
+        final PackageInstallerSession session;
+        synchronized (mSessions) {
+            // Sanity check that installer isn't going crazy
+            // 确保同一个uid没有提交过多的活动Session，MAX_ACTIVE_SESSIONS=1024
+            final int activeCount = getSessionCount(mSessions, callingUid);
+            if (activeCount >= MAX_ACTIVE_SESSIONS) {
+                throw new IllegalStateException(
+                        "Too many active sessions for UID " + callingUid);
+            }
+            // 确保同一个uid没有提交过多的历史Session，MAX_HISTORICAL_SESSIONS=1048576
+            final int historicalCount = getSessionCount(mHistoricalSessions, callingUid);
+            if (historicalCount >= MAX_HISTORICAL_SESSIONS) {
+                throw new IllegalStateException(
+                        "Too many historical sessions for UID " + callingUid);
+            }
+
+            sessionId = allocateSessionIdLocked();
+        }
+
+        final long createdMillis = System.currentTimeMillis();
+        // We're staging to exactly one location
+        File stageDir = null;
+        String stageCid = null;
+        // 根据installFlags决定安装目录，默认安装到internal目录下
+        if ((params.installFlags & PackageManager.INSTALL_INTERNAL) != 0) {
+            final boolean isEphemeral =
+                    (params.installFlags & PackageManager.INSTALL_EPHEMERAL) != 0;
+            stageDir = buildStageDir(params.volumeUuid, sessionId, isEphemeral);
+        } else {
+            stageCid = buildExternalStageCid(sessionId);
+        }
+
+        session = new PackageInstallerSession(mInternalCallback, mContext, mPm,
+                mInstallThread.getLooper(), sessionId, userId, installerPackageName, callingUid,
+                params, createdMillis, stageDir, stageCid, false, false);
+
+        synchronized (mSessions) {
+            mSessions.put(sessionId, session);
+        }
+
+        // 回调通知Session已经create
+        mCallbacks.notifySessionCreated(session.sessionId, session.userId);
+        // 在mSessionsFile中记录
+        writeSessionsAsync();
+        return sessionId;
+    }
+```
 
 
 
