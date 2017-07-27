@@ -309,7 +309,7 @@ han: false
 #swiftype_key:
 
 # Baidu Analytics ID
-baidu_analytics: 8fec724dcee05957a8bec1939d430585
+baidu_analytics: 24a6d3c4c0f292c5f682d26414c3994b
 
 # Duoshuo ShortName
 #duoshuo_shortname:
@@ -633,7 +633,7 @@ js: js
 images: images
 
 reward_comment: 坚持原创技术分享，您的支持将鼓励我继续创作！
-wechatpay: /images/wechat.jpg
+wechatpay: /images/wxpay.jpg
 alipay: /images/alipay.jpg
 
 # Theme version

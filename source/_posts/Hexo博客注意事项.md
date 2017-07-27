@@ -72,3 +72,4 @@ $ grep -irn "SyncWriteStream" .\node_modules\hexo-deployer-git\
 可以看到是在.\hexo-deployer-git\/node_modules/hexo-fs/lib/fs.js的第718行用到的，进去后把这一行注释掉问题就解决了，但是为什么会在hexo-deployer-git中有个node_modules，而且在其中还有个hexo-fs呢，因为在根目录node_modules中也有个hexo-fs目录，进去[hexo-deployer-git官方Github网址](https://github.com/hexojs/hexo-deployer-git)查看是没有node_modules目录的，但是通过npm命令npm install hexo-deployer-git --save安装的hexo-deployer-git是有的，所以应该是npm源没有更新？
 
 总之是解决了这个强迫症难以忍受的问题，通过--debug参数定位问题。
+
