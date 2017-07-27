@@ -14,6 +14,8 @@ copyright: true
 (node:7048) [DEP0061] DeprecationWarning: fs.SyncWriteStream is deprecated.
 ```
 
+<!--more-->
+
 从报错信息来看是因为fs.SyncWriteStream is deprecated，node.js从8.0开始已经弃用了fs.SyncWriteStream方法，所以是因为我们node_modules中某个插件调用了这个方法，通过查看Hexo作者GitHub对应的项目，在issue中看到有人提到[这个问题](https://github.com/hexojs/hexo/issues/2598)，在hexo项目中其中有一个hexo-fs的插件调用了这个方法，所以需要更新hexo-fs插件，更新方法如下：
 
 ``` powershell
