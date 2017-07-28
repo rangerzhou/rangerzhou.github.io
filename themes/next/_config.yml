@@ -149,6 +149,8 @@ font:
 social:
   #LinkLabel: Link
   GitHub: https://github.com/rangerzhou
+  CSDN: http://blog.csdn.net/ranger0220?viewmode=contents
+  Weixin: http://otqux1hnn.bkt.clouddn.com/rangerzhou/170728/wxAccount.jpg
 
 
 # Social Links Icons
@@ -163,12 +165,14 @@ social_icons:
   GitHub: github
   Twitter: twitter
   Weibo: weibo
+  CSDN: cc
+  Weixin: weixin
 
 
 # Sidebar Avatar
 # in theme directory(source/images): /images/avatar.jpg
 # in site  directory(source/uploads): /uploads/avatar.jpg
-avatar: /images/me.jpg
+avatar: /images/avatar.jpg
 
 
 # Table Of Contents in the Sidebar

@@ -20,5 +20,5 @@ categories: "Freedom"
 
 ##### 小哥哥微信
 
-![小哥哥微信](/images/wxAccount.jpg)
+![小哥哥微信](http://otqux1hnn.bkt.clouddn.com/rangerzhou/170728/wxAccount.jpg)
 

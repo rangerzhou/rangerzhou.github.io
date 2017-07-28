@@ -73,3 +73,17 @@ $ grep -irn "SyncWriteStream" .\node_modules\hexo-deployer-git\
 
 总之是解决了这个强迫症难以忍受的问题，通过--debug参数定位问题。
 
+**7月28日更新：**
+
+在[hexo Github issue](https://github.com/hexojs/hexo/issues/2598)中反馈后，已经可以通过npm更新最新版本的hexo-deployer-git以及其他包含旧版本Hexo-fs的插件了，通过npm install --save xxx就可以解决了。
+
+> FYI, the following packages may contain the old version of Hexo-fs have been updated.
+>
+> hexo-deployer-git 0.3.1
+> hexo-math 3.0.3
+> hexo-renderer-ejs 0.3.1
+> hexo-deployer-openshift 0.1.2
+> hexo-server 0.2.2
+> hexo-deployer-heroku 0.1.2
+
+当然还有hexo-fs，更新如上几个插件即可解决。

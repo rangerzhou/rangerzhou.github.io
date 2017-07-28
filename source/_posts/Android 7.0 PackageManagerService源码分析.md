@@ -6,8 +6,6 @@ categories: "Frameworks"
 copyright: true
 ---
 
-********************占位符*****************
-
 ## 一、PKMS的启动、main函数解析
 
 此部分待补充
@@ -680,7 +678,7 @@ status_t AndroidRuntime::callMain(const String8& className, jclass clazz,
     }
 ```
 
-从代码中看，runInstall方法主要做了三件事：创建Session，对Session进行写操作，提交Session。接下来看每一步的详细工作：
+从代码中看，runInstall方法主要做了三件事：创建Session、对Session进行写操作以及提交Session，接下来看每一步的详细工作。
 
 ##### 1.4.1 Create Session
 
@@ -848,7 +846,76 @@ status_t AndroidRuntime::callMain(const String8& className, jclass clazz,
     }
 ```
 
+从代码中可知creatSession主要工作就是为APK的安装做好准备工作，最终创建出PackageInstallerSession对象，这个对象可以看作是“安装APK”这个请求的封装，其中包含了处理这个请求需要的一些信息。
 
+##### 1.4.2 Write Session
+
+/[frameworks](http://androidxref.com/7.1.1_r6/xref/frameworks/)/[base](http://androidxref.com/7.1.1_r6/xref/frameworks/base/)/[cmds](http://androidxref.com/7.1.1_r6/xref/frameworks/base/cmds/)/[pm](http://androidxref.com/7.1.1_r6/xref/frameworks/base/cmds/pm/)/[src](http://androidxref.com/7.1.1_r6/xref/frameworks/base/cmds/pm/src/)/[com](http://androidxref.com/7.1.1_r6/xref/frameworks/base/cmds/pm/src/com/)/[android](http://androidxref.com/7.1.1_r6/xref/frameworks/base/cmds/pm/src/com/android/)/[commands](http://androidxref.com/7.1.1_r6/xref/frameworks/base/cmds/pm/src/com/android/commands/)/[pm](http://androidxref.com/7.1.1_r6/xref/frameworks/base/cmds/pm/src/com/android/commands/pm/)/[Pm.java](http://androidxref.com/7.1.1_r6/xref/frameworks/base/cmds/pm/src/com/android/commands/pm/Pm.java)
+
+``` java
+    private int doWriteSession(int sessionId, String inPath, long sizeBytes, String splitName,
+            boolean logSuccess) throws RemoteException {
+        if ("-".equals(inPath)) {
+            inPath = null;
+        } else if (inPath != null) {
+            // file指向待安装的apk文件
+            final File file = new File(inPath);
+            if (file.isFile()) {
+                sizeBytes = file.length();
+            }
+        }
+
+        final SessionInfo info = mInstaller.getSessionInfo(sessionId);
+
+        PackageInstaller.Session session = null;
+        InputStream in = null;
+        OutputStream out = null;
+        try {
+            // 获取PakcageInstallerSession的调用接口
+            session = new PackageInstaller.Session(
+                    mInstaller.openSession(sessionId));
+
+            if (inPath != null) {
+                // 定义输入端，待安装apk对应文件的源地址
+                in = new FileInputStream(inPath);
+            } else {
+                in = new SizedInputStream(System.in, sizeBytes);
+            }
+            // 定义输出端，对应copy后的目的地址
+            out = session.openWrite(splitName, 0, sizeBytes);
+
+            int total = 0;
+            byte[] buffer = new byte[65536];
+            int c;
+            // 开始copy文件
+            while ((c = in.read(buffer)) != -1) {
+                total += c;
+                out.write(buffer, 0, c);
+
+                if (info.sizeBytes > 0) {
+                    final float fraction = ((float) c / (float) info.sizeBytes);
+                    // 更新copy的进度（c为已copy的，info.sizeBytes为总的）
+                    session.addProgress(fraction);
+                }
+            }
+            session.fsync(out);
+
+            if (logSuccess) {
+                System.out.println("Success: streamed " + total + " bytes");
+            }
+            return PackageInstaller.STATUS_SUCCESS;
+        } catch (IOException e) {
+            System.err.println("Error: failed to write; " + e.getMessage());
+            return PackageInstaller.STATUS_FAILURE;
+        } finally {
+            IoUtils.closeQuietly(out);
+            IoUtils.closeQuietly(in);
+            IoUtils.closeQuietly(session);
+        }
+    }
+```
+
+从代码看此段代码主要作用是通过Session将源端的数据copy到目的端。
 
 
 
