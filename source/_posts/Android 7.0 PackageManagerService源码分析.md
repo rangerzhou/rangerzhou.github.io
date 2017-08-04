@@ -577,6 +577,7 @@ status_t AndroidRuntime::callMain(const String8& className, jclass clazz,
             System.err.println(PM_NOT_RUNNING_ERR);
             return 1;
         }
+        // getPackageInstaller()在PKMS中实现，返回的是final PackageInstallerService mInstallerService;
         mInstaller = mPm.getPackageInstaller();
 
         mArgs = args;
@@ -916,6 +917,184 @@ status_t AndroidRuntime::callMain(const String8& className, jclass clazz,
 ```
 
 从代码看此段代码主要作用是通过Session将源端的数据copy到目的端。
+
+整个执行过程是基于C/S架构的通信工程，PackageInstallerSession是服务端：
+
+``` java
+public class PackageInstallerSession extends IPackageInstallerSession.Stub {
+```
+
+Pm作为PackageInstallerService的客户端，利用PackageInstallerSession来封装每一次完整的通信过程。
+
+##### 1.4.2.1 得到PackageInstallerSession的代理对象
+
+在Write Session中通过`session = new PackageInstaller.Session(mInstaller.openSession(sessionId));`获取了PackageInstallerSession的调用接口，PackageInstaller.Session的构造函数如下：
+
+``` java
+    public static class Session implements Closeable {
+        private IPackageInstallerSession mSession;
+
+        /** {@hide} */
+        public Session(IPackageInstallerSession session) {
+            mSession = session;
+        }
+    ... ...
+    }
+```
+
+传入的参数是`mInstaller.openSession(sessionId)`，mInstaller是在Pm.java中定义的，`IPackageInstaller mInstaller;`，`mInstaller = mPm.getPackageInstaller();`，最终返回的是`final PackageInstallerService mInstallerService;` ，来看一下PackageInstallerService.openSession函数：
+
+/[frameworks](http://androidxref.com/7.1.1_r6/xref/frameworks/)/[base](http://androidxref.com/7.1.1_r6/xref/frameworks/base/)/[services](http://androidxref.com/7.1.1_r6/xref/frameworks/base/services/)/[core](http://androidxref.com/7.1.1_r6/xref/frameworks/base/services/core/)/[java](http://androidxref.com/7.1.1_r6/xref/frameworks/base/services/core/java/)/[com](http://androidxref.com/7.1.1_r6/xref/frameworks/base/services/core/java/com/)/[android](http://androidxref.com/7.1.1_r6/xref/frameworks/base/services/core/java/com/android/)/[server](http://androidxref.com/7.1.1_r6/xref/frameworks/base/services/core/java/com/android/server/)/[pm](http://androidxref.com/7.1.1_r6/xref/frameworks/base/services/core/java/com/android/server/pm/)/[PackageInstallerService.java](http://androidxref.com/7.1.1_r6/xref/frameworks/base/services/core/java/com/android/server/pm/PackageInstallerService.java)
+
+``` java
+    @Override
+    public IPackageInstallerSession openSession(int sessionId) {
+        try {
+            return openSessionInternal(sessionId);
+        } catch (IOException e) {
+            throw ExceptionUtils.wrap(e);
+        }
+    }
+
+    private IPackageInstallerSession openSessionInternal(int sessionId) throws IOException {
+        synchronized (mSessions) {
+            // 根据sessionId获得PackageInstallerSession
+            final PackageInstallerSession session = mSessions.get(sessionId);
+            if (session == null || !isCallingUidOwner(session)) {
+                throw new SecurityException("Caller has no access to session " + sessionId);
+            }
+            session.open();
+            return session;
+        }
+    }
+
+    // open函数作用是准备好待copy的目录
+    public void open() throws IOException {
+        if (mActiveCount.getAndIncrement() == 0) {
+            mCallback.onSessionActiveChanged(this, true);
+        }
+
+        synchronized (mLock) {
+            if (!mPrepared) {
+                if (stageDir != null) {
+                    prepareStageDir(stageDir);
+                } else if (stageCid != null) {
+                    final long identity = Binder.clearCallingIdentity();
+                    try {
+                        prepareExternalStageCid(stageCid, params.sizeBytes);
+                    } finally {
+                        Binder.restoreCallingIdentity(identity);
+                    }
+
+                    // TODO: deliver more granular progress for ASEC allocation
+                    mInternalProgress = 0.25f;
+                    computeProgressLocked(true);
+                } else {
+                    throw new IllegalArgumentException(
+                            "Exactly one of stageDir or stageCid stage must be set");
+                }
+
+                mPrepared = true;
+                mCallback.onSessionPrepared(this);
+            }
+        }
+    }
+```
+
+##### 1.4.2.2 定义输出端，得到客户端
+
+/[frameworks](http://androidxref.com/7.1.1_r6/xref/frameworks/)/[base](http://androidxref.com/7.1.1_r6/xref/frameworks/base/)/[core](http://androidxref.com/7.1.1_r6/xref/frameworks/base/core/)/[java](http://androidxref.com/7.1.1_r6/xref/frameworks/base/core/java/)/[android](http://androidxref.com/7.1.1_r6/xref/frameworks/base/core/java/android/)/[content](http://androidxref.com/7.1.1_r6/xref/frameworks/base/core/java/android/content/)/[pm](http://androidxref.com/7.1.1_r6/xref/frameworks/base/core/java/android/content/pm/)/[PackageInstaller.java](http://androidxref.com/7.1.1_r6/xref/frameworks/base/core/java/android/content/pm/PackageInstaller.java)
+
+``` java
+        public @NonNull OutputStream openWrite(@NonNull String name, long offsetBytes,
+                long lengthBytes) throws IOException {
+            try {
+                // 调用了mSession(PackageInstallerSession对象)的openWrite方法，发生了Binder通信
+                final ParcelFileDescriptor clientSocket = mSession.openWrite(name,
+                        offsetBytes, lengthBytes);
+                // 此处创建了一个FileBridge对象
+                return new FileBridge.FileBridgeOutputStream(clientSocket);
+            } catch (RuntimeException e) {
+                ExceptionUtils.maybeUnwrapIOException(e);
+                throw e;
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+```
+
+实际上就是获得输出流，对应copy后的目的地址，接下来看看PackageInstallerSession的openWrite方法。
+
+/[frameworks](http://androidxref.com/7.1.1_r6/xref/frameworks/)/[base](http://androidxref.com/7.1.1_r6/xref/frameworks/base/)/[services](http://androidxref.com/7.1.1_r6/xref/frameworks/base/services/)/[core](http://androidxref.com/7.1.1_r6/xref/frameworks/base/services/core/)/[java](http://androidxref.com/7.1.1_r6/xref/frameworks/base/services/core/java/)/[com](http://androidxref.com/7.1.1_r6/xref/frameworks/base/services/core/java/com/)/[android](http://androidxref.com/7.1.1_r6/xref/frameworks/base/services/core/java/com/android/)/[server](http://androidxref.com/7.1.1_r6/xref/frameworks/base/services/core/java/com/android/server/)/[pm](http://androidxref.com/7.1.1_r6/xref/frameworks/base/services/core/java/com/android/server/pm/)/[PackageInstallerSession.java](http://androidxref.com/7.1.1_r6/xref/frameworks/base/services/core/java/com/android/server/pm/PackageInstallerSession.java)
+
+``` java
+    @Override
+    public ParcelFileDescriptor openWrite(String name, long offsetBytes, long lengthBytes) {
+        try {
+            return openWriteInternal(name, offsetBytes, lengthBytes);
+        } catch (IOException e) {
+            throw ExceptionUtils.wrap(e);
+        }
+    }
+
+    private ParcelFileDescriptor openWriteInternal(String name, long offsetBytes, long lengthBytes)
+            throws IOException {
+        // Quick sanity check of state, and allocate a pipe for ourselves. We
+        // then do heavy disk allocation outside the lock, but this open pipe
+        // will block any attempted install transitions.
+        // FileBridge建立客户端和服务端的管道
+        final FileBridge bridge;
+        synchronized (mLock) {
+            assertPreparedAndNotSealed("openWrite");
+
+            bridge = new FileBridge();
+            mBridges.add(bridge);
+        }
+
+        try {
+            // Use installer provided name for now; we always rename later
+            if (!FileUtils.isValidExtFilename(name)) {
+                throw new IllegalArgumentException("Invalid name: " + name);
+            }
+            final File target;
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                target = new File(resolveStageDir(), name);
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+
+            // TODO: this should delegate to DCS so the system process avoids
+            // holding open FDs into containers.
+            final FileDescriptor targetFd = Libcore.os.open(target.getAbsolutePath(),
+                    O_CREAT | O_WRONLY, 0644);
+            Os.chmod(target.getAbsolutePath(), 0644);
+
+            // If caller specified a total length, allocate it for them. Free up
+            // cache space to grow, if needed.
+            if (lengthBytes > 0) {
+                final StructStat stat = Libcore.os.fstat(targetFd);
+                final long deltaBytes = lengthBytes - stat.st_size;
+                // Only need to free up space when writing to internal stage
+                if (stageDir != null && deltaBytes > 0) {
+                    mPm.freeStorage(params.volumeUuid, deltaBytes);
+                }
+                Libcore.os.posix_fallocate(targetFd, 0, lengthBytes);
+            }
+
+            if (offsetBytes > 0) {
+                Libcore.os.lseek(targetFd, offsetBytes, OsConstants.SEEK_SET);
+            }
+
+            bridge.setTargetFile(targetFd);
+            bridge.start();
+            return new ParcelFileDescriptor(bridge.getClientSocket());
+
+        } catch (ErrnoException e) {
+            throw e.rethrowAsIOException();
+        }
+    }
+```
 
 
 
