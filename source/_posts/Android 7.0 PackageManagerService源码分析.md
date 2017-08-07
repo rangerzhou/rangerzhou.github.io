@@ -683,6 +683,8 @@ status_t AndroidRuntime::callMain(const String8& className, jclass clazz,
 
 ##### 1.4.1 Create Session
 
+/[frameworks](http://androidxref.com/7.1.1_r6/xref/frameworks/)/[base](http://androidxref.com/7.1.1_r6/xref/frameworks/base/)/[cmds](http://androidxref.com/7.1.1_r6/xref/frameworks/base/cmds/)/[pm](http://androidxref.com/7.1.1_r6/xref/frameworks/base/cmds/pm/)/[src](http://androidxref.com/7.1.1_r6/xref/frameworks/base/cmds/pm/src/)/[com](http://androidxref.com/7.1.1_r6/xref/frameworks/base/cmds/pm/src/com/)/[android](http://androidxref.com/7.1.1_r6/xref/frameworks/base/cmds/pm/src/com/android/)/[commands](http://androidxref.com/7.1.1_r6/xref/frameworks/base/cmds/pm/src/com/android/commands/)/[pm](http://androidxref.com/7.1.1_r6/xref/frameworks/base/cmds/pm/src/com/android/commands/pm/)/[Pm.java](http://androidxref.com/7.1.1_r6/xref/frameworks/base/cmds/pm/src/com/android/commands/pm/Pm.java)
+
 ``` java
     private int doCreateSession(SessionParams params, String installerPackageName, int userId)
             throws RemoteException {
@@ -1092,6 +1094,150 @@ Pm作为PackageInstallerService的客户端，利用PackageInstallerSession来�
 
         } catch (ErrnoException e) {
             throw e.rethrowAsIOException();
+        }
+    }
+```
+
+FileBridge到底是什么呢，来看一下FileBridge类：
+
+/[frameworks](http://androidxref.com/7.1.1_r6/xref/frameworks/)/[base](http://androidxref.com/7.1.1_r6/xref/frameworks/base/)/[core](http://androidxref.com/7.1.1_r6/xref/frameworks/base/core/)/[java](http://androidxref.com/7.1.1_r6/xref/frameworks/base/core/java/)/[android](http://androidxref.com/7.1.1_r6/xref/frameworks/base/core/java/android/)/[os](http://androidxref.com/7.1.1_r6/xref/frameworks/base/core/java/android/os/)/[FileBridge.java](http://androidxref.com/7.1.1_r6/xref/frameworks/base/core/java/android/os/FileBridge.java)
+
+``` java
+/**
+ * Simple bridge that allows file access across process boundaries without
+ * returning the underlying {@link FileDescriptor}. This is useful when the
+ * server side needs to strongly assert that a client side is completely
+ * hands-off.
+ *
+ * @hide
+ */
+public class FileBridge extends Thread {
+    private static final String TAG = "FileBridge";
+
+    // TODO: consider extending to support bidirectional IO
+
+    private static final int MSG_LENGTH = 8;
+
+    /** CMD_WRITE [len] [data] */
+    private static final int CMD_WRITE = 1;
+    /** CMD_FSYNC */
+    private static final int CMD_FSYNC = 2;
+    /** CMD_CLOSE */
+    private static final int CMD_CLOSE = 3;
+
+    private FileDescriptor mTarget;
+
+    private final FileDescriptor mServer = new FileDescriptor();
+    private final FileDescriptor mClient = new FileDescriptor();
+
+    private volatile boolean mClosed;
+
+    public FileBridge() {
+        try {
+            // 构造函数建立的mServer和mClient之间的管道
+            Os.socketpair(AF_UNIX, SOCK_STREAM, 0, mServer, mClient);
+        } catch (ErrnoException e) {
+            throw new RuntimeException("Failed to create bridge");
+        }
+    }
+
+    public boolean isClosed() {
+        return mClosed;
+    }
+
+    public void forceClose() {
+        IoUtils.closeQuietly(mTarget);
+        IoUtils.closeQuietly(mServer);
+        IoUtils.closeQuietly(mClient);
+        mClosed = true;
+    }
+
+    public void setTargetFile(FileDescriptor target) {
+        mTarget = target;
+    }
+
+    public FileDescriptor getClientSocket() {
+        return mClient;
+    }
+
+    @Override
+    public void run() {
+        final byte[] temp = new byte[8192];
+        try {
+            // mServer和mClient已经通过管道绑定，取出从mClient写入到mServer中的数据并进行处理
+            while (IoBridge.read(mServer, temp, 0, MSG_LENGTH) == MSG_LENGTH) {
+                final int cmd = Memory.peekInt(temp, 0, ByteOrder.BIG_ENDIAN);
+                if (cmd == CMD_WRITE) {
+                    // Shuttle data into local file
+                    int len = Memory.peekInt(temp, 4, ByteOrder.BIG_ENDIAN);
+                    while (len > 0) {
+                        int n = IoBridge.read(mServer, temp, 0, Math.min(temp.length, len));
+                        if (n == -1) {
+                            throw new IOException(
+                                    "Unexpected EOF; still expected " + len + " bytes");
+                        }
+                        IoBridge.write(mTarget, temp, 0, n);
+                        len -= n;
+                    }
+
+                } else if (cmd == CMD_FSYNC) {
+                    // Sync and echo back to confirm
+                    Os.fsync(mTarget);
+                    IoBridge.write(mServer, temp, 0, MSG_LENGTH);
+
+                } else if (cmd == CMD_CLOSE) {
+                    // Close and echo back to confirm
+                    Os.fsync(mTarget);
+                    Os.close(mTarget);
+                    mClosed = true;
+                    IoBridge.write(mServer, temp, 0, MSG_LENGTH);
+                    break;
+                }
+            }
+
+        } catch (ErrnoException | IOException e) {
+            Log.wtf(TAG, "Failed during bridge", e);
+        } finally {
+            forceClose();
+        }
+    }
+```
+
+在PackageInstallerSession中的openWrite函数中，Pm得到与PackageInstallerSession通信的client端，同时PackageInstallerSession也启动了FileBridge准备接收数据。
+
+在Write Session中进行文件copy时，最终是利用FileBridge的管道来完成实际的工作。
+
+##### 1.4.3 Commit Session
+
+在doWriteSession函数完成后，APK源文件已经copy到目的地址了，紧接着开始doCommitSession的工作：
+
+/[frameworks](http://androidxref.com/7.1.1_r6/xref/frameworks/)/[base](http://androidxref.com/7.1.1_r6/xref/frameworks/base/)/[cmds](http://androidxref.com/7.1.1_r6/xref/frameworks/base/cmds/)/[pm](http://androidxref.com/7.1.1_r6/xref/frameworks/base/cmds/pm/)/[src](http://androidxref.com/7.1.1_r6/xref/frameworks/base/cmds/pm/src/)/[com](http://androidxref.com/7.1.1_r6/xref/frameworks/base/cmds/pm/src/com/)/[android](http://androidxref.com/7.1.1_r6/xref/frameworks/base/cmds/pm/src/com/android/)/[commands](http://androidxref.com/7.1.1_r6/xref/frameworks/base/cmds/pm/src/com/android/commands/)/[pm](http://androidxref.com/7.1.1_r6/xref/frameworks/base/cmds/pm/src/com/android/commands/pm/)/[Pm.java](http://androidxref.com/7.1.1_r6/xref/frameworks/base/cmds/pm/src/com/android/commands/pm/Pm.java)
+
+``` java
+    private int doCommitSession(int sessionId, boolean logSuccess) throws RemoteException {
+        PackageInstaller.Session session = null;
+        try {
+            session = new PackageInstaller.Session(
+                    mInstaller.openSession(sessionId));
+
+            final LocalIntentReceiver receiver = new LocalIntentReceiver();
+            // 此处提交Session
+            session.commit(receiver.getIntentSender());
+
+            final Intent result = receiver.getResult();
+            final int status = result.getIntExtra(PackageInstaller.EXTRA_STATUS,
+                    PackageInstaller.STATUS_FAILURE);
+            if (status == PackageInstaller.STATUS_SUCCESS) {
+                if (logSuccess) {
+                    System.out.println("Success");
+                }
+            } else {
+                System.err.println("Failure ["
+                        + result.getStringExtra(PackageInstaller.EXTRA_STATUS_MESSAGE) + "]");
+            }
+            return status;
+        } finally {
+            IoUtils.closeQuietly(session);
         }
     }
 ```

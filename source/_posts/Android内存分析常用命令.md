@@ -10,6 +10,8 @@ categories: Android
 
 ### 1.1 内存指标
 
+<!--more-->
+
 | 简称   | 全称                    | 含义          | 备注                    |
 | ---- | --------------------- | ----------- | --------------------- |
 | USS  | Unique Set Size       | 进程独自占用的物理内存 | 不包含共享库占用的内存           |
@@ -18,8 +20,6 @@ categories: Android
 | VSS  | Virtual Set Size      | 虚拟耗用内存      | VSS = RSS + 未分配实际物理内存 |
 
 内存的大小关系：VSS >= RSS >= PSS >= USS
-
-<!--more-->
 
 ### 1.2 常用内存分析命令
 
