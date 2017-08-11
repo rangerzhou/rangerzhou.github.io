@@ -148,9 +148,10 @@ font:
 # Value is the target link (E.g. GitHub: https://github.com/iissnan)
 social:
   #LinkLabel: Link
-  GitHub: https://github.com/rangerzhou
+  #GitHub: https://github.com/rangerzhou
   CSDN: http://blog.csdn.net/ranger0220?viewmode=contents
   Wechat: http://otqux1hnn.bkt.clouddn.com/rangerzhou/170728/wxAccount.jpg
+  淘宝: http://fashionentice.taobao.com/
 
 
 # Social Links Icons
@@ -166,7 +167,8 @@ social_icons:
   Twitter: twitter
   Weibo: weibo
   CSDN: cc
-  Wechat: weixin
+  Wechat: wechat
+  淘宝: tumblr
 
 
 # Sidebar Avatar

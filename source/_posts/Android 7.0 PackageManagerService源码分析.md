@@ -1242,5 +1242,70 @@ public class FileBridge extends Thread {
     }
 ```
 
+/[frameworks](http://androidxref.com/7.1.1_r6/xref/frameworks/)/[base](http://androidxref.com/7.1.1_r6/xref/frameworks/base/)/[core](http://androidxref.com/7.1.1_r6/xref/frameworks/base/core/)/[java](http://androidxref.com/7.1.1_r6/xref/frameworks/base/core/java/)/[android](http://androidxref.com/7.1.1_r6/xref/frameworks/base/core/java/android/)/[content](http://androidxref.com/7.1.1_r6/xref/frameworks/base/core/java/android/content/)/[pm](http://androidxref.com/7.1.1_r6/xref/frameworks/base/core/java/android/content/pm/)/[PackageInstaller.java](http://androidxref.com/7.1.1_r6/xref/frameworks/base/core/java/android/content/pm/PackageInstaller.java)
 
+``` java
+        /**
+         * Attempt to commit everything staged in this session. This may require
+         * user intervention, and so it may not happen immediately. The final
+         * result of the commit will be reported through the given callback.
+         * <p>
+         * Once this method is called, no additional mutations may be performed
+         * on the session. If the device reboots before the session has been
+         * finalized, you may commit the session again.
+         *
+         * @throws SecurityException if streams opened through
+         *             {@link #openWrite(String, long, long)} are still open.
+         */
+        public void commit(@NonNull IntentSender statusReceiver) {
+            try {
+                // 调用PackageInstallerSession中的commit函数
+                mSession.commit(statusReceiver);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+```
+
+/[frameworks](http://androidxref.com/7.1.1_r6/xref/frameworks/)/[base](http://androidxref.com/7.1.1_r6/xref/frameworks/base/)/[services](http://androidxref.com/7.1.1_r6/xref/frameworks/base/services/)/[core](http://androidxref.com/7.1.1_r6/xref/frameworks/base/services/core/)/[java](http://androidxref.com/7.1.1_r6/xref/frameworks/base/services/core/java/)/[com](http://androidxref.com/7.1.1_r6/xref/frameworks/base/services/core/java/com/)/[android](http://androidxref.com/7.1.1_r6/xref/frameworks/base/services/core/java/com/android/)/[server](http://androidxref.com/7.1.1_r6/xref/frameworks/base/services/core/java/com/android/server/)/[pm](http://androidxref.com/7.1.1_r6/xref/frameworks/base/services/core/java/com/android/server/pm/)/[PackageInstallerSession.java](http://androidxref.com/7.1.1_r6/xref/frameworks/base/services/core/java/com/android/server/pm/PackageInstallerSession.java)
+
+``` java
+    @Override
+    public void commit(IntentSender statusReceiver) {
+        Preconditions.checkNotNull(statusReceiver);
+
+        final boolean wasSealed;
+        synchronized (mLock) {
+            wasSealed = mSealed;
+            if (!mSealed) {
+                // Verify that all writers are hands-off
+                for (FileBridge bridge : mBridges) {
+                    if (!bridge.isClosed()) {
+                        throw new SecurityException("Files still open");
+                    }
+                }
+                mSealed = true;
+            }
+
+            // Client staging is fully done at this point
+            mClientProgress = 1f;
+            computeProgressLocked(true);
+        }
+
+        if (!wasSealed) {
+            // Persist the fact that we've sealed ourselves to prevent
+            // mutations of any hard links we create. We do this without holding
+            // the session lock, since otherwise it's a lock inversion.
+            mCallback.onSessionSealedBlocking(this);
+        }
+
+        // This ongoing commit should keep session active, even though client
+        // will probably close their end.
+        mActiveCount.incrementAndGet();
+
+        final PackageInstallObserverAdapter adapter = new PackageInstallObserverAdapter(mContext,
+                statusReceiver, sessionId, mIsInstallerDeviceOwner, userId);
+        mHandler.obtainMessage(MSG_COMMIT, adapter.getBinder()).sendToTarget();
+    }
+```
 
