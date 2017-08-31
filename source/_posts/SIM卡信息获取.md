@@ -11,7 +11,7 @@ password:
 
 <!--more-->
 
-首先上传源码文件：[点我下载]()
+首先上传源码文件：[CSDN下载](http://download.csdn.net/download/guai8023/9934947) （[百度网盘](http://pan.baidu.com/s/1mify6LU) 密码: hfvz）
 
 此文记录在获取这些信息时踩过的坑。
 
