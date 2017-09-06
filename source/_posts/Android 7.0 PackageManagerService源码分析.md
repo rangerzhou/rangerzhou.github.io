@@ -1198,7 +1198,7 @@ public class FileBridge extends Thread {
         } catch (ErrnoException | IOException e) {
             Log.wtf(TAG, "Failed during bridge", e);
         } finally {
-            forceClose();
+            forceClose(); // 此处会关闭bridge
         }
     }
 ```
@@ -1259,7 +1259,7 @@ public class FileBridge extends Thread {
          */
         public void commit(@NonNull IntentSender statusReceiver) {
             try {
-                // 调用PackageInstallerSession中的commit函数
+                // 通过Binder通信调用PackageInstallerSession中的commit函数
                 mSession.commit(statusReceiver);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
@@ -1274,11 +1274,12 @@ public class FileBridge extends Thread {
     public void commit(IntentSender statusReceiver) {
         Preconditions.checkNotNull(statusReceiver);
 
-        final boolean wasSealed;
+        final boolean wasSealed; // boolean默认值为false
         synchronized (mLock) {
             wasSealed = mSealed;
             if (!mSealed) {
                 // Verify that all writers are hands-off
+                // 在FileBridge.java中run()的finally代码块中(也即doWriteSession传输数据的结尾)会关闭bridge
                 for (FileBridge bridge : mBridges) {
                     if (!bridge.isClosed()) {
                         throw new SecurityException("Files still open");
@@ -1307,5 +1308,242 @@ public class FileBridge extends Thread {
                 statusReceiver, sessionId, mIsInstallerDeviceOwner, userId);
         mHandler.obtainMessage(MSG_COMMIT, adapter.getBinder()).sendToTarget();
     }
+```
+
+指定mHandler对应的callback：
+
+/[frameworks](http://androidxref.com/7.1.1_r6/xref/frameworks/)/[base](http://androidxref.com/7.1.1_r6/xref/frameworks/base/)/[services](http://androidxref.com/7.1.1_r6/xref/frameworks/base/services/)/[core](http://androidxref.com/7.1.1_r6/xref/frameworks/base/services/core/)/[java](http://androidxref.com/7.1.1_r6/xref/frameworks/base/services/core/java/)/[com](http://androidxref.com/7.1.1_r6/xref/frameworks/base/services/core/java/com/)/[android](http://androidxref.com/7.1.1_r6/xref/frameworks/base/services/core/java/com/android/)/[server](http://androidxref.com/7.1.1_r6/xref/frameworks/base/services/core/java/com/android/server/)/[pm](http://androidxref.com/7.1.1_r6/xref/frameworks/base/services/core/java/com/android/server/pm/)/[PackageInstallerSession.java](http://androidxref.com/7.1.1_r6/xref/frameworks/base/services/core/java/com/android/server/pm/PackageInstallerSession.java)
+
+``` java
+    private final Handler.Callback mHandlerCallback = new Handler.Callback() {
+        @Override
+        public boolean handleMessage(Message msg) {
+            // Cache package manager data without the lock held
+            final PackageInfo pkgInfo = mPm.getPackageInfo(
+                    params.appPackageName, PackageManager.GET_SIGNATURES /*flags*/, userId);
+            final ApplicationInfo appInfo = mPm.getApplicationInfo(
+                    params.appPackageName, 0, userId);
+
+            synchronized (mLock) {
+                if (msg.obj != null) {
+                    mRemoteObserver = (IPackageInstallObserver2) msg.obj;
+                }
+
+                try {
+                    // 最终触发commitLocked
+                    commitLocked(pkgInfo, appInfo);
+                } catch (PackageManagerException e) {
+                    final String completeMsg = ExceptionUtils.getCompleteMessage(e);
+                    Slog.e(TAG, "Commit of session " + sessionId + " failed: " + completeMsg);
+                    destroyInternal();
+                    dispatchSessionFinished(e.error, completeMsg, null);
+                }
+
+                return true;
+            }
+        }
+    };
+```
+
+``` java
+    private void commitLocked(PackageInfo pkgInfo, ApplicationInfo appInfo)
+            throws PackageManagerException {
+        ... ...
+        try {
+            resolveStageDir(); // 解析安装地址，即apk文件copy后的目的地址
+        } catch (IOException e) {
+            throw new PackageManagerException(INSTALL_FAILED_CONTAINER_ERROR,
+                    "Failed to resolve stage location", e);
+        }
+
+        // Verify that stage looks sane with respect to existing application.
+        // This currently only ensures packageName, versionCode, and certificate
+        // consistency.
+        // 检查apk文件是否满足要求，验证包名，版本号，证书的一致性
+        validateInstallLocked(pkgInfo, appInfo);
+
+        Preconditions.checkNotNull(mPackageName);
+        Preconditions.checkNotNull(mSignatures);
+        Preconditions.checkNotNull(mResolvedBaseFile);
+
+        // 检查权限
+        if (!mPermissionsAccepted) {
+            // User needs to accept permissions; give installer an intent they
+            // can use to involve user.
+            final Intent intent = new Intent(PackageInstaller.ACTION_CONFIRM_PERMISSIONS);
+            intent.setPackage(mContext.getPackageManager().getPermissionControllerPackageName());
+            intent.putExtra(PackageInstaller.EXTRA_SESSION_ID, sessionId);
+            try {
+                mRemoteObserver.onUserActionRequired(intent);
+            } catch (RemoteException ignored) {
+            }
+
+            // Commit was keeping session marked as active until now; release
+            // that extra refcount so session appears idle.
+            close();
+            return;
+        }
+
+        if (stageCid != null) {
+            // Figure out the final installed size and resize the container once
+            // and for all. Internally the parser handles straddling between two
+            // locations when inheriting.
+            final long finalSize = calculateInstalledSize();
+            resizeContainer(stageCid, finalSize);
+        }
+
+        // Inherit any packages and native libraries from existing install that
+        // haven't been overridden.
+        if (params.mode == SessionParams.MODE_INHERIT_EXISTING) {
+            // 如果新的APK文件继承某些已安装的Package(不懂。。。)，此处将copy需要的native库文件等
+            ... ...
+        }
+
+        // TODO: surface more granular state from dexopt
+        mInternalProgress = 0.5f;
+        computeProgressLocked(true);
+
+        // Unpack native libraries
+        // 解压native库文件
+        extractNativeLibraries(mResolvedStageDir, params.abiOverride);
+
+        // Container is ready to go, let's seal it up!
+        // 封装容器，会针对安装在sdcard的操作做一些处理
+        if (stageCid != null) {
+            finalizeAndFixContainer(stageCid);
+        }
+
+        // We've reached point of no return; call into PMS to install the stage.
+        // Regardless of success or failure we always destroy session.
+        final IPackageInstallObserver2 localObserver = new IPackageInstallObserver2.Stub() {
+            @Override
+            public void onUserActionRequired(Intent intent) {
+                throw new IllegalStateException();
+            }
+
+            @Override
+            public void onPackageInstalled(String basePackageName, int returnCode, String msg,
+                    Bundle extras) {
+                destroyInternal();
+                dispatchSessionFinished(returnCode, msg, extras);
+            }
+        };
+
+        final UserHandle user;
+        if ((params.installFlags & PackageManager.INSTALL_ALL_USERS) != 0) {
+            user = UserHandle.ALL;
+        } else {
+            user = new UserHandle(userId);
+        }
+
+        mRelinquished = true;
+        // 调用PKMS的installStage，进入安装的下一步操作
+        mPm.installStage(mPackageName, stageDir, stageCid, localObserver, params,
+                installerPackageName, installerUid, user, mCertificates);
+    }
+```
+
+到这里可以总结Pm.java所做的事情，实际操作就是将adb copy的文件，copy到系统内或者sdcard的目录中，进行初步的权限检查等工作，最后通知PKMS进入Install Stage。这部分流程图如下：
+
+![pm流程](http://otqux1hnn.bkt.clouddn.com/rangerzhou/170904/pm.png)
+
+
+
+#### 1.5 installStage
+
+首先来看installStage函数：
+
+/[frameworks](http://androidxref.com/7.1.1_r6/xref/frameworks/)/[base](http://androidxref.com/7.1.1_r6/xref/frameworks/base/)/[services](http://androidxref.com/7.1.1_r6/xref/frameworks/base/services/)/[core](http://androidxref.com/7.1.1_r6/xref/frameworks/base/services/core/)/[java](http://androidxref.com/7.1.1_r6/xref/frameworks/base/services/core/java/)/[com](http://androidxref.com/7.1.1_r6/xref/frameworks/base/services/core/java/com/)/[android](http://androidxref.com/7.1.1_r6/xref/frameworks/base/services/core/java/com/android/)/[server](http://androidxref.com/7.1.1_r6/xref/frameworks/base/services/core/java/com/android/server/)/[pm](http://androidxref.com/7.1.1_r6/xref/frameworks/base/services/core/java/com/android/server/pm/)/[PackageManagerService.java](http://androidxref.com/7.1.1_r6/xref/frameworks/base/services/core/java/com/android/server/pm/PackageManagerService.java)
+
+``` java
+    void installStage(String packageName, File stagedDir, String stagedCid,
+            IPackageInstallObserver2 observer, PackageInstaller.SessionParams sessionParams,
+            String installerPackageName, int installerUid, UserHandle user,
+            Certificate[][] certificates) {
+        if (DEBUG_EPHEMERAL) {
+            if ((sessionParams.installFlags & PackageManager.INSTALL_EPHEMERAL) != 0) {
+                Slog.d(TAG, "Ephemeral install of " + packageName);
+            }
+        }
+        // verificationInfo主要用于存储权限验证需要的信息
+        final VerificationInfo verificationInfo = new VerificationInfo(
+                sessionParams.originatingUri, sessionParams.referrerUri,
+                sessionParams.originatingUid, installerUid);
+
+        final OriginInfo origin;
+        if (stagedDir != null) {
+            // origin存储apk文件的路径信息
+            origin = OriginInfo.fromStagedFile(stagedDir);
+        } else {
+            origin = OriginInfo.fromStagedContainer(stagedCid);
+        }
+
+        final Message msg = mHandler.obtainMessage(INIT_COPY); // 参数为INIT_COPY
+        // 准备安装所需要的参数
+        final InstallParams params = new InstallParams(origin, null, observer,
+                sessionParams.installFlags, installerPackageName, sessionParams.volumeUuid,
+                verificationInfo, user, sessionParams.abiOverride,
+                sessionParams.grantedRuntimePermissions, certificates);
+        params.setTraceMethod("installStage").setTraceCookie(System.identityHashCode(params));
+        msg.obj = params; // 把安装参数赋给msg.obj
+
+        Trace.asyncTraceBegin(TRACE_TAG_PACKAGE_MANAGER, "installStage",
+                System.identityHashCode(msg.obj));
+        Trace.asyncTraceBegin(TRACE_TAG_PACKAGE_MANAGER, "queueInstall",
+                System.identityHashCode(msg.obj));
+
+        // 发送INIT_COPY消息，驱动处理流程
+        mHandler.sendMessage(msg);
+    }
+```
+
+此处的mHandler为PKMS中内部类PackageHandler对象，其中处理消息的函数为doHandleMessage:
+
+``` java
+        void doHandleMessage(Message msg) {
+            switch (msg.what) {
+                case INIT_COPY: {
+                    // 在installStage中已把安装参数赋给msg.obj
+                    HandlerParams params = (HandlerParams) msg.obj;
+                    // idx为当前等待处理的安装请求个数
+                    int idx = mPendingInstalls.size();
+                    if (DEBUG_INSTALL) Slog.i(TAG, "init_copy idx=" + idx + ": " + params);
+                    // If a bind was already initiated we dont really
+                    // need to do anything. The pending install
+                    // will be processed later on.
+                    // 如果已经有一个绑定被初始化，那就不做任何事情，待安装的操作稍后会进行，初始时mBound的值为false
+                    if (!mBound) {
+                        Trace.asyncTraceBegin(TRACE_TAG_PACKAGE_MANAGER, "bindingMCS",
+                                System.identityHashCode(mHandler));
+                        // If this is the only one pending we might
+                        // have to bind to the service again.
+                        if (!connectToService()) {
+                            Slog.e(TAG, "Failed to bind to media container service");
+                            params.serviceError();
+                            Trace.asyncTraceEnd(TRACE_TAG_PACKAGE_MANAGER, "bindingMCS",
+                                    System.identityHashCode(mHandler));
+                            if (params.traceMethod != null) {
+                                Trace.asyncTraceEnd(TRACE_TAG_PACKAGE_MANAGER, params.traceMethod,
+                                        params.traceCookie);
+                            }
+                            return;
+                        } else {
+                            // Once we bind to the service, the first
+                            // pending request will be processed.
+                            mPendingInstalls.add(idx, params);
+                        }
+                    } else {
+                        mPendingInstalls.add(idx, params);
+                        // Already bound to the service. Just make
+                        // sure we trigger off processing the first request.
+                        if (idx == 0) {
+                            mHandler.sendEmptyMessage(MCS_BOUND);
+                        }
+                    }
+                    break;
+                }
+                ... ...
+            }
+        }
 ```
 
