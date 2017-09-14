@@ -1503,7 +1503,7 @@ public class FileBridge extends Thread {
         void doHandleMessage(Message msg) {
             switch (msg.what) {
                 case INIT_COPY: {
-                    // 在installStage中已把安装参数赋给msg.obj
+                    // 在installStage中msg.obj已经被赋值安装参数
                     HandlerParams params = (HandlerParams) msg.obj;
                     // idx为当前等待处理的安装请求个数
                     int idx = mPendingInstalls.size();
@@ -1517,6 +1517,7 @@ public class FileBridge extends Thread {
                                 System.identityHashCode(mHandler));
                         // If this is the only one pending we might
                         // have to bind to the service again.
+                        // 绑定实际的安装service
                         if (!connectToService()) {
                             Slog.e(TAG, "Failed to bind to media container service");
                             params.serviceError();
@@ -1530,13 +1531,16 @@ public class FileBridge extends Thread {
                         } else {
                             // Once we bind to the service, the first
                             // pending request will be processed.
+                            // 绑定服务成功后，将请求加入到mPendingInstalls等待处理
                             mPendingInstalls.add(idx, params);
                         }
                     } else {
+                        // 如果已经绑定过service，同样将新的请求加入到mPendingInstalls等待处理
                         mPendingInstalls.add(idx, params);
                         // Already bound to the service. Just make
                         // sure we trigger off processing the first request.
                         if (idx == 0) {
+                            // idx=0代表第一个请求，直接发送MCS_BOUND事件，触发处理流程
                             mHandler.sendEmptyMessage(MCS_BOUND);
                         }
                     }

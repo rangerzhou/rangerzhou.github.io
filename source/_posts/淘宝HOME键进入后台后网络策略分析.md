@@ -341,8 +341,41 @@ password:
         }
 ```
 
-分析到这里就找到了为什么淘宝进程最后的状态为3了，在调试的过程中发现打开淘宝后会启动一个service：`09-05 17:41:27.474  1486 21013 I ActivityManager: Start proc 5692:com.taobao.taobao:channel/u0a198 for service com.taobao.taobao/com.alibaba.analytics.AnalyticsService caller=com.taobao.taobao` ，就是这个service在`computeOomAdjLocked`所绑定的connections所对应的client进程为前台进程，最终系统把mayBeTop设置为了true，当淘宝进程的procState > 2（比如按HOME键使之后台）时，就会调整adj，最终把淘宝进程的状态procState设置为3，如果按HOME键的时候这个service还没有启动起来，则不会触发`computeOomAdjLocked`中把mayBeTop设为true的那段代码，也就不会调整procState了。
+分析到这里就找到了为什么淘宝进程最后的状态为3了，在调试的过程中发现打开淘宝后会启动一个service：`09-05 17:41:27.474  1486 21013 I ActivityManager: Start proc 5692:com.taobao.taobao:channel/u0a198 for service com.taobao.taobao/com.alibaba.analytics.AnalyticsService caller=com.taobao.taobao` ，就是这个service在`computeOomAdjLocked`所绑定的connections所对应的client进程为前台进程，通过在`if (cr.binding.client == app)`中添加log发现client为ProcessRecord{ffadbcb 21266:com.taobao.taobao/u0a88}，app为ProcessRecord{7a416b8 21766:com.taobao.taobao:channel/u0a88}，所以出现问题时client为`com.taobao.taobao`，app为`com.taobao.taobao:channel`，最终系统把mayBeTop设置为了true，当procState > 2时，就会调整adj，最终把procState为3，而在`computeOomAdjLocked`的最后，把proState的值赋给了app.curProcState，最终淘宝的state就为3了。
 
-### 4 总结
+``` java
+    private final int computeOomAdjLocked(ProcessRecord app, int cachedAdj, ProcessRecord TOP_APP, boolean doingAll, long now) {
+        ... ...
+		app.curAdj = app.modifyRawOomAdj(adj);
+        app.curSchedGroup = schedGroup;
+        app.curProcState = procState; // 此处会把procState赋给app.curProcState
+        app.foregroundActivities = foregroundActivities;
+        return app.curRawAdj;
+    }
+```
+
+如果按HOME键的时候这个service还没有启动起来，则不会触发`computeOomAdjLocked`中把mayBeTop设为true的那段代码，也就不会调整procState了。
+
+### 4 解决方案
+
+文中问题应该是淘宝利用Android漏洞故意为之，
+
+- 淘宝启动后，会启动两个进程`com.taobao.taobao`（UI进程）和`com.taobao.taobao:channel`（守护进程，也就是service进程）,守护进程是被绑定在淘宝进程，而在这个时候由于淘宝进程是前台进程，所以procState为PROCESS_STATE_TOP，值为2，而这个时候守护进程是后台运行的service，所以procState为PROCESS_STATE_SERVICE，值为10，当这两个条件同时满足的时候会将守护进程的procState设置为PROCESS_STATE_BOUND_FOREGROUND_SERVICE，值为3。
+- 按HOME键退出UI进程，也就是淘宝进程，退出后台后淘宝被cache起来，procState变成了PROCESS_STATE_CACHED_ACTIVITY，值为14，变成了低优先级，正常app都是这个逻辑，但是守护进程的procState并没有因为绑定进程的优先级降低而降低自己的优先级，依然是PROCESS_STATE_BOUND_FOREGROUND_SERVICE，值为3，相反为了保证守护进程能一直在后台运行，在computeOomAdjLocked方法最后将守护进程的procState赋值给UI进程淘宝，这时候淘宝的procState也变为了3，这就是我们看到的因为网络访问策略中淘宝因为procState为3而不限制网络访问。
+
+此处对淘宝做了特殊处理：
+
+``` java
+... ...
+if (cr.binding.client == app ||(cr.binding.client.processName.equals("com.taobao.taobao") && app.processName.equals("com.taobao.taobao:channel"))) {
+                        // Binding to ourself is not interesting.
+                        continue;
+                    }
+... ...
+```
+
+如此一来淘宝按HOME键之后的状态就变为`state=10 (bg)`了，后台时会禁止访问网络权限。
+
+### 5 总结
 
 单是针对文中问题的分析已经到此结束，终其原因是Android framework层中承载activity/service/contentprovider/broadcastreceiver的进程根据组件运行状态而动态调节进程自身的状态，进程有两个比较重要的状态值adj(ProcessList.java中定义)和procState(ActivityManager.java中定义)，调整进程ADJ算法的核心方法`computeOomAdjLocked`除了对service的处理外还有对Activity和ContentProvider情况的处理，整个adj算法的分析还没有完全弄懂，此部分内容未完待续。
