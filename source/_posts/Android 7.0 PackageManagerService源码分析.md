@@ -6,19 +6,17 @@ categories: "Frameworks"
 copyright: true
 ---
 
-## 一、PKMS的启动、main函数解析
 
-此部分待补充
 
-## 二、PKMS构造函数解析
+PKMS模块分三个部分学习：
 
-此部分待补充
+- [PKMS的启动、main函数解析]()
+- [PKMS构造函数解析]()
+- [APK安装](http://rangerzhou.top/2017/06/26/Android%207.0%20PackageManagerService%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/)
 
-## 三、APK安装
+本文开始分析APK的安装及PKMS在这个流程中所做工作，APK有多种安装方式，我们从adb install开始分析。
 
 <!--more-->
-
-本部分开始分析APK的安装及相关处理流程，APK有多种安装方式，我们从adb install开始分析。
 
 ### 1. adb install 分析#
 
@@ -186,7 +184,7 @@ cleanup_apk:
 
 从代码中看出`install_app_legacy`就是将源机器中的APK文件传输到目的手机的tmp目录下，然后调用pm_command进行处理。
 
-#### 1.3 pm_command
+### 2. pm_command
 
 ``` c++
 static int pm_command(TransportType transport, const char* serial, int argc, const char** argv) {
@@ -539,7 +537,7 @@ status_t AndroidRuntime::callMain(const String8& className, jclass clazz,
 }
 ```
 
-#### 1.4 Pm.java流程
+### 3. Pm.java流程
 
 进入Pm.java的main函数：
 
@@ -681,7 +679,7 @@ status_t AndroidRuntime::callMain(const String8& className, jclass clazz,
 
 从代码中看，runInstall方法主要做了三件事：创建Session、对Session进行写操作以及提交Session，接下来看每一步的详细工作。
 
-##### 1.4.1 Create Session
+#### 3.1 Create Session
 
 /[frameworks](http://androidxref.com/7.1.1_r6/xref/frameworks/)/[base](http://androidxref.com/7.1.1_r6/xref/frameworks/base/)/[cmds](http://androidxref.com/7.1.1_r6/xref/frameworks/base/cmds/)/[pm](http://androidxref.com/7.1.1_r6/xref/frameworks/base/cmds/pm/)/[src](http://androidxref.com/7.1.1_r6/xref/frameworks/base/cmds/pm/src/)/[com](http://androidxref.com/7.1.1_r6/xref/frameworks/base/cmds/pm/src/com/)/[android](http://androidxref.com/7.1.1_r6/xref/frameworks/base/cmds/pm/src/com/android/)/[commands](http://androidxref.com/7.1.1_r6/xref/frameworks/base/cmds/pm/src/com/android/commands/)/[pm](http://androidxref.com/7.1.1_r6/xref/frameworks/base/cmds/pm/src/com/android/commands/pm/)/[Pm.java](http://androidxref.com/7.1.1_r6/xref/frameworks/base/cmds/pm/src/com/android/commands/pm/Pm.java)
 
@@ -851,7 +849,7 @@ status_t AndroidRuntime::callMain(const String8& className, jclass clazz,
 
 从代码中可知creatSession主要工作就是为APK的安装做好准备工作，最终创建出PackageInstallerSession对象，这个对象可以看作是“安装APK”这个请求的封装，其中包含了处理这个请求需要的一些信息。
 
-##### 1.4.2 Write Session
+#### 3.2 Write Session
 
 /[frameworks](http://androidxref.com/7.1.1_r6/xref/frameworks/)/[base](http://androidxref.com/7.1.1_r6/xref/frameworks/base/)/[cmds](http://androidxref.com/7.1.1_r6/xref/frameworks/base/cmds/)/[pm](http://androidxref.com/7.1.1_r6/xref/frameworks/base/cmds/pm/)/[src](http://androidxref.com/7.1.1_r6/xref/frameworks/base/cmds/pm/src/)/[com](http://androidxref.com/7.1.1_r6/xref/frameworks/base/cmds/pm/src/com/)/[android](http://androidxref.com/7.1.1_r6/xref/frameworks/base/cmds/pm/src/com/android/)/[commands](http://androidxref.com/7.1.1_r6/xref/frameworks/base/cmds/pm/src/com/android/commands/)/[pm](http://androidxref.com/7.1.1_r6/xref/frameworks/base/cmds/pm/src/com/android/commands/pm/)/[Pm.java](http://androidxref.com/7.1.1_r6/xref/frameworks/base/cmds/pm/src/com/android/commands/pm/Pm.java)
 
@@ -928,7 +926,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
 Pm作为PackageInstallerService的客户端，利用PackageInstallerSession来封装每一次完整的通信过程。
 
-##### 1.4.2.1 得到PackageInstallerSession的代理对象
+##### 3.2.1 得到PackageInstallerSession的代理对象
 
 在Write Session中通过`session = new PackageInstaller.Session(mInstaller.openSession(sessionId));`获取了PackageInstallerSession的调用接口，PackageInstaller.Session的构造函数如下：
 
@@ -1003,7 +1001,7 @@ Pm作为PackageInstallerService的客户端，利用PackageInstallerSession来�
     }
 ```
 
-##### 1.4.2.2 定义输出端，得到客户端
+##### 3.2.2 定义输出端，得到客户端
 
 /[frameworks](http://androidxref.com/7.1.1_r6/xref/frameworks/)/[base](http://androidxref.com/7.1.1_r6/xref/frameworks/base/)/[core](http://androidxref.com/7.1.1_r6/xref/frameworks/base/core/)/[java](http://androidxref.com/7.1.1_r6/xref/frameworks/base/core/java/)/[android](http://androidxref.com/7.1.1_r6/xref/frameworks/base/core/java/android/)/[content](http://androidxref.com/7.1.1_r6/xref/frameworks/base/core/java/android/content/)/[pm](http://androidxref.com/7.1.1_r6/xref/frameworks/base/core/java/android/content/pm/)/[PackageInstaller.java](http://androidxref.com/7.1.1_r6/xref/frameworks/base/core/java/android/content/pm/PackageInstaller.java)
 
@@ -1207,7 +1205,7 @@ public class FileBridge extends Thread {
 
 在Write Session中进行文件copy时，最终是利用FileBridge的管道来完成实际的工作。
 
-##### 1.4.3 Commit Session
+#### 3.3 Commit Session
 
 在doWriteSession函数完成后，APK源文件已经copy到目的地址了，紧接着开始doCommitSession的工作：
 
@@ -1449,9 +1447,9 @@ public class FileBridge extends Thread {
 
 
 
-#### 1.5 installStage
+### 4. installStage
 
-首先来看installStage函数：
+接下来进入PKMS，首先来看installStage函数：
 
 /[frameworks](http://androidxref.com/7.1.1_r6/xref/frameworks/)/[base](http://androidxref.com/7.1.1_r6/xref/frameworks/base/)/[services](http://androidxref.com/7.1.1_r6/xref/frameworks/base/services/)/[core](http://androidxref.com/7.1.1_r6/xref/frameworks/base/services/core/)/[java](http://androidxref.com/7.1.1_r6/xref/frameworks/base/services/core/java/)/[com](http://androidxref.com/7.1.1_r6/xref/frameworks/base/services/core/java/com/)/[android](http://androidxref.com/7.1.1_r6/xref/frameworks/base/services/core/java/com/android/)/[server](http://androidxref.com/7.1.1_r6/xref/frameworks/base/services/core/java/com/android/server/)/[pm](http://androidxref.com/7.1.1_r6/xref/frameworks/base/services/core/java/com/android/server/pm/)/[PackageManagerService.java](http://androidxref.com/7.1.1_r6/xref/frameworks/base/services/core/java/com/android/server/pm/PackageManagerService.java)
 
@@ -1500,6 +1498,51 @@ public class FileBridge extends Thread {
 此处的mHandler为PKMS中内部类PackageHandler对象，其中处理消息的函数为doHandleMessage:
 
 ``` java
+    static final String DEFAULT_CONTAINER_PACKAGE = "com.android.defcontainer";
+
+    static final ComponentName DEFAULT_CONTAINER_COMPONENT = new ComponentName(
+            DEFAULT_CONTAINER_PACKAGE,
+            "com.android.defcontainer.DefaultContainerService");
+... ...
+	class PackageHandler extends Handler {
+        private boolean mBound = false;
+        final ArrayList<HandlerParams> mPendingInstalls =
+            new ArrayList<HandlerParams>();
+        private boolean connectToService() { // 其实就是bindService
+            if (DEBUG_SD_INSTALL) Log.i(TAG, "Trying to bind to" +
+                    " DefaultContainerService");
+            // 如上定义了component的包名和类名
+            Intent service = new Intent().setComponent(DEFAULT_CONTAINER_COMPONENT);
+            Process.setThreadPriority(Process.THREAD_PRIORITY_DEFAULT);
+            if (mContext.bindServiceAsUser(service, mDefContainerConn,
+                    Context.BIND_AUTO_CREATE, UserHandle.SYSTEM)) {
+                Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
+                mBound = true;
+                return true;
+            }
+            Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
+            return false;
+        }
+
+        private void disconnectService() { // unbindService
+            mContainerService = null;
+            mBound = false;
+            Process.setThreadPriority(Process.THREAD_PRIORITY_DEFAULT);
+            mContext.unbindService(mDefContainerConn);
+            Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
+        }
+
+        PackageHandler(Looper looper) {
+            super(looper);
+        }
+
+        public void handleMessage(Message msg) {
+            try {
+                doHandleMessage(msg);
+            } finally {
+                Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
+            }
+        }
         void doHandleMessage(Message msg) {
             switch (msg.what) {
                 case INIT_COPY: {
@@ -1549,5 +1592,586 @@ public class FileBridge extends Thread {
                 ... ...
             }
         }
+     }
 ```
+
+PKMS定义了安装服务的包名`com.android.defcontainer`和类名`com.android.defcontainer.DefaultContainerService`，可知实际进行安装工作的是DefaultContainerService，还是定义在PKMS中，接下来看绑定服务成功后的操作：
+
+``` java
+    class DefaultContainerConnection implements ServiceConnection {
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            if (DEBUG_SD_INSTALL) Log.i(TAG, "onServiceConnected");
+            // 获得与服务端通信的代理对象
+            IMediaContainerService imcs =
+                IMediaContainerService.Stub.asInterface(service);
+            // 发送消息MCS_BOUND
+            mHandler.sendMessage(mHandler.obtainMessage(MCS_BOUND, imcs));
+        }
+
+        public void onServiceDisconnected(ComponentName name) {
+            if (DEBUG_SD_INSTALL) Log.i(TAG, "onServiceDisconnected");
+        }
+    }
+```
+
+绑定service后会获取与服务端通信的代理对象，并且发送MCS_BOUND消息，
+
+``` java
+        void doHandleMessage(Message msg) {
+            switch (msg.what) {
+                ... ...
+                case MCS_BOUND: {
+                    if (DEBUG_INSTALL) Slog.i(TAG, "mcs_bound");
+                    if (msg.obj != null) {
+                        mContainerService = (IMediaContainerService) msg.obj;
+                        Trace.asyncTraceEnd(TRACE_TAG_PACKAGE_MANAGER, "bindingMCS",
+                                System.identityHashCode(mHandler));
+                    }
+                    if (mContainerService == null) {
+                        ... ...
+                    } else if (mPendingInstalls.size() > 0) { // 安装请求的个数大于0
+                        // 获取第一个安装请求
+                        HandlerParams params = mPendingInstalls.get(0);
+                        if (params != null) {
+                            Trace.asyncTraceEnd(TRACE_TAG_PACKAGE_MANAGER, "queueInstall",
+                                    System.identityHashCode(params));
+                            Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "startCopy");
+                            if (params.startCopy()) {
+                                // We are done...  look for more work or to
+                                // go idle.
+                                if (DEBUG_SD_INSTALL) Log.i(TAG,
+                                        "Checking for more work or unbind...");
+                                // Delete pending install
+                                if (mPendingInstalls.size() > 0) {
+                                    mPendingInstalls.remove(0);
+                                }
+                                if (mPendingInstalls.size() == 0) {
+                                // 如果没有安装请求了则10秒钟后解绑service
+                                    if (mBound) {
+                                        if (DEBUG_SD_INSTALL) Log.i(TAG,
+                                                "Posting delayed MCS_UNBIND");
+                                        removeMessages(MCS_UNBIND);
+                                        Message ubmsg = obtainMessage(MCS_UNBIND);
+                                        // Unbind after a little delay, to avoid
+                                        // continual thrashing.
+                                        sendMessageDelayed(ubmsg, 10000);
+                                    }
+                                } else {
+                                    // 否则继续发送MCS_BOUND消息
+                                    // There are more pending requests in queue.
+                                    // Just post MCS_BOUND message to trigger processing
+                                    // of next pending install.
+                                    if (DEBUG_SD_INSTALL) Log.i(TAG,
+                                            "Posting MCS_BOUND for next work");
+                                    mHandler.sendEmptyMessage(MCS_BOUND);
+                                }
+                            }
+                            Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
+                        }
+                    } else {
+                        // Should never happen ideally.
+                        Slog.w(TAG, "Empty queue");
+                    }
+                    break;
+                }
+```
+
+这段代码的功能就是处理安装请求，处理完后安装队列不为空，则继续发送MCS_BOUND消息继续处理下一个安装请求，如果安装队列为空，则等待10秒钟后发送MCS_UNBIND消息断开service绑定。
+
+接下来看startCopy函数：
+
+``` java
+    private abstract class HandlerParams {
+        private static final int MAX_RETRIES = 4;
+      ... ...
+        final boolean startCopy() {
+            boolean res;
+            try {
+                if (DEBUG_INSTALL) Slog.i(TAG, "startCopy " + mUser + ": " + this);
+
+                // 如果最大安装重复次数大于4次，处理安装失败的消息
+                if (++mRetries > MAX_RETRIES) {
+                    Slog.w(TAG, "Failed to invoke remote methods on default container service. Giving up");
+                    mHandler.sendEmptyMessage(MCS_GIVE_UP);
+                    handleServiceError();
+                    return false;
+                } else {
+                    handleStartCopy(); // 实际的copy工作
+                    res = true;
+                }
+            } catch (RemoteException e) {
+                if (DEBUG_INSTALL) Slog.i(TAG, "Posting install MCS_RECONNECT");
+                mHandler.sendEmptyMessage(MCS_RECONNECT);
+                res = false;
+            }
+            handleReturnCode();
+            return res;
+        }
+```
+
+![installStage](http://otqux1hnn.bkt.clouddn.com/rangerzhou/170728/installstage.png)
+
+### 5. handleStartCopy
+
+如上图，HandlerParams为内部抽象类，handleStartCopy在HandlerParams的子类InstallParams中实现：
+
+``` java
+    class InstallParams extends HandlerParams {
+      ... ...
+      /*
+         * Invoke remote method to get package information and install
+         * location values. Override install location based on default
+         * policy if needed and then create install arguments based
+         * on the install location.
+         */
+        public void handleStartCopy() throws RemoteException {
+            int ret = PackageManager.INSTALL_SUCCEEDED;
+
+            // If we're already staged, we've firmly committed to an install location
+            if (origin.staged) {
+                if (origin.file != null) {
+                    installFlags |= PackageManager.INSTALL_INTERNAL;
+                    installFlags &= ~PackageManager.INSTALL_EXTERNAL;
+                } else if (origin.cid != null) {
+                    installFlags |= PackageManager.INSTALL_EXTERNAL;
+                    installFlags &= ~PackageManager.INSTALL_INTERNAL;
+                } else {
+                    throw new IllegalStateException("Invalid stage location");
+                }
+            }
+
+            final boolean onSd = (installFlags & PackageManager.INSTALL_EXTERNAL) != 0;
+            final boolean onInt = (installFlags & PackageManager.INSTALL_INTERNAL) != 0;
+            final boolean ephemeral = (installFlags & PackageManager.INSTALL_EPHEMERAL) != 0;
+            PackageInfoLite pkgLite = null;
+
+            // 检查APK的安装位置是否正确
+            if (onInt && onSd) {
+                // Check if both bits are set.
+                // APK不能同时安装在内部存储和SD卡上
+                Slog.w(TAG, "Conflicting flags specified for installing on both internal and external");
+                ret = PackageManager.INSTALL_FAILED_INVALID_INSTALL_LOCATION;
+            } else if (onSd && ephemeral) {
+                // APK不能短暂的安装在SD卡中
+                Slog.w(TAG,  "Conflicting flags specified for installing ephemeral on external");
+                ret = PackageManager.INSTALL_FAILED_INVALID_INSTALL_LOCATION;
+            } else {
+                // getMini...用来解析安装包，返回PackageInfoLite对象，判断能否安装，具体见5.1
+                pkgLite = mContainerService.getMinimalPackageInfo(origin.resolvedPath, installFlags, packageAbiOverride);
+
+                if (DEBUG_EPHEMERAL && ephemeral) {
+                    Slog.v(TAG, "pkgLite for install: " + pkgLite);
+                }
+
+                /*
+                 * If we have too little free space, try to free cache
+                 * before giving up.
+                 */
+                // 如果由于存储空间过小导致安装失败时
+                if (!origin.staged && pkgLite.recommendedInstallLocation
+                        == PackageHelper.RECOMMEND_FAILED_INSUFFICIENT_STORAGE) {
+                    // TODO: focus freeing disk space on the target device
+                    final StorageManager storage = StorageManager.from(mContext);
+                    // 获取设备内部存储空间允许的最小存储空间大小
+                    final long lowThreshold = storage.getStorageLowBytes(
+                            Environment.getDataDirectory());
+
+                    // 计算安装APK大概所需的空间
+                    final long sizeBytes = mContainerService.calculateInstalledSize(
+                            origin.resolvedPath, isForwardLocked(), packageAbiOverride);
+
+                    try {
+                        // 释放cache，尝试将缓存释放到大于等于sizeBytes + lowThreshold
+                        mInstaller.freeCache(null, sizeBytes + lowThreshold);
+                        // 再次通过getMini...方法判断是否满足安装条件
+                        pkgLite = mContainerService.getMinimalPackageInfo(origin.resolvedPath,
+                                installFlags, packageAbiOverride);
+                    } catch (InstallerException e) {
+                        Slog.w(TAG, "Failed to free cache", e);
+                    }
+
+                    /*
+                     * The cache free must have deleted the file we
+                     * downloaded to install.
+                     *
+                     * TODO: fix the "freeCache" call to not delete
+                     *       the file we care about.
+                     */
+                    // 如果经过释放cache后还是无法安装，则把安装失败flag保存到recom...
+                    if (pkgLite.recommendedInstallLocation
+                            == PackageHelper.RECOMMEND_FAILED_INVALID_URI) {
+                        pkgLite.recommendedInstallLocation
+                            = PackageHelper.RECOMMEND_FAILED_INSUFFICIENT_STORAGE;
+                    }
+                }
+            }
+
+            if (ret == PackageManager.INSTALL_SUCCEEDED) {
+                // recommendedInstallLocation保存安装路径信息，即内部还是SD卡中，也记录安装失败的信息
+                int loc = pkgLite.recommendedInstallLocation;
+                if (loc == PackageHelper.RECOMMEND_FAILED_INVALID_LOCATION) {
+                    ret = PackageManager.INSTALL_FAILED_INVALID_INSTALL_LOCATION;
+                } else if (loc == PackageHelper.RECOMMEND_FAILED_ALREADY_EXISTS) {
+                    ret = PackageManager.INSTALL_FAILED_ALREADY_EXISTS;
+                } else if (loc == PackageHelper.RECOMMEND_FAILED_INSUFFICIENT_STORAGE) {
+                    ret = PackageManager.INSTALL_FAILED_INSUFFICIENT_STORAGE;
+                } else if (loc == PackageHelper.RECOMMEND_FAILED_INVALID_APK) {
+                    ret = PackageManager.INSTALL_FAILED_INVALID_APK;
+                } else if (loc == PackageHelper.RECOMMEND_FAILED_INVALID_URI) {
+                    ret = PackageManager.INSTALL_FAILED_INVALID_URI;
+                } else if (loc == PackageHelper.RECOMMEND_MEDIA_UNAVAILABLE) {
+                    ret = PackageManager.INSTALL_FAILED_MEDIA_UNAVAILABLE;
+                } else {
+                    // Override with defaults if needed.
+                    // 如果安装路径有足够的空间，loc就不会等于上述判断条件
+                    // 代码将会走到这里，installLocationPolicy用来判断APK是否已经安装过，具体见5.2
+                    loc = installLocationPolicy(pkgLite);
+                    ... ...
+                }
+            }
+
+            // 创建安装参数，具体见5.3
+            final InstallArgs args = createInstallArgs(this);
+            mArgs = args;
+
+            if (ret == PackageManager.INSTALL_SUCCEEDED) {
+                // TODO: http://b/22976637
+                // Apps installed for "all" users use the device owner to verify the app
+                UserHandle verifierUser = getUser();
+                if (verifierUser == UserHandle.ALL) {
+                    verifierUser = UserHandle.SYSTEM;
+                }
+
+                /*
+                 * Determine if we have any installed package verifiers. If we
+                 * do, then we'll defer to them to verify the packages.
+                 */
+                final int requiredUid = mRequiredVerifierPackage == null ? -1
+                        : getPackageUid(mRequiredVerifierPackage, MATCH_DEBUG_TRIAGED_MISSING,
+                                verifierUser.getIdentifier());
+                if (!origin.existing && requiredUid != -1
+                        && isVerificationEnabled(verifierUser.getIdentifier(), installFlags)) {
+                    // 存在安装包检查者，并且满足启动检查条件，就利用安装包检查者检查
+                    final Intent verification = new Intent(
+                            Intent.ACTION_PACKAGE_NEEDS_VERIFICATION);
+                    verification.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
+                    verification.setDataAndType(Uri.fromFile(new File(origin.resolvedPath)),
+                            PACKAGE_MIME_TYPE);
+                    verification.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+                    // 检查安装包的操作
+                    ... ...
+                } else {
+                    /*
+                     * No package verification is enabled, so immediately start
+                     * the remote call to initiate copy using temporary file.
+                     */
+                    // 没有安装包检查，则直接执行copyApk函数，具体见5.4
+                    ret = args.copyApk(mContainerService, true);
+                }
+            }
+
+            mRet = ret;
+        }
+```
+
+#### 5.1 getMinimalPackageInfo
+
+getMinimalPackageInfo定义在DefaultContainerService中：
+
+/[frameworks](http://androidxref.com/7.1.1_r6/xref/frameworks/)/[base](http://androidxref.com/7.1.1_r6/xref/frameworks/base/)/[packages](http://androidxref.com/7.1.1_r6/xref/frameworks/base/packages/)/[DefaultContainerService](http://androidxref.com/7.1.1_r6/xref/frameworks/base/packages/DefaultContainerService/)/[src](http://androidxref.com/7.1.1_r6/xref/frameworks/base/packages/DefaultContainerService/src/)/[com](http://androidxref.com/7.1.1_r6/xref/frameworks/base/packages/DefaultContainerService/src/com/)/[android](http://androidxref.com/7.1.1_r6/xref/frameworks/base/packages/DefaultContainerService/src/com/android/)/[defcontainer](http://androidxref.com/7.1.1_r6/xref/frameworks/base/packages/DefaultContainerService/src/com/android/defcontainer/)/[DefaultContainerService.java](http://androidxref.com/7.1.1_r6/xref/frameworks/base/packages/DefaultContainerService/src/com/android/defcontainer/DefaultContainerService.java)
+
+``` java
+        /**
+         * Parse given package and return minimal details.
+         *
+         * @param packagePath absolute path to the package to be copied. Can be
+         *            a single monolithic APK file or a cluster directory
+         *            containing one or more APKs.
+         */
+        @Override
+        public PackageInfoLite getMinimalPackageInfo(String packagePath, int flags,
+                String abiOverride) {
+            final Context context = DefaultContainerService.this;
+            final boolean isForwardLocked = (flags & PackageManager.INSTALL_FORWARD_LOCK) != 0;
+
+            PackageInfoLite ret = new PackageInfoLite();
+            if (packagePath == null) {
+                Slog.i(TAG, "Invalid package file " + packagePath);
+                ret.recommendedInstallLocation = PackageHelper.RECOMMEND_FAILED_INVALID_APK;
+                return ret;
+            }
+
+            final File packageFile = new File(packagePath);
+            final PackageParser.PackageLite pkg;
+            final long sizeBytes;
+            try {
+                // 解析安装包，得到PackageParser.PackageLite
+                pkg = PackageParser.parsePackageLite(packageFile, 0);
+                sizeBytes = PackageHelper.calculateInstalledSize(pkg, isForwardLocked, abiOverride);
+            } catch (PackageParserException | IOException e) {
+                Slog.w(TAG, "Failed to parse package at " + packagePath + ": " + e);
+
+                if (!packageFile.exists()) {
+                    ret.recommendedInstallLocation = PackageHelper.RECOMMEND_FAILED_INVALID_URI;
+                } else {
+                    ret.recommendedInstallLocation = PackageHelper.RECOMMEND_FAILED_INVALID_APK;
+                }
+
+                return ret;
+            }
+
+            ret.packageName = pkg.packageName;
+            ret.splitNames = pkg.splitNames;
+            ret.versionCode = pkg.versionCode;
+            ret.baseRevisionCode = pkg.baseRevisionCode;
+            ret.splitRevisionCodes = pkg.splitRevisionCodes;
+            ret.installLocation = pkg.installLocation;
+            ret.verifiers = pkg.verifiers;
+            // 利用resolveInstallLocation获取安装位置
+            ret.recommendedInstallLocation = PackageHelper.resolveInstallLocation(context,
+                    pkg.packageName, pkg.installLocation, sizeBytes, flags);
+            ret.multiArch = pkg.multiArch;
+
+            return ret;
+        }
+```
+
+从代码可知`getMinimalPackageInfo`就是对安装包进行解析，获取安装包的一些信息。
+
+resolveInstallLocation:
+
+/[frameworks](http://androidxref.com/7.1.1_r6/xref/frameworks/)/[base](http://androidxref.com/7.1.1_r6/xref/frameworks/base/)/[core](http://androidxref.com/7.1.1_r6/xref/frameworks/base/core/)/[java](http://androidxref.com/7.1.1_r6/xref/frameworks/base/core/java/)/[com](http://androidxref.com/7.1.1_r6/xref/frameworks/base/core/java/com/)/[android](http://androidxref.com/7.1.1_r6/xref/frameworks/base/core/java/com/android/)/[internal](http://androidxref.com/7.1.1_r6/xref/frameworks/base/core/java/com/android/internal/)/[content](http://androidxref.com/7.1.1_r6/xref/frameworks/base/core/java/com/android/internal/content/)/[PackageHelper.java](http://androidxref.com/7.1.1_r6/xref/frameworks/base/core/java/com/android/internal/content/PackageHelper.java)
+
+``` java
+    /**
+     * Given a requested {@link PackageInfo#installLocation} and calculated
+     * install size, pick the actual location to install the app.
+     */
+    public static int resolveInstallLocation(Context context, String packageName,
+            int installLocation, long sizeBytes, int installFlags) {
+        ApplicationInfo existingInfo = null;
+        try {
+            // 就根据包名获取已经存在的ApplicationInfo信息，意如其名existingInfo
+            existingInfo = context.getPackageManager().getApplicationInfo(packageName,
+                    PackageManager.GET_UNINSTALLED_PACKAGES);
+        } catch (NameNotFoundException ignored) {
+        }
+
+        final int prefer;
+        final boolean checkBoth;
+        boolean ephemeral = false;
+        // 根据installFlags与一些常量flag参数的相与结果以及installLocation决定安装路径
+        if ((installFlags & PackageManager.INSTALL_EPHEMERAL) != 0) {
+            prefer = RECOMMEND_INSTALL_INTERNAL;
+            ephemeral = true;
+            checkBoth = false;
+        } else if ((installFlags & PackageManager.INSTALL_INTERNAL) != 0) {
+            prefer = RECOMMEND_INSTALL_INTERNAL;
+            checkBoth = false;
+        } else if ((installFlags & PackageManager.INSTALL_EXTERNAL) != 0) {
+            prefer = RECOMMEND_INSTALL_EXTERNAL;
+            checkBoth = false;
+        } else if (installLocation == PackageInfo.INSTALL_LOCATION_INTERNAL_ONLY) {
+            prefer = RECOMMEND_INSTALL_INTERNAL;
+            checkBoth = false;
+        } else if (installLocation == PackageInfo.INSTALL_LOCATION_PREFER_EXTERNAL) {
+            prefer = RECOMMEND_INSTALL_EXTERNAL;
+            checkBoth = true;
+        } else if (installLocation == PackageInfo.INSTALL_LOCATION_AUTO) {
+            // 一般情况下installLocation为AUTO
+            // When app is already installed, prefer same medium
+            if (existingInfo != null) {
+                // TODO: distinguish if this is external ASEC
+                // APK以前安装过，直接从保存的ApplicationInfo中获取flag得出安装路径
+                if ((existingInfo.flags & ApplicationInfo.FLAG_EXTERNAL_STORAGE) != 0) {
+                    prefer = RECOMMEND_INSTALL_EXTERNAL;
+                } else {
+                    prefer = RECOMMEND_INSTALL_INTERNAL;
+                }
+            } else {
+                // 如果existingInfo为null，即以前没有安装过，则安装在手机内部
+                prefer = RECOMMEND_INSTALL_INTERNAL;
+            }
+            checkBoth = true;
+        } else {
+            // 默认情况下也安装在手机内部
+            prefer = RECOMMEND_INSTALL_INTERNAL;
+            checkBoth = false;
+        }
+
+        // fitsOnInternal函数会判断上文中得出的sizeBytes是否小于data目录的剩余空间
+        boolean fitsOnInternal = false;
+        if (checkBoth || prefer == RECOMMEND_INSTALL_INTERNAL) {
+            fitsOnInternal = fitsOnInternal(context, sizeBytes);
+        }
+
+        // fitsOnExternal和fitsOnInternal一样都是判断是否有足够空间安装
+        boolean fitsOnExternal = false;
+        if (checkBoth || prefer == RECOMMEND_INSTALL_EXTERNAL) {
+            fitsOnExternal = fitsOnExternal(context, sizeBytes);
+        }
+
+        // 根据prefer和上面得出的fits...再次判断返回的安装目录
+        // 怎么这么多重复判断呢，感觉代码写的有点冗余，明明可以合在上面代码中一并处理
+        if (prefer == RECOMMEND_INSTALL_INTERNAL) {
+            // The ephemeral case will either fit and return EPHEMERAL, or will not fit
+            // and will fall through to return INSUFFICIENT_STORAGE
+            if (fitsOnInternal) {
+                return (ephemeral)
+                        ? PackageHelper.RECOMMEND_INSTALL_EPHEMERAL
+                        : PackageHelper.RECOMMEND_INSTALL_INTERNAL;
+            }
+        } else if (prefer == RECOMMEND_INSTALL_EXTERNAL) {
+            if (fitsOnExternal) {
+                return PackageHelper.RECOMMEND_INSTALL_EXTERNAL;
+            }
+        }
+
+        // 正常情况下以上部分代码已经返回了安装路径
+        if (checkBoth) {
+            if (fitsOnInternal) {
+                return PackageHelper.RECOMMEND_INSTALL_INTERNAL;
+            } else if (fitsOnExternal) {
+                return PackageHelper.RECOMMEND_INSTALL_EXTERNAL;
+            }
+        }
+
+        // 如果没有足够的空间安装，则返回。。。
+        return PackageHelper.RECOMMEND_FAILED_INSUFFICIENT_STORAGE;
+    }
+```
+
+`resolveInstallLocation`的作用就是判断安装路径是否有足够的工具，返回对应的flag。
+
+#### 5.2 installLocationPolicy
+
+如果`resolveInstallLocation`返回的不是failed的flag，就会调用installLocationPolicy函数：
+
+/[frameworks](http://androidxref.com/7.1.1_r6/xref/frameworks/)/[base](http://androidxref.com/7.1.1_r6/xref/frameworks/base/)/[services](http://androidxref.com/7.1.1_r6/xref/frameworks/base/services/)/[core](http://androidxref.com/7.1.1_r6/xref/frameworks/base/services/core/)/[java](http://androidxref.com/7.1.1_r6/xref/frameworks/base/services/core/java/)/[com](http://androidxref.com/7.1.1_r6/xref/frameworks/base/services/core/java/com/)/[android](http://androidxref.com/7.1.1_r6/xref/frameworks/base/services/core/java/com/android/)/[server](http://androidxref.com/7.1.1_r6/xref/frameworks/base/services/core/java/com/android/server/)/[pm](http://androidxref.com/7.1.1_r6/xref/frameworks/base/services/core/java/com/android/server/pm/)/[PackageManagerService.java](http://androidxref.com/7.1.1_r6/xref/frameworks/base/services/core/java/com/android/server/pm/PackageManagerService.java)
+
+``` java
+    class InstallParams extends HandlerParams {
+      ... ...
+        private int installLocationPolicy(PackageInfoLite pkgLite) {
+            String packageName = pkgLite.packageName;
+            int installLocation = pkgLite.installLocation;
+            boolean onSd = (installFlags & PackageManager.INSTALL_EXTERNAL) != 0;
+            // reader
+            synchronized (mPackages) {
+                // Currently installed package which the new package is attempting to replace or
+                // null if no such package is installed.
+                // 判断终端上是否安装过同样的APK
+                PackageParser.Package installedPkg = mPackages.get(packageName);
+                // ... ...
+                // 如果installedPkg为null，则设备上没有安装这个APK或者APK已卸载
+                PackageParser.Package dataOwnerPkg = installedPkg;
+                if (dataOwnerPkg  == null) {
+                    // 如果APK卸载了，但是保留了数据，那么将取出对应的PackageSetting对象
+                    PackageSetting ps = mSettings.mPackages.get(packageName);
+                    if (ps != null) {
+                        // 如果取出的PackageSetting不为空，则取出对应的pkg给dataOwnerPkg
+                        dataOwnerPkg = ps.pkg;
+                    }
+                }
+
+                if (dataOwnerPkg != null) {
+					// ... ...
+                    final boolean downgradeRequested =
+                            (installFlags & PackageManager.INSTALL_ALLOW_DOWNGRADE) != 0;
+                    final boolean packageDebuggable =
+                                (dataOwnerPkg.applicationInfo.flags
+                                        & ApplicationInfo.FLAG_DEBUGGABLE) != 0;
+                    final boolean downgradePermitted =
+                            (downgradeRequested) && ((Build.IS_DEBUGGABLE) || (packageDebuggable));
+                    if (!downgradePermitted) {
+                        try {
+                            checkDowngrade(dataOwnerPkg, pkgLite);
+                        } catch (PackageManagerException e) {
+                            Slog.w(TAG, "Downgrade detected: " + e.getMessage());
+                            return PackageHelper.RECOMMEND_FAILED_VERSION_DOWNGRADE;
+                        }
+                    }
+                }
+
+                if (installedPkg != null) {
+                    if ((installFlags & PackageManager.INSTALL_REPLACE_EXISTING) != 0) {
+                        // Check for updated system application.
+                        if ((installedPkg.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0) {
+                            if (onSd) {
+                                Slog.w(TAG, "Cannot install update to system app on sdcard");
+                                return PackageHelper.RECOMMEND_FAILED_INVALID_LOCATION;
+                            }
+                            return PackageHelper.RECOMMEND_INSTALL_INTERNAL;
+                        } else {
+                            if (onSd) {
+                                // Install flag overrides everything.
+                                return PackageHelper.RECOMMEND_INSTALL_EXTERNAL;
+                            }
+                            // If current upgrade specifies particular preference
+                            if (installLocation == PackageInfo.INSTALL_LOCATION_INTERNAL_ONLY) {
+                                // Application explicitly specified internal.
+                                return PackageHelper.RECOMMEND_INSTALL_INTERNAL;
+                            } else if (installLocation == PackageInfo.INSTALL_LOCATION_PREFER_EXTERNAL) {
+                                // App explictly prefers external. Let policy decide
+                            } else {
+                                // Prefer previous location
+                                if (isExternal(installedPkg)) {
+                                    return PackageHelper.RECOMMEND_INSTALL_EXTERNAL;
+                                }
+                                return PackageHelper.RECOMMEND_INSTALL_INTERNAL;
+                            }
+                        }
+                    } else {
+                        // Invalid install. Return error code
+                        return PackageHelper.RECOMMEND_FAILED_ALREADY_EXISTS;
+                    }
+                }
+            }
+            // All the special cases have been taken care of.
+            // Return result based on recommended install location.
+            if (onSd) {
+                return PackageHelper.RECOMMEND_INSTALL_EXTERNAL;
+            }
+            return pkgLite.recommendedInstallLocation;
+        }
+```
+
+
+
+
+
+#### 5.3 createInstallArgs
+
+
+
+
+
+#### 5.4 copyApk
+
+
+
+### 6. handleReturnCode
+
+
+
+#### 6.1 
+
+
+
+#### 6.2 
+
+
+
+#### 6.3 
+
+
+
+### 6.4 
+
+
+
+### 7. 
+
+
 
