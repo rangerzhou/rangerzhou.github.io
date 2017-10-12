@@ -11,7 +11,7 @@ password:
 
 
 
-
+<!--more-->
 
 ### 2. Watchdog机制解析
 
@@ -85,9 +85,10 @@ public class Watchdog extends Thread {
         // will also dispatch monitor checks and do other work.
         mMonitorChecker = new HandlerChecker(FgThread.getHandler(),
                 "foreground thread", DEFAULT_TIMEOUT);
-        mHandlerCheckers.add(mMonitorChecker);
+        mHandlerCheckers.add(mMonitorChecker); //添加MonitorChecker
         // Add checker for main thread.  We only do a quick check since there
         // can be UI running on the thread.
+  		// 添加Looper Checker
         mHandlerCheckers.add(new HandlerChecker(new Handler(Looper.getMainLooper()),
                 "main thread", DEFAULT_TIMEOUT));
         // Add checker for shared UI thread.
