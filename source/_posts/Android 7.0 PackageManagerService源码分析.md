@@ -20,7 +20,7 @@ PKMS模块分三个部分学习：
 
 ### 1. adb install 分析#
 
-​	adb install 有多个参数，在此仅考虑最简单的`adb install ***.apk`，adb是命令，install是参数，处理install参数的代码:
+​	adb install 有多个参数，在此仅考虑最简单的`adb install ***.apk`，adb是命令，install是参数，处理install参数的代码：
 
 /[system](http://androidxref.com/7.1.1_r6/xref/system/)/[core](http://androidxref.com/7.1.1_r6/xref/system/core/)/[adb](http://androidxref.com/7.1.1_r6/xref/system/core/adb/)/[commandline.cpp](http://androidxref.com/7.1.1_r6/xref/system/core/adb/commandline.cpp)
 
@@ -2046,7 +2046,7 @@ resolveInstallLocation:
 
 #### 5.2 installLocationPolicy
 
-如果`resolveInstallLocation`返回的不是failed的flag，就会调用installLocationPolicy函数：
+如果`resolveInstallLocation`返回的不是FAILED的flag，就会调用installLocationPolicy函数判断APK是否安装过，返回安装路径：
 
 /[frameworks](http://androidxref.com/7.1.1_r6/xref/frameworks/)/[base](http://androidxref.com/7.1.1_r6/xref/frameworks/base/)/[services](http://androidxref.com/7.1.1_r6/xref/frameworks/base/services/)/[core](http://androidxref.com/7.1.1_r6/xref/frameworks/base/services/core/)/[java](http://androidxref.com/7.1.1_r6/xref/frameworks/base/services/core/java/)/[com](http://androidxref.com/7.1.1_r6/xref/frameworks/base/services/core/java/com/)/[android](http://androidxref.com/7.1.1_r6/xref/frameworks/base/services/core/java/com/android/)/[server](http://androidxref.com/7.1.1_r6/xref/frameworks/base/services/core/java/com/android/server/)/[pm](http://androidxref.com/7.1.1_r6/xref/frameworks/base/services/core/java/com/android/server/pm/)/[PackageManagerService.java](http://androidxref.com/7.1.1_r6/xref/frameworks/base/services/core/java/com/android/server/pm/PackageManagerService.java)
 
@@ -2064,7 +2064,7 @@ resolveInstallLocation:
                 // 判断终端上是否安装过同样的APK
                 PackageParser.Package installedPkg = mPackages.get(packageName);
                 // ... ...
-                // 如果installedPkg为null，则设备上没有安装这个APK或者APK已卸载
+                // 如果installedPkg为null，则APK已卸载
                 PackageParser.Package dataOwnerPkg = installedPkg;
                 if (dataOwnerPkg  == null) {
                     // 如果APK卸载了，但是保留了数据，那么将取出对应的PackageSetting对象
@@ -2075,15 +2075,18 @@ resolveInstallLocation:
                     }
                 }
 
+                // 存在旧APK的信息
                 if (dataOwnerPkg != null) {
-					// ... ...
+					// 只有当不是降级版本时，或者前身程序包被标记为可调式且显示请求降级时，才允许新的程序包有访问前身保留数据的权限
                     final boolean downgradeRequested =
                             (installFlags & PackageManager.INSTALL_ALLOW_DOWNGRADE) != 0;
                     final boolean packageDebuggable =
                                 (dataOwnerPkg.applicationInfo.flags
                                         & ApplicationInfo.FLAG_DEBUGGABLE) != 0;
+                    // 降级安装的情况,不会在下面比较版本号
                     final boolean downgradePermitted =
                             (downgradeRequested) && ((Build.IS_DEBUGGABLE) || (packageDebuggable));
+                    // 正常情况下，即非降级安装时，会比较两个package信息中的versionCode
                     if (!downgradePermitted) {
                         try {
                             checkDowngrade(dataOwnerPkg, pkgLite);
@@ -2094,10 +2097,12 @@ resolveInstallLocation:
                     }
                 }
 
+                // installedPkg不为空，则表示旧的APK还在终端上没卸载
                 if (installedPkg != null) {
                     if ((installFlags & PackageManager.INSTALL_REPLACE_EXISTING) != 0) {
                         // Check for updated system application.
                         if ((installedPkg.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0) {
+                            // 系统app不能在SD卡上安装更新
                             if (onSd) {
                                 Slog.w(TAG, "Cannot install update to system app on sdcard");
                                 return PackageHelper.RECOMMEND_FAILED_INVALID_LOCATION;
@@ -2116,6 +2121,7 @@ resolveInstallLocation:
                                 // App explictly prefers external. Let policy decide
                             } else {
                                 // Prefer previous location
+                                // 如果没有指定安装路径，与之前的安装路径保持一致
                                 if (isExternal(installedPkg)) {
                                     return PackageHelper.RECOMMEND_INSTALL_EXTERNAL;
                                 }
@@ -2137,41 +2143,541 @@ resolveInstallLocation:
         }
 ```
 
-
-
-
+从代码可知，installLocationPolicy函数就是判断APK是否安装过，对于升级安装要比较新旧两个package的版本号，再根据一些参数最后返回安装路径。
 
 #### 5.3 createInstallArgs
 
+随后PKMS开始调用createInstallArgs方法生成安装参数对象：
 
+``` java
+    private InstallArgs createInstallArgs(InstallParams params) {
+        if (params.move != null) {
+            return new MoveInstallArgs(params);
+        } else if (installOnExternalAsec(params.installFlags) || params.isForwardLocked()) {
+            return new AsecInstallArgs(params);
+        } else {
+            return new FileInstallArgs(params);
+        }
+    }
+```
 
-
+根据params决定创建哪个InstallArgs的子类对象，在这里将会创建FileInstallArgs对象。
 
 #### 5.4 copyApk
 
+在handleStartCopy中创建安装参数后，如果不需要进行安装包检查，则调用上一步创建的安装参数FileInstallArgs的copyApk方法：
 
+``` java
+    /**
+     * Logic to handle installation of non-ASEC applications, including copying
+     * and renaming logic.
+     */
+    class FileInstallArgs extends InstallArgs {
+      ... ...
+        int copyApk(IMediaContainerService imcs, boolean temp) throws RemoteException {
+            Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "copyApk");
+            try {
+                return doCopyApk(imcs, temp);
+            } finally {
+                Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
+            }
+        }
+
+        private int doCopyApk(IMediaContainerService imcs, boolean temp) throws RemoteException {
+            // Android 7.0对于adb安装在前文3.2 WriteSession中已经完成了copy操作，在installStag函数
+            // 中调用的OriginInfo.fromStagedFile和OriginInfo.fromStagedContainer两个方法均会把
+            // origin.staged设置为true
+            if (origin.staged) {
+                if (DEBUG_INSTALL) Slog.d(TAG, origin.file + " already staged; skipping copy");
+                codeFile = origin.file;
+                resourceFile = origin.file;
+                return PackageManager.INSTALL_SUCCEEDED;
+            }
+
+            // 对于非adb安装
+            try {
+                // 临时安装flag
+                final boolean isEphemeral = (installFlags & PackageManager.INSTALL_EPHEMERAL) != 0;
+                // 创建一个临时安装的目录
+                final File tempDir =
+                        mInstallerService.allocateStageDirLegacy(volumeUuid, isEphemeral);
+                codeFile = tempDir;
+                resourceFile = tempDir;
+            } catch (IOException e) {
+                Slog.w(TAG, "Failed to create copy file: " + e);
+                return PackageManager.INSTALL_FAILED_INSUFFICIENT_STORAGE;
+            }
+
+            // 定义一个回调接口
+            final IParcelFileDescriptorFactory target = new IParcelFileDescriptorFactory.Stub() {
+                @Override
+                public ParcelFileDescriptor open(String name, int mode) throws RemoteException {
+                    if (!FileUtils.isValidExtFilename(name)) {
+                        throw new IllegalArgumentException("Invalid filename: " + name);
+                    }
+                    try {
+                        // 接口被回调时的操作，包含创建文件，打开文件，返回ParcelFileDescriptor对象
+                        final File file = new File(codeFile, name);
+                        final FileDescriptor fd = Os.open(file.getAbsolutePath(),
+                                O_RDWR | O_CREAT, 0644);
+                        Os.chmod(file.getAbsolutePath(), 0644);
+                        return new ParcelFileDescriptor(fd);
+                    } catch (ErrnoException e) {
+                        throw new RemoteException("Failed to open: " + e.getMessage());
+                    }
+                }
+            };
+
+            int ret = PackageManager.INSTALL_SUCCEEDED;
+            // 通过DefaultContainerService的copyPackage方法进行copy，target是上面的回调的接口
+            ret = imcs.copyPackage(origin.file.getAbsolutePath(), target);
+            if (ret != PackageManager.INSTALL_SUCCEEDED) {
+                Slog.e(TAG, "Failed to copy package");
+                return ret;
+            }
+
+            // copy APK对应的Native库文件
+            final File libraryRoot = new File(codeFile, LIB_DIR_NAME);
+            NativeLibraryHelper.Handle handle = null;
+            try {
+                handle = NativeLibraryHelper.Handle.create(codeFile);
+                ret = NativeLibraryHelper.copyNativeBinariesWithOverride(handle, libraryRoot,
+                        abiOverride);
+            } catch (IOException e) {
+                Slog.e(TAG, "Copying native libraries failed", e);
+                ret = PackageManager.INSTALL_FAILED_INTERNAL_ERROR;
+            } finally {
+                IoUtils.closeQuietly(handle);
+            }
+
+            return ret;
+        }
+```
+
+看一下DefaultContainerService的copyPackage操作：
+
+/[frameworks](http://androidxref.com/7.1.1_r6/xref/frameworks/)/[base](http://androidxref.com/7.1.1_r6/xref/frameworks/base/)/[packages](http://androidxref.com/7.1.1_r6/xref/frameworks/base/packages/)/[DefaultContainerService](http://androidxref.com/7.1.1_r6/xref/frameworks/base/packages/DefaultContainerService/)/[src](http://androidxref.com/7.1.1_r6/xref/frameworks/base/packages/DefaultContainerService/src/)/[com](http://androidxref.com/7.1.1_r6/xref/frameworks/base/packages/DefaultContainerService/src/com/)/[android](http://androidxref.com/7.1.1_r6/xref/frameworks/base/packages/DefaultContainerService/src/com/android/)/[defcontainer](http://androidxref.com/7.1.1_r6/xref/frameworks/base/packages/DefaultContainerService/src/com/android/defcontainer/)/[DefaultContainerService.java](http://androidxref.com/7.1.1_r6/xref/frameworks/base/packages/DefaultContainerService/src/com/android/defcontainer/DefaultContainerService.java)
+
+``` java
+        /**
+         * Copy package to the target location.
+         * copy安装包到target
+         *
+         * @param packagePath absolute path to the package to be copied. Can be
+         *            a single monolithic APK file or a cluster directory
+         *            containing one or more APKs.
+         * @return returns status code according to those in
+         *         {@link PackageManager}
+         */
+        @Override
+        public int copyPackage(String packagePath, IParcelFileDescriptorFactory target) {
+            if (packagePath == null || target == null) {
+                return PackageManager.INSTALL_FAILED_INVALID_URI;
+            }
+
+            PackageLite pkg = null;
+            try {
+                final File packageFile = new File(packagePath);
+                pkg = PackageParser.parsePackageLite(packageFile, 0); // 解析packageFile
+                return copyPackageInner(pkg, target); // 调用copyPackageInner
+            } catch (PackageParserException | IOException | RemoteException e) {
+                Slog.w(TAG, "Failed to copy package at " + packagePath + ": " + e);
+                return PackageManager.INSTALL_FAILED_INSUFFICIENT_STORAGE;
+            }
+        }
+... ...
+    private int copyPackageInner(PackageLite pkg, IParcelFileDescriptorFactory target)
+            throws IOException, RemoteException {
+        copyFile(pkg.baseCodePath, target, "base.apk"); // 实际copy的执行
+  		// 处理多apk的情况
+        if (!ArrayUtils.isEmpty(pkg.splitNames)) {
+            for (int i = 0; i < pkg.splitNames.length; i++) {
+                copyFile(pkg.splitCodePaths[i], target, "split_" + pkg.splitNames[i] + ".apk");
+            }
+        }
+
+        return PackageManager.INSTALL_SUCCEEDED;
+    }
+
+    private void copyFile(String sourcePath, IParcelFileDescriptorFactory target, String targetName)
+            throws IOException, RemoteException {
+        Slog.d(TAG, "Copying " + sourcePath + " to " + targetName);
+        InputStream in = null;
+        OutputStream out = null;
+        try {
+            in = new FileInputStream(sourcePath); // 输入源
+            // 输出源，在doCopyApk中定义的回调接口的open函数，会创建文件，打开文件，
+            // 赋予权限，返回ParcelFileDescriptor对象
+            out = new ParcelFileDescriptor.AutoCloseOutputStream(
+                    target.open(targetName, ParcelFileDescriptor.MODE_READ_WRITE));
+            Streams.copy(in, out); // 执行copy操作
+        } finally {
+            // 关闭输入输出流
+            IoUtils.closeQuietly(out);
+            IoUtils.closeQuietly(in);
+        }
+    }
+```
+
+对于非adb安装路径，handleStartCopy会进行copy的操作，对于adb安装途经则并没有做什么实质性的操作，整个handleStartCopy的流程如下：
+
+![handleStartCopy](http://otqux1hnn.bkt.clouddn.com/rangerzhou/170728/handleStartCopy.png)
 
 ### 6. handleReturnCode
 
+在handleStartCopy后，会调用handleReturnCode：
+
+/[frameworks](http://androidxref.com/7.1.1_r6/xref/frameworks/)/[base](http://androidxref.com/7.1.1_r6/xref/frameworks/base/)/[services](http://androidxref.com/7.1.1_r6/xref/frameworks/base/services/)/[core](http://androidxref.com/7.1.1_r6/xref/frameworks/base/services/core/)/[java](http://androidxref.com/7.1.1_r6/xref/frameworks/base/services/core/java/)/[com](http://androidxref.com/7.1.1_r6/xref/frameworks/base/services/core/java/com/)/[android](http://androidxref.com/7.1.1_r6/xref/frameworks/base/services/core/java/com/android/)/[server](http://androidxref.com/7.1.1_r6/xref/frameworks/base/services/core/java/com/android/server/)/[pm](http://androidxref.com/7.1.1_r6/xref/frameworks/base/services/core/java/com/android/server/pm/)/[PackageManagerService.java](http://androidxref.com/7.1.1_r6/xref/frameworks/base/services/core/java/com/android/server/pm/PackageManagerService.java)
+
+``` java
+    class InstallParams extends HandlerParams {
+      ... ...
+        @Override
+        void handleReturnCode() {
+            if (mArgs != null) {
+                processPendingInstall(mArgs, mRet);
+            }
+        }
+      ... ...
+    private void processPendingInstall(final InstallArgs args, final int currentStatus) {
+        // Queue up an async operation since the package installation may take a little while.
+        // 安装需要一些时间，新建一个线程
+        mHandler.post(new Runnable() {
+            public void run() {
+                mHandler.removeCallbacks(this);
+                 // Result object to be returned
+                PackageInstalledInfo res = new PackageInstalledInfo();
+                res.setReturnCode(currentStatus);
+                res.uid = -1;
+                res.pkg = null;
+                res.removedInfo = null;
+                if (res.returnCode == PackageManager.INSTALL_SUCCEEDED) {
+                    // 见6.1
+                    args.doPreInstall(res.returnCode);
+                    synchronized (mInstallLock) {
+                        // 进行安装，见6.2
+                        installPackageTracedLI(args, res);
+                    }
+                    // 见6.3
+                    args.doPostInstall(res.returnCode, res.uid);
+                }
+
+                // A restore should be performed at this point if (a) the install
+                // succeeded, (b) the operation is not an update, and (c) the new
+                // package has not opted out of backup participation.
+                // 如果(a)安装成功(b)不是更新操作(c)新的package没有选择退出备份，则进行备份
+                final boolean update = res.removedInfo != null
+                        && res.removedInfo.removedPackage != null;
+                final int flags = (res.pkg == null) ? 0 : res.pkg.applicationInfo.flags;
+                boolean doRestore = !update
+                        && ((flags & ApplicationInfo.FLAG_ALLOW_BACKUP) != 0);
+
+                // Set up the post-install work request bookkeeping.  This will be used
+                // and cleaned up by the post-install event handling regardless of whether
+                // there's a restore pass performed.  Token values are >= 1.
+                int token;
+                if (mNextInstallToken < 0) mNextInstallToken = 1;
+                token = mNextInstallToken++;
+
+                PostInstallData data = new PostInstallData(args, res);
+                mRunningInstalls.put(token, data);
+                if (DEBUG_INSTALL) Log.v(TAG, "+ starting restore round-trip " + token);
+
+                // doRestore为true的话则进行恢复工作
+                if (res.returnCode == PackageManager.INSTALL_SUCCEEDED && doRestore) {
+                    // Pass responsibility to the Backup Manager.  It will perform a
+                    // restore if appropriate, then pass responsibility back to the
+                    // Package Manager to run the post-install observer callbacks
+                    // and broadcasts.
+                    IBackupManager bm = IBackupManager.Stub.asInterface(
+                            ServiceManager.getService(Context.BACKUP_SERVICE));
+                    if (bm != null) {
+                        if (DEBUG_INSTALL) Log.v(TAG, "token " + token
+                                + " to BM for possible restore");
+                        Trace.asyncTraceBegin(TRACE_TAG_PACKAGE_MANAGER, "restore", token);
+                        try {
+                            // TODO: http://b/22388012
+                            if (bm.isBackupServiceActive(UserHandle.USER_SYSTEM)) {
+                                bm.restoreAtInstall(res.pkg.applicationInfo.packageName, token);
+                            } else {
+                                doRestore = false;
+                            }
+                        } catch (RemoteException e) {
+                            // can't happen; the backup manager is local
+                        } catch (Exception e) {
+                            Slog.e(TAG, "Exception trying to enqueue restore", e);
+                            doRestore = false;
+                        }
+                    } else {
+                        Slog.e(TAG, "Backup Manager not found!");
+                        doRestore = false;
+                    }
+                }
+
+                if (!doRestore) {
+                    // No restore possible, or the Backup Manager was mysteriously not
+                    // available -- just fire the post-install work request directly.
+                    if (DEBUG_INSTALL) Log.v(TAG, "No restore - queue post-install for " + token);
+
+                    Trace.asyncTraceBegin(TRACE_TAG_PACKAGE_MANAGER, "postInstall", token);
+
+                    // 发送POST_INSTALL消息，见6.4
+                    Message msg = mHandler.obtainMessage(POST_INSTALL, token, 0);
+                    mHandler.sendMessage(msg);
+                }
+            }
+        });
+    }
+```
 
 
-#### 6.1 
 
+#### 6.1 doPreInstall 
 
+``` java
+    class FileInstallArgs extends InstallArgs {
+      ... ...
+        int doPreInstall(int status) {
+            if (status != PackageManager.INSTALL_SUCCEEDED) {
+                cleanUp();
+            }
+            return status;
+        }
+      ... ...
+        private boolean cleanUp() {
+            if (codeFile == null || !codeFile.exists()) {
+                return false;
+            }
 
-#### 6.2 
+            removeCodePathLI(codeFile);
 
+            if (resourceFile != null && !FileUtils.contains(codeFile, resourceFile)) {
+                resourceFile.delete();
+            }
 
+            return true;
+        }
+```
 
-#### 6.3 
+在前面代码调用doPreInstall之前已经判断了status是否等于PackageManager.INSTALL_SUCCEEDED，传入的参数也是PackageManager.INSTALL_SUCCEEDED，所以根本就没做什么操作，直接把status返回了，看其他调用doPreInstall的地方也是传入的XXX_SUCCEEDED，莫名其妙。。。
 
+#### 6.2 installPackageTracedLI 
 
+``` java
+    private void installPackageTracedLI(InstallArgs args, PackageInstalledInfo res) {
+        try {
+            Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "installPackage");
+            installPackageLI(args, res);
+        } finally {
+            Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
+        }
+    }
 
-### 6.4 
+    private void installPackageLI(InstallArgs args, PackageInstalledInfo res) {
+        ... ...
 
+        // Result object to be returned
+        res.setReturnCode(PackageManager.INSTALL_SUCCEEDED);
 
+        ... ...
 
-### 7. 
+        // Retrieve PackageSettings and parse package
+        final int parseFlags = mDefParseFlags | ...;
+        PackageParser pp = new PackageParser();
+        pp.setSeparateProcesses(mSeparateProcesses);
+        pp.setDisplayMetrics(mMetrics);
 
+        final PackageParser.Package pkg;
+        try {
+            // 解析APK文件得到PackageParser.Package对象
+            pkg = pp.parsePackage(tmpPackageFile, parseFlags);
+        } catch (PackageParserException e) {
+            res.setError("Failed parse during installPackageLI", e);
+            return;
+        } finally {
+            Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
+        }
 
+        // If we are installing a clustered package add results for the children
+        // 安装clustered pacakge时的一些操作
+        if (pkg.childPackages != null) {
+            synchronized (mPackages) {
+                ... ...
+            }
+        }
+		... ...
+
+        try {
+            // either use what we've been given or parse directly from the APK
+            // 权限信息的一些处理
+            if (args.certificates != null) {
+                try {
+                    // 如果args中包含了权限信息，则直接用参数中的权限配置package
+                    PackageParser.populateCertificates(pkg, args.certificates);
+                } catch (PackageParserException e) {
+                    // there was something wrong with the certificates we were given;
+                    // try to pull them from the APK
+                    PackageParser.collectCertificates(pkg, parseFlags);
+                }
+            } else {
+                // 否则直接从Manifest.xml中解析出权限信息
+                PackageParser.collectCertificates(pkg, parseFlags);
+            }
+        } catch (PackageParserException e) {
+            res.setError("Failed collect during installPackageLI", e);
+            return;
+        }
+
+        // Get rid of all references to package scan path via parser.
+        pp = null;
+        String oldCodePath = null;
+        boolean systemApp = false;
+
+        // Check if installing already existing package
+        // 检查安装的package是否已经存在，即是否重复安装，会根据运行时权限、签名信息、
+        // 版本、是否系统APP等条件，判断能否继续安装
+		... ...
+		// 重命名copy时临时赋予的名字
+        if (!args.doRename(res.returnCode, pkg, oldCodePath)) {
+            res.setError(INSTALL_FAILED_INSUFFICIENT_STORAGE, "Failed rename");
+            return;
+        }
+
+        startIntentFilterVerifications(args.user.getIdentifier(), replace, pkg);
+
+        try (PackageFreezer freezer = freezePackageForInstall(pkgName, installFlags,
+                "installPackageLI")) {
+            if (replace) {
+                // 用新的package信息替换旧的
+                replacePackageLIF(pkg, parseFlags, scanFlags | SCAN_REPLACING, args.user,
+                        installerPackageName, res);
+            } else {
+                // 把新的package信息加入到PKMS中
+                installNewPackageLIF(pkg, parseFlags, scanFlags | SCAN_DELETE_DATA_ON_FAILURES,
+                        args.user, installerPackageName, volumeUuid, res);
+            }
+        }
+        synchronized (mPackages) {
+            final PackageSetting ps = mSettings.mPackages.get(pkgName);
+            if (ps != null) {
+                res.newUsers = ps.queryInstalledUsers(sUserManager.getUserIds(), true);
+            }
+
+            final int childCount = (pkg.childPackages != null) ? pkg.childPackages.size() : 0;
+            for (int i = 0; i < childCount; i++) {
+                PackageParser.Package childPkg = pkg.childPackages.get(i);
+                PackageInstalledInfo childRes = res.addedChildPackages.get(childPkg.packageName);
+                PackageSetting childPs = mSettings.peekPackageLPr(childPkg.packageName);
+                if (childPs != null) {
+                    childRes.newUsers = childPs.queryInstalledUsers(
+                            sUserManager.getUserIds(), true);
+                }
+            }
+        }
+    }
+```
+
+这部分代码太长了，也没有细看，installPackageTracedLI的主要工作就是解析APK文件，形成对应的Package对象；生成对应的权限信息后，根据Package中的信息，更改存储路径对应目录的名称。
+
+#### 6.3 doPostInstall 
+
+``` java
+    class FileInstallArgs extends InstallArgs {
+      ... ...
+        int doPostInstall(int status, int uid) {
+            if (status != PackageManager.INSTALL_SUCCEEDED) {
+                cleanUp();
+            }
+            return status;
+        }
+```
+
+doPostInstall和doPreInstall一样，没做什么实质性的操作。
+
+#### 6.4 POST_INSTALL消息处理  
+
+``` java
+    class PackageHandler extends Handler {
+      ... ...
+        void doHandleMessage(Message msg) {
+            switch (msg.what) {
+                case POST_INSTALL: {
+                    if (DEBUG_INSTALL) Log.v(TAG, "Handling post-install for " + msg.arg1);
+
+                    PostInstallData data = mRunningInstalls.get(msg.arg1);
+                    final boolean didRestore = (msg.arg2 != 0);
+                    mRunningInstalls.delete(msg.arg1);
+
+                    if (data != null) {
+                        InstallArgs args = data.args;
+                        PackageInstalledInfo parentRes = data.res;
+
+                        final boolean grantPermissions = (args.installFlags
+                                & PackageManager.INSTALL_GRANT_RUNTIME_PERMISSIONS) != 0;
+                        final boolean killApp = (args.installFlags
+                                & PackageManager.INSTALL_DONT_KILL_APP) == 0;
+                        final String[] grantedPermissions = args.installGrantPermissions;
+
+                        // Handle the parent package
+                        // 处理父package
+                        handlePackagePostInstall(parentRes, grantPermissions, killApp,
+                                grantedPermissions, didRestore, args.installerPackageName,
+                                args.observer);
+
+                        // Handle the child packages
+                        // 处理子package
+                        final int childCount = (parentRes.addedChildPackages != null)
+                                ? parentRes.addedChildPackages.size() : 0;
+                        for (int i = 0; i < childCount; i++) {
+                            PackageInstalledInfo childRes = parentRes.addedChildPackages.valueAt(i);
+                            handlePackagePostInstall(childRes, grantPermissions, killApp,
+                                    grantedPermissions, false, args.installerPackageName,
+                                    args.observer);
+                        }
+
+                        // Log tracing if needed
+                        if (args.traceMethod != null) {
+                            Trace.asyncTraceEnd(TRACE_TAG_PACKAGE_MANAGER, args.traceMethod,
+                                    args.traceCookie);
+                        }
+                    } else {
+                        Slog.e(TAG, "Bogus post-install token " + msg.arg1);
+                    }
+
+                    Trace.asyncTraceEnd(TRACE_TAG_PACKAGE_MANAGER, "postInstall", msg.arg1);
+                } break;
+                
+                ... ...
+    private void handlePackagePostInstall(PackageInstalledInfo res, boolean grantPermissions,
+            boolean killApp, String[] grantedPermissions,
+            boolean launchedForRestore, String installerPackage,
+            IPackageInstallObserver2 installObserver) {
+        if (res.returnCode == PackageManager.INSTALL_SUCCEEDED) {
+            // Send the removed broadcasts
+            // 赋予package权限，发送ACTION_PACKAGE_ADDED等广播
+        }
+
+        // If someone is watching installs - notify them
+        // 如果有观察者监控安装信息，就通知它
+        if (installObserver != null) {
+            try {
+                Bundle extras = extrasForInstallResult(res);
+                installObserver.onPackageInstalled(res.name, res.returnCode,
+                        res.returnMsg, extras);
+            } catch (RemoteException e) {
+                Slog.i(TAG, "Observer no longer exists.");
+            }
+        }
+    }
+```
+
+从代码看出处理POST_INSTALL消息的主要工作是通过广播和回调接口通知系统中的其他组件package的安装和改变信息。
+
+点击查看 [handleReturnCode流程图](http://otqux1hnn.bkt.clouddn.com/rangerzhou/170928/handleReturnCode.png) 。
+
+![handleReturnCode](http://otqux1hnn.bkt.clouddn.com/rangerzhou/170928/handleReturnCode.png)
+
+### 7. 总结 
+
+点击查看 [APK安装整体流程图](http://otqux1hnn.bkt.clouddn.com/rangerzhou/170929/apkinstall.png) 。
 
