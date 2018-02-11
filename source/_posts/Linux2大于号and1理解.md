@@ -1,13 +1,11 @@
 ---
-title: 1
+title: Linux “2 > &1”理解
 copyright: true
 date: 2018-01-17 11:50:26
 tags:
 categories: Others
 password:
 ---
-
-### Linux “2 > &1”理解
 
 Linux中会经常遇到`command>/dev/null 2>&1 &` 这样形式的命令，到底是什么意思呢？`command`就是要执行的命令，`command>/dev/null`也比较好理解，`/dev/null`表示一个空设备，意思是把`command`的执行结果重定向到空设备中，也就是不显示任何信息。`2>&1`是什么意思呢？
 
