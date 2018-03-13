@@ -102,6 +102,8 @@ bootanimation ends at: 12888 12888 (+0)
 
 生成的bootchart.png如下图所示：
 
+[看不到图点这里bootchart](http://otqux1hnn.bkt.clouddn.com/rangerzhou/180313/bootchart.png)
+
 ![bootchart](http://otqux1hnn.bkt.clouddn.com/rangerzhou/180313/bootchart.png])
 
 通过图片中的时间线timeline上各个进程的启动、IO处理等，我们大致可以分析在开机过程中哪个部分比较耗时，我们能够大致清楚了从系统启动到Android启动完成后的主要时间，同时也能够简单的分析出kernel启动时间，zygote启动时间，sysetmserver启动时间，看出哪个部分比较耗时，待查找出后去重点优化，但是这个工具还是不能把Android 启动阶段毕竟清晰的展现出来，这个时候就需要使用到开机events log信息了。
