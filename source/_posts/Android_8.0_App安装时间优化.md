@@ -2,7 +2,7 @@
 title: Android8.0-App安装时间优化
 copyright: true
 date: 2018-02-12 10:57:56
-tags: install
+tags: packageInstall
 categories: Performance
 password:
 ---

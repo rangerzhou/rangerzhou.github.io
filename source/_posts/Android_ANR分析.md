@@ -17,17 +17,21 @@ password: zr
 
 #### 2. ANR分类
 
-- KeyDispatchTimeout（最常见的ANR）
+- inputDispatching Timeout（最常见的ANR）
 
   输入事件超时（包括屏幕点击、滑动或按键事件），在一定时间内（通常是5秒）没有得到应用的处理。
 
-- BroadcastTimeou（比较常见）
+- BroadcastQueue Timeout（比较常见）
 
   广播事件处理超时，指BroadcastReceiver在一定时间内（通常是10秒）没有处理完成。
 
-- ServiceTimeout（很少见）
+- Service Timeout（很少见）
 
   服务超时，应用提供的服务，在一定的时间内（通常是20秒）没法处理完成。
+
+- ContentProvider Timeout
+
+  内容提供者,在publish过超时10s。
 
   **注：以上超时的时间阀值，都定义在ActivityManagerService.java中，在一些特殊的情况下，也可以通过修改阀值来避免ANR。**
 
