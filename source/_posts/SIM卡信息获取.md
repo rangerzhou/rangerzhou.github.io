@@ -7,7 +7,7 @@ categories: Android
 password:
 ---
 
-这几天帮同事看一个在小米手机电信送测时的需求，要求插卡时上报手机卡的信息，包括CDMAIMSI,LTEIMSI,MANUFACTURE,IMEI, NID, SID, ICCID, BASEID, MACID等等，由于现在大都是双卡双待，所以要获取每一个卡的信息。
+> 这几天帮同事看一个在小米手机电信送测时的需求，要求插卡时上报手机卡的信息，包括CDMAIMSI,LTEIMSI,MANUFACTURE,IMEI, NID, SID, ICCID, BASEID, MACID等等，由于现在大都是双卡双待，所以要获取每一个卡的信息。
 
 <!--more-->
 

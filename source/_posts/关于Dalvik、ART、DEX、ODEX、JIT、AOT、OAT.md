@@ -6,7 +6,7 @@ categories: Android
 copyright: true
 ---
 
-关于Dalvik、ART、DEX、ODEX、JIT、AOT、OAT，说真的，我看着都头大，每次看完过不了多久就会忘记一些内容，然后再去搜资料，好记性不如烂笔头，写在这里随时温故。
+> 关于Dalvik、ART、DEX、ODEX、JIT、AOT、OAT，说真的，我看着都头大，每次看完过不了多久就会忘记一些内容，然后再去搜资料，好记性不如烂笔头，写在这里随时温故。
 
 <!--more-->
 

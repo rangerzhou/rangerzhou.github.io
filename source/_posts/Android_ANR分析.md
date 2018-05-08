@@ -9,7 +9,7 @@ password: zr
 
 #### 1. 简介
 
-+ ANR是一个很常见的问题，即Application Not Responding，通俗的说，就是应用程序与外界的交互不灵敏了。Android应用与外界的交互有多种，但其中一些特别重要的交互，如果没有得到应用的及时处理，超过一定时间，就会造成ANR。
++ > ANR是一个很常见的问题，即Application Not Responding，通俗的说，就是应用程序与外界的交互不灵敏了。Android应用与外界的交互有多种，但其中一些特别重要的交互，如果没有得到应用的及时处理，超过一定时间，就会造成ANR。
 
   <!--more-->
 

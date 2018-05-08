@@ -7,7 +7,7 @@ categories: Frameworks
 password:
 ---
 
-Android7.0 获取通话状态的方式有如下几种：
+> 有时候有监听童话状态的需求，Android7.0 获取通话状态的方式有如下几种：
 
 <!--more-->
 

@@ -8,7 +8,7 @@ copyright: true
 
 ## 1. Windows平台
 
-Windows平台有三种方法可以抓取systrace，分别是通过Eclipse，AndriodStudio和cmd命令，这里我们只介绍通过命令抓取。
+> Windows平台有三种方法可以抓取systrace，分别是通过Eclipse，AndriodStudio和cmd命令，这里我们只介绍通过命令抓取。
 
 <!--more-->
 

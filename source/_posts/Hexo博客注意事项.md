@@ -8,7 +8,7 @@ copyright: true
 
 #### 1. 解决fs.SyncWriteStream报错问题
 
-在执行hexo命令的时候，总会显示如下报错：
+> 在执行hexo命令的时候，总会显示如下报错：
 
 ``` powershell
 (node:7048) [DEP0061] DeprecationWarning: fs.SyncWriteStream is deprecated.

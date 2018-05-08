@@ -8,13 +8,13 @@ copyright: true
 
 
 
-PKMS模块分三个部分学习：
+> PKMS模块分三个部分学习：
 
 - [PKMS的启动、main函数解析]()
 - [PKMS构造函数解析]()
 - [APK安装](http://rangerzhou.top/2017/06/26/Android%207.0%20PackageManagerService%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/)
 
-本文开始分析APK的安装及PKMS在这个流程中所做工作，APK有多种安装方式，我们从adb install开始分析。
+> 本文开始分析APK的安装及PKMS在这个流程中所做工作，APK有多种安装方式，我们从adb install开始分析。
 
 <!--more-->
 

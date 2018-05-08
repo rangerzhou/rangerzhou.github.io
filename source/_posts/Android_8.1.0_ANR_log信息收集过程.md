@@ -9,7 +9,7 @@ password:
 
 ### 1. 概述
 
-如前文[Android_ANR分析](http://rangerzhou.top/2018/03/04/Android-ANR%E5%88%86%E6%9E%90/)所述，ANR有4种分类：KeyDispatch Timeout、Broadcast Timeou、Service Timeout、ContentProvider Timeout，但是无论是哪一类，最后都会调用到AppErrors.appNotResponding()方法（Android N之前还是写在AMS中，从N开始定义在新添加的[AppErrors.java](http://androidxref.com/8.0.0_r4/xref/frameworks/base/services/core/java/com/android/server/am/AppErrors.java)中，本文基于Android 8.1.0源码分析），该方法的调用如下图：
+> 如前文[Android_ANR分析](http://rangerzhou.top/2018/03/04/Android-ANR%E5%88%86%E6%9E%90/)所述，ANR有4种分类：KeyDispatch Timeout、Broadcast Timeou、Service Timeout、ContentProvider Timeout，但是无论是哪一类，最后都会调用到AppErrors.appNotResponding()方法（Android N之前还是写在AMS中，从N开始定义在新添加的[AppErrors.java](http://androidxref.com/8.0.0_r4/xref/frameworks/base/services/core/java/com/android/server/am/AppErrors.java)中，本文基于Android 8.1.0源码分析），该方法的调用如下图：
 
 <!--more-->
 
