@@ -15,3 +15,17 @@ password:
 - 第三方点击安装：点击存储在手机设备或者SD卡中的APK文件安装，通过PackageInstall处理，有安装界面；
 
 
+``` java
+import android.util.BoostFramework;
+... ...
+        private static BoostFramework sPerfBoost = null;
+... ...
+            if (sPerfBoost == null) {
+                sPerfBoost = new BoostFramework();
+            }
+            if (sPerfBoost != null) {
+                sPerfBoost.perfHint(BoostFramework.VENDOR_HINT_PACKAGE_INSTALL_BOOST, null, 6000, -1);
+                Slog.d(TAG, "perflock acquired for PackageInstallService");
+            }
+```
+
