@@ -7,6 +7,10 @@ categories: Others
 password:
 ---
 
+> `OpenGrok` 是一个快速, 便于使用的源码搜索引擎与对照引擎, 它能够帮助我们快速的搜索、定位、对照代码树. 接下来就具体讲解一下 `OpenGrok` 的安装及使用。
+
+<!--more-->
+
 ### 1. 安装 JDK
 
 需要安装java 1.8.x及以上：

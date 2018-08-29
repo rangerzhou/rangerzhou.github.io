@@ -9,6 +9,12 @@ password:
 
 
 
+> Ubuntu18.04编译问题
+
+> 记录Ubuntu18.04编译问题。
+
+<!--more-->
+
 ### 一. XEN项目
 
 ##### 1.make -j4 ALLOW_MISSING_DEPENDENCIES=true
