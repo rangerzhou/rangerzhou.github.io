@@ -52,7 +52,34 @@ Tomcat started.
 2. 使用如下脚本命令创建索引
 
    ```shell
-   
+      #****************************************************************#                                                                                                                                     
+      # ScriptName: indexing_opengrok.sh
+      # Author: ZhouRan
+      # Create Date: 2018-08-29
+      #***************************************************************#
+     
+      opengrok_path="/opt/opengrok-0.12.1.5"
+      source_root="${opengrok_path}/source/code"
+      indexing_root="${opengrok_path}/source/indexing"
+     
+      # indexing for the source code
+      # 1. remove the old indexing if exist
+      if [ -d ${indexing_root}/ ];then
+          rm -rf ${indexing_root}/
+      fi
+      mkdir -p ${indexing_root}
+     
+      # 2. export the OpenGrok environment variables
+      export OPENGROK_TOMCAT_BASE=/opt/apache-tomcat-9.0.11
+      export OPENGROK_INSTANCE_BASE=opengrok
+     
+      export JAVA_OPTS="-Xmx1024m"
+      # java -jar ${opengrok_path}/lib/opengrok.jar for command help
+      java $JAVA_OPTS -jar ${opengrok_path}/lib/opengrok.jar -P -S -v \
+      -s ${source_root} \
+      -d ${indexing_root} \
+      -W ${indexing_root}/configuration.xml \
+      -w opengrok # webapp-context  ${OPENGROK_TOMCAT_BASE}/webapps/webapp-context
    ```
 
    
