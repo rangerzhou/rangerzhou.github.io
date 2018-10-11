@@ -1,5 +1,5 @@
 ---
-title: Note
+title: Notes
 copyright: true
 date: 2017-10-10 13:19:50
 tags:

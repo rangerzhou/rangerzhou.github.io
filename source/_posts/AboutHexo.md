@@ -1,6 +1,17 @@
+---
+title: AboutHexo
+copyright: true
+date: 2017-10-11 10:31:07
+tags:
+categories: Others
+password:
+---
+
+
+
 卸载安装 hexo
 
-``` shell
+```shell
 安装
 sudo npm install hexo-cli -g
 sudo npm install hexo-deployer-git --save
@@ -10,11 +21,11 @@ sudo npm uninstall hexo-cli -g // 3.0.0 及之后版本
 sudo npm uninstall hexo -g // 之前版本
 ```
 
-
+<!--more-->
 
 升级npm
 
-``` shell
+```shell
 sudo npm -g install npm@next
 ```
 
@@ -22,7 +33,7 @@ sudo npm -g install npm@next
 
 升级 node
 
-``` shell
+```shell
 sudo npm install -g n // n模块是专门用来管理node.js版本的
 sudo n latest // 最新版本
 sudo n stable // 最新稳定版
@@ -32,7 +43,7 @@ sudo n stable // 最新稳定版
 
 一键脚本
 
-``` shell
+```shell
 npm config set registry https://registry.npm.taobao.org
 npm install hexo-cli -g
 git clone https://git.oschina.net/neoFelhz/hexokit.git
