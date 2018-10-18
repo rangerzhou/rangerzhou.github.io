@@ -280,13 +280,13 @@ sudo vim /etc/samba/smb.conf
     path = /home/rangerzhou/share/
     available = yes
     browseable = yes
-    create mask = 777
-    directory mask = 777
-    force user = nobody
-    force group = nogroup
     public = yes
-    valid users = ran.zhou
     writable = yes
+#    create mask = 777
+#    directory mask = 777
+#    force user = nobody
+#    force group = nogroup
+#    valid users = ran.zhou
 
 #3. 创建共享目录
 mkdir ~/share
