@@ -17,6 +17,8 @@ https://www.ubuntu.com/download/desktop
 
 机器启动时，选择UEFI，Security off
 
+<!--more-->
+
 ## 二. Ubuntu 18.04 初始化
 
 ### 1. Update and Upgrade
