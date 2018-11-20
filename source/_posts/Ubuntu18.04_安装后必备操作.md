@@ -206,6 +206,7 @@ PS1='${debian_chroot:+($debian_chroot)}\[\033[01;35;01m\]\u\[\033[00;00;01m\]@\[
 ### 13. 编译&其他必备工具
 
 ```shell
+sudo apt install terminator # 替换终端
 sudo apt install m4
 sudo apt install bison
 sudo apt install g++-multilib gcc-multilib lib32ncurses5-dev lib32z1-dev
@@ -219,14 +220,18 @@ sudo apt install python-lunch
 sudo apt install python-pip
 pip install pycrypto
 pip install wand
-sudo apt install shutter #截图软件
+sudo apt install shutter # 截图软件
 sudo apt install build-essential
-sudo apt-get install rar unrar #解压 rar 工具
+sudo apt-get install rar unrar # 解压 rar 工具
 sudo apt-get install rar rar
 sudo apt install vim
 sudo apt install curl
 sudo apt install wget
 sudo apt install putty
+sudo apt install sshpass # 免密码 ssh 连接
+sudo apt install git
+sudo apt install vim
+sudo apt install flameshot # 截图,比 shutter 好用
 
 ```
 
@@ -374,7 +379,7 @@ https://extensions.gnome.org/extension/723/pixel-saver/
 主题目录 `/usr/share/themes`，或者 
 
 ```shell
-mkdir ~/.themes
+mkdir ~/.themes # 
 mkdir ~/.icons
 ```
 
@@ -391,4 +396,282 @@ mkdir ~/.icons
 - 更换 shell，下载如下链接中的 shell 主题，解压到 .themes 目录，在 tweak 中切换即可
 
   https://www.opendesktop.org/s/Gnome/p/1013741/
+
+### 22. 安装 wine
+
+``` shell
+# https://linuxconfig.org/install-wine-on-ubuntu-18-04-bionic-beaver-linux
+sudo dpkg --add-architecture i386 
+wget -qO- https://dl.winehq.org/wine-builds/Release.key | sudo apt-key add -
+sudo apt-add-repository 'deb http://dl.winehq.org/wine-builds/ubuntu/ bionic main'
+
+# To install development WineHQ packages
+sudo apt install wine-devel-amd64
+sudo apt install wine-devel-i386
+sudo apt install wine-devel
+sudo apt install --install-recommends winehq-devel
+wine --version
+wine-3.19
+```
+
+### 23. sublime 输入中文
+
+``` shell
+sudo apt update && sudo apt upgrade
+git clone https://github.com/lyfeyaj/sublime-text-imfix.git
+cd sublime-text-imfix && ./sublime-imfix
+```
+
+https://github.com/lyfeyaj/sublime-text-imfix
+
+
+
+### 24. 安装 anaconda
+
+https://zhuanlan.zhihu.com/p/32925500
+
+**切换环境**
+
+``` shell
+source activate python2
+source activate python3
+# 或者
+conda activate python2
+conda activate python3
+```
+
+**退出环境至root**
+
+``` shell
+source deactivate
+# 或者
+conda deactivate
+```
+
+**显示已创建环境**
+
+``` shell
+conda info --envs # 或者conda info -e，或者conda env list
+```
+
+**删除环境**
+
+``` shell
+#注意： <env_name> 为被删除环境的名称。环境名两边不加尖括号“<>”
+conda remove --name <env_name> --all 
+```
+
+### 25. 切换 python 版本
+
+``` shell
+# update-alternatives --list python
+update-alternatives: error: no alternatives for python
+```
+
+如果出现以上所示的错误信息，则表示 Python 的替代版本尚未被 update-alternatives 命令识别。想解决这个问题，我们需要更新一下替代列表，将安装的 python 放入其中：
+
+``` shell
+$ sudo update-alternatives --install /usr/bin/python python /usr/bin/python2.7 1
+update-alternatives: using /usr/bin/python2.7 to provide /usr/bin/python (python) in auto mode
+$ sudo update-alternatives --install /usr/bin/python python /usr/bin/python3.6 2
+update-alternatives: using /usr/bin/python3.6 to provide /usr/bin/python (python) in auto mode
+$ sudo update-alternatives --install /usr/bin/python python /home/ranger/anaconda3/bin/python3.7 3
+update-alternatives: using /home/ranger/anaconda3/bin/python3.7 to provide /usr/bin/python (python) in auto mode
+```
+
+--install 选项使用了多个参数用于创建符号链接。最后一个参数指定了此选项的优先级，如果我们没有手动来设置替代选项，那么具有最高优先级的选项就会被选中。这个例子中，我们为 /usr/bin/python3.6 设置的优先级为2，所以update-alternatives 命令会自动将它设置为默认 Python 版本。现在开始，我们就可以使用下方的命令随时在列出的 Python 替代版本中任意切换了：
+
+``` shell
+sudo update-alternatives --config python
+# 由于安装了 anaconda，所以一直没切换成功，从 PATH 环境中移除 annconda 中的 /bin 目录即可，或者修改 anaconda 下的 bin 目录名称，使 PATH 找不到 bin 目录。
+```
+
+### 26. 串口 log 工具
+
+#### 26.1 minicom
+
+minicom 是 linux 下常用的一款查看串口 log 的工具，安装：
+
+``` shell
+sudo apt install minicom
+```
+
+配置：
+
+``` shell
+sudo minicom -s
+```
+
+使用方向键选择需要配置的选项，如 Serial port setup，回车进入配置，此时光标在最下方，输入对应修改配置项对应的字母，编辑，回车确认，光标重新回到最下方，一般只需修改如下三项：
+
+``` shell
+A -    Serial Device
+E -    Bps/Par/Bits
+F -    Hardware Flow Control
+```
+
+A 配置项指定 USB 装置，使用命令 `ls -l /dev/ttyUSB*` 查看，修改成需要的 **ttyUSB*** 。
+
+E配置项根据时间情况指定波特率，如115200。
+
+F配置项为硬件流控，如果没有或者不确定则指定为 No。
+
+修改完成后回车退到上一界面，选择 **Save setup as dfl** ，将刚才的修改存储为预设配置，避免下次使用重新配置，选择 **Exit** 退出配置界面，并开启 **minicom** 。
+
+****
+
+**快捷键**
+
+**Ctrl+A**：执行特殊操作时都需要先按Ctrl+A，另一个功能是暂停屏幕输出，方便查看 log 。
+
+**Ctrl+A, Z：** 查看帮助，也可直接使用命令 `minicom -h` 。
+
+**Ctrl+A, X：** 退出。
+
+**Ctrl+A, N：** 启用时间戳，在每行 log 前添加当前系统的时间戳。
+
+**Ctrl+A, W：** 开启 minicom 的自动换行功能。
+
+
+
+****
+
+**配置权限**
+
+minicom 本身无序 sudo 权限，但是因为要开启串口 */dev/xxx* ，所以需要 sudo 启动，修改如下信息即可免除输入 sudo。
+
+- 直接使用 chmod 命令修改
+
+  ``` shell
+  sudo chmod 666 /dev/ttyUSB0
+  ```
+
+- 配置 udev 规则（推荐）
+
+  ``` shell
+  sudo vim /etc/udev/rules.d/70-ttyusb.rules
+  # 添加一行
+  KERNEL=="ttyUSB[0-9]*", MODE="0666"
+  ```
+
+  修改后重新插拔设备即可。
+
+****
+
+**自动设置 ttyUSB***
+
+如果日常只需一个设备，设备名指定为 */dev/ttyUSB0* ，每次直接开启 minicom 即可，但当需要使用多个串口时，就需要每次查看 `ls /dev/ttyUSB*` ，手动修改配置才能使用，比较麻烦，使用如下 minicom 的 -D 参数可解决问题。
+
+``` shell
+# 编写脚本
+vim ~/.minicom.sh
+# 输入如下
+com() {
+    ports_USB=$(ls /dev/ttyUSB*)
+    ports_ACM=$(ls /dev/ttyACM*)  #arduino
+    ports="$ports_USB $ports_ACM"
+    select port in $ports;do
+        if [ "$port" ]; then
+            echo "You select the choice '$port'"
+            minicom -D "$port" $@"
+            break
+        else
+            echo "Invaild selection"
+        fi
+    done
+}
+# 随后在 ~/.bashrc 中引入
+echo 'source ~/.minicom.sh' >> ~/.bashrc
+source ~/.bashrc
+```
+
+这样就可以直接通过 **com** 命令调用 minicom 了。
+
+``` shell
+ranger@zr:~ $ com
+1) /dev/ttyUSB0
+2) /dev/ttyUSB1
+#?
+```
+
+****
+
+**自动存储 log **
+
+minicom 可使用 -C 参数指定存储 log 文件，修改 minicom.sh 脚本，把 log 存储在指定目录下。
+
+``` shell
+com() {
+    ports_USB=$(ls /dev/ttyUSB*)
+    ports_ACM=$(ls /dev/ttyACM*)  #arduino
+    ports="$ports_USB $ports_ACM"
+    datename=$(date +%Y%m%d-%H%M%S)
+    select port in $ports;do
+        if [ "$port" ]; then
+            echo "You select the choice '$port'"
+            minicom -D "$port" -C /home/ranger/work/tmps/"$datename".log "$@"
+            break
+        else
+            echo "Invaild selection"
+        fi
+    done
+}
+
+# 修改后
+com() {
+    ports_USB=$(ls /dev/ttyUSB*)
+    #ports_ACM=$(ls /dev/ttyACM*)  #arduino
+    #ports="$ports_USB $ports_ACM"
+    ports="$ports_USB"
+    datename=$(date +%Y%m%d-%H%M%S)
+    select port in $ports;do
+        if [ "$port" ]; then
+            echo "You select the choice '$port'"
+            minicom -D "$port" -C /home/ranger/work/tmps/"$datename".log "$@"
+            break
+        else
+            echo "Invaild selection"
+        fi
+    done
+}
+```
+
+PS: 出现 **Device /dev/ttyS0 is locked minicom** 错误
+
+通常是因为 minicom 上次使用时没有正常退出，系统自动在目录 */var/lock* 中生成了 lockfile 所致，删除即可：
+
+```shell
+sudo rm -rf /var/lock/***
+```
+
+*Reference*: https://tw.saowen.com/a/72a306fdd0cf62f69032d77659e5667332140154cbe22e1e6b1b537f55ed77b7
+
+#### 26.2 picocom
+
+picocom 可以看作是 minicom 的简化版，安装配置简单。
+
+**安装**
+
+``` shell
+sudo apt install picocom
+```
+
+**使用**
+
+``` shell
+sudo picocom -b 115200 /dev/ttyUSB0
+```
+
+可写入 *~/.bashrc* 中快捷启动：
+
+``` shell
+alias seri='sudo picocom -b 115200 /dev/ttyUSB0'
+```
+
+**退出**
+
+Ctrl+A, Ctrl+Q 即可退出（Ctrl+a 是转义键）。
+
+优点：简单，文字可以有颜色，不会改变终端的背景。
+缺点：启动和关闭的速度较慢。
 

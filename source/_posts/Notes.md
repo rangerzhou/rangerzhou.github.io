@@ -37,6 +37,13 @@ password:
 
 4. `sudo service squid restart`
 
+5. 配置Network
+
+   ``` shell
+   
+   ```
+
+
 
 
 #### 2. Google服务器配置SS
