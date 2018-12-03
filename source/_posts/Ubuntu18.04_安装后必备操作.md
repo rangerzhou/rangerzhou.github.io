@@ -675,3 +675,21 @@ Ctrl+A, Ctrl+Q 即可退出（Ctrl+a 是转义键）。
 优点：简单，文字可以有颜色，不会改变终端的背景。
 缺点：启动和关闭的速度较慢。
 
+### 27. Wired 网络消失
+
+某天开机后突然发现 Settings-Network 中的 Wired 消失了，电脑无法上网，通过如下方法解决：
+
+``` shell
+cat /etc/NetworkManager/NetworkManager.conf
+[main]
+plugins=ifupdown,keyfile
+
+[ifupdown]
+managed=true
+
+[device]
+wifi.scan-rand-mac-address=no
+
+```
+
+把 managed 值改为 true ，同时恢复了 `/etc/network/interfaces` 为默认，重启电脑，解决。
