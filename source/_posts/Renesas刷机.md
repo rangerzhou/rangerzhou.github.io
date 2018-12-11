@@ -42,7 +42,60 @@ password: zr
    | tee-<board_name>.srec  |     0x44100000      |      0x200000      |         OP-Tee         |
    |    u-boot-elf.srec     |     0x50000000      |      0x640000      |         U-Boot         |
 
-   执行 `xls2` 命令，按照要求输入选择，分别输入 Top Address 和 Save Address，选择相应文件 send，重复上面步骤依次刷入上表中所示文件。
+   执行 `xls2` 命令，选择 `3 : HyperFlash` ，输入2次 Y，
+
+   ``` shell
+   >xls2
+   ===== Qspi/HyperFlash writing of Gen3 Board Command =============
+   Load Program to Spiflash
+   Writes to any of SPI address.
+   Please select,FlashMemory.
+      1 : QspiFlash       (U5 : S25FS128S)
+      2 : QspiFlash Board (CN3: S25FL512S)
+      3 : HyperFlash      (SiP internal)
+     Select (1-3)>3
+   SW1 SW2 All OFF!   Setting OK? (Push Y key)
+   # 输入 Y 之后，会出现如下，再输入一次 Y
+   SW3 ON!            Setting OK? (Push Y key)
+   ```
+
+   输入 2 次 Y 后，按要求输入 Top address 和 Save Address，然后 send 相应文件
+
+   ``` shell
+     Select (1-3)>3
+    READ ID OK.
+    READ ID = 0x007E0001
+   Program Top Address & Qspi/HyperFlash Save Address
+   ===== Please Input Program Top Address ============
+     Please Input : H'44100000
+   
+   ===== Please Input Qspi/HyperFlash Save Address ===
+     Please Input : H'200000
+   Work RAM(H'50000000-H'53FFFFFF) Clear....
+   please send ! ('.' & CR stop load
+   # send 相应需要刷入的文件
+   ```
+
+   send 成功后
+
+   ``` shell
+   Work RAM(H'50000000-H'53FFFFFF) Clear....
+   please send ! ('.' & CR stop load)
+   SPI Data Clear(H'FF) Check :H'00180000-001BFFFF,Clear OK?(y/n)
+   # 输入 y，随后：
+   SPI Data Clear(H'FF) Check :H'00180000-001BFFFF Erasing..Erase Completed
+   SAVE SPI-FLASH....... complete!
+   
+   ======= Qspi/HyperFlash Save Information  =================
+    SpiFlashMemory Stat Address : H'00180000
+    SpiFlashMemory End Address  : H'00184E67
+   ===========================================================
+   >
+   ```
+
+
+
+   按照要求输入选择，分别输入 Top Address 和 Save Address，选择相应文件 send，重复上面步骤依次刷入上表中所示文件。
 
 5. Remove the power and red and yellow uart pin, Then Power the board. (关机开机？)
 
