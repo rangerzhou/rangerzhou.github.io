@@ -91,7 +91,9 @@ jsonContent:
 
 # Deployment
 ## Docs: https://hexo.io/docs/deployment.html
+# SSH: git@github.com:rangerzhou/rangerzhou.github.io.git 
+# HTTPS: https://github.com/rangerzhou/rangerzhou.github.io.git
 deploy:
   type: git
-  repo: git@github.com:rangerzhou/rangerzhou.github.io.git
+  repo: https://github.com/rangerzhou/rangerzhou.github.io.git
   branch: master

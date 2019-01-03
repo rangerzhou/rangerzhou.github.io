@@ -4,10 +4,14 @@ copyright: true
 date: 2018-08-29 19:56:30
 tags: Python
 categories: Python
-password:
+password: zr
 ---
 
 
+
+>Python Study
+
+<!--more-->
 
 ### 1. List, Tuple, Dictionary, Set
 
