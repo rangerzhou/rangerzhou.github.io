@@ -693,3 +693,31 @@ wifi.scan-rand-mac-address=no
 ```
 
 把 managed 值改为 true ，同时恢复了 `/etc/network/interfaces` 为默认，重启电脑，解决。
+
+
+
+### 28. 文件管理器
+
+查看默认的文件管理器
+
+``` shell
+xdg-mime query default inode/directory
+```
+
+将默认的文件管理器设置为 nemo
+
+``` shell
+xdg-mime default nemo.desktop inode/directory application/x-gnome-saved-search
+```
+
+恢复 nautilus.desktop
+
+``` shell
+xdg-mime default nautilus.desktop inode/directory application/x-gnome-saved-search
+```
+
+使用 `xdg-open $HOME` 来验证有没有生效。
+
+
+
+Reference: http://einverne.github.io/post/2018/08/nemo-file-manager.html
