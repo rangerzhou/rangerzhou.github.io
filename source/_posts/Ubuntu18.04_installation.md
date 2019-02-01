@@ -157,7 +157,9 @@ java -version
 
 下载以上安装包，然后执行命令：
 
+``` shell
 sudo dpkg -i openjdk-7-* libjpeg62-turbo* libfontconfig1* fontconfig-config*
+```
 
 如果在安装过程中报错，则执行以下命令：
 

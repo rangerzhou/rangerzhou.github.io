@@ -180,9 +180,11 @@ password:
 
    下载以上安装包，然后执行命令：
 
-   sudo dpkg -i openjdk-7-* libjpeg62-turbo* libfontconfig1* fontconfig-config*
+``` shell
+sudo dpkg -i openjdk-7-* libjpeg62-turbo* libfontconfig1* fontconfig-config*
+```
 
-   如果在安装过程中报错，则执行以下命令：
+​      如果在安装过程中报错，则执行以下命令：
 
    sudo apt --fix-broken install
 
@@ -383,3 +385,33 @@ https://zhuanlan.zhihu.com/p/36265103
 3.”在自定义过滤（My filter list）“添加一行：blog.csdn.net###layerd 
 
 4.刷新网页，Enjoy it….
+
+
+
+#### 13. Repo 切换所有分支
+
+**创建分支**
+
+**方式一**
+
+repo init -b branch-name
+
+repo sync
+
+repo start branch-name --all
+
+
+
+**方式二**
+
+repo forall -c git checkout -b branch-name
+
+
+
+区别及原理后面补充。
+
+**删除分支**
+
+repo abandon branch-name
+
+repo abandon branch-name

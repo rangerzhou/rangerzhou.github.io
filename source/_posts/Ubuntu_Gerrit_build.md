@@ -369,6 +369,16 @@ gerrit@aptivadp:~ $ ssh -p 29418 admin@10.243.54.188 gerrit create-project Demo-
 
 
 
+配置自动启动
+
+``` shell
+# 安装chkconfig
+sudo apt install sysv-rc-conf
+sudo cp /usr/sbin/sysv-rc-conf /usr/sbin/chkconfig
+sudo chkconfig --level 345 gerrit.sh on # 设置gerrit开机启动
+sudo chkconfig --level 345 httpd on # 设置httpd开机启动
+```
+
 
 
 
