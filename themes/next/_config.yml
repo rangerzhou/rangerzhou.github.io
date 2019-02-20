@@ -207,10 +207,11 @@ social_icons:
 
 # Blog rolls
 links_icon: link
-links_title: Links
-links_layout: block
-#links_layout: inline
-#links:
+links_title: 墙裂推荐
+#links_layout: block
+links_layout: inline
+links:
+  TaoBao: http://fashionentice.taobao.com
   #Title: http://example.com
 
 # Sidebar Avatar
