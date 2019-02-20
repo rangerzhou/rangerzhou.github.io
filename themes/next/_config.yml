@@ -1070,3 +1070,8 @@ images: images
 
 # Fireworks
 fireworks: true
+
+# Security
+##
+encrypt:
+    enable: true
