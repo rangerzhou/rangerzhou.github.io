@@ -1,5 +1,6 @@
 # ---------------------------------------------------------------
 # Theme Core Configuration Settings
+# Updated in 20190220
 # ---------------------------------------------------------------
 
 # If false, merge configs from `_data/next.yml` into default configuration (rewrite).
@@ -1065,4 +1066,4 @@ vendors:
 css: css
 js: js
 images: images
-# Update 20190219
+
