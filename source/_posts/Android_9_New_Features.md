@@ -5,9 +5,11 @@ date: 2019-01-18 16:42:40
 tags:
 categories: Android
 password: zr
+abstract: Welcome to my blog, enter password to read.
+message: Welcome to my blog, enter password to read.
 ---
 
-2018 年 8 月 7 日凌晨，google 推出了 Android 9.0。
+> 2018 年 8 月 7 日凌晨，google 推出了 Android 9.0。
 
 <!--more-->
 
