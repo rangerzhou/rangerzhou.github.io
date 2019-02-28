@@ -3,7 +3,7 @@ title: Java中的强引用、软引用、弱引用、虚引用
 copyright: true
 date: 2019-02-27 13:10:18
 tags:
-categories:
+categories: Java
 password:
 ---
 
