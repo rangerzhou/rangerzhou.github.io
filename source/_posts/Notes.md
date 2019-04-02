@@ -23,7 +23,7 @@ password:
    acl all src 0.0.0.0/0.0.0.0
    http_access allow all
    #cache_peer 10.201.220.168 parent 8081 0 login=wjl0n2:zr123456 default
-   cache_peer 10.201.249.71 parent 8081 0 login=wjl0n2:zr123456 default
+   cache_peer 10.201.249.71 parent 8081 0 login=asia/xxxxxx:zr123456 default
    never_direct allow all
    ```
 
@@ -40,7 +40,11 @@ password:
 5. 配置Network
 
    ``` shell
-   
+   HTTP Proxy | localhost | 3128
+   HTTPS Proxy | localhost | 3128
+   FTP Proxy | localhost | 3128
+   Socks Host | localhost | 3128
+   Ignore Hosts | localhost, 127.0.0.0/8, ::1
    ```
 
 
@@ -415,3 +419,17 @@ repo forall -c git checkout -b branch-name
 repo abandon branch-name
 
 repo abandon branch-name
+
+
+
+#### 14. 访问删除 /root 目录
+
+``` shell
+cd /
+sudo passwd root
+# 按照提示输入密码
+su root
+cd root
+# 即可操作 /root 目录
+```
+

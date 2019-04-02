@@ -9,11 +9,56 @@ password: zr
 
 
 
-> 此文介绍 Renesas 项目刷机指南。
+> Renesas Flash guide.
 
 <!--more-->
 
-### 1. 刷入 IPL
+### 1. 编译
+
+编译步骤：Android → QNX App → QNX Hypervisor
+
+#### 1.1 编译 Android
+
+``` shell
+$ ./GWM_V3/AOSP/build_all.sh
+# 生成 Android image:
+out/target/product/salvator/system.img
+out/target/product/salvator/vendor.img
+out/target/product/salvator/userdata.img
+out/host/linux-x86/bin/fastboot
+# 生成 IPL:
+out/target/product/salvator/bl2.srec
+out/target/product/salvator/bl31.srec
+out/target/product/salvator/bootparam_sa0.srec
+out/target/product/salvator/cert_header_sa6.srec
+out/target/product/salvator/tee.srec
+out/target/product/salvator/u-boot-elf.srec
+# Guest OS file(auto compile to QNX data.img):
+out/target/product/salvator/obj/KERNEL_OBJ/arch/arm64/boot/dts/renesas/r8a7795-salvator-xs.dtb
+out/target/product/salvator/obj/KERNEL_OBJ/arch/arm64/boot/Image
+```
+
+#### 1.2 编译 QNX APP
+
+``` shell
+$ ./GWM_V3/QNX/APP/ICC_CLUSTER/sw/buildv3.sh
+```
+
+#### 1.3 编译 QNX + Hypervisor
+
+``` shell
+$ ./GWM_V3/QNX/Hypervisor/qnx700/build_all.sh
+# 生成：
+GWM_V3/QNX/Hypervisor/qnx700/bsp/BSP_hypervisor-host_br-mainline_be-700_SVN854175_JBN863/images/generated/diskimage/boot.img
+GWM_V3/QNX/Hypervisor/qnx700/bsp/BSP_hypervisor-host_br-mainline_be-700_SVN854175_JBN863/images/generated/diskimage/data.img
+# 如果编译出现 ERROR "make[1]: img2simg: Command not found"
+$ sudo apt install android-tools-fsutils
+# 或者 sudo apt install img2simg
+```
+
+### 2. 刷机
+
+#### 2.1. 刷入 IPL
 
 1. 安装 [Tera Term](https://osdn.net/projects/ttssh2/releases) ，打开后如果驱动安装正常，会自动选择相应端口（Setup - Serial port），Speed: 115200，Data: 8 bit，Parity: none，Stop bits: 1 bit，Flow control: none。
 
@@ -99,9 +144,18 @@ password: zr
 
 5. Remove the power and red and yellow uart pin, Then Power the board. (关机开机？)
 
+#### 2.2 刷入 QNX image
 
+``` shell
+$ cd GWM_V3/QNX/Hypervisor/qnx700/bsp/BSP_hypervisor-host_br-mainline_be-700_SVN854175_JBN863/images/generated/diskimage
+# Copy 'fastboot' to the folder first
+$ cp GWM_V3/AOSP/out/host/linux-x86/bin/fastboot  ./
+$ chmod a+x ./fastboot
+$ ./fastboot flash boot_a boot.img
+$ ./fastboot flash extbin_a data.img
+```
 
-### 2. 刷入 Android
+#### 2.3 刷入 Android
 
 1. 连接 USB 到电脑，Tera Term 中输入如下指令：
 
@@ -123,3 +177,16 @@ password: zr
    ```
 
    等待刷机完成。
+
+#### 2.4 刷入 R7 image
+
+``` shell
+$ ./fastboot flash ipl_a v3_r7.bin
+```
+
+#### 2.5 运行 Android
+
+``` shell
+# sh /extbin/guests/android/android_guest_start.sh
+```
+

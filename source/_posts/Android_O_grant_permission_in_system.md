@@ -369,3 +369,70 @@ import android.Manifest;
 ```
 
 同样可通过 **checkPermission** 方法检查权限是否添加成功。
+
+### 5. 应用
+
+``` java
+	private final static int MY_PERMISSIONS_REQUEST_CODE = 0x1000;
+	// 所需申请的权限，需在 Manifest 中声明
+    private static String[] PERMISSION_GROUP = {
+            Manifest.permission.READ_CALENDAR,
+            Manifest.permission.READ_EXTERNAL_STORAGE
+    };
+
+	// 申请权限
+    public void checkPermissions() {
+        Log.i(TAG, "checkPermissions");
+        if (checkSelfPermission(Manifest.permission.READ_CALENDAR) != PackageManager.PERMISSION_GRANTED
+                || checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(PERMISSION_GROUP, MY_PERMISSIONS_REQUEST_CODE);
+        }
+    }
+
+	// 申请后会回调此方法
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        //super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        switch (requestCode) {
+            case MY_PERMISSIONS_REQUEST_CODE:
+                Log.i(TAG, "permissions.length: " + permissions.length + ", results.length: " + grantResults.length);
+                for (int i = 0; i < permissions.length || i < grantResults.length; i++) {
+                    Log.i(TAG, "permissions[" + i + "] : " + grantResults[i]);
+                    if (shouldShowRequestPermissionRationale(permissions[i])) {
+                        // 申请过权限但是被拒绝了，没有勾选 "不再提示" 的 checkbox
+                        permissionStr.append("[").append(permissions[i]).append("] ");
+                    }
+                }
+                showWaringDialog(permissionStr);
+                break;
+        }
+    }
+
+    private void showWaringDialog(StringBuilder str) {
+
+        Log.i(TAG, "str.length: " + str.length() + "str: " + str);
+        if (str.length() != 0) {
+            AlertDialog dialog = new AlertDialog.Builder(this)
+                    .setTitle("警告！")
+                    .setMessage("需要 " + str + "权限，请前往设置->应用->CalendarDemo->权限中打开相关权限，否则功能无法正常运行！")
+                    .setCancelable(false)
+                    .setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            // TODO sth. when click Ok
+                            // 一般情况下如果用户不授权的话，功能是无法运行的，做退出处理
+                            //finish();
+                        }
+                    })
+                    .setNegativeButton("取消", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            // TODO sth. when click Cancel
+                        }
+                    })
+                    .create();
+            dialog.show();
+        }
+    }
+```
+

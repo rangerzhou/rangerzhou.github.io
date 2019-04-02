@@ -234,6 +234,7 @@ sudo apt install sshpass # 免密码 ssh 连接
 sudo apt install git
 sudo apt install vim
 sudo apt install flameshot # 截图,比 shutter 好用
+sudo apt install img2simg #编译 QNX 时用到
 
 ```
 

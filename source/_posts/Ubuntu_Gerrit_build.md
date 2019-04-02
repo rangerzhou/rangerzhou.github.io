@@ -369,14 +369,40 @@ gerrit@aptivadp:~ $ ssh -p 29418 admin@10.243.54.188 gerrit create-project Demo-
 
 
 
-配置自动启动
+配置自动启动，首先查看 gerrit.sh
 
 ``` shell
-# 安装chkconfig
-sudo apt install sysv-rc-conf
-sudo cp /usr/sbin/sysv-rc-conf /usr/sbin/chkconfig
-sudo chkconfig --level 345 gerrit.sh on # 设置gerrit开机启动
-sudo chkconfig --level 345 httpd on # 设置httpd开机启动
+$ cat gerit/bin/gerrit.sh | head -n 50
+# Configuration files:
+#
+# /etc/default/gerritcodereview
+#   If it exists, sourced at the start of this script. It may perform any
+#   sequence of shell commands, like setting relevant environment variables.
+#
+# The files will be checked for existence before being sourced.
+
+# Configuration variables.  These may be set in /etc/default/gerritcodereview.
+#
+# GERRIT_SITE
+#   Path of the Gerrit site to run.  $GERRIT_SITE/etc/gerrit.config
+#   will be used to configure the process.
+#
+# GERRIT_WAR
+#   Location of the gerrit.war download that we will execute.  Defaults to
+#   container.war property in $GERRIT_SITE/etc/gerrit.config.
+#
+# NO_START
+#   If set to "1" disables Gerrit from starting.
+# 从以上注释得知 /etc/default/gerritcodereview 为配置文件，如下配置开机启动
+$ sudo ln -snf /home/gerrit/gerrit/bin/gerrit.sh /etc/init.d/gerrit.sh
+$ sduo ln -snf /etc/init.d/gerrit.sh /etc/rc2.d/S90gerrit
+$ sduo ln -snf /etc/init.d/gerrit.sh /etc/rc3.d/S90gerrit
+# 自动启动脚本 /etc/init.d/gerrit.sh 需要通过 /etc/default/gerritcodereview 文件来提供一些配置
+$ sudo cat /etc/default/gerritcodereview
+# 内容如下
+GERRIT_SITE=/home/gerrit/gerrit
+NO_START=0 # 值为 1 时取消开机启动
+
 ```
 
 
