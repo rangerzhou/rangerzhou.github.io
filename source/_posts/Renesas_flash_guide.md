@@ -48,9 +48,14 @@ $ ./GWM_V3/QNX/APP/ICC_CLUSTER/sw/buildv3.sh
 
 ``` shell
 $ ./GWM_V3/QNX/Hypervisor/qnx700/build_all.sh
-# 生成：
+# 生成 images：
 GWM_V3/QNX/Hypervisor/qnx700/bsp/BSP_hypervisor-host_br-mainline_be-700_SVN854175_JBN863/images/generated/diskimage/boot.img
-GWM_V3/QNX/Hypervisor/qnx700/bsp/BSP_hypervisor-host_br-mainline_be-700_SVN854175_JBN863/images/generated/diskimage/data.img
+
+GWM_V3/QNX/Hypervisor/qnx700/bsp/BSP_hypervisor-host_br-mainline_be-700_SVN854175_JBN863/images/generated/diskimage/extbin.img
+
+GWM_V3/QNX/Hypervisor/qnx700/bsp/BSP_hypervisor-host_br-mainline_be-700_SVN854175_JBN863/images/generated/diskimage/factory.img
+
+GWM_V3/QNX/Hypervisor/qnx700/bsp/BSP_hypervisor-host_br-mainline_be-700_SVN854175_JBN863/images/generated/diskimage/persistence.img
 # 如果编译出现 ERROR "make[1]: img2simg: Command not found"
 $ sudo apt install android-tools-fsutils
 # 或者 sudo apt install img2simg
@@ -152,7 +157,9 @@ $ cd GWM_V3/QNX/Hypervisor/qnx700/bsp/BSP_hypervisor-host_br-mainline_be-700_SVN
 $ cp GWM_V3/AOSP/out/host/linux-x86/bin/fastboot  ./
 $ chmod a+x ./fastboot
 $ ./fastboot flash boot_a boot.img
-$ ./fastboot flash extbin_a data.img
+$ ./fastboot flash extbin_a extbin.img
+$ ./fastboot flash factory factory.img
+$ ./fastboot flash persistence persistence.img
 ```
 
 #### 2.3 刷入 Android
@@ -177,6 +184,15 @@ $ ./fastboot flash extbin_a data.img
    ```
 
    等待刷机完成。
+
+3. 单刷 Android
+
+   ``` shell
+   $./fastboot flash system_a system.img
+   $./fastboot flash vendor_a vendor.img
+   $./fastboot flash userdata userdata.img
+   ```
+
 
 #### 2.4 刷入 R7 image
 
