@@ -103,3 +103,28 @@ deploy:
   type: git
   repo: https://github.com/rangerzhou/rangerzhou.github.io.git
   branch: master
+
+# Security
+## https://github.com/MikeCoder/hexo-blog-encrypt/blob/master/ReadMe.zh.md
+## npm install --save hexo-blog-encrypt
+encrypt:
+    enable: true
+    # 以下修改默认的提示和摘要内容
+    # The content has been encrypted, enter the password to read.
+    # Please enter the password to read.
+    default_abstract: 加密文章，输入密码阅读</br>
+    default_message: 请输入密码
+    default_template:
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+        <div id="hbe-security">
+          <div class="hbe-input-container">
+          <input type="password" class="hbe-form-control" id="pass" placeholder="{{message}}" />
+            <label for="pass">{{message}}</label>
+            <div class="bottom-line"></div>
+          </div>
+        </div>
+        <div id="decryptionError" style="display:none;">{{decryptionError}}</div>
+        <div id="noContentError" style="display:none;">{{noContentError}}</div>
+        <div id="encrypt-blog" style="display:none">
+        {{content}}
+        </div>
