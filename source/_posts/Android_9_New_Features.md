@@ -4,9 +4,7 @@ copyright: true
 date: 2019-01-18 16:42:40
 tags:
 categories: Android
-password: zr
-abstract: Welcome to my blog, enter password to read.
-message: Welcome to my blog, enter password to read.
+password:
 ---
 
 > 2018 年 8 月 7 日凌晨，google 推出了 Android 9.0。

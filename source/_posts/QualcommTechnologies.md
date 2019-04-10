@@ -4,7 +4,7 @@ copyright: true
 date: 2017-08-07 10:09:13
 tags:
 categories: Android
-password: zr
+password: zr.
 ---
 
 > Please Enter the PassWord to View.

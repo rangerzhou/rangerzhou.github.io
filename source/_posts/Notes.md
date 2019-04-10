@@ -433,3 +433,80 @@ cd root
 # 即可操作 /root 目录
 ```
 
+
+
+#### 15. crontab 定时任务
+
+**方法一**
+
+执行 `crontab -e` 后，任务会被写入到 */var/spool/cron/crontabs/* 目录下，生成一个和用户名一致的文件，文件内容就是我们编辑的定时脚本。
+
+直接用 crontab 命令编辑
+
+cron服务提供 crontab 命令来设定 cron 服务的，以下是这个命令的一些参数与说明：
+
+- crontab -u //设定某个用户的cron服务，一般 root 用户在执行这个命令的时候需要此参数
+- crontab -l //列出某个用户cron服务的详细内容
+- crontab -r //删除某个用户的cron服务
+- crontab -e //编辑某个用户的cron服务
+
+比如说 root 查看自己的 cron 设置：crontab -u root -l
+
+再例如，root 想删除 fred 的 cron 设置：crontab -u fred -r 
+
+基本格式 :
+分　 时　 日　 月　 周　 命令
+第1列表示分钟1～59 每分钟用*或者 */1表示
+第2列表示小时1～23（0表示0点）
+第3列表示日期1～31
+第4列表示月份1～12
+第5列标识号星期0～6（0表示星期天）
+
+``` shell
+crontab -e
+# 末尾添加， 分，时，天，月，周
+59 23 * * * /home/xxx/xxx.sh
+# 重启 service
+sudo service cron restart
+# 也可以用 sudo /etc/init.d/cron restart
+
+# 其他命令
+sudo service cron status // 查看 crontab 服务状态
+sudo service cron start // 启动服务
+sudo service cron stop // 关闭服务
+sudo service cron restart // 重启服务
+sudo service cron reload // 重新载入配置
+vim /var/mail/xxx // 失败会发送邮件？
+
+sudo vim /var/spool/cron/crontabs/root // 
+```
+
+**方法2**
+
+使用命令 vi /etc/crontab 编辑定时脚本。
+
+它包括下面几行：
+
+``` shell
+SHELL=/bin/bash
+PATH=/sbin:/bin:/usr/sbin:/usr/bin
+MAILTO=root
+HOME=/
+
+\# run-parts
+01 * * * * root run-parts /etc/cron.hourly
+02 4 * * * root run-parts /etc/cron.daily
+22 4 * * 0 root run-parts /etc/cron.weekly
+42 4 1 * * root run-parts /etc/cron.monthly
+```
+
+前四行是用来配置 cron 任务运行环境的变量。
+SHELL 变量的值告诉系统要使用哪个 shell 环境（在这个例子里是 bash shell）；
+PATH 变量定义用来执行命令的路径。
+cron 任务的输出被邮寄给 MAILTO 变量定义的用户名。
+如果 MAILTO 变量被定义为空白字符串（MAILTO=""），电子邮件就不会被寄出。
+HOME 变量可以用来设置在执行命令或脚本时使用的主目录。
+如果不加run-parts参数，可是直接写任务文件，而不是文件夹。
+
+（系统级的）做系统级配置我们会直接配置 /etc/crontab
+（用户级的）一般还是建议大家使用 crontab -e ，这样系统也会帮着检查我们配置的脚本语法。
