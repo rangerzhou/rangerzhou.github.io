@@ -2,12 +2,14 @@
 title: Android8.0-App安装时间优化
 copyright: true
 date: 2018-02-12 10:57:56
-tags: packageInstall
+tags: appInstall
 categories: Performance
 password:
 ---
 
-> APP的安装有四种方式：
+> APP的安装有四种方式
+
+<!--more-->
 
 - 系统应用安装——开机时完成，没有安装界面；
 - 应用市场安装——通过应用市场完成，有安装界面，有些market开启无障碍开关和root后可静默安装；

@@ -3,7 +3,7 @@ title: Android 内存泄漏总结
 copyright: true
 date: 2019-03-01 15:16:51
 tags:
-categories:
+categories: Android
 password:
 ---
 
