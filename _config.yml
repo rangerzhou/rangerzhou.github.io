@@ -128,3 +128,22 @@ encrypt:
         <div id="encrypt-blog" style="display:none">
         {{content}}
         </div>
+
+# Live2D
+## https://github.com/EYHN/hexo-helper-live2d
+live2d:
+  enable: true
+  scriptFrom: local
+  pluginRootPath: live2dw/
+  pluginJsPath: lib/
+  pluginModelPath: assets/
+  tagMode: false
+  debug: false
+  model:
+    use: live2d-widget-model-wanko
+  display:
+    position: right
+    width: 300
+    height: 600
+  mobile:
+    show: true
