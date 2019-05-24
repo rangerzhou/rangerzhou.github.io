@@ -8,11 +8,11 @@ password:
 top:
 ---
 
+> SocketStudy
 
+<!--more-->
 
 ### 1. sss
-
-
 
 Mina 官网：http://mina.apache.org/mina-project/
 
@@ -26,3 +26,6 @@ Run - EditConfigurations - + Application，填写 Name, Main class, Working dire
 
 lsof -i:8989 可查看 8989 端口是否被占用，如被占用 kill PID 即可。
 
+[Demo源码下载](https://github.com/rangerzhou/Demos/tree/master/MinaClient) 
+
+先运行 libMinaServer，再运行 app，点击 button 测试。
