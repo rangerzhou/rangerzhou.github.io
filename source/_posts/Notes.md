@@ -62,11 +62,15 @@ password:
    重启:reboot
    验证内核版本:uname -r
    写入配置:
+
+   ``` shell
    sudo -i
    echo "net.core.default_qdisc=fq" >> /etc/sysctl.conf
    echo "net.ipv4.tcp_congestion_control=bbr" >> /etc/sysctl.conf
+   ```
+
    配置生效:sysctl -p
-   检验:lsmod | grep bbr
+   检验: lsmod | grep bbr
    看到回显tcp_bbr 20480 0说明已经成功开启 BBR
 
 2. 配置Shadowsocks
@@ -115,6 +119,38 @@ password:
 4. Python版一键安装脚本
 
    https://teddysun.com/342.htmlShadowsocks 
+   
+5. SSH 连接服务器
+
+   **通过 SSH 密码验证登录**
+
+   ``` shell
+   # 添加密码
+   $ sudo passwd ${whoami} // 下面以 user 代替 ${whoami}
+   # 切换到 root
+   $ sudo -i
+   # 编辑 ssh 配置文件
+   $ vi /etc/ssh/sshd_config
+   # 修改以下内容
+   $ PermitRootLogin yes
+   $ PasswordAuthentication yes
+   # 重启 ssh
+   $ service sshd restart
+   ```
+
+   **通过本地私钥登录**
+
+   ``` shell
+   # 生成 ssh key
+   $ ssh-keygen
+   $ cat c:\Users\RangerZhou\.ssh\id_rsa.pub
+   # 进入谷歌云平台页面 -> 计算引擎 -> 元数据 -> SSH 密钥，粘贴保存
+   # 谷歌就会把上面这段 public key 写入到 ~/.ssh/authorized_keys
+   
+   # 本地通过私钥登录
+   $ ssh -i id_rsa.pub user@35.189.175.199
+   
+   ```
 
 #### 3. JDK
 
