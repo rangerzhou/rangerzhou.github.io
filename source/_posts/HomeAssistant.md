@@ -155,6 +155,142 @@ Juhe_juke: 8ad9dbb7d43528138e6ad32bb3a1714f
 
 Put the file `sensor.py` `__init__.py` `manifest.json` in the dir: `~/.homeassistant/custom_components/gaode_travel_time/`
 
+### HomeAssistant API 查询
+
+https://developers.home-assistant.io/docs/en/external_api_rest.html
+
+- configuration.yaml 中添加 `api:`
+
+- 在 http://10.244.6.199:8123/profile 页面 CREATE TOKEN
+
+- ``` shell
+  # 使用如下命令查询
+  curl -X GET -H "Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiI4Zjc1MTQ0MzlhMTY0MTljOWNmY2I5NDE2NDQzNTFhOCIsImlhdCI6MTU2MDMyNjQ5NiwiZXhwIjoxODc1Njg2NDk2fQ.2yph0Z1FJiBEvOB2v-2iTE0aYBciwiSGX_mOf2NMffM" -H "Content-Type: application/json"     http://10.244.6.199:8123/api/services
+  ```
+
+- ``` shell
+  # 使用如下命令 POST
+  curl -X POST -H "Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiI4Zjc1MTQ0MzlhMTY0MTljOWNmY2I5NDE2NDQzNTFhOCIsImlhdCI6MTU2MDMyNjQ5NiwiZXhwIjoxODc1Njg2NDk2fQ.2yph0Z1FJiBEvOB2v-2iTE0aYBciwiSGX_mOf2NMffM" -H "Content-Type: application/json" -d '{"message": "12345678"}' http://localhost:8123/api/services/tts/google_translate_say
+  ```
+
+- 
+
+### HASS 中添加 Google 日程时添加 location
+
+``` shell
+diff --git a/homeassistant/components/google/__init__.py b/homeassistant/components/google/__init__.py
+index 027a6b2f5..8ebe0cb52 100644
+--- a/homeassistant/components/google/__init__.py
++++ b/homeassistant/components/google/__init__.py
+@@ -49,6 +49,7 @@ EVENT_START_DATE = 'start_date'
+ EVENT_START_DATETIME = 'start_date_time'
+ EVENT_SUMMARY = 'summary'
+ EVENT_TYPES_CONF = 'event_types'
++EVENT_LOCATION = 'location'
+ 
+ NOTIFICATION_ID = 'google_calendar_notification'
+ NOTIFICATION_TITLE = "Google Calendar Setup"
+@@ -100,6 +101,7 @@ ADD_EVENT_SERVICE_SCHEMA = vol.Schema(
+     {
+         vol.Required(EVENT_CALENDAR_ID): cv.string,
+         vol.Required(EVENT_SUMMARY): cv.string,
++        vol.Required(EVENT_LOCATION): cv.string,
+         vol.Optional(EVENT_DESCRIPTION, default=""): cv.string,
+         vol.Exclusive(EVENT_START_DATE, EVENT_START_CONF): cv.date,
+         vol.Exclusive(EVENT_END_DATE, EVENT_END_CONF): cv.date,
+@@ -288,6 +290,7 @@ def setup_services(hass, hass_config, track_new_found_calendars,
+         event = {
+             'summary': call.data[EVENT_SUMMARY],
+             'description': call.data[EVENT_DESCRIPTION],
++            'location': call.data[EVENT_LOCATION],
+             'start': start,
+             'end': end,
+         }
+diff --git a/homeassistant/components/google/services.yaml b/homeassistant/components/google/services.yaml
+index 048e886dc..f3194381f 100644
+--- a/homeassistant/components/google/services.yaml
++++ b/homeassistant/components/google/services.yaml
+@@ -28,4 +28,7 @@ add_event:
+       example: '2019-03-11'
+     in:
+       description: Days or weeks that you want to create the event in.
+-      example: '"days": 2 or "weeks": 2'
+\ No newline at end of file
++      example: '"days": 2 or "weeks": 2'
++    location:
++      description: The location of the calendar you want.
++      example: '德林路 118 号'
+```
+
+google event通知 automation.yaml：
+
+``` yaml
+alias: CalendarEvent
+trigger:
+- entity_id: calendar.ranger_assist_gmail_com
+  from: 'off'
+  platform: state
+  to: 'on'
+- entity_id: calendar.test_important
+  from: 'off'
+  platform: state
+  to: 'on'
+- platform: template
+  value_template: "{% if is_state_attr('calendar.test_important', 'offset_reached', true) %}true{% endif %}"
+condition: []
+action:
+- data:
+    message: 有新的日程啦
+  service: tts.google_translate_say
+- data_template:
+    message: >
+      日程内容: {{ states.calendar.ranger_assist_gmail_com.attributes["message"] }}, 地点: {{ states.calendar.ranger_assist_gmail_com.attributes["location"] }}, 开始时间: {{ states.calendar.ranger_assist_gmail_com.attributes["start_time"] }}, 结束时间: {{ states.calendar.ranger_assist_gmail_com.attributes["end_time"] }}
+  service: notify.pushover
+```
+
+
+
+### 声音相关配置
+
+选择声音输出：
+
+两种方法，第一种通过 raspi 配置：
+
+``` yaml
+sudo raspi-config
+# 选择 Advanced Options - Audio - 即可选择
+```
+
+第二种通过命令：
+
+amixer，是alsamixer的文本模式,即命令行模式，需要用amixer命令的形式去配置你的声卡的各个选项。
+
+``` shell
+sudo amixer cset numid=3 2
+```
+
+这里将输出设置为2，也就是HDMI。
+将输出设置为1将切换到模拟信号（也就是耳机接口）。
+默认的设置为0，代表自动选择。
+
+我使用第二种方法设置之后，耳机死活不能播放声音了，经过搜索应该是声卡选择有问题，使用命令配置：
+
+``` shell
+alsamixer
+```
+
+进入后按 F6 选择 bcm2835 ALSA 即可。
+
+树莓派连接猫精接入：
+
+https://bbs.hassbian.com/thread-5439-1-1.html
+
+https://yanke.info/?id=108
+
+
+
+
+
 
 
 ### References: 

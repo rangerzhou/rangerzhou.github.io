@@ -12,7 +12,7 @@ top:
 
 <!--more-->
 
-HA Release: 0.93.2
+HA Release: 0.94.4
 
 净化器型号: AC-M2-AA
 
@@ -78,7 +78,7 @@ homeassistant:
 
 ### 4. 下载 packages 文件
 
-下载 [ xiaomi_air_pufifier.yaml](https://github.com/rangerzhou/git_resource/blob/master/Hass_Resources/xiaomi_air_purifier.yaml) 放入 `~/homeassistant/packages` 目录下，此文件修复了上面参考链接里的bug和 HA 升级导致的几个问题，主要为：
+下载 [ xiaomi_air_pufifier.yaml](https://github.com/rangerzhou/HomeAssistant/tree/master/xiaomiAirPurifier2/packages) 放入 `~/homeassistant/packages` 目录下，此文件修复了上面参考链接里的bug和 HA 升级导致的几个问题，主要为：
 
 - 增加 sensors: xiaomi_ap_filter_used 和 xiaomi_ap_filter_life，以在主界面显示滤芯使用时长和滤芯寿命
 - 修复提示音无效（HA 升级，service 名称改变导致）
@@ -115,8 +115,8 @@ homeassistant:
   ... ...
   packages: !include_dir_named packages
   customize_glob:
-  "*.*":
-    custom_ui_state_card: state-card-custom-ui
+    "*.*":
+      custom_ui_state_card: state-card-custom-ui
 ... ...
 frontend:
   extra_html_url:
@@ -127,7 +127,7 @@ frontend:
 
 ```
 
-### 6. 添加 HA 已有的空气净化器组件
+### 6. 添加 HA 已有的空气净化器组件 (可选，加不加不影响，这个是官方支持的)
 
 configuration.yaml
 
