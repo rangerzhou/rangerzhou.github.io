@@ -14,7 +14,7 @@ top:
 
 HA Version: 0.94.4
 
-首先用京东帐号申请一个**和风API**，请注意，是京东万象平台，不是从风天气官网申请的 API
+首先用京东帐号申请一个[和风API](https://wx.jdcloud.com/market/datas/26/10610)，请注意，是京东万象平台，不是从风天气官网申请的 API 。
 
 ## 1. hf_weather 组件实现
 
