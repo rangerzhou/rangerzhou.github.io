@@ -285,7 +285,31 @@ There are 2 choices for the alternative python (providing /usr/bin/python).
 Press <enter> to keep the current choice[*], or type selection number: 2
 ```
 
+**Python 升级**
 
+https://www.python.org/
+
+下载最新版本 Python ，
+
+``` shell
+# 配置配置文件
+$ ./configure
+# 编译
+$ make
+# 安装
+$ sudo make install
+# 添加python3的符号链接
+$ sudo ln -s /usr/local/bin/python3.7 /usr/bin/python3
+# 添加pip3的符号链接
+$ sudo ln -s /usr/local/bin/pip3.7 /usr/bin/pip3
+# 查看版本
+$ pip3 -V
+pip 19.1.1 from /usr/local/python3/lib/python3.7/site-packages/pip (python 3.7)
+```
+
+**卸载 python** 
+
+https://www.howtoinstall.co/en/ubuntu/xenial/python3.5?action=remove
 
 #### 6. JACK介绍
 
