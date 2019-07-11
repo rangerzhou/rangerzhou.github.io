@@ -570,3 +570,83 @@ HOME 变量可以用来设置在执行命令或脚本时使用的主目录。
 
 （系统级的）做系统级配置我们会直接配置 /etc/crontab
 （用户级的）一般还是建议大家使用 crontab -e ，这样系统也会帮着检查我们配置的脚本语法。
+
+
+
+#### 16. systemd 配置 service 开机启动
+
+以启动 HomeAssistant 为例：
+
+``` shell
+# 配置启动脚本
+$ sudo vim /etc/systemd/system/home-assistant.service
+[Unit]
+Description=Home Assistant
+After=network.target
+
+[Service]
+Type=simple
+User=ranger   # hass 所属user
+Group=ranger  # hass 所属group
+ExecStart=/usr/bin/python3 /usr/local/bin/hass
+
+[Install]
+WantedBy=multi-user.target
+# 其他配置
+$ sudo systemctl enable home-assistant.service
+$ sudo systemctl is-enabled home-assistant.service
+enabled
+$ sudo systemctl daemon-reload
+$ sudo systemctl start home-assistant.service
+$ sudo systemctl status home-assistant.service
+* home-assistant.service - Home Assistant
+   Loaded: loaded (/etc/systemd/system/home-assistant.service; enabled; vendor preset: enabled)
+   Active: active (running) since Wed 2019-07-03 13:04:45 CST; 22min ago
+ Main PID: 17003 (python3)
+    Tasks: 34 (limit: 4915)
+   CGroup: /system.slice/home-assistant.service
+           |-17003 /usr/bin/python3 /usr/local/bin/hass
+           `-17048 /usr/bin/pulseaudio --start --log-target=syslog
+
+$ ll /etc/systemd/system/home-assistant.service
+-rw-r--r-- 1 root root 188 Jul  3 13:04 /etc/systemd/system/home-assistant.service
+$ ll /usr/local/bin/hass
+-rwxr-xr-x 1 ranger ranger 224 Jul  1 13:05 /usr/local/bin/hass*
+```
+
+其他命令（参考：https://linux.cn/article-5926-1.html）
+
+``` shell
+$ sudo systemctl start apache.service						# 立即启动一个服务
+$ sudo systemctl stop apache.service						# 立即停止一个服务
+$ sudo systemctl restart apache.service						# 重启一个服务
+$ sudo systemctl kill apache.service						# 杀死一个服务的所有子进程
+$ sudo systemctl reload apache.service						# 重新加载一个服务的配置文件
+$ sudo systemctl daemon-reload								# 重载所有修改过的配置文件
+$ systemctl show httpd.service								# 显示某个 Unit 的所有底层参数
+$ systemctl show -p CPUShares httpd.service					# 显示某个 Unit 的指定属性的值
+$ sudo systemctl set-property httpd.service CPUShares=500	# 设置某个 Unit 的指定属性
+
+$ sudo systemctl reboot 		# 重启系统
+$ sudo systemctl poweroff 		# 关闭系统，切断电源
+$ sudo systemctl halt 			# CPU停止工作
+$ sudo systemctl suspend 		# 暂停系统
+$ sudo systemctl hibernate 		# 让系统进入冬眠状态
+$ sudo systemctl hybrid-sleep	# 让系统进入交互式休眠状态
+$ sudo systemctl rescue 		# 启动进入救援状态（单用户状态）
+$ systemctl list-units			# 列出正在运行的 Unit
+$ systemctl list-units --all	# 列出所有Unit，包括没有找到配置文件的或者启动失败的
+$ systemctl list-units --all --state=inactive	# 列出所有没有运行的 Unit
+$ systemctl list-units --failed					# 列出所有加载失败的 Unit
+$ systemctl list-units --type=service			# 列出所有正在运行的、类型为 service 的 Unit
+# Unit 的状态
+$ systemctl status 								# 显示系统状态
+$ sysystemctl status bluetooth.service			# 显示单个 Unit 的状态
+```
+
+
+
+
+
+https://yourzeromax.top/2018/08/13/Android-%E5%90%8C%E4%B8%80%E4%B8%AATextView%E4%B8%AD%E5%A4%9A%E5%BD%A9%E6%98%BE%E7%A4%BA%E6%96%87%E5%AD%97/
+

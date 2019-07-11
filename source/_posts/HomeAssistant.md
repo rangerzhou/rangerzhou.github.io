@@ -289,6 +289,17 @@ https://yanke.info/?id=108
 
 
 
+排错
+
+``` shell
+# error during connection setup: no module named '_sqlite3'
+sudo apt-get install libsqlite3-dev
+./configure --enable-loadable-sqlite-extensions
+make
+sudo make install
+sudo pip3 install homeassistant
+```
+
 
 
 
