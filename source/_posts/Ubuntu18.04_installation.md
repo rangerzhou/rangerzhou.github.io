@@ -721,6 +721,55 @@ xdg-mime default nautilus.desktop inode/directory application/x-gnome-saved-sear
 
 使用 `xdg-open $HOME` 来验证有没有生效。
 
+### 29. 终端中文只能显示 ASCII 码
+
+使用 locale 命令查看
+
+``` shell
+$ locale
+LANG=en_US.UTF-8
+LANGUAGE=en_US:en
+LC_CTYPE="C"
+LC_NUMERIC="C"
+LC_TIME="C"
+LC_COLLATE="C"
+LC_MONETARY="C"
+LC_MESSAGES="C"
+LC_PAPER="C"
+LC_NAME="C"
+LC_ADDRESS="C"
+LC_TELEPHONE="C"
+LC_MEASUREMENT="C"
+LC_IDENTIFICATION="C"
+LC_ALL=C
+```
+
+随后执行 `sudo locale-gen zh_CN.UTF-8`
+
+再执行：
+
+``` shell
+export LANG=en_US.UTF-8
+export LANGUAGE=
+export LC_CTYPE="en_US.UTF-8"
+export LC_NUMERIC=zh_CN.UTF-8
+export LC_TIME=zh_CN.UTF-8
+export LC_COLLATE="en_US.UTF-8"
+export LC_MONETARY=zh_CN.UTF-8
+export LC_MESSAGES="en_US.UTF-8"
+export LC_PAPER=zh_CN.UTF-8
+export LC_NAME=zh_CN.UTF-8
+export LC_ADDRESS=zh_CN.UTF-8
+export LC_TELEPHONE=zh_CN.UTF-8
+export LC_MEASUREMENT=zh_CN.UTF-8
+export LC_IDENTIFICATION=zh_CN.UTF-8
+export LC_ALL=
+```
+
+
+
+
+
 
 
 Reference: http://einverne.github.io/post/2018/08/nemo-file-manager.html

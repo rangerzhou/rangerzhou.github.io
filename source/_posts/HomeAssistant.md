@@ -289,7 +289,9 @@ https://yanke.info/?id=108
 
 
 
-排错
+### 排错
+
+1. 
 
 ``` shell
 # error during connection setup: no module named '_sqlite3'
@@ -300,6 +302,24 @@ sudo make install
 sudo pip3 install homeassistant
 ```
 
+2. [Unable to install package home-assistant-frontend==20190626.0](https://github.com/home-assistant/home-assistant/issues/24968)
+
+``` shell
+sudo rm -rf /usr/local/lib/python3.7/dist-packages/hass_frontend/
+sudo rm -rf /usr/local/lib/python3.7/dist-packages/home_assistant_frontend-20190721.1.dist-info/
+sudo pip install homeassistant==0.96.4
+sudo reboot
+```
+
+3. not initializing bluetooth_tracker because could not install requirement pybluez==0.22
+
+   ``` shell
+   sudo apt-get update
+   sudo apt-get install python-pip python-dev ipython
+   
+   sudo apt-get install bluetooth libbluetooth-dev
+   sudo pip install pybluez
+   ```
 
 
 
