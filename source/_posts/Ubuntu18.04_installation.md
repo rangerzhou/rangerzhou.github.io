@@ -766,9 +766,56 @@ export LC_IDENTIFICATION=zh_CN.UTF-8
 export LC_ALL=
 ```
 
+vim 中文乱码的解决方案：
+
+设置 vimrc 文件，加上fileencodings、enc、fencs，代码如下：
+
+```bash
+$ vim /etc/vim/vimrc # 或者 vim ~/.vimrc
+# 一般只需要这行就行了
+set enc=utf8
+# 如果还不行，可以再添加
+set fileencodings=utf-8,gb2312,gb18030,gbk,ucs-bom,cp936,latin1
+# 还不行就把第一行的utf8换成gbk，第二行的gbk挪到最前
+set fencs=utf8,gbk,gb2312,gb18030
+```
 
 
 
+### 30. 安装 nodejs 和 npm
+
+#### 30.1 卸载 node 和 npm
+
+``` shell
+    # apt-get 卸载
+    sudo apt remove --purge npm
+    sudo apt remove --purge nodejs
+    sudo apt remove --purge nodejs-legacy
+    sudo apt autoremove
+
+    # 手动删除 npm 相关目录
+    rm -r /usr/local/bin/npm
+    rm -r /usr/local/lib/node-moudels
+    find / -name npm
+    rm -r /tmp/npm*
+```
+
+#### 30.2 安装最新的 node 和 npm
+
+``` shell
+    # apt-get 安装 nodejs
+    sudo apt install nodejs
+    sudo apt install nodejs-legacy
+    node -v # v4.2.6
+
+    # 安装最新的 node v12.x  https://github.com/nodesource/distributions
+    curl -sL https://deb.nodesource.com/setup_12.x | sudo -E bash -
+    sudo apt-get install -y nodejs
+    node -v
+
+    # 更新 npm
+    sudo npm install npm -g
+```
 
 
 
