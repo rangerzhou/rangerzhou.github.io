@@ -591,3 +591,13 @@ void* OpenNativeLibrary(JNIEnv* env, int32_t target_sdk_version, const char* pat
 Android 7.0 开始，禁止加载非NDK库，也就是说系统禁止了应用去链接系统的私有库。它通过名字空间的方式来实现其方法。所以就看到了，我们加载 so 的时候是用 OpenNativeLibrary 方法，而不是以往的 dlopen 方法。
 
 
+
+
+
+参考：
+
+http://gityuan.com/2016/05/28/android-jni/
+
+http://gityuan.com/2017/03/26/load_library/
+
+https://blog.csdn.net/QQxiaoqiang1573/article/details/101781380
