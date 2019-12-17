@@ -7,13 +7,13 @@ categories: Android
 password:
 ---
 
-> **JNI** （**Java Native Interface, Java 本地接口**）是一种[编程框架](https://zh.wikipedia.org/w/index.php?title=%E7%BC%96%E7%A8%8B%E6%A1%86%E6%9E%B6&action=edit&redlink=1)，使得 [Java虚拟机](https://zh.wikipedia.org/wiki/Java%E8%99%9A%E6%8B%9F%E6%9C%BA)中的 [Java](https://zh.wikipedia.org/wiki/Java) 程序可以调用本地应用或库，也可以被其他程序调用。 本地程序一般是用其它语言（[C](https://zh.wikipedia.org/wiki/C%E8%AF%AD%E8%A8%80)、[C++](https://zh.wikipedia.org/wiki/C%2B%2B)或[汇编语言](https://zh.wikipedia.org/wiki/%E6%B1%87%E7%BC%96%E8%AF%AD%E8%A8%80)等）编写的，并且被编译为基于本机硬件和操作系统的程序。JNI 用于打通 Java 层与 Native(C/C++) 层，并非 Android 系统独有，而是 Java 所有。Java语言是跨平台的语言，而这跨平台的背后都是依靠Java虚拟机，虚拟机采用C/C++编写，适配各个系统，通过JNI为上层Java提供各种服务，保证跨平台性。本文基于 android-10.0.0_r5 源码。
+> **JNI** （**Java Native Interface, Java 本地接口**）是一种[编程框架](https://zh.wikipedia.org/w/index.php?title=%E7%BC%96%E7%A8%8B%E6%A1%86%E6%9E%B6&action=edit&redlink=1)，使得 [Java虚拟机](https://zh.wikipedia.org/wiki/Java%E8%99%9A%E6%8B%9F%E6%9C%BA)中的 [Java](https://zh.wikipedia.org/wiki/Java) 程序可以调用本地应用或库，也可以被其他程序调用。 本地程序一般是用其它语言（[C](https://zh.wikipedia.org/wiki/C%E8%AF%AD%E8%A8%80)、[C++](https://zh.wikipedia.org/wiki/C%2B%2B)或[汇编语言](https://zh.wikipedia.org/wiki/%E6%B1%87%E7%BC%96%E8%AF%AD%E8%A8%80)等）编写的，并且被编译为基于本机硬件和操作系统的程序。JNI 用于打通 Java 层与 Native(C/C++) 层，并非 Android 系统独有，而是 Java 所有。Java语言是跨平台的语言，而这跨平台的背后都是依靠Java虚拟机，虚拟机采用C/C++编写，适配各个系统，通过JNI为上层Java提供各种服务，保证跨平台性。本文基于 android-10.0.0_r6 源码。
 
 <!--more-->
 
 ### 1. JNI 原理分析
 
-JAVA 层和 Native 层方法是怎样注册并映射的？以 Bluetooth 为例，在 [AdapterApp.java]([AdapterApp.java](http://androidxref.com/9.0.0_r3/xref/packages/apps/Bluetooth/src/com/android/bluetooth/btservice/AdapterApp.java)) 中调用 `System.loadLibrary("bluetooth_jni");` ，加载 libbluetooth_jni.so 动态库到内存。
+JAVA 层和 Native 层方法是怎样注册并映射的？以 Bluetooth 为例，在 [AdapterApp.java](http://androidxref.com/9.0.0_r3/xref/packages/apps/Bluetooth/src/com/android/bluetooth/btservice/AdapterApp.java) 中调用 `System.loadLibrary("bluetooth_jni");` ，加载 libbluetooth_jni.so 动态库到内存。
 
  [/packages/apps/Bluetooth/src/com/android/bluetooth/btservice/AdapterApp.java](https://android.googlesource.com/platform/packages/apps/Bluetooth/+/refs/tags/android-10.0.0_r6/src/com/android/bluetooth/btservice/AdapterApp.java)
 
@@ -588,7 +588,7 @@ void* OpenNativeLibrary(JNIEnv* env, int32_t target_sdk_version, const char* pat
 }
 ```
 
-Android 7.0 开始，禁止加载非NDK库，也就是说系统禁止了应用去链接系统的私有库。它通过名字空间的方式来实现其方法。所以就看到了，我们加载 so 的时候是用 OpenNativeLibrary 方法，而不是以往的 dlopen 方法。
+Android 7.0 开始，禁止加载非NDK库，也就是说系统禁止了应用去链接系统的私有库，它通过名字空间的方式来实现其方法。所以就看到了，我们加载 so 的时候是用 OpenNativeLibrary 方法，而不是以往的 dlopen 方法。
 
 
 

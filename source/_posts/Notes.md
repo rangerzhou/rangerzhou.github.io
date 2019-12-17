@@ -289,20 +289,29 @@ Press <enter> to keep the current choice[*], or type selection number: 2
 
 https://www.python.org/
 
-下载最新版本 Python ，
+下载最新版本 Python ，或者 `wget https://www.python.org/ftp/python/3.8.0/Python-3.8.0.tgz` 
 
 ``` shell
 # 配置配置文件
-$ ./configure
+$ ./configure --with-ssl
+# 安装依赖
+$ sudo apt update
+$ sudo apt upgrade
+$ sudo apt dist-upgrade
+$ sudo apt-get install build-essential python-dev python-setuptools python-pip python-smbus libncursesw5-dev libgdbm-dev libc6-dev zlib1g-dev libsqlite3-dev tk-dev libssl-dev openssl libffi-dev
 # 编译
 $ make
 # 安装
 $ sudo make install
+# 删除软链接
+$ sudo rm -rf /usr/bin/python3
+$ sudo rm -rf /usr/bin/pip3
 # 添加python3的符号链接
-$ sudo ln -s /usr/local/bin/python3.7 /usr/bin/python3
+$ sudo ln -s /usr/local/bin/python3.8 /usr/bin/python3
 # 添加pip3的符号链接
-$ sudo ln -s /usr/local/bin/pip3.7 /usr/bin/pip3
+$ sudo ln -s /usr/local/bin/pip3.8 /usr/bin/pip3
 # 查看版本
+$ python3
 $ pip3 -V
 pip 19.1.1 from /usr/local/python3/lib/python3.7/site-packages/pip (python 3.7)
 ```
