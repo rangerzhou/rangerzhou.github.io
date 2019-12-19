@@ -1,5 +1,5 @@
 ---
-title: Android 10 JNI原理及 JNI 使用
+title: Android JNI原理-loadLibrary动态库加载过程
 copyright: true
 date: 2019-10-25 16:38:46
 tags:
@@ -11,7 +11,19 @@ password:
 
 <!--more-->
 
-### 1. JNI 原理分析
+### 1. JNI loadLibrary 动态库加载过程
+
+在 Android 上层 Java 代码中，只需要一行代码即可加载动态库：
+
+``` java
+System.load("/data/local/tmp/lib***.so");
+System.loadLibrary("xxx");
+```
+
+load 和 loadLibrary 区别如下：
+
+- load 指定动态库的完整路径，不会自动加载依赖库；
+- loadLibrary 只从指定的 lib 目录查找，并加上 lib 前缀和 .so 后缀；
 
 JAVA 层和 Native 层方法是怎样注册并映射的？以 Bluetooth 为例，在 [AdapterApp.java](http://androidxref.com/9.0.0_r3/xref/packages/apps/Bluetooth/src/com/android/bluetooth/btservice/AdapterApp.java) 中调用 `System.loadLibrary("bluetooth_jni");` ，加载 libbluetooth_jni.so 动态库到内存。
 
@@ -61,7 +73,7 @@ public final class System {
     "Directory separator should not appear in library name: " + libname);
         }
         String libraryName = libname;
-        // 如果 loader 不为 null
+        // 如果 loader 不为 null，就调用 findLibrary
         if (loader != null && !(loader instanceof BootClassLoader)) {
             // 根据动态库名获取动态库的文件路径，见 1.2
             String filename = loader.findLibrary(libraryName);
@@ -81,9 +93,10 @@ public final class System {
         // 当 loader 为 null 时执行如下操作
         // We know some apps use mLibPaths directly, potentially assuming it's not null.
         // Initialize it here to make sure apps see a non-null value.
-        getLibPaths();// 
+        getLibPaths();// 获取 mLibPaths 值: /system/lib64/
         // mapLibraryName 功能是将动态库 xxx 的名字转换为 libxxx.so，见 1.1.4
         String filename = System.mapLibraryName(libraryName);
+        // 真正加载库的函数 nativeLoad
         String error = nativeLoad(filename, loader, callerClass);
         if (error != null) {
             throw new UnsatisfiedLinkError(error);
@@ -118,7 +131,7 @@ public final class System {
     }
 ```
 
-**loadLibrary0** 主要目的是找到动态库所在路径，然后调用 **nativeLoad ** 来加载动态库，当 loader 不为 null 时通过 loader.findLibrary() 查找动态库所在路径，当 loader 为 null 时从默认目录 mLibPaths 下(比如 /vendor/lib, system/lib, system/lib64)查找是否存在该动态库。
+**loadLibrary0** 主要目的是找到动态库所在路径，然后调用 **nativeLoad ** 来加载动态库，先判断 loader 是否为 null，当 loader 不为 null 时通过 loader.findLibrary() 查找动态库所在绝对路径，当 loader 为 null 时从默认目录 mLibPaths 下(比如 /vendor/lib, system/lib, system/lib64)查找是否存在该动态库，如果都没有找到就抛出异常。
 
 ##### 1.1.3 findLibrary
 
