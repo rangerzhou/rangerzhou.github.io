@@ -1,0 +1,1680 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+  <meta name="google-site-verification" content="OJnYjbr3wdT22qLrZSzyD9lAyBcXiXlEQ7-5wAnaWoQ">
+
+
+
+
+
+
+
+  <meta name="baidu-site-verification" content="vr4n4JeXgB">
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2">
+
+<link rel="stylesheet" href="/css/main.css?v=7.0.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=7.0.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.jpg?v=7.0.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.jpg?v=7.0.0">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=7.0.0" color="#222">
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '7.0.0',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+
+<script src="//cdn.bootcss.com/pace/1.0.2/pace.min.js"></script>
+<link href="//cdn.bootcss.com/pace/1.0.2/themes/pink/pace-theme-flash.css" rel="stylesheet">
+
+
+  <meta name="description" content="1. 概述 xxxxxx">
+<meta name="keywords" content="Watchdog">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Watchdog机制及实例分析">
+<meta property="og:url" content="http://rangerzhou.top/2017/10/12/Watchdog_Mechanism/index.html">
+<meta property="og:site_name" content="RangerZhou">
+<meta property="og:description" content="1. 概述 xxxxxx">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2019-12-31T04:33:39.561Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Watchdog机制及实例分析">
+<meta name="twitter:description" content="1. 概述 xxxxxx">
+
+
+
+  <link rel="alternate" href="/atom.xml" title="RangerZhou" type="application/atom+xml">
+
+
+
+
+  <link rel="canonical" href="http://rangerzhou.top/2017/10/12/Watchdog_Mechanism/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>Watchdog机制及实例分析 | RangerZhou</title>
+  
+
+
+
+
+  <script async src="//www.googletagmanager.com/gtag/js?id=UA-138158952-1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'UA-138158952-1');
+  </script>
+
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?24a6d3c4c0f292c5f682d26414c3994b";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .motion-element,
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-title { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">RangerZhou</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <h1 class="site-subtitle" itemprop="description">Read the fucking source code</h1>
+      
+    
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/about/" rel="section"><i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-shop">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="http://fashionentice.taobao.com/" rel="noopener" target="_blank"><i class="menu-item-icon fa fa-fw fa-user"></i> <br>shop</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-commonweal">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/404.html" rel="section"><i class="menu-item-icon fa fa-fw fa-heartbeat"></i> <br>公益</a>
+
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+    <div class="reading-progress-bar"></div>
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://rangerzhou.top/2017/10/12/Watchdog_Mechanism/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Ranger Zhou">
+      <meta itemprop="description" content="我是一个小流氓我从来也不浪，有一天我心血来潮耍了个流氓，我嘴里吹着小口哨我心里好得意，不知怎么哗啦啦啦啦我摔了一身泥">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="RangerZhou">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">Watchdog机制及实例分析
+
+              
+            
+          </h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2017-10-12 10:01:06" itemprop="dateCreated datePublished" datetime="2017-10-12T10:01:06+08:00">2017-10-12</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2019-12-31 12:33:39" itemprop="dateModified" datetime="2019-12-31T12:33:39+08:00">2019-12-31</time>
+              
+            
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Frameworks/" itemprop="url" rel="index"><span itemprop="name">Frameworks</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="post-meta-item-icon">
+            <i class="fa fa-eye"></i>
+             阅读次数： 
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h3 id="1-概述"><a href="#1-概述" class="headerlink" title="1. 概述"></a>1. 概述</h3><blockquote>
+<p>xxxxxx</p>
+</blockquote>
+<a id="more"></a>
+<h3 id="2-Watchdog机制解析"><a href="#2-Watchdog机制解析" class="headerlink" title="2. Watchdog机制解析"></a>2. Watchdog机制解析</h3><h4 id="2-1-Watchdog的初始化"><a href="#2-1-Watchdog的初始化" class="headerlink" title="2.1 Watchdog的初始化"></a>2.1 Watchdog的初始化</h4><p>Watchdog是在System Server中初始化的：</p>
+<p>/<a href="http://androidxref.com/7.1.1_r6/xref/frameworks/" target="_blank" rel="noopener">frameworks</a>/<a href="http://androidxref.com/7.1.1_r6/xref/frameworks/base/" target="_blank" rel="noopener">base</a>/<a href="http://androidxref.com/7.1.1_r6/xref/frameworks/base/services/" target="_blank" rel="noopener">services</a>/<a href="http://androidxref.com/7.1.1_r6/xref/frameworks/base/services/java/" target="_blank" rel="noopener">java</a>/<a href="http://androidxref.com/7.1.1_r6/xref/frameworks/base/services/java/com/" target="_blank" rel="noopener">com</a>/<a href="http://androidxref.com/7.1.1_r6/xref/frameworks/base/services/java/com/android/" target="_blank" rel="noopener">android</a>/<a href="http://androidxref.com/7.1.1_r6/xref/frameworks/base/services/java/com/android/server/" target="_blank" rel="noopener">server</a>/<a href="http://androidxref.com/7.1.1_r6/xref/frameworks/base/services/java/com/android/server/SystemServer.java" target="_blank" rel="noopener">SystemServer.java</a></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">SystemServer</span> </span>&#123;</span><br><span class="line">  ... ...</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * Starts a miscellaneous grab bag of stuff that has yet to be refactored</span></span><br><span class="line"><span class="comment">     * and organized.</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">startOtherServices</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    ... ...</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">          ... ...</span><br><span class="line">            traceBeginAndSlog(<span class="string">"InitWatchdog"</span>);</span><br><span class="line">            <span class="keyword">final</span> Watchdog watchdog = Watchdog.getInstance(); <span class="comment">// 获取Watchdog对象初始化</span></span><br><span class="line">            watchdog.init(context, mActivityManagerService); <span class="comment">// 注册receiver以接收系统重启广播</span></span><br><span class="line">            Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);</span><br><span class="line">          ... ...</span><br><span class="line">        &#125;</span><br><span class="line">    ... ...</span><br><span class="line">        mActivityManagerService.systemReady(<span class="keyword">new</span> Runnable() &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">              ... ...</span><br><span class="line">                Watchdog.getInstance().start();</span><br><span class="line">              ... ...</span><br><span class="line">             &#125;</span><br><span class="line">        &#125;);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<p>Watchdog在初始化时构造了很多HandlerChecker，大致可以分为两类：</p>
+<ul>
+<li>Monitor Checker：用于检查是Monitor对象可能发生的死锁, AMS, PKMS, WMS等核心的系统服务都是Monitor对象。在log中会有<code>watchdog: Blocked in monitor xxx foreground thread(android.fg)</code>，所以其实就是android.fg线程。</li>
+<li>Looper Checker：用于检查线程的消息队列是否长时间处于工作状态。Watchdog自身的消息队列，UI, IO, Display这些全局的消息队列都是被检查的对象。此外，一些重要的线程的消息队列，也会加入到<strong>Looper Checker</strong>中，譬如AMS, PKMS，这些是在对应的对象初始化时加入的。</li>
+</ul>
+<p>/<a href="http://androidxref.com/7.1.1_r6/xref/frameworks/" target="_blank" rel="noopener">frameworks</a>/<a href="http://androidxref.com/7.1.1_r6/xref/frameworks/base/" target="_blank" rel="noopener">base</a>/<a href="http://androidxref.com/7.1.1_r6/xref/frameworks/base/services/" target="_blank" rel="noopener">services</a>/<a href="http://androidxref.com/7.1.1_r6/xref/frameworks/base/services/core/" target="_blank" rel="noopener">core</a>/<a href="http://androidxref.com/7.1.1_r6/xref/frameworks/base/services/core/java/" target="_blank" rel="noopener">java</a>/<a href="http://androidxref.com/7.1.1_r6/xref/frameworks/base/services/core/java/com/" target="_blank" rel="noopener">com</a>/<a href="http://androidxref.com/7.1.1_r6/xref/frameworks/base/services/core/java/com/android/" target="_blank" rel="noopener">android</a>/<a href="http://androidxref.com/7.1.1_r6/xref/frameworks/base/services/core/java/com/android/server/" target="_blank" rel="noopener">server</a>/<a href="http://androidxref.com/7.1.1_r6/xref/frameworks/base/services/core/java/com/android/server/Watchdog.java" target="_blank" rel="noopener">Watchdog.java</a></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/** This class calls its monitor every minute. Killing this process if they don't return **/</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Watchdog</span> <span class="keyword">extends</span> <span class="title">Thread</span> </span>&#123;</span><br><span class="line">  ... ...</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* This handler will be used to post message back onto the main thread */</span></span><br><span class="line">    <span class="keyword">final</span> ArrayList&lt;HandlerChecker&gt; mHandlerCheckers = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">    <span class="keyword">final</span> HandlerChecker mMonitorChecker;</span><br><span class="line">  ... ...      </span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Watchdog <span class="title">getInstance</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (sWatchdog == <span class="keyword">null</span>) &#123;</span><br><span class="line">            sWatchdog = <span class="keyword">new</span> Watchdog(); <span class="comment">// new一个Watchdog对象</span></span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> sWatchdog;</span><br><span class="line">    &#125;</span><br><span class="line">... ...</span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="title">Watchdog</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>(<span class="string">"watchdog"</span>);</span><br><span class="line">        <span class="comment">// Initialize handler checkers for each common thread we want to check.  Note</span></span><br><span class="line">        <span class="comment">// that we are not currently checking the background thread, since it can</span></span><br><span class="line">        <span class="comment">// potentially hold longer running operations with no guarantees about the timeliness</span></span><br><span class="line">        <span class="comment">// of operations there.</span></span><br><span class="line"></span><br><span class="line">        <span class="comment">// The shared foreground thread is the main checker.  It is where we</span></span><br><span class="line">        <span class="comment">// will also dispatch monitor checks and do other work.</span></span><br><span class="line">  		<span class="comment">// 可以看一下FgThread的构造函数，super("android.fg", xxx, true)，所以其实就是android.fg线程</span></span><br><span class="line">        mMonitorChecker = <span class="keyword">new</span> HandlerChecker(FgThread.getHandler(),</span><br><span class="line">                <span class="string">"foreground thread"</span>, DEFAULT_TIMEOUT);</span><br><span class="line">        mHandlerCheckers.add(mMonitorChecker); <span class="comment">//添加MonitorChecker</span></span><br><span class="line">        <span class="comment">// Add checker for main thread.  We only do a quick check since there</span></span><br><span class="line">        <span class="comment">// can be UI running on the thread.</span></span><br><span class="line">  		<span class="comment">// 添加Looper Checker</span></span><br><span class="line">        mHandlerCheckers.add(<span class="keyword">new</span> HandlerChecker(<span class="keyword">new</span> Handler(Looper.getMainLooper()),</span><br><span class="line">                <span class="string">"main thread"</span>, DEFAULT_TIMEOUT));</span><br><span class="line">        <span class="comment">// Add checker for shared UI thread.</span></span><br><span class="line">        mHandlerCheckers.add(<span class="keyword">new</span> HandlerChecker(UiThread.getHandler(),</span><br><span class="line">                <span class="string">"ui thread"</span>, DEFAULT_TIMEOUT));</span><br><span class="line">        <span class="comment">// And also check IO thread.</span></span><br><span class="line">        mHandlerCheckers.add(<span class="keyword">new</span> HandlerChecker(IoThread.getHandler(),</span><br><span class="line">                <span class="string">"i/o thread"</span>, DEFAULT_TIMEOUT));</span><br><span class="line">        <span class="comment">// And the display thread.</span></span><br><span class="line">        mHandlerCheckers.add(<span class="keyword">new</span> HandlerChecker(DisplayThread.getHandler(),</span><br><span class="line">                <span class="string">"display thread"</span>, DEFAULT_TIMEOUT));</span><br><span class="line"></span><br><span class="line">        <span class="comment">// Initialize monitor for Binder threads.</span></span><br><span class="line">        addMonitor(<span class="keyword">new</span> BinderThreadMonitor());</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<p>Monitor Checker和Looper Checker的侧重点不一样，前者预警我们不能长时间持有核心系统服务的对象锁，否则会阻塞很多函数的运行；后者预警我们不能长时间的霸占消息队列，否则其他消息将得不到处理。这两类都会导致系统卡住(System Not Responding)。</p>
+<p>init注册了一个广播接收器用来接收重启系统的广播：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">    <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">RebootRequestReceiver</span> <span class="keyword">extends</span> <span class="title">BroadcastReceiver</span> </span>&#123;</span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onReceive</span><span class="params">(Context c, Intent intent)</span> </span>&#123;</span><br><span class="line">            <span class="keyword">if</span> (intent.getIntExtra(<span class="string">"nowait"</span>, <span class="number">0</span>) != <span class="number">0</span>) &#123;</span><br><span class="line">                rebootSystem(<span class="string">"Received ACTION_REBOOT broadcast"</span>);</span><br><span class="line">                <span class="keyword">return</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            Slog.w(TAG, <span class="string">"Unsupported ACTION_REBOOT broadcast: "</span> + intent);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">... ...</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">init</span><span class="params">(Context context, ActivityManagerService activity)</span> </span>&#123;</span><br><span class="line">        mResolver = context.getContentResolver();</span><br><span class="line">        mActivity = activity;</span><br><span class="line"></span><br><span class="line">        context.registerReceiver(<span class="keyword">new</span> RebootRequestReceiver(),</span><br><span class="line">                <span class="keyword">new</span> IntentFilter(Intent.ACTION_REBOOT),</span><br><span class="line">                android.Manifest.permission.REBOOT, <span class="keyword">null</span>);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<h4 id="2-2-触发Watchdog"><a href="#2-2-触发Watchdog" class="headerlink" title="2.2 触发Watchdog"></a>2.2 触发Watchdog</h4><p>初始化Watchdog后，在SystemServer中start，作为SystemServer进程中的一个单独的线程运行，但是想要触发Watchdog的运行还需要AMS、PMS等系统服务加入到Watchdog的监测集，也就是需要Watchdog关注的对象，Watchdog只关注一些核心的系统服务。</p>
+<p>需要Watchdog检测的对象，需要将自己添加到Watchdog的监测集中，以AMS为例：</p>
+<p>/<a href="http://androidxref.com/7.1.1_r6/xref/frameworks/" target="_blank" rel="noopener">frameworks</a>/<a href="http://androidxref.com/7.1.1_r6/xref/frameworks/base/" target="_blank" rel="noopener">base</a>/<a href="http://androidxref.com/7.1.1_r6/xref/frameworks/base/services/" target="_blank" rel="noopener">services</a>/<a href="http://androidxref.com/7.1.1_r6/xref/frameworks/base/services/core/" target="_blank" rel="noopener">core</a>/<a href="http://androidxref.com/7.1.1_r6/xref/frameworks/base/services/core/java/" target="_blank" rel="noopener">java</a>/<a href="http://androidxref.com/7.1.1_r6/xref/frameworks/base/services/core/java/com/" target="_blank" rel="noopener">com</a>/<a href="http://androidxref.com/7.1.1_r6/xref/frameworks/base/services/core/java/com/android/" target="_blank" rel="noopener">android</a>/<a href="http://androidxref.com/7.1.1_r6/xref/frameworks/base/services/core/java/com/android/server/" target="_blank" rel="noopener">server</a>/<a href="http://androidxref.com/7.1.1_r6/xref/frameworks/base/services/core/java/com/android/server/am/" target="_blank" rel="noopener">am</a>/<a href="http://androidxref.com/7.1.1_r6/xref/frameworks/base/services/core/java/com/android/server/am/ActivityManagerService.java" target="_blank" rel="noopener">ActivityManagerService.java</a></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">ActivityManagerService</span><span class="params">(Context systemContext)</span> </span>&#123;</span><br><span class="line">  ... ...</span><br><span class="line">    Watchdog.getInstance().addMonitor(<span class="keyword">this</span>);</span><br><span class="line">    Watchdog.getInstance().addThread(mHandler);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/** In this method we try to acquire our lock to make sure that we have not deadlocked */</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">monitor</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">synchronized</span> (<span class="keyword">this</span>) &#123; &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>/<a href="http://androidxref.com/7.1.1_r6/xref/frameworks/" target="_blank" rel="noopener">frameworks</a>/<a href="http://androidxref.com/7.1.1_r6/xref/frameworks/base/" target="_blank" rel="noopener">base</a>/<a href="http://androidxref.com/7.1.1_r6/xref/frameworks/base/services/" target="_blank" rel="noopener">services</a>/<a href="http://androidxref.com/7.1.1_r6/xref/frameworks/base/services/core/" target="_blank" rel="noopener">core</a>/<a href="http://androidxref.com/7.1.1_r6/xref/frameworks/base/services/core/java/" target="_blank" rel="noopener">java</a>/<a href="http://androidxref.com/7.1.1_r6/xref/frameworks/base/services/core/java/com/" target="_blank" rel="noopener">com</a>/<a href="http://androidxref.com/7.1.1_r6/xref/frameworks/base/services/core/java/com/android/" target="_blank" rel="noopener">android</a>/<a href="http://androidxref.com/7.1.1_r6/xref/frameworks/base/services/core/java/com/android/server/" target="_blank" rel="noopener">server</a>/<a href="http://androidxref.com/7.1.1_r6/xref/frameworks/base/services/core/java/com/android/server/Watchdog.java" target="_blank" rel="noopener">Watchdog.java</a></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Watchdog</span> <span class="keyword">extends</span> <span class="title">Thread</span> </span>&#123;</span><br><span class="line">  ... ...</span><br><span class="line">    <span class="comment">// 1 addMonitor</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">addMonitor</span><span class="params">(Monitor monitor)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">synchronized</span> (<span class="keyword">this</span>) &#123;</span><br><span class="line">            <span class="keyword">if</span> (isAlive()) &#123;</span><br><span class="line">                <span class="keyword">throw</span> <span class="keyword">new</span> RuntimeException(<span class="string">"Monitors can't be added once the Watchdog is running"</span>);</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="comment">// 实际调用Watchdog内部类HandlerChecker的addMonitor</span></span><br><span class="line">            mMonitorChecker.addMonitor(monitor);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 2 addThread</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">addThread</span><span class="params">(Handler thread)</span> </span>&#123;</span><br><span class="line">        addThread(thread, DEFAULT_TIMEOUT);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">addThread</span><span class="params">(Handler thread, <span class="keyword">long</span> timeoutMillis)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">synchronized</span> (<span class="keyword">this</span>) &#123;</span><br><span class="line">            <span class="keyword">if</span> (isAlive()) &#123;</span><br><span class="line">                <span class="keyword">throw</span> <span class="keyword">new</span> RuntimeException(<span class="string">"Threads can't be added once the Watchdog is running"</span>);</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">final</span> String name = thread.getLooper().getThread().getName(); <span class="comment">// 线程名</span></span><br><span class="line">            mHandlerCheckers.add(<span class="keyword">new</span> HandlerChecker(thread, name, timeoutMillis));</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  ... ...</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Watchdog</span> <span class="keyword">extends</span> <span class="title">Thread</span> </span>&#123;</span><br><span class="line">  ... ...</span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">HandlerChecker</span> <span class="keyword">implements</span> <span class="title">Runnable</span> </span>&#123;</span><br><span class="line">      ... ...</span><br><span class="line">        HandlerChecker(Handler handler, String name, <span class="keyword">long</span> waitMaxMillis) &#123;</span><br><span class="line">            mHandler = handler;</span><br><span class="line">            mName = name;</span><br><span class="line">            mWaitMax = waitMaxMillis;</span><br><span class="line">            mCompleted = <span class="keyword">true</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">addMonitor</span><span class="params">(Monitor monitor)</span> </span>&#123;</span><br><span class="line">        	<span class="comment">// mMonitors是一个ArrayList&lt;Monitor&gt; mMonitors = new ArrayList&lt;Monitor&gt;</span></span><br><span class="line">            <span class="comment">// 将monitor对象添加到MonitorChecker中，在AMS中则是把AMS对象添加到此list</span></span><br><span class="line">            mMonitors.add(monitor);</span><br><span class="line">        &#125;</span><br><span class="line">      ... ...</span><br></pre></td></tr></table></figure>
+<p>AMS在构造函数中分别通过addMonitor和 addThread方法把自己添加到Monitor Checker对象中，把自己的Handler添加到Looper Checker对象中。</p>
+<h4 id="2-3-Watchdog监测机制"><a href="#2-3-Watchdog监测机制" class="headerlink" title="2.3 Watchdog监测机制"></a>2.3 Watchdog监测机制</h4><p>Watchdog继承了Thread，也就是说本身就是一个线程，来看一下它的run()方法实现：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">boolean</span> waitedHalf = <span class="keyword">false</span>;</span><br><span class="line">    <span class="keyword">while</span> (<span class="keyword">true</span>) &#123;</span><br><span class="line">        <span class="keyword">final</span> ArrayList&lt;HandlerChecker&gt; blockedCheckers;</span><br><span class="line">        <span class="keyword">final</span> String subject;</span><br><span class="line">        <span class="keyword">final</span> <span class="keyword">boolean</span> allowRestart;</span><br><span class="line">        <span class="keyword">int</span> debuggerWasConnected = <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">synchronized</span> (<span class="keyword">this</span>) &#123;</span><br><span class="line">            <span class="keyword">long</span> timeout = CHECK_INTERVAL; <span class="comment">// 值为30s</span></span><br><span class="line">            <span class="comment">// Make sure we (re)spin the checkers that have become idle within</span></span><br><span class="line">            <span class="comment">// this wait-and-check interval</span></span><br><span class="line">            <span class="comment">// 2.3.1 调度所有的HandlerChecker，给所有受监控的线程发送消息</span></span><br><span class="line">            <span class="keyword">for</span>(<span class="keyword">int</span> i=<span class="number">0</span>; i&lt;mHandlerCheckers.size(); i++) &#123;</span><br><span class="line">                HandlerChecker hc = mHandlerCheckers.get(i);</span><br><span class="line">                hc.scheduleCheckLocked();</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> (debuggerWasConnected &gt; <span class="number">0</span>) &#123;</span><br><span class="line">                debuggerWasConnected--;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="comment">// <span class="doctag">NOTE:</span> We use uptimeMillis() here because we do not want to increment the time we</span></span><br><span class="line">            <span class="comment">// wait while asleep. If the device is asleep then the thing that we are waiting</span></span><br><span class="line">            <span class="comment">// to timeout on is asleep as well and won't have a chance to run, causing a false</span></span><br><span class="line">            <span class="comment">// positive on when to kill things.</span></span><br><span class="line">            <span class="comment">// 2.3.2 睡眠一段时间</span></span><br><span class="line">            <span class="keyword">long</span> start = SystemClock.uptimeMillis();</span><br><span class="line">            <span class="keyword">while</span> (timeout &gt; <span class="number">0</span>) &#123;</span><br><span class="line">                <span class="keyword">if</span> (Debug.isDebuggerConnected()) &#123;</span><br><span class="line">                    debuggerWasConnected = <span class="number">2</span>;</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="keyword">try</span> &#123;</span><br><span class="line">                    wait(timeout); <span class="comment">// 线程休眠且释放锁</span></span><br><span class="line">                &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">                    Log.wtf(TAG, e);</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="keyword">if</span> (Debug.isDebuggerConnected()) &#123;</span><br><span class="line">                    debuggerWasConnected = <span class="number">2</span>;</span><br><span class="line">                &#125;</span><br><span class="line">                timeout = CHECK_INTERVAL - (SystemClock.uptimeMillis() - start);</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="comment">// 2.3.3 检查是否有线程或者服务出了问题</span></span><br><span class="line">            <span class="keyword">final</span> <span class="keyword">int</span> waitState = evaluateCheckerCompletionLocked();</span><br><span class="line">            <span class="keyword">if</span> (waitState == COMPLETED) &#123;</span><br><span class="line">                <span class="comment">// The monitors have returned; reset</span></span><br><span class="line">                waitedHalf = <span class="keyword">false</span>;</span><br><span class="line">                <span class="keyword">continue</span>;</span><br><span class="line">            &#125; <span class="keyword">else</span> <span class="keyword">if</span> (waitState == WAITING) &#123;</span><br><span class="line">                <span class="comment">// still waiting but within their configured intervals; back off and recheck</span></span><br><span class="line">                <span class="keyword">continue</span>;</span><br><span class="line">            &#125; <span class="keyword">else</span> <span class="keyword">if</span> (waitState == WAITED_HALF) &#123;</span><br><span class="line">                <span class="keyword">if</span> (!waitedHalf) &#123;</span><br><span class="line">                    <span class="comment">// We've waited half the deadlock-detection interval.  Pull a stack</span></span><br><span class="line">                    <span class="comment">// trace and wait another half.</span></span><br><span class="line">                    ArrayList&lt;Integer&gt; pids = <span class="keyword">new</span> ArrayList&lt;Integer&gt;();</span><br><span class="line">                    pids.add(Process.myPid());</span><br><span class="line">                    ActivityManagerService.dumpStackTraces(<span class="keyword">true</span>, pids, <span class="keyword">null</span>, <span class="keyword">null</span>,</span><br><span class="line">                            NATIVE_STACKS_OF_INTEREST);</span><br><span class="line">                    waitedHalf = <span class="keyword">true</span>;</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="keyword">continue</span>;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="comment">// something is overdue!</span></span><br><span class="line">            <span class="comment">// 2.3.4 存在超时的HandlerChecker</span></span><br><span class="line">            blockedCheckers = getBlockedCheckersLocked();</span><br><span class="line">            subject = describeCheckersLocked(blockedCheckers);</span><br><span class="line">            allowRestart = mAllowRestart;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// If we got here, that means that the system is most likely hung.</span></span><br><span class="line">        <span class="comment">// First collect stack traces from all threads of the system process.</span></span><br><span class="line">        <span class="comment">// Then kill this process so that the system will restart.</span></span><br><span class="line">        <span class="comment">// 走到这里意味着系统hung了，首先收集系统进程所有线程的stack trace，然后kill进程以重启。</span></span><br><span class="line">        EventLog.writeEvent(EventLogTags.WATCHDOG, subject);</span><br><span class="line"></span><br><span class="line">        ArrayList&lt;Integer&gt; pids = <span class="keyword">new</span> ArrayList&lt;Integer&gt;();</span><br><span class="line">        pids.add(Process.myPid());</span><br><span class="line">        <span class="keyword">if</span> (mPhonePid &gt; <span class="number">0</span>) pids.add(mPhonePid);</span><br><span class="line">        <span class="comment">// Pass !waitedHalf so that just in case we somehow wind up here without having</span></span><br><span class="line">        <span class="comment">// dumped the halfway stacks, we properly re-initialize the trace file.</span></span><br><span class="line">        <span class="keyword">final</span> File stack = ActivityManagerService.dumpStackTraces(</span><br><span class="line">                !waitedHalf, pids, <span class="keyword">null</span>, <span class="keyword">null</span>, NATIVE_STACKS_OF_INTEREST);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// Give some extra time to make sure the stack traces get written.</span></span><br><span class="line">        <span class="comment">// The system's been hanging for a minute, another second or two won't hurt much.</span></span><br><span class="line">        <span class="comment">// 线程休眠2秒钟以确保trace输出完毕</span></span><br><span class="line">        SystemClock.sleep(<span class="number">2000</span>);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 输出kernel log（dump和backtrace），尝试把error添加到dropbox</span></span><br><span class="line">        ... ...</span><br><span class="line"></span><br><span class="line">        <span class="comment">// Only kill the process if the debugger is not attached.</span></span><br><span class="line">        <span class="keyword">if</span> (Debug.isDebuggerConnected()) &#123;</span><br><span class="line">            debuggerWasConnected = <span class="number">2</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (debuggerWasConnected &gt;= <span class="number">2</span>) &#123;</span><br><span class="line">            Slog.w(TAG, <span class="string">"Debugger connected: Watchdog is *not* killing the system process"</span>);</span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> (debuggerWasConnected &gt; <span class="number">0</span>) &#123;</span><br><span class="line">            Slog.w(TAG, <span class="string">"Debugger was connected: Watchdog is *not* killing the system process"</span>);</span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> (!allowRestart) &#123;</span><br><span class="line">            Slog.w(TAG, <span class="string">"Restart not allowed: Watchdog is *not* killing the system process"</span>);</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            Slog.w(TAG, <span class="string">"*** WATCHDOG KILLING SYSTEM PROCESS: "</span> + subject);</span><br><span class="line">            <span class="keyword">for</span> (<span class="keyword">int</span> i=<span class="number">0</span>; i&lt;blockedCheckers.size(); i++) &#123;</span><br><span class="line">                Slog.w(TAG, blockedCheckers.get(i).getName() + <span class="string">" stack trace:"</span>);</span><br><span class="line">                StackTraceElement[] stackTrace</span><br><span class="line">                        = blockedCheckers.get(i).getThread().getStackTrace();</span><br><span class="line">                <span class="keyword">for</span> (StackTraceElement element: stackTrace) &#123;</span><br><span class="line">                    Slog.w(TAG, <span class="string">"    at "</span> + element);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="comment">// 2.3.5 保存日志，判断是否需要杀掉系统进程</span></span><br><span class="line">            Slog.w(TAG, <span class="string">"*** GOODBYE!"</span>);</span><br><span class="line">            <span class="comment">// 杀死SystemServer</span></span><br><span class="line">            Process.killProcess(Process.myPid());</span><br><span class="line">            System.exit(<span class="number">10</span>);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        waitedHalf = <span class="keyword">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h5 id="2-3-1-scheduleCheckLocked-方法"><a href="#2-3-1-scheduleCheckLocked-方法" class="headerlink" title="2.3.1 scheduleCheckLocked()方法"></a>2.3.1 scheduleCheckLocked()方法</h5><p>Watchdog运行后开始循环，调用每一个HandlerChecker的scheduleCheckLocked()方法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">HandlerChecker</span> <span class="keyword">implements</span> <span class="title">Runnable</span> </span>&#123;</span><br><span class="line">  ... ...</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">scheduleCheckLocked</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (mMonitors.size() == <span class="number">0</span> &amp;&amp; mHandler.getLooper().getQueue().isPolling()) &#123;</span><br><span class="line">            <span class="comment">// ... ...</span></span><br><span class="line">            mCompleted = <span class="keyword">true</span>;</span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (!mCompleted) &#123;</span><br><span class="line">            <span class="comment">// we already have a check in flight, so no need</span></span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        mCompleted = <span class="keyword">false</span>;</span><br><span class="line">        mCurrentMonitor = <span class="keyword">null</span>;</span><br><span class="line">        mStartTime = SystemClock.uptimeMillis();</span><br><span class="line">        mHandler.postAtFrontOfQueue(<span class="keyword">this</span>); <span class="comment">// 给监控的线程发送消息</span></span><br><span class="line">    &#125;</span><br><span class="line">  ... ...</span><br></pre></td></tr></table></figure>
+<p>HandlerChecker对象既要监控服务，也要监控某个线程，所以代码中要先判断mMonitors.size是否为0，如果为0则说明这个HandlerChecker没有监控服务，这时如果被监控线程的消息队列处于空闲状态（调用isIdling()检查），则说明线程运行良好，把mCompleted设为true后就可以返回了。否则先把mCompleted设为false，然后记录消息开始发送的时间到变量mStartTime中，最后调用postAtFrontOfQueue()方法给被监控的线程发送一个消息。</p>
+<h5 id="2-3-2-定期检查"><a href="#2-3-2-定期检查" class="headerlink" title="2.3.2 定期检查"></a>2.3.2 定期检查</h5><p>调度完HandlerChecker给受监控的线程发送完消息后，开始定期检查是否超时，每一次的检查的间隔由常量CHECK_INTERVAL设定，为30s，调用wait()方法（线程休眠且释放锁）让WatchDog线程睡眠一段时间。</p>
+<h5 id="2-3-3-检查线程或服务是否有问题"><a href="#2-3-3-检查线程或服务是否有问题" class="headerlink" title="2.3.3 检查线程或服务是否有问题"></a>2.3.3 检查线程或服务是否有问题</h5><p>调用evaluateCheckerCompletionLocked()方法来检查是否有问题：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">int</span> <span class="title">evaluateCheckerCompletionLocked</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> state = COMPLETED;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i=<span class="number">0</span>; i&lt;mHandlerCheckers.size(); i++) &#123;</span><br><span class="line">        HandlerChecker hc = mHandlerCheckers.get(i);</span><br><span class="line">        state = Math.max(state, hc.getCompletionStateLocked());</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> state;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">getCompletionStateLocked</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (mCompleted) &#123;</span><br><span class="line">        <span class="keyword">return</span> COMPLETED;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="keyword">long</span> latency = SystemClock.uptimeMillis() - mStartTime;</span><br><span class="line">        <span class="keyword">if</span> (latency &lt; mWaitMax/<span class="number">2</span>) &#123;</span><br><span class="line">            <span class="keyword">return</span> WAITING;</span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> (latency &lt; mWaitMax) &#123;</span><br><span class="line">            <span class="keyword">return</span> WAITED_HALF;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> OVERDUE;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>根据等待时间来确认返回HandlerChecker对象的状态，</p>
+<ul>
+<li><p>COMPLETED表示已经完成</p>
+</li>
+<li><p>WAITING和WAITED_HALF表示还在等待，但未超时</p>
+</li>
+<li><p>OVERDUE表示已经超时，默认情况下timeout是1分钟，但监测对象可以通过传参自行设定，譬如PKMS的<strong>Handler Checker</strong>的超时是10分钟:</p>
+</li>
+<li><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">long</span> WATCHDOG_TIMEOUT = <span class="number">1000</span>*<span class="number">60</span>*<span class="number">10</span>;     <span class="comment">// ten minutes</span></span><br><span class="line">        Watchdog.getInstance().addThread(mHandler, WATCHDOG_TIMEOUT);</span><br></pre></td></tr></table></figure>
+<p>​</p>
+</li>
+</ul>
+<h5 id="2-3-4-getBlockedCheckersLocked"><a href="#2-3-4-getBlockedCheckersLocked" class="headerlink" title="2.3.4 getBlockedCheckersLocked"></a>2.3.4 getBlockedCheckersLocked</h5><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> ArrayList&lt;HandlerChecker&gt; <span class="title">getBlockedCheckersLocked</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    ArrayList&lt;HandlerChecker&gt; checkers = <span class="keyword">new</span> ArrayList&lt;HandlerChecker&gt;();</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i=<span class="number">0</span>; i&lt;mHandlerCheckers.size(); i++) &#123;</span><br><span class="line">        HandlerChecker hc = mHandlerCheckers.get(i);</span><br><span class="line">        <span class="keyword">if</span> (hc.isOverdueLocked()) &#123;</span><br><span class="line">            checkers.add(hc);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> checkers;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>如果超时时间到了，还有HandlerChecker处于未完成的状态(OVERDUE)，则通过getBlockedCheckersLocked()方法，获取阻塞的HandlerChecker，生成一些描述信息</p>
+<h5 id="2-3-5-保存日志"><a href="#2-3-5-保存日志" class="headerlink" title="2.3.5 保存日志"></a>2.3.5 保存日志</h5><p>保存日志，包括一些运行时的堆栈信息，这些日志是我们解决Watchdog问题的重要依据。如果判断需要杀掉system_server进程，则给当前进程(system_server)发送signal。</p>
+<h3 id="3-实例分析"><a href="#3-实例分析" class="headerlink" title="3. 实例分析"></a>3. 实例分析</h3><h3 id="4-总结"><a href="#4-总结" class="headerlink" title="4. 总结"></a>4. 总结</h3>
+      
+    </div>
+
+    
+      
+
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>Da Ye Lai Ma ~</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById(&quot;QR&quot;); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/images/wechatpay.jpg" alt="Ranger Zhou 微信支付">
+        <p>微信支付</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/images/alipay.jpg" alt="Ranger Zhou 支付宝">
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+
+    <div>
+          
+            
+<div class="my_post_copyright">
+  <script src="//cdn.bootcss.com/clipboard.js/1.5.10/clipboard.min.js"></script>
+
+  <!-- JS库 sweetalert 可修改路径 -->
+  <script src="https://cdn.bootcss.com/jquery/2.0.0/jquery.min.js"></script>
+  <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+  <p><span>本文标题:</span><a href="/2017/10/12/Watchdog_Mechanism/">Watchdog机制及实例分析</a></p>
+  <p><span>文章作者:</span><a href="/" title="访问 Ranger Zhou 的个人博客">Ranger Zhou</a></p>
+  <p><span>发布时间:</span>2017年10月12日 - 10:01</p>
+  <p><span>最后更新:</span>2019年12月31日 - 12:33</p>
+  <p><span>原始链接:</span><a href="/2017/10/12/Watchdog_Mechanism/" title="Watchdog机制及实例分析">http://rangerzhou.top/2017/10/12/Watchdog_Mechanism/</a>
+    <span class="copy-path" title="点击复制文章链接"><i class="fa fa-clipboard" data-clipboard-text="http://rangerzhou.top/2017/10/12/Watchdog_Mechanism/" aria-label="复制成功！"></i></span>
+  </p>
+  <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank" title="Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0)">署名-非商业性使用-RangerZhou</a> 转载请保留原文链接及作者。</p>
+</div>
+<script>
+    var clipboard = new Clipboard('.fa-clipboard');
+    $(".fa-clipboard").click(function(){
+      clipboard.on('success', function(){
+        swal({
+          title: "",
+          text: '复制成功',
+          icon: "success",
+          showConfirmButton: true
+          });
+    });
+    });
+</script>
+
+          
+    </div>
+
+    <div>
+      
+        <div>
+    
+        <div style="text-align:center;color: #ccc;font-size:14px;">-------------本文结束<i class="fa fa-paw"></i>感谢您的阅读 ^_^-------------</div>
+    
+</div>
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Watchdog/" rel="tag"># Watchdog</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/10/11/AboutHexo/" rel="next" title="AboutHexo">
+                <i class="fa fa-chevron-left"></i> AboutHexo
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/12/07/App_boot_progress/" rel="prev" title="App启动流程">
+                App启动流程 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC8yOTcyNS82Mjky"></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/avatar.jpg" alt="Ranger Zhou">
+            
+              <p class="site-author-name" itemprop="name">Ranger Zhou</p>
+              <p class="site-description motion-element" itemprop="description">我是一个小流氓我从来也不浪，有一天我心血来潮耍了个流氓，我嘴里吹着小口哨我心里好得意，不知怎么哗啦啦啦啦我摔了一身泥</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">45</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">11</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">16</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="http://fashionentice.taobao.com/" title="淘宝 &rarr; http://fashionentice.taobao.com/" rel="noopener" target="_blank"><i class="fa fa-fw fa-globe"></i>淘宝</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://instagram.com/ranger.zhou" title="Instagram &rarr; https://instagram.com/ranger.zhou" rel="noopener" target="_blank"><i class="fa fa-fw fa-instagram"></i>Instagram</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="/images/wechat.jpg" title="WeChat &rarr; /images/wechat.jpg"><i class="fa fa-fw fa-wechat"></i>WeChat</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="http://blog.csdn.net/ranger0220?viewmode=contents" title="CSDN &rarr; http://blog.csdn.net/ranger0220?viewmode=contents" rel="noopener" target="_blank"><i class="fa fa-fw fa-globe"></i>CSDN</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                墙裂推荐
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://fashionentice.taobao.com" title="http://fashionentice.taobao.com" rel="noopener" target="_blank">TaoBao</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+            
+            
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-概述"><span class="nav-text">1. 概述</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-Watchdog机制解析"><span class="nav-text">2. Watchdog机制解析</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#2-1-Watchdog的初始化"><span class="nav-text">2.1 Watchdog的初始化</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-2-触发Watchdog"><span class="nav-text">2.2 触发Watchdog</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-3-Watchdog监测机制"><span class="nav-text">2.3 Watchdog监测机制</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#2-3-1-scheduleCheckLocked-方法"><span class="nav-text">2.3.1 scheduleCheckLocked()方法</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#2-3-2-定期检查"><span class="nav-text">2.3.2 定期检查</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#2-3-3-检查线程或服务是否有问题"><span class="nav-text">2.3.3 检查线程或服务是否有问题</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#2-3-4-getBlockedCheckersLocked"><span class="nav-text">2.3.4 getBlockedCheckersLocked</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#2-3-5-保存日志"><span class="nav-text">2.3.5 保存日志</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-实例分析"><span class="nav-text">3. 实例分析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-总结"><span class="nav-text">4. 总结</span></a></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">  <a href="http://www.miitbeian.gov.cn" rel="noopener" target="_blank"> </a>&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Ranger Zhou</span>
+
+  
+
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="post-meta-item-icon">
+      <i class="fa fa-user"></i>
+    </span>
+    <span class="site-uv" title="总访客量">
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+    </span>
+  
+
+  
+    <span class="post-meta-divider">|</span>
+  
+
+  
+    <span class="post-meta-item-icon">
+      <i class="fa fa-eye"></i>
+    </span>
+    <span class="site-pv" title="总访问量">
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+    
+      <div>
+        
+  <script>
+    window._bd_share_config = {
+      "common": {
+        "bdText": "",
+        "bdMini": "1",
+        "bdMiniList": false,
+        "bdPic": ""
+      },
+      "image": {
+        "viewList": ["tsina", "douban", "sqq", "qzone", "weixin", "twi", "fbook"],
+        "viewText": "分享到：",
+        "viewSize": "16"
+      },
+      "slide": {
+        "bdImg": "5",
+        "bdPos": "left",
+        "bdTop": "100"
+      }
+    }
+  </script>
+
+<script>
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='//bdimg.share.baidu.com/static/api/js/share.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+      </div>
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <script src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/reading_progress/reading_progress.js"></script>
+
+
+  
+
+
+  <script src="/js/src/utils.js?v=7.0.0"></script>
+
+  <script src="/js/src/motion.js?v=7.0.0"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/src/affix.js?v=7.0.0"></script>
+
+  <script src="/js/src/schemes/pisces.js?v=7.0.0"></script>
+
+
+
+  
+  <script src="/js/src/scrollspy.js?v=7.0.0"></script>
+<script src="/js/src/post-details.js?v=7.0.0"></script>
+
+
+
+  
+
+
+  <script src="/js/src/bootstrap.js?v=7.0.0"></script>
+
+
+
+  
+
+
+  
+    <script>
+  window.livereOptions = {
+    refer: '2017/10/12/Watchdog_Mechanism/'
+  };
+  (function(d, s) {
+    var j, e = d.getElementsByTagName(s)[0];
+    if (typeof LivereTower === 'function') { return; }
+    j = d.createElement(s);
+    j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+    j.async = true;
+    e.parentNode.insertBefore(j, e);
+  })(document, 'script');
+</script>
+
+  
+
+
+  
+  <script>
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url).replace(/\/{2,}/g, '/');
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x"></i></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x"></i></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+  <script>
+    (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js'; 
+      }
+      else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+      }
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+    })();
+  </script>
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+  
+  <script src="/lib/bookmark/bookmark.min.js?v=1.0"></script>
+  <script>
+  
+    bookmark.scrollToMark('auto', "#更多");
+  
+  </script>
+
+
+  
+  <style>
+    .copy-btn {
+      display: inline-block;
+      padding: 6px 12px;
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 20px;
+      color: #333;
+      white-space: nowrap;
+      vertical-align: middle;
+      cursor: pointer;
+      background-color: #eee;
+      background-image: linear-gradient(#fcfcfc, #eee);
+      border: 1px solid #d5d5d5;
+      border-radius: 3px;
+      user-select: none;
+      outline: 0;
+    }
+
+    .highlight-wrap .copy-btn {
+      transition: opacity .3s ease-in-out;
+      opacity: 0;
+      padding: 2px 6px;
+      position: absolute;
+      right: 4px;
+      top: 8px;
+    }
+
+    .highlight-wrap:hover .copy-btn,
+    .highlight-wrap .copy-btn:focus {
+      opacity: 1
+    }
+
+    .highlight-wrap {
+      position: relative;
+    }
+  </style>
+  <script>
+    $('.highlight').each(function(i, e) {
+      var $wrap = $('<div>').addClass('highlight-wrap');
+      $(e).after($wrap);
+      $wrap.append($('<button>').addClass('copy-btn').append('复制').on('click', function(e) {
+        var code = $(this).parent().find('.code').find('.line').map(function(i, e) {
+          return $(e).text();
+        }).toArray().join('\n');
+        var ta = document.createElement('textarea');
+        var range = document.createRange(); //For Chrome
+        var sel = window.getSelection(); //For Chrome
+        var yPosition = window.pageYOffset || document.documentElement.scrollTop;
+        ta.style.top = yPosition + 'px'; //Prevent page scroll
+        ta.style.position = 'absolute';
+        ta.style.opacity = '0';
+        ta.value = code;
+        ta.textContent = code; //For FireFox
+        ta.contentEditable = true;
+        ta.readOnly = false;
+        document.body.appendChild(ta);
+        range.selectNode(ta);
+        sel.removeAllRanges();
+        sel.addRange(range);
+        ta.setSelectionRange(0, code.length);
+        var result = document.execCommand('copy');
+        
+          if (result) $(this).text('复制成功');
+          else $(this).text('复制失败');
+        
+        ta.blur(); //For iOS
+        $(this).blur();
+      })).on('mouseleave', function(e) {
+        var $b = $(this).find('.copy-btn');
+        setTimeout(function() {
+          $b.text('复制');
+        }, 300);
+      }).append(e);
+    })
+  </script>
+
+
+
+  
+   <canvas class="fireworks" style="position: fixed;left: 0;top: 0;z-index: 1; pointer-events: none;"></canvas>
+   <script type="text/javascript" src="//cdn.bootcss.com/animejs/2.2.0/anime.min.js"></script>
+   <script type="text/javascript" src="/js/src/fireworks.js"></script>
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/wanko.model.json"},"display":{"position":"right","width":300,"height":600},"mobile":{"show":false},"log":false});</script></body>
+</html>

@@ -1,0 +1,1694 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+  <meta name="google-site-verification" content="OJnYjbr3wdT22qLrZSzyD9lAyBcXiXlEQ7-5wAnaWoQ">
+
+
+
+
+
+
+
+  <meta name="baidu-site-verification" content="vr4n4JeXgB">
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2">
+
+<link rel="stylesheet" href="/css/main.css?v=7.0.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=7.0.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.jpg?v=7.0.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.jpg?v=7.0.0">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=7.0.0" color="#222">
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '7.0.0',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+
+<script src="//cdn.bootcss.com/pace/1.0.2/pace.min.js"></script>
+<link href="//cdn.bootcss.com/pace/1.0.2/themes/pink/pace-theme-flash.css" rel="stylesheet">
+
+
+  <meta name="description" content="JNI （Java Native Interface, Java 本地接口）是一种编程框架，使得 Java虚拟机中的 Java 程序可以调用本地应用或库，也可以被其他程序调用。 本地程序一般是用其它语言（C、C++或汇编语言等）编写的，并且被编译为基于本机硬件和操作系统的程序。JNI 用于打通 Java 层与 Native(C/C++) 层，并非 Android 系统独有，而是 Java 所有。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android JNI原理-loadLibrary动态库加载过程">
+<meta property="og:url" content="http://rangerzhou.top/2019/10/25/JNI-Study/index.html">
+<meta property="og:site_name" content="RangerZhou">
+<meta property="og:description" content="JNI （Java Native Interface, Java 本地接口）是一种编程框架，使得 Java虚拟机中的 Java 程序可以调用本地应用或库，也可以被其他程序调用。 本地程序一般是用其它语言（C、C++或汇编语言等）编写的，并且被编译为基于本机硬件和操作系统的程序。JNI 用于打通 Java 层与 Native(C/C++) 层，并非 Android 系统独有，而是 Java 所有。">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2019-12-31T04:33:39.553Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Android JNI原理-loadLibrary动态库加载过程">
+<meta name="twitter:description" content="JNI （Java Native Interface, Java 本地接口）是一种编程框架，使得 Java虚拟机中的 Java 程序可以调用本地应用或库，也可以被其他程序调用。 本地程序一般是用其它语言（C、C++或汇编语言等）编写的，并且被编译为基于本机硬件和操作系统的程序。JNI 用于打通 Java 层与 Native(C/C++) 层，并非 Android 系统独有，而是 Java 所有。">
+
+
+
+  <link rel="alternate" href="/atom.xml" title="RangerZhou" type="application/atom+xml">
+
+
+
+
+  <link rel="canonical" href="http://rangerzhou.top/2019/10/25/JNI-Study/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>Android JNI原理-loadLibrary动态库加载过程 | RangerZhou</title>
+  
+
+
+
+
+  <script async src="//www.googletagmanager.com/gtag/js?id=UA-138158952-1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'UA-138158952-1');
+  </script>
+
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?24a6d3c4c0f292c5f682d26414c3994b";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .motion-element,
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-title { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">RangerZhou</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <h1 class="site-subtitle" itemprop="description">Read the fucking source code</h1>
+      
+    
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/about/" rel="section"><i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-shop">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="http://fashionentice.taobao.com/" rel="noopener" target="_blank"><i class="menu-item-icon fa fa-fw fa-user"></i> <br>shop</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-commonweal">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/404.html" rel="section"><i class="menu-item-icon fa fa-fw fa-heartbeat"></i> <br>公益</a>
+
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+    <div class="reading-progress-bar"></div>
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://rangerzhou.top/2019/10/25/JNI-Study/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Ranger Zhou">
+      <meta itemprop="description" content="我是一个小流氓我从来也不浪，有一天我心血来潮耍了个流氓，我嘴里吹着小口哨我心里好得意，不知怎么哗啦啦啦啦我摔了一身泥">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="RangerZhou">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">Android JNI原理-loadLibrary动态库加载过程
+
+              
+            
+          </h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2019-10-25 16:38:46" itemprop="dateCreated datePublished" datetime="2019-10-25T16:38:46+08:00">2019-10-25</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2019-12-31 12:33:39" itemprop="dateModified" datetime="2019-12-31T12:33:39+08:00">2019-12-31</time>
+              
+            
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Android/" itemprop="url" rel="index"><span itemprop="name">Android</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="post-meta-item-icon">
+            <i class="fa fa-eye"></i>
+             阅读次数： 
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <blockquote>
+<p><strong>JNI</strong> （<strong>Java Native Interface, Java 本地接口</strong>）是一种<a href="https://zh.wikipedia.org/w/index.php?title=%E7%BC%96%E7%A8%8B%E6%A1%86%E6%9E%B6&amp;action=edit&amp;redlink=1" target="_blank" rel="noopener">编程框架</a>，使得 <a href="https://zh.wikipedia.org/wiki/Java%E8%99%9A%E6%8B%9F%E6%9C%BA" target="_blank" rel="noopener">Java虚拟机</a>中的 <a href="https://zh.wikipedia.org/wiki/Java" target="_blank" rel="noopener">Java</a> 程序可以调用本地应用或库，也可以被其他程序调用。 本地程序一般是用其它语言（<a href="https://zh.wikipedia.org/wiki/C%E8%AF%AD%E8%A8%80" target="_blank" rel="noopener">C</a>、<a href="https://zh.wikipedia.org/wiki/C%2B%2B" target="_blank" rel="noopener">C++</a>或<a href="https://zh.wikipedia.org/wiki/%E6%B1%87%E7%BC%96%E8%AF%AD%E8%A8%80" target="_blank" rel="noopener">汇编语言</a>等）编写的，并且被编译为基于本机硬件和操作系统的程序。JNI 用于打通 Java 层与 Native(C/C++) 层，并非 Android 系统独有，而是 Java 所有。Java语言是跨平台的语言，而这跨平台的背后都是依靠Java虚拟机，虚拟机采用C/C++编写，适配各个系统，通过JNI为上层Java提供各种服务，保证跨平台性。本文基于 android-10.0.0_r6 源码。</p>
+</blockquote>
+<a id="more"></a>
+<h3 id="1-JNI-loadLibrary-动态库加载过程"><a href="#1-JNI-loadLibrary-动态库加载过程" class="headerlink" title="1. JNI loadLibrary 动态库加载过程"></a>1. JNI loadLibrary 动态库加载过程</h3><p>在 Android 上层 Java 代码中，只需要一行代码即可加载动态库：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">System.load(<span class="string">"/data/local/tmp/lib***.so"</span>);</span><br><span class="line">System.loadLibrary(<span class="string">"xxx"</span>);</span><br></pre></td></tr></table></figure>
+<p>load 和 loadLibrary 区别如下：</p>
+<ul>
+<li>load 指定动态库的完整路径，不会自动加载依赖库；</li>
+<li>loadLibrary 只从指定的 lib 目录查找，并加上 lib 前缀和 .so 后缀；</li>
+</ul>
+<p>JAVA 层和 Native 层方法是怎样注册并映射的？以 Bluetooth 为例，在 <a href="http://androidxref.com/9.0.0_r3/xref/packages/apps/Bluetooth/src/com/android/bluetooth/btservice/AdapterApp.java" target="_blank" rel="noopener">AdapterApp.java</a> 中调用 <code>System.loadLibrary(&quot;bluetooth_jni&quot;);</code> ，加载 libbluetooth_jni.so 动态库到内存。</p>
+<p> <a href="https://android.googlesource.com/platform/packages/apps/Bluetooth/+/refs/tags/android-10.0.0_r6/src/com/android/bluetooth/btservice/AdapterApp.java" target="_blank" rel="noopener">/packages/apps/Bluetooth/src/com/android/bluetooth/btservice/AdapterApp.java</a></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">AdapterApp</span> <span class="keyword">extends</span> <span class="title">Application</span> </span>&#123;</span><br><span class="line">    ... ...</span><br><span class="line">    <span class="keyword">static</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> (DBG) &#123;</span><br><span class="line">            Log.d(TAG, <span class="string">"Loading JNI Library"</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        System.loadLibrary(<span class="string">"bluetooth_jni"</span>);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<h4 id="1-1-loadLibrary"><a href="#1-1-loadLibrary" class="headerlink" title="1.1 loadLibrary"></a>1.1 loadLibrary</h4><h5 id="1-1-1-System-loadLibrary"><a href="#1-1-1-System-loadLibrary" class="headerlink" title="1.1.1 System.loadLibrary"></a>1.1.1 System.loadLibrary</h5><p><a href="https://android.googlesource.com/platform/libcore/+/refs/tags/android-10.0.0_r6/ojluni/src/main/java/java/lang/System.java" target="_blank" rel="noopener">libcore/ojluni/src/main/java/java/lang/System.java</a> </p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">System</span> </span>&#123;</span><br><span class="line">    ... ...</span><br><span class="line">    <span class="meta">@CallerSensitive</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">loadLibrary</span><span class="params">(String libname)</span> </span>&#123;</span><br><span class="line">        Runtime.getRuntime().loadLibrary0(Reflection.getCallerClass(), libname);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<h5 id="1-1-2-Runtime-loadLibrary0"><a href="#1-1-2-Runtime-loadLibrary0" class="headerlink" title="1.1.2 Runtime.loadLibrary0"></a>1.1.2 Runtime.loadLibrary0</h5><p><a href="https://android.googlesource.com/platform/libcore/+/refs/tags/android-10.0.0_r6/ojluni/src/main/java/java/lang/Runtime.java" target="_blank" rel="noopener">libcore/ojluni/src/main/java/java/lang/Runtime.java</a> </p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">loadLibrary0</span><span class="params">(Class&lt;?&gt; fromClass, String libname)</span> </span>&#123;</span><br><span class="line">    <span class="comment">// getClassLoader 返回 调用者(getCallerClass) fromClass 定义的 ClassLoader</span></span><br><span class="line">    ClassLoader classLoader = ClassLoader.getClassLoader(fromClass);</span><br><span class="line">    loadLibrary0(classLoader, fromClass, libname);</span><br><span class="line">&#125;</span><br><span class="line">... ...</span><br><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">synchronized</span> <span class="keyword">void</span> <span class="title">loadLibrary0</span><span class="params">(ClassLoader loader, Class&lt;?&gt; callerClass, String libname)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (libname.indexOf((<span class="keyword">int</span>)File.separatorChar) != -<span class="number">1</span>) &#123;</span><br><span class="line">        <span class="comment">// 目录分隔符不应该出现在 library 名称中</span></span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> UnsatisfiedLinkError(</span><br><span class="line"><span class="string">"Directory separator should not appear in library name: "</span> + libname);</span><br><span class="line">    &#125;</span><br><span class="line">    String libraryName = libname;</span><br><span class="line">    <span class="comment">// 如果 loader 不为 null，就调用 findLibrary</span></span><br><span class="line">    <span class="keyword">if</span> (loader != <span class="keyword">null</span> &amp;&amp; !(loader <span class="keyword">instanceof</span> BootClassLoader)) &#123;</span><br><span class="line">        <span class="comment">// 根据动态库名获取动态库的文件路径，见 1.2</span></span><br><span class="line">        String filename = loader.findLibrary(libraryName);</span><br><span class="line">        <span class="keyword">if</span> (filename == <span class="keyword">null</span>) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> UnsatisfiedLinkError(loader + <span class="string">" couldn't find \""</span> +</span><br><span class="line">                                           System.mapLibraryName(libraryName) + <span class="string">"\""</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// 在 nativeLoad 中加载库，如果加载成功则 return，否则抛出异常</span></span><br><span class="line">        String error = nativeLoad(filename, loader);</span><br><span class="line">        <span class="keyword">if</span> (error != <span class="keyword">null</span>) &#123;</span><br><span class="line">            <span class="comment">// 加载错误</span></span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> UnsatisfiedLinkError(error);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 当 loader 为 null 时执行如下操作</span></span><br><span class="line">    <span class="comment">// We know some apps use mLibPaths directly, potentially assuming it's not null.</span></span><br><span class="line">    <span class="comment">// Initialize it here to make sure apps see a non-null value.</span></span><br><span class="line">    getLibPaths();<span class="comment">// 获取 mLibPaths 值: /system/lib64/</span></span><br><span class="line">    <span class="comment">// mapLibraryName 功能是将动态库 xxx 的名字转换为 libxxx.so，见 1.1.4</span></span><br><span class="line">    String filename = System.mapLibraryName(libraryName);</span><br><span class="line">    <span class="comment">// 真正加载库的函数 nativeLoad</span></span><br><span class="line">    String error = nativeLoad(filename, loader, callerClass);</span><br><span class="line">    <span class="keyword">if</span> (error != <span class="keyword">null</span>) &#123;</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> UnsatisfiedLinkError(error);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">private</span> <span class="keyword">volatile</span> String[] mLibPaths = <span class="keyword">null</span>;</span><br><span class="line"><span class="keyword">private</span> String[] getLibPaths() &#123;</span><br><span class="line">    <span class="keyword">if</span> (mLibPaths == <span class="keyword">null</span>) &#123;</span><br><span class="line">        <span class="keyword">synchronized</span>(<span class="keyword">this</span>) &#123;</span><br><span class="line">            <span class="keyword">if</span> (mLibPaths == <span class="keyword">null</span>) &#123;</span><br><span class="line">                mLibPaths = initLibPaths();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> mLibPaths;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> String[] initLibPaths() &#123;</span><br><span class="line">    <span class="comment">// java.library.path = /system/lib64</span></span><br><span class="line">    String javaLibraryPath = System.getProperty(<span class="string">"java.library.path"</span>);</span><br><span class="line">    <span class="keyword">if</span> (javaLibraryPath == <span class="keyword">null</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> EmptyArray.STRING;</span><br><span class="line">    &#125;</span><br><span class="line">    String[] paths = javaLibraryPath.split(<span class="string">":"</span>);</span><br><span class="line">    <span class="comment">// Add a '/' to the end of each directory so we don't have to do it every time.</span></span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; paths.length; ++i) &#123;</span><br><span class="line">        <span class="keyword">if</span> (!paths[i].endsWith(<span class="string">"/"</span>)) &#123;</span><br><span class="line">            paths[i] += <span class="string">"/"</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> paths;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><strong>loadLibrary0</strong> 主要目的是找到动态库所在路径，然后调用 <strong>nativeLoad </strong> 来加载动态库，先判断 loader 是否为 null，当 loader 不为 null 时通过 loader.findLibrary() 查找动态库所在绝对路径，当 loader 为 null 时从默认目录 mLibPaths 下(比如 /vendor/lib, system/lib, system/lib64)查找是否存在该动态库，如果都没有找到就抛出异常。</p>
+<h5 id="1-1-3-findLibrary"><a href="#1-1-3-findLibrary" class="headerlink" title="1.1.3 findLibrary"></a>1.1.3 findLibrary</h5><p><a href="https://android.googlesource.com/platform/libcore/+/refs/tags/android-10.0.0_r6/dalvik/src/main/java/dalvik/system/BaseDexClassLoader.java" target="_blank" rel="noopener">libcore/dalvik/src/main/java/dalvik/system/BaseDexClassLoader.java</a></p>
+<p><strong>BaseDexClassLoader.findLibrary</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">BaseDexClassLoader</span> <span class="keyword">extends</span> <span class="title">ClassLoader</span> </span>&#123;</span><br><span class="line">    <span class="meta">@UnsupportedAppUsage</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> DexPathList pathList;</span><br><span class="line">    ... ...</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">BaseDexClassLoader</span><span class="params">(String dexPath,</span></span></span><br><span class="line"><span class="function"><span class="params">            String librarySearchPath, ClassLoader parent, ClassLoader[] sharedLibraryLoaders,</span></span></span><br><span class="line"><span class="function"><span class="params">            <span class="keyword">boolean</span> isTrusted)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>(parent);</span><br><span class="line">        ... ...</span><br><span class="line">        <span class="comment">// 初始化 DexPathList</span></span><br><span class="line">        <span class="keyword">this</span>.pathList = <span class="keyword">new</span> DexPathList(<span class="keyword">this</span>, dexPath, librarySearchPath, <span class="keyword">null</span>, isTrusted);</span><br><span class="line">        ... ...</span><br><span class="line">    &#125;</span><br><span class="line">    ... ...</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">findLibrary</span><span class="params">(String name)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> pathList.findLibrary(name);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<p><a href="https://android.googlesource.com/platform/libcore/+/refs/tags/android-10.0.0_r6/dalvik/src/main/java/dalvik/system/DexPathList.java" target="_blank" rel="noopener">libcore/dalvik/src/main/java/dalvik/system/DexPathList.java</a></p>
+<p><strong>初始化 DexPathList </strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">DexPathList</span> </span>&#123;</span><br><span class="line">    ... ...</span><br><span class="line">    DexPathList(ClassLoader definingContext, String dexPath,</span><br><span class="line">            String librarySearchPath, File optimizedDirectory, <span class="keyword">boolean</span> isTrusted) &#123;</span><br><span class="line">        ... ...</span><br><span class="line">        <span class="keyword">this</span>.definingContext = definingContext;</span><br><span class="line">        ArrayList&lt;IOException&gt; suppressedExceptions = <span class="keyword">new</span> ArrayList&lt;IOException&gt;();</span><br><span class="line">        <span class="comment">// save dexPath for BaseDexClassLoader</span></span><br><span class="line">        <span class="keyword">this</span>.dexElements = makeDexElements(splitDexPath(dexPath), optimizedDirectory,</span><br><span class="line">                                           suppressedExceptions, definingContext, isTrusted);</span><br><span class="line">        <span class="comment">// app 目录的 native 库</span></span><br><span class="line">        <span class="keyword">this</span>.nativeLibraryDirectories = splitPaths(librarySearchPath, <span class="keyword">false</span>);</span><br><span class="line">        <span class="comment">// 系统目录的 native 库</span></span><br><span class="line">        <span class="keyword">this</span>.systemNativeLibraryDirectories =</span><br><span class="line">                splitPaths(System.getProperty(<span class="string">"java.library.path"</span>), <span class="keyword">true</span>);</span><br><span class="line">        <span class="comment">// 记录所有的 native 动态库</span></span><br><span class="line">        <span class="keyword">this</span>.nativeLibraryPathElements = makePathElements(getAllNativeLibraryDirectories());</span><br><span class="line">        ... ...</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<p>DexPathList 构造函数主要是收集变量 dexElements(记录所有的 dexFile 文件) 和 nativeLibraryPathElements(记录所有的 native 动态库，包含 app 目录和 系统 目录的动态库) 的信息。</p>
+<p><strong>DexPathList.findLibrary</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">DexPathList</span> </span>&#123;</span><br><span class="line">    ... ...</span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">findLibrary</span><span class="params">(String libraryName)</span> </span>&#123;</span><br><span class="line">        <span class="comment">// 见 1.1.4 mapLibraryName</span></span><br><span class="line">        String fileName = System.mapLibraryName(libraryName);</span><br><span class="line">        <span class="keyword">for</span> (NativeLibraryElement element : nativeLibraryPathElements) &#123;</span><br><span class="line">            <span class="comment">// 见 1.1.5 findNativeLibrary</span></span><br><span class="line">            String path = element.findNativeLibrary(fileName);</span><br><span class="line">            <span class="keyword">if</span> (path != <span class="keyword">null</span>) &#123;</span><br><span class="line">                <span class="keyword">return</span> path;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<p>遍历 nativeLibraryPathElements ，从所有的动态库查询是否存在匹配的动态库，nativeLibraryPathElements 取值：</p>
+<ul>
+<li>/data/app/packagename-xyz/lib/arm64:/data/app/packagename-xyz==/base.apk!/lib/arm64-v8a</li>
+<li>/vendor/lib64</li>
+<li>/system/lib64</li>
+</ul>
+<h5 id="1-1-4-mapLibraryName"><a href="#1-1-4-mapLibraryName" class="headerlink" title="1.1.4 mapLibraryName"></a>1.1.4 mapLibraryName</h5><p><a href="https://android.googlesource.com/platform/libcore/+/refs/tags/android-10.0.0_r6/ojluni/src/main/native/System.c" target="_blank" rel="noopener">libcore/ojluni/src/main/native/System.c</a></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">void</span> <span class="title">cpchars</span><span class="params">(jchar *dst, <span class="keyword">char</span> *src, <span class="keyword">int</span> n)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">int</span> i;</span><br><span class="line">    <span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; n; i++) &#123;</span><br><span class="line">        dst[i] = src[i];</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">JNIEXPORT jstring JNICALL</span><br><span class="line">System_mapLibraryName(JNIEnv *env, jclass ign, jstring libname)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">int</span> len;</span><br><span class="line">    <span class="comment">// 在libcore/ojluni/src/main/native/jvm_md.h中定义：</span></span><br><span class="line">    <span class="comment">// #define JNI_LIB_PREFIX "lib"</span></span><br><span class="line">    <span class="comment">// #define JNI_LIB_SUFFIX ".so"</span></span><br><span class="line">    <span class="keyword">int</span> prefix_len = (<span class="keyword">int</span>) <span class="built_in">strlen</span>(JNI_LIB_PREFIX);</span><br><span class="line">    <span class="keyword">int</span> suffix_len = (<span class="keyword">int</span>) <span class="built_in">strlen</span>(JNI_LIB_SUFFIX);</span><br><span class="line">    jchar chars[<span class="number">256</span>];</span><br><span class="line">    <span class="keyword">if</span> (libname == <span class="literal">NULL</span>) &#123;</span><br><span class="line">        JNU_ThrowNullPointerException(env, <span class="number">0</span>);</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">NULL</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    len = (*env)-&gt;GetStringLength(env, libname);</span><br><span class="line">    <span class="keyword">if</span> (len &gt; <span class="number">240</span>) &#123;</span><br><span class="line">        JNU_ThrowIllegalArgumentException(env, <span class="string">"name too long"</span>);</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">NULL</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    cpchars(chars, JNI_LIB_PREFIX, prefix_len);<span class="comment">// chars = "lib"</span></span><br><span class="line">    (*env)-&gt;GetStringRegion(env, libname, <span class="number">0</span>, len, chars + prefix_len);<span class="comment">// chars = "lib"&lt;libname&gt;</span></span><br><span class="line">    len += prefix_len;</span><br><span class="line">    cpchars(chars + len, JNI_LIB_SUFFIX, suffix_len);<span class="comment">// chars = "lib"&lt;libname&gt;".so"</span></span><br><span class="line">    len += suffix_len;</span><br><span class="line">    <span class="keyword">return</span> (*env)-&gt;NewString(env, chars, len);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>可见 mapLibraryName 的作用就是给 libname 加上 “lib” 前缀和 “.so” 后缀。</p>
+<h5 id="1-1-5-findNativeLibrary"><a href="#1-1-5-findNativeLibrary" class="headerlink" title="1.1.5 findNativeLibrary"></a>1.1.5 findNativeLibrary</h5><p><a href="https://android.googlesource.com/platform/libcore/+/refs/tags/android-10.0.0_r6/dalvik/src/main/java/dalvik/system/DexPathList.java" target="_blank" rel="noopener">libcore/dalvik/src/main/java/dalvik/system/DexPathList.java</a></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">DexPathList</span> </span>&#123;</span><br><span class="line">... ...</span><br><span class="line">    <span class="comment">/*package*/</span> <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">NativeLibraryElement</span> </span>&#123;</span><br><span class="line">        ... ...</span><br><span class="line">        <span class="function"><span class="keyword">public</span> String <span class="title">findNativeLibrary</span><span class="params">(String name)</span> </span>&#123;</span><br><span class="line">            maybeInit();</span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> (zipDir == <span class="keyword">null</span>) &#123;</span><br><span class="line">                String entryPath = <span class="keyword">new</span> File(path, name).getPath();</span><br><span class="line">                <span class="keyword">if</span> (IoUtils.canOpenReadOnly(entryPath)) &#123;</span><br><span class="line">                    <span class="keyword">return</span> entryPath;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125; <span class="keyword">else</span> <span class="keyword">if</span> (urlHandler != <span class="keyword">null</span>) &#123;</span><br><span class="line">                <span class="comment">// Having a urlHandler means the element has a zip file.</span></span><br><span class="line">                <span class="comment">// In this case Android supports loading the library iff</span></span><br><span class="line">                <span class="comment">// it is stored in the zip uncompressed.</span></span><br><span class="line">                String entryName = zipDir + <span class="string">'/'</span> + name;</span><br><span class="line">                <span class="keyword">if</span> (urlHandler.isEntryStored(entryName)) &#123;</span><br><span class="line">                  <span class="keyword">return</span> path.getPath() + zipSeparator + entryName;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">        &#125;</span><br></pre></td></tr></table></figure>
+<p>在Element 中查找对应的动态库。</p>
+<h4 id="1-2-nativeLoad"><a href="#1-2-nativeLoad" class="headerlink" title="1.2 nativeLoad"></a>1.2 nativeLoad</h4><p><a href="https://android.googlesource.com/platform/libcore/+/refs/tags/android-10.0.0_r6/ojluni/src/main/java/java/lang/Runtime.java" target="_blank" rel="noopener">libcore/ojluni/src/main/java/java/lang/Runtime.java</a> </p>
+<p>找到 so 后就开始加载 so 了，通过 nativeLoad 方法实现：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">static</span> String <span class="title">nativeLoad</span><span class="params">(String filename, ClassLoader loader)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> nativeLoad(filename, loader, <span class="keyword">null</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 调用 native 方法</span></span><br><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">native</span> String <span class="title">nativeLoad</span><span class="params">(String filename, ClassLoader loader, Class&lt;?&gt; caller)</span></span>;</span><br></pre></td></tr></table></figure>
+<p>java 层的 nativeLoad 对应 c 层的 Runtime_nativeLoad 方法：</p>
+<p><a href="https://android.googlesource.com/platform/libcore/+/refs/tags/android-10.0.0_r6/ojluni/src/main/native/System.c" target="_blank" rel="noopener">libcore/ojluni/src/main/native/System.c</a></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">define</span> NATIVE_METHOD(className, functionName, signature) \</span></span><br><span class="line">&#123; #functionName, signature, (<span class="keyword">void</span>*)(className ## _ ## functionName) &#125;</span><br></pre></td></tr></table></figure>
+<p><a href="https://android.googlesource.com/platform/libcore/+/refs/tags/android-10.0.0_r6/ojluni/src/main/native/Runtime.c" target="_blank" rel="noopener">libcore/ojluni/src/main/native/Runtime.c</a></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">JNIEXPORT jstring JNICALL</span><br><span class="line">Runtime_nativeLoad(JNIEnv* env, jclass ignored, jstring javaFilename,</span><br><span class="line">                   jobject javaLoader, jclass caller)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">return</span> JVM_NativeLoad(env, javaFilename, javaLoader, caller);</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">static</span> JNINativeMethod gMethods[] = &#123;</span><br><span class="line">  FAST_NATIVE_METHOD(Runtime, freeMemory, <span class="string">"()J"</span>),</span><br><span class="line">  FAST_NATIVE_METHOD(Runtime, totalMemory, <span class="string">"()J"</span>),</span><br><span class="line">  FAST_NATIVE_METHOD(Runtime, maxMemory, <span class="string">"()J"</span>),</span><br><span class="line">  NATIVE_METHOD(Runtime, nativeGc, <span class="string">"()V"</span>),</span><br><span class="line">  NATIVE_METHOD(Runtime, nativeExit, <span class="string">"(I)V"</span>),</span><br><span class="line">  NATIVE_METHOD(Runtime, nativeLoad,</span><br><span class="line">                <span class="string">"(Ljava/lang/String;Ljava/lang/ClassLoader;Ljava/lang/Class;)"</span></span><br><span class="line">                    <span class="string">"Ljava/lang/String;"</span>),</span><br><span class="line">  <span class="comment">// 根据 System.c 中NATIVE_METHOD 的宏定义，相当于如下写法：</span></span><br><span class="line">  <span class="comment">// &#123;"nativeLoad", "(Ljava/lang/String;Ljava/lang/ClassLoader;)"</span></span><br><span class="line">  <span class="comment">//                  "Ljava/lang/String;", (void*)Runtime_nativeLoad&#125;</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">register_java_lang_Runtime</span><span class="params">(JNIEnv* env)</span> </span>&#123;</span><br><span class="line">  jniRegisterNativeMethods(env, <span class="string">"java/lang/Runtime"</span>, gMethods, NELEM(gMethods));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>可以看到 Runtime_nativeLoad 调用了 JVM_NativeLoad 方法，</p>
+<p><a href="https://android.googlesource.com/platform/art/+/refs/tags/android-10.0.0_r6/openjdkjvm/OpenjdkJvm.cc" target="_blank" rel="noopener">art/openjdkjvm/OpenjdkJvm.cc</a></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">JNIEXPORT jstring <span class="title">JVM_NativeLoad</span><span class="params">(JNIEnv* env,</span></span></span><br><span class="line"><span class="function"><span class="params">                                 jstring javaFilename,</span></span></span><br><span class="line"><span class="function"><span class="params">                                 jobject javaLoader,</span></span></span><br><span class="line"><span class="function"><span class="params">                                 jclass caller)</span> </span>&#123;</span><br><span class="line">  <span class="function">ScopedUtfChars <span class="title">filename</span><span class="params">(env, javaFilename)</span></span>;</span><br><span class="line">  <span class="keyword">if</span> (filename.c_str() == <span class="literal">nullptr</span>) &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">nullptr</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="built_in">std</span>::<span class="built_in">string</span> error_msg;</span><br><span class="line">  &#123;</span><br><span class="line">    art::JavaVMExt* vm = art::Runtime::Current()-&gt;GetJavaVM();</span><br><span class="line">    <span class="comment">// 真正加载 so 的地方</span></span><br><span class="line">    <span class="keyword">bool</span> success = vm-&gt;LoadNativeLibrary(env,</span><br><span class="line">                                         filename.c_str(),</span><br><span class="line">                                         javaLoader,</span><br><span class="line">                                         caller,</span><br><span class="line">                                         &amp;error_msg);</span><br><span class="line">    <span class="keyword">if</span> (success) &#123;</span><br><span class="line">      <span class="keyword">return</span> <span class="literal">nullptr</span>;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="comment">// Don't let a pending exception from JNI_OnLoad cause a CheckJNI issue with NewStringUTF.</span></span><br><span class="line">  env-&gt;ExceptionClear();</span><br><span class="line">  <span class="keyword">return</span> env-&gt;NewStringUTF(error_msg.c_str());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>真正加载 so 的方法是 LoadNativeLibrary 。</p>
+<h4 id="1-3-LoadNativeLibrary"><a href="#1-3-LoadNativeLibrary" class="headerlink" title="1.3 LoadNativeLibrary"></a>1.3 LoadNativeLibrary</h4><p><a href="https://android.googlesource.com/platform/art/+/refs/tags/android-10.0.0_r6/runtime/jni/java_vm_ext.cc" target="_blank" rel="noopener">art/runtime/jni/java_vm_ext.cc</a></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">bool</span> JavaVMExt::LoadNativeLibrary(JNIEnv* env,</span><br><span class="line">                                  <span class="keyword">const</span> <span class="built_in">std</span>::<span class="built_in">string</span>&amp; path,</span><br><span class="line">                                  jobject class_loader,</span><br><span class="line">                                  jclass caller_class,</span><br><span class="line">                                  <span class="built_in">std</span>::<span class="built_in">string</span>* error_msg) &#123;</span><br><span class="line">  error_msg-&gt;clear();</span><br><span class="line">  <span class="comment">// See if we've already loaded this library.  If we have, and the class loader</span></span><br><span class="line">  <span class="comment">// matches, return successfully without doing anything.</span></span><br><span class="line">  <span class="comment">// 判断是否已经加载过这个库，如果加载过直接返回</span></span><br><span class="line">  SharedLibrary* library;</span><br><span class="line">  Thread* self = Thread::Current();</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="comment">// <span class="doctag">TODO:</span> move the locking (and more of this logic) into Libraries.</span></span><br><span class="line">    <span class="function">MutexLock <span class="title">mu</span><span class="params">(self, *Locks::jni_libraries_lock_)</span></span>;</span><br><span class="line">    library = libraries_-&gt;Get(path);</span><br><span class="line">  &#125;</span><br><span class="line">  ... ...</span><br><span class="line">  <span class="comment">// Open the shared library.  Because we're using a full path, the system</span></span><br><span class="line">  <span class="comment">// doesn't have to search through LD_LIBRARY_PATH.  (It may do so to</span></span><br><span class="line">  <span class="comment">// resolve this library's dependencies though.)</span></span><br><span class="line">  <span class="comment">// Failures here are expected when java.library.path has several entries</span></span><br><span class="line">  <span class="comment">// and we have to hunt for the lib.</span></span><br><span class="line">  <span class="comment">// Below we dlopen but there is no paired dlclose, this would be necessary if we supported</span></span><br><span class="line">  <span class="comment">// class unloading. Libraries will only be unloaded when the reference count (incremented by</span></span><br><span class="line">  <span class="comment">// dlopen) becomes zero from dlclose.</span></span><br><span class="line">  <span class="comment">// Retrieve the library path from the classloader, if necessary.</span></span><br><span class="line">  ScopedLocalRef&lt;jstring&gt; library_path(env, GetLibrarySearchPath(env, class_loader));</span><br><span class="line">  Locks::mutator_lock_-&gt;AssertNotHeld(self);</span><br><span class="line">  <span class="keyword">const</span> <span class="keyword">char</span>* path_str = path.empty() ? <span class="literal">nullptr</span> : path.c_str();</span><br><span class="line">  <span class="keyword">bool</span> needs_native_bridge = <span class="literal">false</span>;</span><br><span class="line">  <span class="keyword">char</span>* nativeloader_error_msg = <span class="literal">nullptr</span>;</span><br><span class="line">  <span class="comment">// 通过 OpenNativeLibrary 加载，旧版本中通过 dlopen</span></span><br><span class="line">  <span class="keyword">void</span>* handle = android::OpenNativeLibrary(</span><br><span class="line">      env,</span><br><span class="line">      runtime_-&gt;GetTargetSdkVersion(),</span><br><span class="line">      path_str,</span><br><span class="line">      class_loader,</span><br><span class="line">      (caller_location.empty() ? <span class="literal">nullptr</span> : caller_location.c_str()),</span><br><span class="line">      library_path.get(),</span><br><span class="line">      &amp;needs_native_bridge,</span><br><span class="line">      &amp;nativeloader_error_msg);</span><br><span class="line">  VLOG(jni) &lt;&lt; <span class="string">"[Call to dlopen(\""</span> &lt;&lt; path &lt;&lt; <span class="string">"\", RTLD_NOW) returned "</span> &lt;&lt; handle &lt;&lt; <span class="string">"]"</span>;</span><br><span class="line">  <span class="keyword">if</span> (handle == <span class="literal">nullptr</span>) &#123;</span><br><span class="line">    <span class="comment">// 加载失败</span></span><br><span class="line">    *error_msg = nativeloader_error_msg;</span><br><span class="line">    android::NativeLoaderFreeErrorMessage(nativeloader_error_msg);</span><br><span class="line">    VLOG(jni) &lt;&lt; <span class="string">"dlopen(\""</span> &lt;&lt; path &lt;&lt; <span class="string">"\", RTLD_NOW) failed: "</span> &lt;&lt; *error_msg;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">if</span> (env-&gt;ExceptionCheck() == JNI_TRUE) &#123;</span><br><span class="line">    LOG(ERROR) &lt;&lt; <span class="string">"Unexpected exception:"</span>;</span><br><span class="line">    env-&gt;ExceptionDescribe();</span><br><span class="line">    env-&gt;ExceptionClear();</span><br><span class="line">  &#125;</span><br><span class="line">  ... ...</span><br><span class="line">  <span class="comment">// Create a new entry.</span></span><br><span class="line">  <span class="comment">// <span class="doctag">TODO:</span> move the locking (and more of this logic) into Libraries.</span></span><br><span class="line">  <span class="keyword">bool</span> created_library = <span class="literal">false</span>;</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="comment">// Create SharedLibrary ahead of taking the libraries lock to maintain lock ordering.</span></span><br><span class="line">    <span class="built_in">std</span>::<span class="built_in">unique_ptr</span>&lt;SharedLibrary&gt; new_library(</span><br><span class="line">        <span class="keyword">new</span> SharedLibrary(env,</span><br><span class="line">                          self,</span><br><span class="line">                          path,</span><br><span class="line">                          handle,</span><br><span class="line">                          needs_native_bridge,</span><br><span class="line">                          class_loader,</span><br><span class="line">                          class_loader_allocator));</span><br><span class="line">    <span class="function">MutexLock <span class="title">mu</span><span class="params">(self, *Locks::jni_libraries_lock_)</span></span>;</span><br><span class="line">    library = libraries_-&gt;Get(path);</span><br><span class="line">    <span class="keyword">if</span> (library == <span class="literal">nullptr</span>) &#123;  <span class="comment">// We won race to get libraries_lock.</span></span><br><span class="line">      library = new_library.release();</span><br><span class="line">      libraries_-&gt;Put(path, library);</span><br><span class="line">      created_library = <span class="literal">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  ... ...</span><br><span class="line">  <span class="keyword">bool</span> was_successful = <span class="literal">false</span>;</span><br><span class="line">  <span class="keyword">void</span>* sym = library-&gt;FindSymbol(<span class="string">"JNI_OnLoad"</span>, <span class="literal">nullptr</span>);</span><br><span class="line">  <span class="keyword">if</span> (sym == <span class="literal">nullptr</span>) &#123;</span><br><span class="line">    VLOG(jni) &lt;&lt; <span class="string">"[No JNI_OnLoad found in \""</span> &lt;&lt; path &lt;&lt; <span class="string">"\"]"</span>;</span><br><span class="line">    was_successful = <span class="literal">true</span>;</span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="comment">// Call JNI_OnLoad.  We have to override the current class</span></span><br><span class="line">    <span class="comment">// loader, which will always be "null" since the stuff at the</span></span><br><span class="line">    <span class="comment">// top of the stack is around Runtime.loadLibrary().  (See</span></span><br><span class="line">    <span class="comment">// the comments in the JNI FindClass function.)</span></span><br><span class="line">    ScopedLocalRef&lt;jobject&gt; old_class_loader(env, env-&gt;NewLocalRef(self-&gt;GetClassLoaderOverride()));</span><br><span class="line">    self-&gt;SetClassLoaderOverride(class_loader);</span><br><span class="line">    VLOG(jni) &lt;&lt; <span class="string">"[Calling JNI_OnLoad in \""</span> &lt;&lt; path &lt;&lt; <span class="string">"\"]"</span>;</span><br><span class="line">    <span class="keyword">using</span> JNI_OnLoadFn = <span class="keyword">int</span>(*)(JavaVM*, <span class="keyword">void</span>*);</span><br><span class="line">    JNI_OnLoadFn jni_on_load = <span class="keyword">reinterpret_cast</span>&lt;JNI_OnLoadFn&gt;(sym);</span><br><span class="line">    <span class="keyword">int</span> version = (*jni_on_load)(<span class="keyword">this</span>, <span class="literal">nullptr</span>);</span><br><span class="line">    <span class="keyword">if</span> (IsSdkVersionSetAndAtMost(runtime_-&gt;GetTargetSdkVersion(), SdkVersion::kL)) &#123;</span><br><span class="line">      <span class="comment">// Make sure that sigchain owns SIGSEGV.</span></span><br><span class="line">      EnsureFrontOfChain(SIGSEGV);</span><br><span class="line">    &#125;</span><br><span class="line">    self-&gt;SetClassLoaderOverride(old_class_loader.get());</span><br><span class="line">    <span class="keyword">if</span> (version == JNI_ERR) &#123;</span><br><span class="line">      StringAppendF(error_msg, <span class="string">"JNI_ERR returned from JNI_OnLoad in \"%s\""</span>, path.c_str());</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (JavaVMExt::IsBadJniVersion(version)) &#123;</span><br><span class="line">      StringAppendF(error_msg, <span class="string">"Bad JNI version returned from JNI_OnLoad in \"%s\": %d"</span>,</span><br><span class="line">                    path.c_str(), version);</span><br><span class="line">      <span class="comment">// It's unwise to call dlclose() here, but we can mark it</span></span><br><span class="line">      <span class="comment">// as bad and ensure that future load attempts will fail.</span></span><br><span class="line">      <span class="comment">// We don't know how far JNI_OnLoad got, so there could</span></span><br><span class="line">      <span class="comment">// be some partially-initialized stuff accessible through</span></span><br><span class="line">      <span class="comment">// newly-registered native method calls.  We could try to</span></span><br><span class="line">      <span class="comment">// unregister them, but that doesn't seem worthwhile.</span></span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">      was_successful = <span class="literal">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    VLOG(jni) &lt;&lt; <span class="string">"[Returned "</span> &lt;&lt; (was_successful ? <span class="string">"successfully"</span> : <span class="string">"failure"</span>)</span><br><span class="line">              &lt;&lt; <span class="string">" from JNI_OnLoad in \""</span> &lt;&lt; path &lt;&lt; <span class="string">"\"]"</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  library-&gt;SetResult(was_successful);</span><br><span class="line">  <span class="keyword">return</span> was_successful;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>最终会通过 OpenNativeLibrary 加载 so 库，随后会判断 JNI_OnLoad 方法是否存在，存在则调用其方法，所以做 JNI 开发时要实现 JNI_OnLoad 方法来做一些初始化的操作。</p>
+<p>主要工作：</p>
+<ul>
+<li>检查动态库是否已加载，如果已加载则直接返回；</li>
+<li>通过 OpenNativeLibrary 打开 so 库；</li>
+<li>创建 SharedLibrary 共享库，并添加到 libraries_ 列表；</li>
+<li>调用 JNI_OnLoad 方法；</li>
+</ul>
+<p><strong>OpenNativeLibrary</strong></p>
+<p><a href="https://android.googlesource.com/platform/system/core/+/refs/tags/android-10.0.0_r6/libnativeloader/native_loader.cpp" target="_blank" rel="noopener">system/core/libnativeloader/native_loader.cpp</a></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span>* <span class="title">OpenNativeLibrary</span><span class="params">(JNIEnv* env, <span class="keyword">int32_t</span> target_sdk_version, <span class="keyword">const</span> <span class="keyword">char</span>* path,</span></span></span><br><span class="line"><span class="function"><span class="params">                        jobject class_loader, <span class="keyword">const</span> <span class="keyword">char</span>* caller_location, jstring library_path,</span></span></span><br><span class="line"><span class="function"><span class="params">                        <span class="keyword">bool</span>* needs_native_bridge, <span class="keyword">char</span>** error_msg)</span> </span>&#123;</span><br><span class="line"><span class="meta">#<span class="meta-keyword">if</span> defined(__ANDROID__)</span></span><br><span class="line">  UNUSED(target_sdk_version);</span><br><span class="line">  <span class="keyword">if</span> (class_loader == <span class="literal">nullptr</span>) &#123;</span><br><span class="line">    *needs_native_bridge = <span class="literal">false</span>;</span><br><span class="line">    <span class="keyword">if</span> (caller_location != <span class="literal">nullptr</span>) &#123;</span><br><span class="line">      <span class="keyword">android_namespace_t</span>* boot_namespace = FindExportedNamespace(caller_location);</span><br><span class="line">      <span class="keyword">if</span> (boot_namespace != <span class="literal">nullptr</span>) &#123;</span><br><span class="line">        <span class="keyword">const</span> android_dlextinfo dlextinfo = &#123;</span><br><span class="line">            .flags = ANDROID_DLEXT_USE_NAMESPACE,</span><br><span class="line">            .library_namespace = boot_namespace,</span><br><span class="line">        &#125;;</span><br><span class="line">        <span class="keyword">void</span>* handle = android_dlopen_ext(path, RTLD_NOW, &amp;dlextinfo);</span><br><span class="line">        <span class="keyword">if</span> (handle == <span class="literal">nullptr</span>) &#123;</span><br><span class="line">          *error_msg = strdup(dlerror());</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> handle;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">void</span>* handle = dlopen(path, RTLD_NOW);</span><br><span class="line">    <span class="keyword">if</span> (handle == <span class="literal">nullptr</span>) &#123;</span><br><span class="line">      *error_msg = strdup(dlerror());</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> handle;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="built_in">std</span>::lock_guard&lt;<span class="built_in">std</span>::mutex&gt; guard(g_namespaces_mutex);</span><br><span class="line">  NativeLoaderNamespace* ns;</span><br><span class="line">  <span class="keyword">if</span> ((ns = g_namespaces-&gt;FindNamespaceByClassLoader(env, class_loader)) == <span class="literal">nullptr</span>) &#123;</span><br><span class="line">    <span class="comment">// This is the case where the classloader was not created by ApplicationLoaders</span></span><br><span class="line">    <span class="comment">// In this case we create an isolated not-shared namespace for it.</span></span><br><span class="line">    <span class="built_in">std</span>::<span class="built_in">string</span> create_error_msg;</span><br><span class="line">    <span class="keyword">if</span> ((ns = g_namespaces-&gt;Create(env, target_sdk_version, class_loader, <span class="literal">false</span> <span class="comment">/* is_shared */</span>,</span><br><span class="line">                                   <span class="literal">nullptr</span>, library_path, <span class="literal">nullptr</span>, &amp;create_error_msg)) == <span class="literal">nullptr</span>) &#123;</span><br><span class="line">      *error_msg = strdup(create_error_msg.c_str());</span><br><span class="line">      <span class="keyword">return</span> <span class="literal">nullptr</span>;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> OpenNativeLibraryInNamespace(ns, path, needs_native_bridge, error_msg);</span><br><span class="line"><span class="meta">#<span class="meta-keyword">else</span></span></span><br><span class="line">  UNUSED(env, target_sdk_version, class_loader, caller_location);</span><br><span class="line">  <span class="comment">// Do some best effort to emulate library-path support. It will not</span></span><br><span class="line">  <span class="comment">// work for dependencies.</span></span><br><span class="line">  <span class="comment">//</span></span><br><span class="line">  <span class="comment">// Note: null has a special meaning and must be preserved.</span></span><br><span class="line">  <span class="built_in">std</span>::<span class="built_in">string</span> c_library_path;  <span class="comment">// Empty string by default.</span></span><br><span class="line">  <span class="keyword">if</span> (library_path != <span class="literal">nullptr</span> &amp;&amp; path != <span class="literal">nullptr</span> &amp;&amp; path[<span class="number">0</span>] != <span class="string">'/'</span>) &#123;</span><br><span class="line">    <span class="function">ScopedUtfChars <span class="title">library_path_utf_chars</span><span class="params">(env, library_path)</span></span>;</span><br><span class="line">    c_library_path = library_path_utf_chars.c_str();</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="built_in">std</span>::<span class="built_in">vector</span>&lt;<span class="built_in">std</span>::<span class="built_in">string</span>&gt; library_paths = base::Split(c_library_path, <span class="string">":"</span>);</span><br><span class="line">  <span class="keyword">for</span> (<span class="keyword">const</span> <span class="built_in">std</span>::<span class="built_in">string</span>&amp; lib_path : library_paths) &#123;</span><br><span class="line">    *needs_native_bridge = <span class="literal">false</span>;</span><br><span class="line">    <span class="keyword">const</span> <span class="keyword">char</span>* path_arg;</span><br><span class="line">    <span class="built_in">std</span>::<span class="built_in">string</span> complete_path;</span><br><span class="line">    <span class="keyword">if</span> (path == <span class="literal">nullptr</span>) &#123;</span><br><span class="line">      <span class="comment">// Preserve null.</span></span><br><span class="line">      path_arg = <span class="literal">nullptr</span>;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">      complete_path = lib_path;</span><br><span class="line">      <span class="keyword">if</span> (!complete_path.empty()) &#123;</span><br><span class="line">        complete_path.append(<span class="string">"/"</span>);</span><br><span class="line">      &#125;</span><br><span class="line">      complete_path.append(path);</span><br><span class="line">      path_arg = complete_path.c_str();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">void</span>* handle = dlopen(path_arg, RTLD_NOW);</span><br><span class="line">    <span class="keyword">if</span> (handle != <span class="literal">nullptr</span>) &#123;</span><br><span class="line">      <span class="keyword">return</span> handle;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (NativeBridgeIsSupported(path_arg)) &#123;</span><br><span class="line">      *needs_native_bridge = <span class="literal">true</span>;</span><br><span class="line">      handle = NativeBridgeLoadLibrary(path_arg, RTLD_NOW);</span><br><span class="line">      <span class="keyword">if</span> (handle != <span class="literal">nullptr</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> handle;</span><br><span class="line">      &#125;</span><br><span class="line">      *error_msg = strdup(NativeBridgeGetError());</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">      *error_msg = strdup(dlerror());</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> <span class="literal">nullptr</span>;</span><br><span class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>Android 7.0 开始，禁止加载非NDK库，也就是说系统禁止了应用去链接系统的私有库，它通过名字空间的方式来实现其方法。所以就看到了，我们加载 so 的时候是用 OpenNativeLibrary 方法，而不是以往的 dlopen 方法。</p>
+<p>参考：</p>
+<p><a href="http://gityuan.com/2016/05/28/android-jni/" target="_blank" rel="noopener">http://gityuan.com/2016/05/28/android-jni/</a></p>
+<p><a href="http://gityuan.com/2017/03/26/load_library/" target="_blank" rel="noopener">http://gityuan.com/2017/03/26/load_library/</a></p>
+<p><a href="https://blog.csdn.net/QQxiaoqiang1573/article/details/101781380" target="_blank" rel="noopener">https://blog.csdn.net/QQxiaoqiang1573/article/details/101781380</a></p>
+
+      
+    </div>
+
+    
+      
+
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>Da Ye Lai Ma ~</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById(&quot;QR&quot;); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/images/wechatpay.jpg" alt="Ranger Zhou 微信支付">
+        <p>微信支付</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/images/alipay.jpg" alt="Ranger Zhou 支付宝">
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+
+    <div>
+          
+            
+<div class="my_post_copyright">
+  <script src="//cdn.bootcss.com/clipboard.js/1.5.10/clipboard.min.js"></script>
+
+  <!-- JS库 sweetalert 可修改路径 -->
+  <script src="https://cdn.bootcss.com/jquery/2.0.0/jquery.min.js"></script>
+  <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+  <p><span>本文标题:</span><a href="/2019/10/25/JNI-Study/">Android JNI原理-loadLibrary动态库加载过程</a></p>
+  <p><span>文章作者:</span><a href="/" title="访问 Ranger Zhou 的个人博客">Ranger Zhou</a></p>
+  <p><span>发布时间:</span>2019年10月25日 - 16:38</p>
+  <p><span>最后更新:</span>2019年12月31日 - 12:33</p>
+  <p><span>原始链接:</span><a href="/2019/10/25/JNI-Study/" title="Android JNI原理-loadLibrary动态库加载过程">http://rangerzhou.top/2019/10/25/JNI-Study/</a>
+    <span class="copy-path" title="点击复制文章链接"><i class="fa fa-clipboard" data-clipboard-text="http://rangerzhou.top/2019/10/25/JNI-Study/" aria-label="复制成功！"></i></span>
+  </p>
+  <p><span>许可协议:</span><i class="fa fa-creative-commons"></i> <a rel="license" href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank" title="Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0)">署名-非商业性使用-RangerZhou</a> 转载请保留原文链接及作者。</p>
+</div>
+<script>
+    var clipboard = new Clipboard('.fa-clipboard');
+    $(".fa-clipboard").click(function(){
+      clipboard.on('success', function(){
+        swal({
+          title: "",
+          text: '复制成功',
+          icon: "success",
+          showConfirmButton: true
+          });
+    });
+    });
+</script>
+
+          
+    </div>
+
+    <div>
+      
+        <div>
+    
+        <div style="text-align:center;color: #ccc;font-size:14px;">-------------本文结束<i class="fa fa-paw"></i>感谢您的阅读 ^_^-------------</div>
+    
+</div>
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/06/28/HassHeWeatherIntegrate/" rel="next" title="HomeAssistant 集成和风天气">
+                <i class="fa fa-chevron-left"></i> HomeAssistant 集成和风天气
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/12/02/NewBaby/" rel="prev" title="New Baby 办理事项列表">
+                New Baby 办理事项列表 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC8yOTcyNS82Mjky"></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/avatar.jpg" alt="Ranger Zhou">
+            
+              <p class="site-author-name" itemprop="name">Ranger Zhou</p>
+              <p class="site-description motion-element" itemprop="description">我是一个小流氓我从来也不浪，有一天我心血来潮耍了个流氓，我嘴里吹着小口哨我心里好得意，不知怎么哗啦啦啦啦我摔了一身泥</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">45</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">11</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">16</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="http://fashionentice.taobao.com/" title="淘宝 &rarr; http://fashionentice.taobao.com/" rel="noopener" target="_blank"><i class="fa fa-fw fa-globe"></i>淘宝</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://instagram.com/ranger.zhou" title="Instagram &rarr; https://instagram.com/ranger.zhou" rel="noopener" target="_blank"><i class="fa fa-fw fa-instagram"></i>Instagram</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="/images/wechat.jpg" title="WeChat &rarr; /images/wechat.jpg"><i class="fa fa-fw fa-wechat"></i>WeChat</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="http://blog.csdn.net/ranger0220?viewmode=contents" title="CSDN &rarr; http://blog.csdn.net/ranger0220?viewmode=contents" rel="noopener" target="_blank"><i class="fa fa-fw fa-globe"></i>CSDN</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                墙裂推荐
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://fashionentice.taobao.com" title="http://fashionentice.taobao.com" rel="noopener" target="_blank">TaoBao</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+            
+            
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-JNI-loadLibrary-动态库加载过程"><span class="nav-text">1. JNI loadLibrary 动态库加载过程</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-1-loadLibrary"><span class="nav-text">1.1 loadLibrary</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#1-1-1-System-loadLibrary"><span class="nav-text">1.1.1 System.loadLibrary</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#1-1-2-Runtime-loadLibrary0"><span class="nav-text">1.1.2 Runtime.loadLibrary0</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#1-1-3-findLibrary"><span class="nav-text">1.1.3 findLibrary</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#1-1-4-mapLibraryName"><span class="nav-text">1.1.4 mapLibraryName</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#1-1-5-findNativeLibrary"><span class="nav-text">1.1.5 findNativeLibrary</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#1-2-nativeLoad"><span class="nav-text">1.2 nativeLoad</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#1-3-LoadNativeLibrary"><span class="nav-text">1.3 LoadNativeLibrary</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">  <a href="http://www.miitbeian.gov.cn" rel="noopener" target="_blank"> </a>&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Ranger Zhou</span>
+
+  
+
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="post-meta-item-icon">
+      <i class="fa fa-user"></i>
+    </span>
+    <span class="site-uv" title="总访客量">
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+    </span>
+  
+
+  
+    <span class="post-meta-divider">|</span>
+  
+
+  
+    <span class="post-meta-item-icon">
+      <i class="fa fa-eye"></i>
+    </span>
+    <span class="site-pv" title="总访问量">
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+    
+      <div>
+        
+  <script>
+    window._bd_share_config = {
+      "common": {
+        "bdText": "",
+        "bdMini": "1",
+        "bdMiniList": false,
+        "bdPic": ""
+      },
+      "image": {
+        "viewList": ["tsina", "douban", "sqq", "qzone", "weixin", "twi", "fbook"],
+        "viewText": "分享到：",
+        "viewSize": "16"
+      },
+      "slide": {
+        "bdImg": "5",
+        "bdPos": "left",
+        "bdTop": "100"
+      }
+    }
+  </script>
+
+<script>
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='//bdimg.share.baidu.com/static/api/js/share.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+      </div>
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <script src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/reading_progress/reading_progress.js"></script>
+
+
+  
+
+
+  <script src="/js/src/utils.js?v=7.0.0"></script>
+
+  <script src="/js/src/motion.js?v=7.0.0"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/src/affix.js?v=7.0.0"></script>
+
+  <script src="/js/src/schemes/pisces.js?v=7.0.0"></script>
+
+
+
+  
+  <script src="/js/src/scrollspy.js?v=7.0.0"></script>
+<script src="/js/src/post-details.js?v=7.0.0"></script>
+
+
+
+  
+
+
+  <script src="/js/src/bootstrap.js?v=7.0.0"></script>
+
+
+
+  
+
+
+  
+    <script>
+  window.livereOptions = {
+    refer: '2019/10/25/JNI-Study/'
+  };
+  (function(d, s) {
+    var j, e = d.getElementsByTagName(s)[0];
+    if (typeof LivereTower === 'function') { return; }
+    j = d.createElement(s);
+    j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+    j.async = true;
+    e.parentNode.insertBefore(j, e);
+  })(document, 'script');
+</script>
+
+  
+
+
+  
+  <script>
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url).replace(/\/{2,}/g, '/');
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x"></i></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x"></i></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+  <script>
+    (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js'; 
+      }
+      else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+      }
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+    })();
+  </script>
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+  
+  <script src="/lib/bookmark/bookmark.min.js?v=1.0"></script>
+  <script>
+  
+    bookmark.scrollToMark('auto', "#更多");
+  
+  </script>
+
+
+  
+  <style>
+    .copy-btn {
+      display: inline-block;
+      padding: 6px 12px;
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 20px;
+      color: #333;
+      white-space: nowrap;
+      vertical-align: middle;
+      cursor: pointer;
+      background-color: #eee;
+      background-image: linear-gradient(#fcfcfc, #eee);
+      border: 1px solid #d5d5d5;
+      border-radius: 3px;
+      user-select: none;
+      outline: 0;
+    }
+
+    .highlight-wrap .copy-btn {
+      transition: opacity .3s ease-in-out;
+      opacity: 0;
+      padding: 2px 6px;
+      position: absolute;
+      right: 4px;
+      top: 8px;
+    }
+
+    .highlight-wrap:hover .copy-btn,
+    .highlight-wrap .copy-btn:focus {
+      opacity: 1
+    }
+
+    .highlight-wrap {
+      position: relative;
+    }
+  </style>
+  <script>
+    $('.highlight').each(function(i, e) {
+      var $wrap = $('<div>').addClass('highlight-wrap');
+      $(e).after($wrap);
+      $wrap.append($('<button>').addClass('copy-btn').append('复制').on('click', function(e) {
+        var code = $(this).parent().find('.code').find('.line').map(function(i, e) {
+          return $(e).text();
+        }).toArray().join('\n');
+        var ta = document.createElement('textarea');
+        var range = document.createRange(); //For Chrome
+        var sel = window.getSelection(); //For Chrome
+        var yPosition = window.pageYOffset || document.documentElement.scrollTop;
+        ta.style.top = yPosition + 'px'; //Prevent page scroll
+        ta.style.position = 'absolute';
+        ta.style.opacity = '0';
+        ta.value = code;
+        ta.textContent = code; //For FireFox
+        ta.contentEditable = true;
+        ta.readOnly = false;
+        document.body.appendChild(ta);
+        range.selectNode(ta);
+        sel.removeAllRanges();
+        sel.addRange(range);
+        ta.setSelectionRange(0, code.length);
+        var result = document.execCommand('copy');
+        
+          if (result) $(this).text('复制成功');
+          else $(this).text('复制失败');
+        
+        ta.blur(); //For iOS
+        $(this).blur();
+      })).on('mouseleave', function(e) {
+        var $b = $(this).find('.copy-btn');
+        setTimeout(function() {
+          $b.text('复制');
+        }, 300);
+      }).append(e);
+    })
+  </script>
+
+
+
+  
+   <canvas class="fireworks" style="position: fixed;left: 0;top: 0;z-index: 1; pointer-events: none;"></canvas>
+   <script type="text/javascript" src="//cdn.bootcss.com/animejs/2.2.0/anime.min.js"></script>
+   <script type="text/javascript" src="/js/src/fireworks.js"></script>
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/wanko.model.json"},"display":{"position":"right","width":300,"height":600},"mobile":{"show":false},"log":false});</script></body>
+</html>
