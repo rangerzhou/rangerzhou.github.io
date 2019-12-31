@@ -817,6 +817,19 @@ set fencs=utf8,gbk,gb2312,gb18030
     sudo npm install npm -g
 ```
 
+### 31. vim 记忆位置不生效（只有加上 sudo 时才生效）
+
+原因：
+
+``` shell
+[ubuntu: ~]$ ls -l ~/.viminfo
+-rw------- 1 root root 4558 2015-05-09 13:58 ~/.viminfo
+```
+
+解决办法：
+删除文件~/.viminfo
+然后重新打开vim(注意要以当前用户打开),vim会自动重建该文件.
+
 
 
 Reference: http://einverne.github.io/post/2018/08/nemo-file-manager.html
