@@ -19,6 +19,22 @@ https://www.ubuntu.com/download/desktop
 
 <!--more-->
 
+安装 Linux Mint 双硬盘分区方案：
+
+``` shell
+SSD 500G分区
+EFI 分区：1024M # 500M 足够
+/boot 分区：2048M
+/swap 分区：32768M # 等于内存大小
+/ 分区：102400M
+/home 分区： 剩余所有空间
+
+HDD 1T分区：
+/home/xxx/work # 挂载到 /home/xxx/ 目录下
+```
+
+
+
 ## 二. Ubuntu 18.04 初始化
 
 ### 1. Update and Upgrade
