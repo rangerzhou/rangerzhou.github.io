@@ -87,3 +87,21 @@ $ grep -irn "SyncWriteStream" .\node_modules\hexo-deployer-git\
 > hexo-deployer-heroku 0.1.2
 
 当然还有hexo-fs，更新如上几个插件即可解决。
+
+
+
+#### 2. Fastly error: unknown domain: xxx. Please check that this domain has been added to a service.
+
+博客突然无法访问，显示如下错误：
+
+``` html
+Fastly error: unknown domain: rangerzhou.top. Please check that this domain has been added to a service.
+
+Details: cache-fty21337-FTY
+```
+
+参考问题：https://github.com/qiubaiying/qiubaiying.github.io/issues/289
+
+![阿里云域名解析](https://raw.githubusercontent.com/rangerzhou/git_resource/master/blog_resource/2020/aliyun.png)
+
+参照上图，阿里云控制台 - 域名 - 解析，值改为 185.199.111.153（开始改为 185.199.110.153 过了一会儿还是显示错误，就通过电脑 `ping xxx.github.io` 得到的了这个 IP），修改解析 IP 即可。
