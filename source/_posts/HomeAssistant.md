@@ -23,7 +23,71 @@ sudo pip3 install --upgrade homeassistant
 sudo pip3 install homeassistant==X.XX.X  # 指定哪个版本的安装
 ```
 
+#### Ubuntu 配置开机启动
 
+`sudo vim /etc/systemd/system/home-assistant@ranger.service`
+
+``` shell
+[Unit]
+Description=Home Assistant
+After=network-online.target
+ 
+[Service]
+Type=simple
+User=%i
+ExecStart=/home/ranger/anaconda3/envs/python3.8/bin/hass
+ 
+[Install]
+WantedBy=multi-user.target
+```
+
+重新加载systemd
+
+`sudo systemctl --system daemon-reload`
+
+加入启动项：
+
+`sudo systemctl enable home-assistant@pi.service`
+
+启动服务：
+
+`sudo systemctl start home-assistant@pi.service`
+
+查看服务：
+
+`sudo systemctl status home-assistant@pi.service`
+
+若查看系统启动服务可以用
+
+`systemctl list-units --type service`
+
+#### 创建 Hass 快捷命令
+
+vim ~/bin/ha-start
+
+``` shell
+sudo systemctl start home-assistant@ranger.service
+```
+
+vim ~/bin/ha-stop
+
+``` shell
+sudo systemct stop home-assistant@ranger.service
+```
+
+vim ~/bin/ha-restart
+
+``` shell
+sudo systemctl restart home-assistant@ranger.service
+```
+
+vim ~/bin/ha-log
+
+``` shell
+sudo journalctl -fu home-assistant@ranger.service
+```
+
+查看 log 也可以：`tail -f ~/.homeassistant/home-assistant.log`
 
 ### 基础配置
 

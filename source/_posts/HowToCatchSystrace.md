@@ -1,12 +1,14 @@
 ---
-title: 如何抓取systrace
+title: Systrace 基本知识
 date: 2017-07-18 14:04:52
 tags:
 categories: Android
 copyright: true
 ---
 
-## 1. Windows平台
+## 如何抓取 Systrace
+
+### 1. Windows平台
 
 > Windows平台有三种方法可以抓取systrace，分别是通过Eclipse，AndriodStudio和cmd命令，这里我们只介绍通过命令抓取。
 
@@ -25,13 +27,14 @@ copyright: true
 
   ``` powershell
   python D:\Android\sdk\platform-tools-linux\systrace\systrace.py -t 10 -o D:\debug\systrace\systrace.html gfx input webview view wm am sm audio video camera hal app res dalvik rs power sched freq idle load workq sync irq disk mmc
+  # workq sync irq disk mmc 这几个 tag 只有设备 root 的时候可以使用
   ```
 
-## 2. Linux平台
+### 2. Linux平台
 
 Linux平台和上述方法一致，一般默认都装好了python环境，直接执行命令即可，命令同上，替换命令中的文件路径。
 
-## 3. 离线systrace
+### 3. 离线systrace
 
 - 执行adb root和adb remount
 
@@ -63,4 +66,13 @@ Linux平台和上述方法一致，一般默认都装好了python环境，直接
 
 - 转化为systrace：`systrace.py --from-file trace_output -o output.html` 
 
-  ​
+
+
+
+
+
+
+
+## Reference
+
+https://www.androidperformance.com/2019/05/28/Android-Systrace-About/
