@@ -449,6 +449,14 @@ https://github.com/lyfeyaj/sublime-text-imfix
 
 https://zhuanlan.zhihu.com/p/32925500
 
+**创建环境**
+
+``` shell
+conda create -n <env_name> python=3.7
+```
+
+
+
 **切换环境**
 
 ``` shell
@@ -479,6 +487,19 @@ conda info --envs # 或者conda info -e，或者conda env list
 #注意： <env_name> 为被删除环境的名称。环境名两边不加尖括号“<>”
 conda remove --name <env_name> --all 
 ```
+
+安装好Anaconda后每次打开终端都会自动帮你激活基本环境（`base`），有时候确实自己不需要激活Conda环境（因为打开终端不一定要用到 Python），而且该项操作还会拖慢打开的终端的响应速度，在终端输入：
+
+``` shell
+$ conda config --set auto_activate_base false
+$ cat ~/.condarc
+channels:
+  - defaults
+ssl_verify: true
+auto_activate_base: false
+```
+
+第一次运行它时，它将在主目录中创建`~/.condarc`，并使用该设置覆盖默认值。
 
 ### 25. 切换 python 版本
 

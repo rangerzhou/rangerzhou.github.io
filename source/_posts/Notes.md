@@ -655,6 +655,40 @@ $ sysystemctl status bluetooth.service			# 显示单个 Unit 的状态
 
 
 
+#### 17. 使用 AndroidStudio 调试源码
+
+
+
+``` shell
+# 生成 idegen.jar
+source build/envsetup.sh
+lunch xxx
+make idegen -j8 # 或者 ./development/tools/idegen/idegen.sh
+
+# 执行脚本
+./development/tools/idegen/idegen.sh
+```
+
+执行脚本后在源码根目录生成 android.iml 和 android.ipr ，编辑 android.iml，添加 <excludeFolder> 过滤不需要调试的目录，随后用 AndroidStudio `Open an existing Android Studio project` 打开 android.ipr 文件，第一次打开，AndroidStudio下方的状态栏会提示Scanning files to index... ，耐心等待即可。
+
+**配置 Project SDK**
+
+```
+主要是配置一个空的JDK，使代码在AOSP源码目录中跳转，不会跳到JDK中去
+
+打开AndroidStudio菜单 File ---> Project Structure，
+
+选择Platform Settings选项下的SDKs，紧接着点右侧上方的＋号，选择＋JDK，这里让选择JDK路径时直接默认的即可，点击OK；
+然后将Name改为AOSP_nojar,然后将Classpath下的所有.jar文件全部选中删除，
+再将Sourcepath,Annotations,Documentation Paths 下的文件全部删除，（当前AOSP源码是 android-9.0.0_r52, Project SDK 应为 Android API 28 Platform），
+紧接着点击Android API 28 Platform,右侧选择 Java SDK 为刚创建的 AOSP_nojar，
+然后选择Project Settings选项下的Project，将右侧的Project SDK 设置为与当前AOSP源码版本一致，如Android API 28 Platform
+
+然后选择Project Settings选项下的Modules,点击右侧的Dependencies,保留最下面的 Module source 和Android API 27 Platform，其他的.jar文件全部删除
+
+现在代码可以正确的跳转了
+```
+
 
 
 https://yourzeromax.top/2018/08/13/Android-%E5%90%8C%E4%B8%80%E4%B8%AATextView%E4%B8%AD%E5%A4%9A%E5%BD%A9%E6%98%BE%E7%A4%BA%E6%96%87%E5%AD%97/
