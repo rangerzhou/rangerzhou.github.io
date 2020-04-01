@@ -7,16 +7,6 @@ categories: IGNITE
 password:
 ---
 
-
-
-教程：https://zybuluo.com/liyuj/note/230739
-
-
-
-> Ignite 相关记录。
-
-
-
 > Apache-ignite 相关记录。
 
 <!--more-->
