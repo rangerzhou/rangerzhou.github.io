@@ -112,7 +112,7 @@
 <meta property="og:site_name" content="RangerZhou">
 <meta property="og:description" content="一. Ubuntu 18.04 安装1. Download Ubuntu-xxx.isohttps://www.ubuntu.com/download/desktop 制作优盘镜像时，选择 GPT 模式；机器启动时，选择UEFI，Security off">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2020-01-07T07:01:16.007Z">
+<meta property="og:updated_time" content="2020-04-01T06:16:05.422Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Ubuntu18.04安装后必备操作">
 <meta name="twitter:description" content="一. Ubuntu 18.04 安装1. Download Ubuntu-xxx.isohttps://www.ubuntu.com/download/desktop 制作优盘镜像时，选择 GPT 模式；机器启动时，选择UEFI，Security off">
@@ -497,7 +497,7 @@
                 
                   <span class="post-meta-item-text">更新于</span>
                 
-                <time title="修改时间：2020-01-07 15:01:16" itemprop="dateModified" datetime="2020-01-07T15:01:16+08:00">2020-01-07</time>
+                <time title="修改时间：2020-04-01 14:16:05" itemprop="dateModified" datetime="2020-04-01T14:16:05+08:00">2020-04-01</time>
               
             
             
@@ -634,6 +634,8 @@
 <h3 id="23-sublime-输入中文"><a href="#23-sublime-输入中文" class="headerlink" title="23. sublime 输入中文"></a>23. sublime 输入中文</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">sudo apt update &amp;&amp; sudo apt upgrade</span><br><span class="line">git clone https://github.com/lyfeyaj/sublime-text-imfix.git</span><br><span class="line">cd sublime-text-imfix &amp;&amp; ./sublime-imfix</span><br></pre></td></tr></table></figure>
 <p><a href="https://github.com/lyfeyaj/sublime-text-imfix" target="_blank" rel="noopener">https://github.com/lyfeyaj/sublime-text-imfix</a></p>
 <h3 id="24-安装-anaconda"><a href="#24-安装-anaconda" class="headerlink" title="24. 安装 anaconda"></a>24. 安装 anaconda</h3><p><a href="https://zhuanlan.zhihu.com/p/32925500" target="_blank" rel="noopener">https://zhuanlan.zhihu.com/p/32925500</a></p>
+<p><strong>创建环境</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">conda create -n &lt;env_name&gt; python=3.7</span><br></pre></td></tr></table></figure>
 <p><strong>切换环境</strong></p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">source activate python2</span><br><span class="line">source activate python3</span><br><span class="line"><span class="meta">#</span> 或者</span><br><span class="line">conda activate python2</span><br><span class="line">conda activate python3</span><br></pre></td></tr></table></figure>
 <p><strong>退出环境至root</strong></p>
@@ -642,6 +644,9 @@
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">conda info --envs # 或者conda info -e，或者conda env list</span><br></pre></td></tr></table></figure>
 <p><strong>删除环境</strong></p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span>注意： &lt;env_name&gt; 为被删除环境的名称。环境名两边不加尖括号“&lt;&gt;”</span><br><span class="line">conda remove --name &lt;env_name&gt; --all</span><br></pre></td></tr></table></figure>
+<p>安装好Anaconda后每次打开终端都会自动帮你激活基本环境（<code>base</code>），有时候确实自己不需要激活Conda环境（因为打开终端不一定要用到 Python），而且该项操作还会拖慢打开的终端的响应速度，在终端输入：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span> conda config --set auto_activate_base false</span><br><span class="line"><span class="meta">$</span> cat ~/.condarc</span><br><span class="line">channels:</span><br><span class="line">  - defaults</span><br><span class="line">ssl_verify: true</span><br><span class="line">auto_activate_base: false</span><br></pre></td></tr></table></figure>
+<p>第一次运行它时，它将在主目录中创建<code>~/.condarc</code>，并使用该设置覆盖默认值。</p>
 <h3 id="25-切换-python-版本"><a href="#25-切换-python-版本" class="headerlink" title="25. 切换 python 版本"></a>25. 切换 python 版本</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span> update-alternatives --list python</span><br><span class="line">update-alternatives: error: no alternatives for python</span><br></pre></td></tr></table></figure>
 <p>如果出现以上所示的错误信息，则表示 Python 的替代版本尚未被 update-alternatives 命令识别。想解决这个问题，我们需要更新一下替代列表，将安装的 python 放入其中：</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span> sudo update-alternatives --install /usr/bin/python python /usr/bin/python2.7 1</span><br><span class="line">update-alternatives: using /usr/bin/python2.7 to provide /usr/bin/python (python) in auto mode</span><br><span class="line"><span class="meta">$</span> sudo update-alternatives --install /usr/bin/python python /usr/bin/python3.6 2</span><br><span class="line">update-alternatives: using /usr/bin/python3.6 to provide /usr/bin/python (python) in auto mode</span><br><span class="line"><span class="meta">$</span> sudo update-alternatives --install /usr/bin/python python /home/ranger/anaconda3/bin/python3.7 3</span><br><span class="line">update-alternatives: using /home/ranger/anaconda3/bin/python3.7 to provide /usr/bin/python (python) in auto mode</span><br></pre></td></tr></table></figure>
@@ -788,7 +793,7 @@
   <p><span>本文标题:</span><a href="/2018/10/30/Ubuntu18.04_installation/">Ubuntu18.04安装后必备操作</a></p>
   <p><span>文章作者:</span><a href="/" title="访问 Ranger Zhou 的个人博客">Ranger Zhou</a></p>
   <p><span>发布时间:</span>2018年10月30日 - 10:22</p>
-  <p><span>最后更新:</span>2020年01月07日 - 15:01</p>
+  <p><span>最后更新:</span>2020年04月01日 - 14:16</p>
   <p><span>原始链接:</span><a href="/2018/10/30/Ubuntu18.04_installation/" title="Ubuntu18.04安装后必备操作">http://rangerzhou.top/2018/10/30/Ubuntu18.04_installation/</a>
     <span class="copy-path" title="点击复制文章链接"><i class="fa fa-clipboard" data-clipboard-text="http://rangerzhou.top/2018/10/30/Ubuntu18.04_installation/" aria-label="复制成功！"></i></span>
   </p>
@@ -922,7 +927,7 @@
                 
                   <a href="/archives/">
                 
-                    <span class="site-state-item-count">45</span>
+                    <span class="site-state-item-count">47</span>
                     <span class="site-state-item-name">日志</span>
                   </a>
                 </div>
@@ -957,7 +962,11 @@
                     
                       
                     
-                    <span class="site-state-item-count">11</span>
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">13</span>
                     <span class="site-state-item-name">分类</span>
                   </a>
                 </div>
