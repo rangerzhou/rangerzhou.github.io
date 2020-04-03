@@ -148,7 +148,7 @@ https://juejin.im/post/5ce3db825188252d23796a5f
 
 https://zhuanlan.zhihu.com/p/28485468
 
-``` shell
+``` bash
 # https://superset.incubator.apache.org/installation.html
 # Install　Anaconda：https://zhuanlan.zhihu.com/p/32925500
 # Download anaconda: https://www.anaconda.com/distribution/#linux
@@ -174,9 +174,9 @@ $ superset load_examples
 $ superset init
 # To start a development web server on port 8088, use -p to bind to another port
 $ superset run -p 8088 --with-threads --reload --debugger
-
-
 ```
+
+
 
 按照如上步骤操作，基本无异常，如有异常请重新安装，重新安装的话在 superset db upgrade 时可能的异常：
 

@@ -142,7 +142,7 @@ dumpsys memifno --package com.tencent.mm // 输出微信的进程，可能包含
 root:/ # cat proc/meminfo
 MemTotal:        2912956 kB	// RAM可用总大小（物理总内存减去系统须留和内核二进制代码大小）
 MemFree:           37836 kB	// RAM未使用的大小
-MemAvailable:    1306036 kB	// 可用RAM（这个和MemFree什么区别？）
+MemAvailable:    1306036 kB	// 可用RAM（这个和MemFree什么区别？已在下方解答）
 Buffers:           90524 kB	// 用于文件缓存
 Cached:          1299636 kB	// 用于高速缓存
 SwapCached:            4 kB	// 用于swap缓存
@@ -176,6 +176,14 @@ VmallocUsed:      183136 kB	// 已使用的虚拟地址空间
 VmallocChunk:   258733028 kB // 虚拟地址空间可用的最大连续内存块
 ```
 
+之前没弄明白 MemFree 和 MemAvailable 的区别，今天有空顺手查了查，总结如下：
+
+- MemTotal: 内存总数，除去内核等使用的，剩下的可供系统支配的内存。
+- MemFree: 空闲内存数，表示系统尚未使用的内存。MemUsed=MemTotal-MemFree就是已被用掉的内存
+- MemAvailable: 应用程序可用内存数，系统中有些内存虽然已被使用但是可以回收的，比如cache/buffer、slab都有一部分可以回收，所以MemFree不能代表全部可用的内存，这部分可回收的内存加上MemFree才是系统可用的内存，即：**MemAvailable≈MemFree+Buffers+Cached**，它是内核使用特定的算法计算出来的，是一个估计值。**与MemFree的关键区别点在于，MemFree是说的系统层面，MemAvailable是说的应用程序层面**。
+- Buffers: 缓冲区内存数。
+- Cache: 缓存区内存数。
+
 ### 2.4 free
 
 示例：
@@ -190,8 +198,10 @@ Swap:      1073737728     8151040  1065586688
 
 `free` 比较简单轻量，用于查看可用内存，缺省单位KB，专注于查看剩余内存情况，数据来源于/proc/meminfo。
 
-- Mem行：total = used + free;
-- -/+ buffers行：used = used(Mem) - buffers(Mem); free = free(Mem) + buffers(Mem);
+- **OS Mem**：total = used + free;
+- **buffers/cache**：used = used(Mem) - buffers(Mem);
+- **buffers/cache**：free = free(Mem) + buffers(Mem);
+- **buffers/cache**：total = buffers/cache used + buffers/cache free = **OS Mem total**
 
 ### 2.5 vmstat
 
