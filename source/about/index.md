@@ -22,3 +22,9 @@ categories: "Freedom"
 
 ![小哥哥微信](http://rangerzhou.top/images/wechat.jpg)
 
+
+
+##### 公众号
+
+![公众号](http://rangerzhou.top/images/qrcode_official.jpg)
+

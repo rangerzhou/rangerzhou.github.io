@@ -145,8 +145,9 @@ menu:
   #schedule: /schedule/ || calendar
   #sitemap: /sitemap.xml || sitemap
   about: /about/ || user
-  shop: http://fashionentice.taobao.com/ || user
+  shop: http://rangerzhou.taobao.com/ || user
   commonweal: /404.html || heartbeat
+  official: /official || /images/official.jpg
   #movies: /movies || user
 
 # Enable/Disable menu icons / item badges.
