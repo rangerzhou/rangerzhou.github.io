@@ -26,5 +26,5 @@ categories: "Freedom"
 
 ##### 公众号
 
-![公众号](http://rangerzhou.top/images/qrcode_official.jpg)
+![公众号](http://rangerzhou.top/images/qrcode_official_15cm.jpg)
 
