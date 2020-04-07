@@ -16,7 +16,7 @@ categories: "Freedom"
 ##### 打赏小哥哥
 
 - 如果觉得小哥哥的文章对您有所帮助或者启发，可随意 [**¥打赏小哥哥** ](/images/wechat.jpg)，给予更多的支持与鼓励，谢谢大家。
-- 也可以去**[小哥哥淘宝店](http://fashionentice.taobao.com/)**买买买。
+- 也可以去**[小哥哥淘宝店](http://rangerzhou.taobao.com/)**买买买。
 
 ##### 小哥哥微信
 
