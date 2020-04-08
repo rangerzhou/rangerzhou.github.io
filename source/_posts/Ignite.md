@@ -19,7 +19,7 @@ a. 下载 gridgain-web-console-agent
 
 https://console.gridgain.com/configuration/overview
 
-![Down WebConsoleAgent](https://raw.githubusercontent.com/rangerzhou/git_resource/master/blog_resource/2020/downloadWebConsoleAgent.png)
+![Down WebConsoleAgent](https://raw.githubusercontent.com/rangerzhou/ImageHosting/master/blog_resource/2020/downloadWebConsoleAgent.png)
 
 b. 解压 gridgain-web-console-agent-2020.02.00.zip
 
@@ -56,7 +56,7 @@ $ ./IGNITE_HOME/gridgain-web-console-agent.sh
 
 Run - Edit Configurations - 选中 Application 下需要配置的项 - 右侧 Configuration 选项 - 配置 Environment variables - 添加环境变量即可。
 
-![image-20200317160517354](https://raw.githubusercontent.com/rangerzhou/git_resource/master/blog_resource/2020/ConfigIGNITE_HOME.png)
+![image-20200317160517354](https://raw.githubusercontent.com/rangerzhou/ImageHosting/master/blog_resource/2020/ConfigIGNITE_HOME.png)
 
 
 

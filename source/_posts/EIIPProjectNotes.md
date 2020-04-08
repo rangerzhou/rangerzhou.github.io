@@ -264,7 +264,7 @@ File → Project Structure → Project/Modules，把 Language level 改为 8 .
 
 File - settings - Build, Execution, Deployment - Compiler - Java Compiler - Per-module bytecode version - Target bytecode version 改为8
 
-![image-20200317094727794](https://raw.githubusercontent.com/rangerzhou/git_resource/master/blog_resource/2020/TargetBytecodeVersion.png)
+![image-20200317094727794](https://raw.githubusercontent.com/rangerzhou/ImageHosting/master/blog_resource/2020/TargetBytecodeVersion.png)
 
 一劳永逸的方法是在 pom.xml 中加入如下配置：
 

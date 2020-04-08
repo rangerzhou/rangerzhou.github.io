@@ -20,9 +20,9 @@ HA Version: 0.94.4
 
 ### 1.1. 预览
 
-![001](https://raw.githubusercontent.com/rangerzhou/git_resource/master/blog_resource/2019/HeWeather_001.PNG)
+![001](https://raw.githubusercontent.com/rangerzhou/ImageHosting/master/blog_resource/2019/HeWeather_001.PNG)
 
-![002](https://raw.githubusercontent.com/rangerzhou/git_resource/master/blog_resource/2019/HeWeather_002.PNG)
+![002](https://raw.githubusercontent.com/rangerzhou/ImageHosting/master/blog_resource/2019/HeWeather_002.PNG)
 
 ### 1.2 下载组件
 
@@ -82,7 +82,7 @@ mode: hourly
 
 ## 2. HeWeather组件实现
 
-![HeWeather](https://raw.githubusercontent.com/rangerzhou/git_resource/master/Hass_Resources/HeWeather.png)
+![HeWeather](https://raw.githubusercontent.com/rangerzhou/ImageHosting/master/Hass_Resources/HeWeather.png)
 
 ### 2.1 下载组件
 

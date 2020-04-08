@@ -20,7 +20,7 @@ Model info: zhimi.airpurifier.m2
 
 首先上图：
 
-![米空气净化器2](https://raw.githubusercontent.com/rangerzhou/git_resource/master/Hass_Resources/ScreenShots_AirPurifier2.PNG)
+![米空气净化器2](https://raw.githubusercontent.com/rangerzhou/ImageHosting/master/Hass_Resources/ScreenShots_AirPurifier2.PNG)
 
 参考了 2 篇小米空气净化器2配置的文章：
 
@@ -46,7 +46,7 @@ Token: 9c9aa**************************** via auto-token
 Support: At least basic
 ```
 
-第二种，安装 [米家 APP (5.4.63版本)](https://github.com/rangerzhou/git_resource/tree/master/apps)，此版本可以直接显示 token ，不知道会不会哪天就被封了……
+第二种，安装 [米家 APP (5.4.63版本)](https://github.com/rangerzhou/ImageHosting/tree/master/apps)，此版本可以直接显示 token ，不知道会不会哪天就被封了……
 
 第三种，安装 python-miio 工具：
 

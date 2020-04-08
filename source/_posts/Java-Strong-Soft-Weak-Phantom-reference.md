@@ -8,7 +8,7 @@ password:
 
 ---
 
-![](https://raw.githubusercontent.com/rangerzhou/git_resource/master/blog_resource/2020/SenXi.jpg)
+![](https://raw.githubusercontent.com/rangerzhou/ImageHosting/master/blog_resource/2020/SenXi.jpg)
 
 > 在 JDK 1.2 之后，Java 对引用的概念进行了扩充，将引用分为**强引用（Strong Reference）**、**软引用（Soft Reference）**、**弱引用（Weak Reference）**、**虚引用（Phantom Reference）**四种，引用强度：强引用 > 软引用 > 弱引用 > 虚引用。
 

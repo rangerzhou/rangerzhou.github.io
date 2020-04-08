@@ -22,7 +22,7 @@ File-New-New Module，切换 Project 视图，复制 jar 包到libs目录；
 
 Run - EditConfigurations - + Application，填写 Name, Main class, Working directory, Use classpath of module，点击OK，如下图:
 
-![androidStudioRunClassConfiguration](https://raw.githubusercontent.com/rangerzhou/git_resource/master/blog_resource/2019/androidStudioRunClassConfiguration.png)
+![androidStudioRunClassConfiguration](https://raw.githubusercontent.com/rangerzhou/ImageHosting/master/blog_resource/2019/androidStudioRunClassConfiguration.png)
 
 lsof -i:8989 可查看 8989 端口是否被占用，如被占用 kill PID 即可。
 

@@ -102,6 +102,6 @@ Details: cache-fty21337-FTY
 
 参考问题：https://github.com/qiubaiying/qiubaiying.github.io/issues/289
 
-![阿里云域名解析](https://raw.githubusercontent.com/rangerzhou/git_resource/master/blog_resource/2020/aliyun.png)
+![阿里云域名解析](https://raw.githubusercontent.com/rangerzhou/ImageHosting/master/blog_resource/2020/aliyun.png)
 
 参照上图，阿里云控制台 - 域名 - 解析，值改为 185.199.111.153（ [Github Page](https://help.github.com/en/github/working-with-github-pages/managing-a-custom-domain-for-your-github-pages-site) 公布的 IP ，开始改为 185.199.110.153 过了一会儿还是显示错误，就通过电脑 `ping xxx.github.io` 得到的了这个 IP），修改解析 IP 即可。
