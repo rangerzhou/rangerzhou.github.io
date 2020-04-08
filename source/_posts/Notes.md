@@ -653,11 +653,7 @@ $ systemctl status 								# 显示系统状态
 $ sysystemctl status bluetooth.service			# 显示单个 Unit 的状态
 ```
 
-
-
 #### 17. 使用 AndroidStudio 调试源码
-
-
 
 ``` shell
 # 生成 idegen.jar
@@ -691,5 +687,13 @@ make idegen -j8 # 或者 ./development/tools/idegen/idegen.sh
 
 
 
-https://yourzeromax.top/2018/08/13/Android-%E5%90%8C%E4%B8%80%E4%B8%AATextView%E4%B8%AD%E5%A4%9A%E5%BD%A9%E6%98%BE%E7%A4%BA%E6%96%87%E5%AD%97/
+[Android 同一个TextView中多彩显示文字](https://yourzeromax.top/2018/08/13/Android-%E5%90%8C%E4%B8%80%E4%B8%AATextView%E4%B8%AD%E5%A4%9A%E5%BD%A9%E6%98%BE%E7%A4%BA%E6%96%87%E5%AD%97/) 
+
+
+
+#### 18. 批量查找并替换字符串
+
+``` shell
+grep oldStr -rl ./source | xargs sed -i 's/oldStr/newStr/g'
+```
 
