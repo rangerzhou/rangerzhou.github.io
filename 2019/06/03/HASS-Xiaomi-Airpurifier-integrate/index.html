@@ -112,12 +112,12 @@
 <meta property="og:site_name" content="RangerZhou">
 <meta property="og:description" content="在 Home Assistant 中集成小米空气净化器2（底部标签型号：AC-M2-AA），网上各种配置比较杂乱，且没有找到针对此净化器完美的配置，可能是因为 HA 更新了，旧的配置失效了，本文写作时 HA 的版本是 0.93.2">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:image" content="https://raw.githubusercontent.com/rangerzhou/git_resource/master/Hass_Resources/ScreenShots_AirPurifier2.PNG">
-<meta property="og:updated_time" content="2019-12-31T04:33:39.549Z">
+<meta property="og:image" content="https://raw.githubusercontent.com/rangerzhou/ImageHosting/master/Hass_Resources/ScreenShots_AirPurifier2.PNG">
+<meta property="og:updated_time" content="2020-04-08T07:49:44.969Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="HomeAssistant 集成小米空气净化器2">
 <meta name="twitter:description" content="在 Home Assistant 中集成小米空气净化器2（底部标签型号：AC-M2-AA），网上各种配置比较杂乱，且没有找到针对此净化器完美的配置，可能是因为 HA 更新了，旧的配置失效了，本文写作时 HA 的版本是 0.93.2">
-<meta name="twitter:image" content="https://raw.githubusercontent.com/rangerzhou/git_resource/master/Hass_Resources/ScreenShots_AirPurifier2.PNG">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/rangerzhou/ImageHosting/master/Hass_Resources/ScreenShots_AirPurifier2.PNG">
 
 
 
@@ -516,7 +516,7 @@
                 
                   <span class="post-meta-item-text">更新于</span>
                 
-                <time title="修改时间：2019-12-31 12:33:39" itemprop="dateModified" datetime="2019-12-31T12:33:39+08:00">2019-12-31</time>
+                <time title="修改时间：2020-04-08 15:49:44" itemprop="dateModified" datetime="2020-04-08T15:49:44+08:00">2020-04-08</time>
               
             
             
@@ -584,7 +584,7 @@
 <p>净化器型号: AC-M2-AA</p>
 <p>Model info: zhimi.airpurifier.m2</p>
 <p>首先上图：</p>
-<p><img src="https://raw.githubusercontent.com/rangerzhou/git_resource/master/Hass_Resources/ScreenShots_AirPurifier2.PNG" alt="米空气净化器2"></p>
+<p><img src="https://raw.githubusercontent.com/rangerzhou/ImageHosting/master/Hass_Resources/ScreenShots_AirPurifier2.PNG" alt="米空气净化器2"></p>
 <p>参考了 2 篇小米空气净化器2配置的文章：</p>
 <ul>
 <li><a href="https://bbs.hassbian.com/thread-1657-1-1.html" target="_blank" rel="noopener">最新小米空气净化器2代接入HASS方法及HA控制面板</a> </li>
@@ -594,7 +594,7 @@
 <h3 id="1-获取-Token"><a href="#1-获取-Token" class="headerlink" title="1. 获取 Token"></a>1. 获取 Token</h3><p>有 3 种方法获取 token 。</p>
 <p>第一种，HACHINA 定制的树莓派集成了 miio 工具，可直接使用命令获取 token：</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> miio discover</span></span><br><span class="line">INFO  Discovering devices. Press Ctrl+C to stop.</span><br><span class="line"></span><br><span class="line">Device ID: 6264xxxx</span><br><span class="line">Model info: zhimi.airpurifier.m2</span><br><span class="line">Address: 192.168.xxx.xxx</span><br><span class="line">Token: 9c9aa**************************** via auto-token</span><br><span class="line">Support: At least basic</span><br></pre></td></tr></table></figure>
-<p>第二种，安装 <a href="https://github.com/rangerzhou/git_resource/tree/master/apps" target="_blank" rel="noopener">米家 APP (5.4.63版本)</a>，此版本可以直接显示 token ，不知道会不会哪天就被封了……</p>
+<p>第二种，安装 <a href="https://github.com/rangerzhou/ImageHosting/tree/master/apps" target="_blank" rel="noopener">米家 APP (5.4.63版本)</a>，此版本可以直接显示 token ，不知道会不会哪天就被封了……</p>
 <p>第三种，安装 python-miio 工具：</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sudo pip3 install python-miio</span><br><span class="line">mirobo discover --handshake 1</span><br></pre></td></tr></table></figure>
 <h3 id="2-新建-packages-目录"><a href="#2-新建-packages-目录" class="headerlink" title="2. 新建 packages 目录"></a>2. 新建 packages 目录</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 在 /home/pi/homeassistant/ 新建 packages 目录</span></span><br><span class="line"><span class="meta">$</span><span class="bash"> mkdir packages</span></span><br></pre></td></tr></table></figure>
@@ -685,7 +685,7 @@
   <p><span>本文标题:</span><a href="/2019/06/03/HASS-Xiaomi-Airpurifier-integrate/">HomeAssistant 集成小米空气净化器2</a></p>
   <p><span>文章作者:</span><a href="/" title="访问 Ranger Zhou 的个人博客">Ranger Zhou</a></p>
   <p><span>发布时间:</span>2019年06月03日 - 13:42</p>
-  <p><span>最后更新:</span>2019年12月31日 - 12:33</p>
+  <p><span>最后更新:</span>2020年04月08日 - 15:49</p>
   <p><span>原始链接:</span><a href="/2019/06/03/HASS-Xiaomi-Airpurifier-integrate/" title="HomeAssistant 集成小米空气净化器2">http://rangerzhou.top/2019/06/03/HASS-Xiaomi-Airpurifier-integrate/</a>
     <span class="copy-path" title="点击复制文章链接"><i class="fa fa-clipboard" data-clipboard-text="http://rangerzhou.top/2019/06/03/HASS-Xiaomi-Airpurifier-integrate/" aria-label="复制成功！"></i></span>
   </p>
