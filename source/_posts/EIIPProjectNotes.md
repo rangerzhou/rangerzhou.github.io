@@ -293,3 +293,9 @@ a. 修改终端显示 log 级别
 $ vim $SPARK_HOME/conf/log4j.properties
 log4j.rootCategory=WARN, console
 ```
+
+### 参数配置
+
+板子 IP：192.168.20.10
+
+电脑 IP：192.168.20.55

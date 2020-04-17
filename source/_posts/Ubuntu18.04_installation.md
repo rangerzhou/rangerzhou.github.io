@@ -867,6 +867,42 @@ set fencs=utf8,gbk,gb2312,gb18030
 删除文件~/.viminfo
 然后重新打开vim(注意要以当前用户打开),vim会自动重建该文件.
 
+### 32. Ubuntu LibreOffice 相关配置
+
+#### 32.1 关闭 LibreOffice Calc 输入字母自动大写
+
+`Tools - AutoCorrect Options... - Options` 中取消勾选 `Capitalize first letter of every sentence` 即可。
+
+#### 32.2 关闭 boolean 型值 true/false 自动变为 TRUE/FALSE
+
+暂未知
+
+### 33. Ubuntu 终端录制工具
+
+#### 33.1 ttygif
+
+安装和使用方式见 github： https://github.com/icholy/ttygif
+
+**1. Create ttyrec recording**
+
+```
+$ ttyrec myrecording
+```
+
+- Hit CTRL-D or type `exit` when done recording.
+
+**2. Convert to gif**
+
+```
+$ ttygif myrecording
+```
+
+#### 33.2 termtosvg
+
+安装和使用方式见 github：https://github.com/nbedos/termtosvg
+
+**ttygif** 使用更简单。
 
 
-Reference: http://einverne.github.io/post/2018/08/nemo-file-manager.html
+
+Reference: [使用 NEMO 文件管理器](http://einverne.github.io/post/2018/08/nemo-file-manager.html) 

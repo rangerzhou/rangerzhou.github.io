@@ -58,9 +58,117 @@ Run - Edit Configurations - 选中 Application 下需要配置的项 - 右侧 Co
 
 ![image-20200317160517354](https://raw.githubusercontent.com/rangerzhou/ImageHosting/master/blog_resource/2020/ConfigIGNITE_HOME.png)
 
+### IGNITE 工具使用
+
+#### ignitevisorcmd.sh 脚本
+
+位置：`$IGNITE_HOME/bin/ignitevisorcmd.sh`
+
+可查看 node, cache, config 等详细信息，使用方法如下：
+
+``` bash
+$ $IGNITE_HOME/bin/ignitevisorcmd.sh
+... ...
+# 输入 open 加入网格
+visor> open
+Local configuration files:
++========================================================================================+
+|  #  |                                                    Configuration File            |
++========================================================================================+
+| 0   | config/default-config.xml                                                        |
+| 1   | benchmarks/config/ignite-base-config.xml                                         |
+| 2   | benchmarks/config/ignite-localhost-config.xml                                    |
+| 3   | benchmarks/config/ignite-multicast-config.xml                                    |
+... ...
++----------------------------------------------------------------------------------------+
+# 选择配置文件，选择 0 即可
+Choose configuration file number ('c' to cancel) [0]: 0
+... ...
+Some useful commands:
++--------------------------------------------+
+| Type 'top'    | to see full topology.      |
+| Type 'node'   | to see node statistics.    |
+| Type 'cache'  | to see cache statistics.   |
+| Type 'tasks'  | to see tasks statistics.   |
+| Type 'config' | to see node configuration. |
++--------------------------------------------+
+
+Type 'help' to get help.
+
++---------------------------------------------------------------------------------+
+| Status               | Connected                                                |
+| Ignite instance name | <default>                                                |
+| Config path          | /home/ranger/opt/apache-ignite/config/default-config.xml |
+| Uptime               | 00:00:00                                                 |
++---------------------------------------------------------------------------------+
+visor> cache
+```
+
+**查看 node**
+
+<img src="https://raw.githubusercontent.com/rangerzhou/ImageHosting/master/Pictures/ignitevisorcmd_node.png" alt="node"  />
+
+**查看 cache**
+
+![cache](https://raw.githubusercontent.com/rangerzhou/ImageHosting/master/Pictures/ignitevisorcmd_cache.png)
+
+上图中的 `personCache` 是在代码中创建的（使用 ignite 的 setIndexedTypes ），[例子在此](https://github.com/sunwu51/bigdatatutorial/blob/master/Persistence/Ignite2.md) ；
+
+`SQL_PUBLIC_CITY` 是通过 SQL 语句建表生成的：
+
+``` sql
+CREATE TABLE City (id LONG PRIMARY KEY, name VARCHAR)
+```
+
+`cache_person` 也是通过 SQL 语句建表生成的：
+
+``` sql
+CREATE TABLE Person (id LONG PRIMARY KEY, name VARCHAR) WITH "CACHE_NAME = cache_person"
+```
+
+详细文档点击 [ignite create-table](https://www.ignite-service.cn/doc/sql/SQLReference.html#_2-3-create-table) 查看。
+
+#### sqlline 工具
+
+[使用教程](https://www.ignite-service.cn/doc/sql/ToolsAndAnalytics.html#_2-sqlline)
+
+位置：`$IGNITE_HOME/bin/sqlline.sh`
+
+ignite 支持完整的 SQL，通过 `sqlline.sh` 可以直接连接 ignite 数据库服务，使用方法如下：
+
+``` bash
+$ sqlline.sh
+sqlline version 1.3.0
+sqlline>
+# 连接
+sqlline> !connect jdbc:ignite:thin://localhost
+Enter username for jdbc:ignite:thin://localhost:
+Enter password for jdbc:ignite:thin://localhost:
+0: jdbc:ignite:thin://localhost>
+# 随后即可输入 SQL 命令了
+0: jdbc:ignite:thin://localhost> !tables
+
+```
+
+**查看 tables**
+
+`0: jdbc:ignite:thin://localhost> !tables`
+
+![](https://raw.githubusercontent.com/rangerzhou/ImageHosting/master/Pictures/sqlline_!tables.png)
+
+如上图所示，在代码中创建 Cache，`CacheConfiguration.setIndexedTypes(Integer.class, Person.class);` 参数中的 Person.class 的类名即为生成的 TABLE_NAME（即类名会被用作表名），Cache 名即为 TABLE_SCHEM。
+
+**查询**
+
+`0: jdbc:ignite:thin://localhost> select * from "personCache".PERSON;`
+
+![select](https://raw.githubusercontent.com/rangerzhou/ImageHosting/master/Pictures/sqlline_select*.png)
 
 
 
+### Ignite 使用注意事项
+
+- [只有 `TRANSACTIONAL` 原子化模式中才支持锁](https://www.ignite-service.cn/doc/java/Key-ValueDataGrid.html#_9-锁)，分布式锁 Lock 不支持原子化模式 `ATOMIC`，[事务原子化模式]([https://www.ignite-service.cn/doc/java/Key-ValueDataGrid.html#_8-%E4%BA%8B%E5%8A%A1](https://www.ignite-service.cn/doc/java/Key-ValueDataGrid.html#_8-事务)) 有三种（`TRANSACTIONAL`、`TRANSACTIONAL_SNAPSHOT`、`ATOMIC`），但是如果使用 `TRANSACTIONAL_SNAPSHOT` 的话，会提示 Lock 不支持 Enable [MVCC](https://www.ignite-service.cn/doc/sql/Architecture.html#_7-1-概述) ，所以要使用 `TRANSACTIONAL` 模式。
 
 ### Ignite 相关异常
 
@@ -196,8 +304,24 @@ Exception in thread "pool-2-thread-1" java.lang.IllegalArgumentException
 
 `new IgniteZerMqStreamer(int ioThreads, ZeroMqTypeSocket socketType, @NotNull String addr, byte[] topic) `中 topic 参数错误，参数不能为 null， 传入 ZMQ.SUBSCRIPTION_ALL 即可。
 
+#### Ignite 持久化异常
 
+``` shell
+Caused by: class org.apache.ignite.spi.IgniteSpiException: Joining persistence node to in-memory cluster couldn't be allowed due to baseline auto-adjust is enabled and timeout equal to 0
+	at org.apache.ignite.spi.discovery.tcp.TcpDiscoverySpi.checkFailedError(TcpDiscoverySpi.java:1997)
+	at org.apache.ignite.spi.discovery.tcp.ServerImpl.joinTopology(ServerImpl.java:1116)
+	at org.apache.ignite.spi.discovery.tcp.ServerImpl.spiStart(ServerImpl.java:427)
+	at org.apache.ignite.spi.discovery.tcp.TcpDiscoverySpi.spiStart(TcpDiscoverySpi.java:2099)
+	at org.apache.ignite.internal.managers.GridManagerAdapter.startSpi(GridManagerAdapter.java:297)
+	... 15 more
+```
+
+
+
+[基线拓扑](https://www.ignite-service.cn/doc/java/Persistence.html#_5-基线拓扑)
 
 ### 文档
 
 文档：https://www.ignite-service.cn/doc/java/
+
+https://www.ignite-service.cn/doc/sql/Architecture.html#_7-1-概述
