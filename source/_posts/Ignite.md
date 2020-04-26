@@ -166,6 +166,169 @@ Enter password for jdbc:ignite:thin://localhost:
 
 
 
+### Ignite持久化
+
+#### 持久化
+
+[点击查看教程](https://www.ignite-service.cn/doc/java/Persistence.html#_1-ignite持久化) 
+
+首先持久化只能在 Server 节点，因为 Client 节点不保存数据；
+
+持久化后，数据保存在 `{WORK_DIR}/db/{nodeId}` ，默认为 `IGNITE_HOME/work/db` 下：
+
+| 子目录名                             | 描述                           |
+| ------------------------------------ | ------------------------------ |
+| `{WORK_DIR}/db/{nodeId}`             | 该目录中包括了缓存的数据和索引 |
+| `{WORK_DIR}/db/wal/{nodeId}`         | 该目录中包括了WAL文件          |
+| `{WORK_DIR}/db/wal/archive/{nodeId}` | 该目录中包括了WAL存档文件      |
+
+举例：
+
+如果持久化，那么数据就会保存，比如在 Client 节点做了某些操作（新建 Cache，即创建了表，表中填充了数据），那么全部节点断开后，再启动一个持久化的 Server 时，SQL 就能直接查询之前 Client 节点操作的数据；
+
+如果不持久化，则 SQL 无法查询之前 Client 节点操作的数据；
+
+``` java
+IgniteConfiguration igniteCfg = new IgniteConfiguration();
+igniteCfg.setConsistentId("DMSServerNode"); //Set Consistent ID
+
+// 持久化
+DataStorageConfiguration storageCfg = new DataStorageConfiguration();
+storageCfg.getDefaultDataRegionConfiguration().setPersistenceEnabled(true);
+igniteCfg.setDataStorageConfiguration(storageCfg);
+
+Ignite ignite = Ignition.start(igniteCfg);
+```
+
+#### 持久化部分 Cache 示例
+
+[点击查看教程](https://www.ignite-service.cn/doc/java/DurableMemory.html#_3-2-内存区) 
+
+**Server 端**
+
+配置一个 4GB 的内存区并且开启持久化
+
+``` java
+IgniteConfiguration igniteCfg = new IgniteConfiguration();
+
+// Ignite Persistence
+DataStorageConfiguration storageCfg = new DataStorageConfiguration();
+// 创建数据区
+DataRegionConfiguration regionCfg = new DataRegionConfiguration();
+regionCfg.setName("TableCache_Region"); // 数据区名称
+regionCfg.setInitialSize(100L * 1024 * 1024); // 设置初始化 RAM 大小
+regionCfg.setMaxSize(4L * 1024 * 1024 * 1024); // 设置最大 RAM 大小
+regionCfg.setPersistenceEnabled(true); // 开启持久化
+storageCfg.setDataRegionConfigurations(regionCfg); // 设置数据区配置
+igniteCfg.setDataStorageConfiguration(storageCfg); // 应用新的配置
+
+Ignite ignite = Ignition.start(igniteCfg);
+```
+
+**Client 端**
+
+用 Server 端配置好的区域，使得 Ignite 缓存将数据存储于其中
+
+``` java
+IgniteConfiguration igniteCfg = new IgniteConfiguration();
+
+CacheConfiguration<Double, DMSTable> dmsTableCacheCfg = new CacheConfiguration<>();
+dmsTableCacheCfg.setName("DMSTableCache");
+dmsTableCacheCfg.setIndexedTypes(Double.class, DMSTable.class);
+// 把 Cache 绑定到 Server 端定义好的区域中
+dmsTableCacheCfg.setDataRegionName("TableCache_Region");
+
+CacheConfiguration<Double, MasterTable> masterTableCacheCfg = new CacheConfiguration<>();
+masterTableCacheCfg.setName("MasterTableCache");
+masterTableCacheCfg.setIndexedTypes(Double.class, MasterTable.class);
+// 把 Cache 绑定到 Server 端定义好的区域中
+masterTableCacheCfg.setDataRegionName("TableCache_Region");
+
+igniteCfg.setCacheConfiguration(dmsTableCacheCfg, masterTableCacheCfg);
+igniteCfg.setClientMode(true);
+Ignite ignite = Ignition.start(igniteCfg);
+```
+
+用这个配置启动 Ignite 集群后，固化内存会分配一个初始大小为 100MB 的内存区，然后它可以增长到 4GB，这个内存区会存储如上两个 cache 的所有数据，因为我们在 Server 端开启了持久化，所以数据的超集会一直存储于磁盘上，确保即使内存空间不足也不会出现数据丢失的情况。
+
+如果**禁用**了持久化并且所有的内存使用量超过了4GB，那么会抛出内存溢出异常，要避免这个问题，可以采用如下的办法来解决：
+
+- 开启Ignite的持久化存储；
+- 启用一个可用的退出算法，注意，只有开启Ignite持久化存储时退出功能才会默认打开，否则这个功能是禁用的；
+- 增加内存区的最大值。
+
+
+
+#### 配置基线拓扑
+
+[点击查看教程]([https://www.ignite-service.cn/doc/java/Persistence.html#_5-%E5%9F%BA%E7%BA%BF%E6%8B%93%E6%89%91](https://www.ignite-service.cn/doc/java/Persistence.html#_5-基线拓扑))
+
+如果启用了原生持久化，Ignite引入了一个 **基线拓扑** 的概念，它表示集群中将数据持久化到磁盘的一组服务端节点。基线拓扑是一组Ignite服务端节点，目的是同时在内存以及原生持久化中存储数据。
+
+基线拓扑的目的是：
+
+- 如果节点重启，避免不必要的数据再平衡。比如，每个节点重启都会触发两个再平衡事件，一个是节点停止，一个是节点重新加入集群，这会导致集群资源的无效利用；
+- 集群重启后，如果基线拓扑中的所有节点都已经加入，那么集群会被自动激活。
+
+``` java
+ignite.cluster().active(true); // 激活集群
+
+// 手动配置基线拓扑
+Collection<ClusterNode> nodes = ignite.cluster().forServers().nodes();
+ignite.cluster().setBaselineTopology(nodes); // 将所有服务端节点配置为基线拓扑
+```
+
+注意：手动配置基线拓扑的时候，必须禁用 baseline 的 auto-adjust: 
+
+``` java
+ignite.cluster().baselineAutoAdjustEnabled(false);
+```
+
+上面持久化操作中，持久化后通过`ignite.cluster().isBaselineAutoAdjustEnabled()` 检查 `auto-adjust` 为 `false` ，此时就不再需要再用 `ignite.cluster().baselineAutoAdjustEnabled(false);` 禁用了。
+
+**注意：** 将所有服务节点配置为基线拓扑，
+
+#### 禁用 Auto-just
+
+持久化时遇到异常：
+
+``` shell
+Caused by: class org.apache.ignite.spi.IgniteSpiException: Joining persistence node to in-memory cluster couldn't be allowed due to baseline auto-adjust is enabled and timeout equal to 0
+    at org.apache.ignite.spi.discovery.tcp.TcpDiscoverySpi.checkFailedError(TcpDiscoverySpi.java:1997)
+    at org.apache.ignite.spi.discovery.tcp.ServerImpl.joinTopology(ServerImpl.java:1116)
+    at org.apache.ignite.spi.discovery.tcp.ServerImpl.spiStart(ServerImpl.java:427)
+    at org.apache.ignite.spi.discovery.tcp.TcpDiscoverySpi.spiStart(TcpDiscoverySpi.java:2099)
+    at org.apache.ignite.internal.managers.GridManagerAdapter.startSpi(GridManagerAdapter.java:297)
+    ... 15 more
+```
+
+[解决方案](https://stackoverflow.com/questions/61266725/how-to-disable-ignite-baseline-auto-just/61268552#61268552)：
+
+- 启动第一个节点后，调用 `ignite.cluster().baselineAutoAdjustEnabled(false)` 即可，随后可用 `ignite.cluster().isBaselineAutoAdjustEnabled()` 检查结果。
+
+- 也可使用 `IGNITE_HOME/bin/control.(sh|bat) --baseline auto_adjust [disable|enable] [timeout <timeoutMillis>] [--yes]` 禁用，但是我用这个方法失败，不知为何：
+
+  ``` shell
+  $ ./control.sh --baseline auto_adjust disable
+  Warning: the command will perform changes in baseline.
+  Press 'y' to continue . . . y
+  Control utility [ver. 2.8.0#20200226-sha1:341b01df]
+  2020 Copyright(C) Apache Software Foundation
+  User: ranger
+  Time: 2020-04-20T10:07:09.300
+  Command [BASELINE] started
+  Arguments: --baseline auto_adjust disable
+  --------------------------------------------------------------------------------
+  Failed to execute baseline command='auto_adjust'
+  Latest topology update failed.
+  Connection to cluster failed. Latest topology update failed.
+  Command [BASELINE] finished with code: 2
+  Control utility has completed execution at: 2020-04-20T10:07:15.597
+  Execution time: 6297 ms
+  ```
+
+
+
 ### Ignite 使用注意事项
 
 - [只有 `TRANSACTIONAL` 原子化模式中才支持锁](https://www.ignite-service.cn/doc/java/Key-ValueDataGrid.html#_9-锁)，分布式锁 Lock 不支持原子化模式 `ATOMIC`，[事务原子化模式]([https://www.ignite-service.cn/doc/java/Key-ValueDataGrid.html#_8-%E4%BA%8B%E5%8A%A1](https://www.ignite-service.cn/doc/java/Key-ValueDataGrid.html#_8-事务)) 有三种（`TRANSACTIONAL`、`TRANSACTIONAL_SNAPSHOT`、`ATOMIC`），但是如果使用 `TRANSACTIONAL_SNAPSHOT` 的话，会提示 Lock 不支持 Enable [MVCC](https://www.ignite-service.cn/doc/sql/Architecture.html#_7-1-概述) ，所以要使用 `TRANSACTIONAL` 模式。
