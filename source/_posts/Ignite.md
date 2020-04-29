@@ -261,7 +261,7 @@ Ignite ignite = Ignition.start(igniteCfg);
 
 #### 配置基线拓扑
 
-[点击查看教程]([https://www.ignite-service.cn/doc/java/Persistence.html#_5-%E5%9F%BA%E7%BA%BF%E6%8B%93%E6%89%91](https://www.ignite-service.cn/doc/java/Persistence.html#_5-基线拓扑))
+[点击查看教程](https://www.ignite-service.cn/doc/java/Persistence.html#_5-基线拓扑)
 
 如果启用了原生持久化，Ignite引入了一个 **基线拓扑** 的概念，它表示集群中将数据持久化到磁盘的一组服务端节点。基线拓扑是一组Ignite服务端节点，目的是同时在内存以及原生持久化中存储数据。
 
