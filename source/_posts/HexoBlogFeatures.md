@@ -132,3 +132,15 @@ livere_uid: data-uid-value
 ```
 
 重新部署博客即可显示 Livere 评论系统。
+
+
+
+### 2. 添加页面加载进度条
+
+新建 `source/_data/head.swig` ，添加如下 2 行：
+
+``` yaml
+<script src="//cdn.bootcss.com/pace/1.0.2/pace.min.js"></script>
+<link href="//cdn.bootcss.com/pace/1.0.2/themes/pink/pace-theme-flash.css" rel="stylesheet">
+```
+
