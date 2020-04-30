@@ -6,9 +6,11 @@
 <meta name="theme-color" content="#222">
 <meta name="generator" content="Hexo 3.9.0">
   <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
-  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
-  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/desert.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/desert.jpg">
   <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <meta name="google-site-verification" content="OJnYjbr3wdT22qLrZSzyD9lAyBcXiXlEQ7-5wAnaWoQ">
+  <meta name="baidu-site-verification" content="vr4n4JeXgB">
 
 <link rel="stylesheet" href="/css/main.css">
 
@@ -17,7 +19,7 @@
 
 <script id="hexo-configurations">
     var NexT = window.NexT || {};
-    var CONFIG = {"hostname":"rangerzhou.top","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":"disqus","storage":true,"lazyload":true,"nav":null,"activeClass":"disqus"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+    var CONFIG = {"hostname":"rangerzhou.top","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":"disqus","storage":true,"lazyload":true,"nav":null,"activeClass":"disqus"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
   </script>
 
   <meta name="description" content="加密文章，输入密码阅读">
@@ -44,11 +46,31 @@
     lang   : 'zh-CN'
   };
 </script>
+<script src="//cdn.bootcss.com/pace/1.0.2/pace.min.js"></script>
+<link href="//cdn.bootcss.com/pace/1.0.2/themes/pink/pace-theme-flash.css" rel="stylesheet">
 
   <title>Qualcomm Technologies | RangerZhou</title>
   
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-138158952-1"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-138158952-1');
+      }
+    </script>
 
 
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?24a6d3c4c0f292c5f682d26414c3994b";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
 
 
 
@@ -104,6 +126,7 @@
 
   <div class="site-nav-right">
     <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
     </div>
   </div>
 </div>
@@ -118,16 +141,73 @@
     <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
 
   </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
         <li class="menu-item menu-item-archives">
 
     <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
 
   </li>
+        <li class="menu-item menu-item-commonweal">
+
+    <a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a>
+
+  </li>
+        <li class="menu-item menu-item-official">
+
+    <a href="/official" rel="section"><i class="fa fa-user fa-fw"></i>official</a>
+
+  </li>
+        <li class="menu-item menu-item-shop">
+
+    <a href="http://rangerzhou.taobao.com/" rel="noopener" target="_blank"><i class="fa fa-user fa-fw"></i>shop</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
   </ul>
 </nav>
 
 
 
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
 
 </div>
     </header>
@@ -218,12 +298,29 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script> <div id="hbe-security"> <div class="hbe-input-container"> <input type="password" class="hbe-form-control" id="pass" placeholder="请输入密码" /> <label for="pass">请输入密码</label> <div class="bottom-line"></div> </div> </div> <div id="decryptionError" style="display:none;">Incorrect Password!</div> <div id="noContentError" style="display:none;">No content to display!</div> <div id="encrypt-blog" style="display:none"> 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 </div><script src="/lib/crypto-js.js"></script><script src="/lib/blog-encrypt.js"></script><link href="/css/blog-encrypt.css" rel="stylesheet" type="text/css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script> <div id="hbe-security"> <div class="hbe-input-container"> <input type="password" class="hbe-form-control" id="pass" placeholder="请输入密码" /> <label for="pass">请输入密码</label> <div class="bottom-line"></div> </div> </div> <div id="decryptionError" style="display:none;">Incorrect Password!</div> <div id="noContentError" style="display:none;">No content to display!</div> <div id="encrypt-blog" style="display:none"> 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 </div><script src="/lib/crypto-js.js"></script><script src="/lib/blog-encrypt.js"></script><link href="/css/blog-encrypt.css" rel="stylesheet" type="text/css">
     </div>
 
     
     
     
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>Ranger Zhou
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://rangerzhou.top/2017/08/07/QualcommTechnologies/" title="Qualcomm Technologies">http://rangerzhou.top/2017/08/07/QualcommTechnologies/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
 
       <footer class="post-footer">
 
@@ -345,18 +442,55 @@
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
+          
         <span class="site-state-item-count">14</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
+          
         <span class="site-state-item-count">16</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
 </div>
+  <div class="sidebar-button motion-element">
+    <a onclick="tidioChatApi.open();"><i class="fa fa-comment"></i>
+    Chat
+  </a>
+  </div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/rangerzhou" title="GitHub → https://github.com/rangerzhou" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:rangero_o@qq.com" title="E-Mail → mailto:rangero_o@qq.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://instagram.com/ranger.zhou" title="Instagram → https://instagram.com/ranger.zhou" rel="noopener" target="_blank"><i class="fab fa-instagram fa-fw"></i>Instagram</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://rangerzhou.taobao.com/" title="Taobao → http://rangerzhou.taobao.com/" rel="noopener" target="_blank"><i class="fab fa-youtube fa-fw"></i>Taobao</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="/images/wechat.jpg" title="WeChat → /images/wechat.jpg"><i class="fab fa-youtube fa-fw"></i>WeChat</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://blog.csdn.net/ranger0220?viewmode=contents" title="CSDN → http://blog.csdn.net/ranger0220?viewmode=contents" rel="noopener" target="_blank"><i class="fab fa-youtube fa-fw"></i>CSDN</a>
+      </span>
+  </div>
 
 
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      墙裂推荐
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="http://rangerzhou.taobao.com" title="http://rangerzhou.taobao.com" rel="noopener" target="_blank">Taobao</a>
+        </li>
+    </ul>
+  </div>
 
       </div>
 
@@ -383,7 +517,7 @@
   </span>
   <span class="author" itemprop="copyrightHolder">Ranger Zhou</span>
 </div>
-  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
   </div>
 
         
@@ -404,15 +538,26 @@
   <script src="/lib/velocity/velocity.min.js"></script>
   <script src="/lib/velocity/velocity.ui.min.js"></script>
 <script src="/js/utils.js"></script><script src="/js/motion.js"></script>
-<script src="/js/schemes/muse.js"></script>
+<script src="/js/schemes/pisces.js"></script>
 <script src="/js/next-boot.js"></script>
 
 
 
   
+  <script>
+    (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      bp.src = (curProtocol === 'https') ? 'https://zz.bdstatic.com/linksubmit/push.js' : 'http://push.zhanzhang.baidu.com/push.js';
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+    })();
+  </script>
 
 
 
+
+  <script src="/js/local-search.js"></script>
 
 
 

@@ -6,9 +6,11 @@
 <meta name="theme-color" content="#222">
 <meta name="generator" content="Hexo 3.9.0">
   <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
-  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
-  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/desert.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/desert.jpg">
   <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <meta name="google-site-verification" content="OJnYjbr3wdT22qLrZSzyD9lAyBcXiXlEQ7-5wAnaWoQ">
+  <meta name="baidu-site-verification" content="vr4n4JeXgB">
 
 <link rel="stylesheet" href="/css/main.css">
 
@@ -17,7 +19,7 @@
 
 <script id="hexo-configurations">
     var NexT = window.NexT || {};
-    var CONFIG = {"hostname":"rangerzhou.top","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":"disqus","storage":true,"lazyload":true,"nav":null,"activeClass":"disqus"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+    var CONFIG = {"hostname":"rangerzhou.top","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":"disqus","storage":true,"lazyload":true,"nav":null,"activeClass":"disqus"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
   </script>
 
   <meta name="description" content="加密文章，输入密码阅读">
@@ -44,11 +46,31 @@
     lang   : 'zh-CN'
   };
 </script>
+<script src="//cdn.bootcss.com/pace/1.0.2/pace.min.js"></script>
+<link href="//cdn.bootcss.com/pace/1.0.2/themes/pink/pace-theme-flash.css" rel="stylesheet">
 
   <title>数据结构与算法之美（1）——复杂度分析 | RangerZhou</title>
   
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-138158952-1"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-138158952-1');
+      }
+    </script>
 
 
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?24a6d3c4c0f292c5f682d26414c3994b";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
 
 
 
@@ -104,6 +126,7 @@
 
   <div class="site-nav-right">
     <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
     </div>
   </div>
 </div>
@@ -118,16 +141,73 @@
     <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
 
   </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
         <li class="menu-item menu-item-archives">
 
     <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
 
   </li>
+        <li class="menu-item menu-item-commonweal">
+
+    <a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a>
+
+  </li>
+        <li class="menu-item menu-item-official">
+
+    <a href="/official" rel="section"><i class="fa fa-user fa-fw"></i>official</a>
+
+  </li>
+        <li class="menu-item menu-item-shop">
+
+    <a href="http://rangerzhou.taobao.com/" rel="noopener" target="_blank"><i class="fa fa-user fa-fw"></i>shop</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
   </ul>
 </nav>
 
 
 
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
 
 </div>
     </header>
@@ -218,12 +298,29 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script> <div id="hbe-security"> <div class="hbe-input-container"> <input type="password" class="hbe-form-control" id="pass" placeholder="请输入密码" /> <label for="pass">请输入密码</label> <div class="bottom-line"></div> </div> </div> <div id="decryptionError" style="display:none;">Incorrect Password!</div> <div id="noContentError" style="display:none;">No content to display!</div> <div id="encrypt-blog" style="display:none"> U2FsdGVkX1+g1IgsOWZYKHbXX3K/oWIxi+4mu3bQ+vBJUTP6sg4zdPmWKFcnLWcn0AQvWW5gevrsfieEemcR4WZb7F8hALF+GCxOxAYHUBYapnjZcWgfXr5YJcPsmt3x1QIYnjbRVv/0qJm7NkxnhDR1nYz7PnQejMSSyrvwCpkWQNoUUSLcgd/bjt22aguSrlORtKeT74/f+Z0p+y24qoGW+cEvOYwzDWJL7ala2DzlOqIiZrZ5Cn/kl74TYDQaJRXouYakoyaki/gLPpATDuoqFveVHF4RZJsUYNjXSje0sNKhoait3aI69SG/CHilS8pY8Xfuu9eGD6/qN/W3JiAk1POB21S1qD8n58s+5CguEQL9GYhK3WBOqQcJo2P8UHiJsKy0wX1e7Cxz20/rb2MsmbciFXTyBWTdTwtgsETK/8qK+84dfnsiFtMrD1dHkVfychRJZEA3g6XIv3+vDANDfri5RTY72oQBKuvsOORrY8fjJ/S8H6pjEkxl+KjxZMe1WtdFb59D6QYz5p9kq820wsoZHQr3j8+VEIOxNeEjqsQb5IMD3wLQjk3Tyo+MEmgVBlNRcVp7xoX+Lb7prI4hkC0sLH2glJ/wlfswg4RBFBjpBe+Zl1ZsJB6mrjQQ3tygakjClI/WTho+URzjVSZ9SbVwJwOFfTOE8rbQwlTXw0TDne1jl0DMkUp9O6HsDs9YiLx69o5csTqN5bnxRvEkj/p3RArp56pjy5x5/xEA/2TkiogJA5no9lzQPdbvllwfdCx3J9RL4JeILppavsgpgl5p23MAk3iZUG3yCpXvP05HpYJkT+9TWfbGovbftASFjQAxmjBHu+j5m3bgeDfWxiHI4fSEND3Yc4wiTOIGZOmoZL7ZrX0ptnmsLiYvGVU72nL3VFXuBt05Q2ylIxSYkXAlPQbwOsyJmklaBWZr97WlEREVoasFEBbIUjFowPITUV6i33NncyB2RX72OtHT3HNgb0lFyECKHYUESs5XtS2DovawP4879T9qYtFBlo6kiTyOoAmWVwrXwaZWj+C8m3ezCfVrM82KbAOM+5hM1YBswh16wtV8oTZJKWEMzDcJ6GcAH3IxIncbzWaEaha5cHSEcrc91t4WiCerRgVgVoDrf8yEfKM7snSzG77Sfhm43fppOKEwZOeko1rps5888ZA2//LfyYnBAKrJuB+tROwzLk2LvAfxCCXx3n8hiNlhyARwoBPdTLApleTQw/VCEs0vTFLjKDr1P9f9mBow0UGpNGg9Hbf5cNg5v58cTaNp2aRiy1Cs6bp0ttlfEDl9SpmjJP3uXUZoYWd3u/k4YzYjgD9anMWm8xS01l89uHjqFvU91AshWKUnKMTUvx7A8x4nUmfl6RNMo3uJqqU9WhWhDqiHkmH7/mtbbRvPCOt9+TgdOuKmduOgU1ZHglmSUhBA1ZZ4ddCFHNzNcJtdApw4XaI1elO+L4OLdmrY </div><script src="/lib/crypto-js.js"></script><script src="/lib/blog-encrypt.js"></script><link href="/css/blog-encrypt.css" rel="stylesheet" type="text/css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script> <div id="hbe-security"> <div class="hbe-input-container"> <input type="password" class="hbe-form-control" id="pass" placeholder="请输入密码" /> <label for="pass">请输入密码</label> <div class="bottom-line"></div> </div> </div> <div id="decryptionError" style="display:none;">Incorrect Password!</div> <div id="noContentError" style="display:none;">No content to display!</div> <div id="encrypt-blog" style="display:none"> U2FsdGVkX19Y/npmOa5LSANhKlbV5Ht+SVt1lHyqSEyWYrIk1UuS/7tmSADef8QiFWsDWu0XZswFIAgJWkE8FY0Uk8AMDtivYpC5w8BBhIFicJ+F+OHBe7shvSUDjLJi7sqZkL+kxTh3Q/9xi07lnOFSbuJTemDWR9UZgKAwtqYJnOLq4DADqHDiILfrmDb2nWtQD6fhSIBSQJdOrfDAQ0DygkXFcenYVw3onI+ONHlMBbgNXi/U+KlL8FUeyY6fpQPOZCiL9G+ccHkaThkbDHwfq0R/MRvQVSYCFibbPS9cIdBVBm7vQNk1EC4L7ipO5NobfIrQGE//R2GIYaxAYEYMuH4sjtRIwEPQBQ9+28QMW4uRHKbauAirzbi5IS5HTkxQOjYNyaatvFV6L333nlTP5PieO77iLzs8cXOUfnBFqoth/S/kJv0L+Kbh+LLhOgF9LAcOkgvZ7oEwQf/wKaGlAIB6tmP5sF+6cBGgx1XlCB3gkP2cGoasgHN8Mfi3tdb973lXhsV8IlkAW3RX2aoKNBUwUWkcjvRnjhNOZ3Dwm0E3wTJ7m6we71qLgZXQ3lAErGJZ9Fu5FM0CJWyBzQnGYLUlP0Mhrmq8MM0rtImc7oqlXDN68+pbfd9XEXXt9C6Jjy1tjolQmpMOPhL7BJB8YsFSX1Ba2jtaw3RgAqU89Jz9B80kyCWUv1ObRvKQ9LAsmhibdJFvbA8KUuPoqh5q4bx1xExrBR4+2/vEShHTpbi/oXLrd6QfdSiuoZ4p4Y9Z+yFyhhBxxtYoEXyFi6ahRvlpekTGS/3w/Md1EHJ8J67lOa/iokEtWQ3E4nPGqzx5VeJRoKLYRVGXruiJRY+j4D5KCJMreO1egPI8RTyz3SuhauxyqjP7fa5XEZNfd8OgkxTbSHvJ2b3sBjR5isjagUn/S6VZhQ8wukxS5w+Lb04Cw0bE7raMJIzaxhZhRhPv4vfuO5RLQxuztG69M4rwGygTmZ0Me1zZbMlxPxtwVo+DEv7z+aW5WzYIew17oyMJa3G78X1fQLQ5TqcmnpH8iw7BvE93AppGrwIPTJUhHYiLChP9tNaSLuUR8lpgi00M/NOXeNGpQmJIW4bOD9S37S8C3KJFSsORwQ+RadIqwHpGSLAjXtRvhq3IMDuBJ/vY7eVjSQdS8bK/HxQyOyFsWB1QGHYkAoD2qv2d0ZJnmPJ0ssiH4M77yYMbkLOn7gfRaSSkni2ktrN+96zY9XkXNezx4fLsiRX7tvNn27/69wAoFRzV7MwHwIGWGl3x7sfPPnnP3adnQv5SPGIyb1iPtY2rVh/4Xc3JNepn9fJFvq0L2nkCSMnjjMw1eR3y+3vy+iARYZiBXSZLvbHe4c/8D50rGA02MpLmnmiz7D2kBKj5Q4HlpKlzOmCVfGzxgvfa7dJsn3HqoW13u02GdrZKKgNWikR4B62a279XE+hPRH9RDcliOw8u2GIWheTo </div><script src="/lib/crypto-js.js"></script><script src="/lib/blog-encrypt.js"></script><link href="/css/blog-encrypt.css" rel="stylesheet" type="text/css">
     </div>
 
     
     
     
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>Ranger Zhou
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://rangerzhou.top/2018/10/05/The_Beauty_of_Data_Structures_and_Algorithms/" title="数据结构与算法之美（1）——复杂度分析">http://rangerzhou.top/2018/10/05/The_Beauty_of_Data_Structures_and_Algorithms/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
 
       <footer class="post-footer">
 
@@ -345,18 +442,55 @@
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
+          
         <span class="site-state-item-count">14</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
+          
         <span class="site-state-item-count">16</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
 </div>
+  <div class="sidebar-button motion-element">
+    <a onclick="tidioChatApi.open();"><i class="fa fa-comment"></i>
+    Chat
+  </a>
+  </div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/rangerzhou" title="GitHub → https://github.com/rangerzhou" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:rangero_o@qq.com" title="E-Mail → mailto:rangero_o@qq.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://instagram.com/ranger.zhou" title="Instagram → https://instagram.com/ranger.zhou" rel="noopener" target="_blank"><i class="fab fa-instagram fa-fw"></i>Instagram</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://rangerzhou.taobao.com/" title="Taobao → http://rangerzhou.taobao.com/" rel="noopener" target="_blank"><i class="fab fa-youtube fa-fw"></i>Taobao</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="/images/wechat.jpg" title="WeChat → /images/wechat.jpg"><i class="fab fa-youtube fa-fw"></i>WeChat</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://blog.csdn.net/ranger0220?viewmode=contents" title="CSDN → http://blog.csdn.net/ranger0220?viewmode=contents" rel="noopener" target="_blank"><i class="fab fa-youtube fa-fw"></i>CSDN</a>
+      </span>
+  </div>
 
 
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      墙裂推荐
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="http://rangerzhou.taobao.com" title="http://rangerzhou.taobao.com" rel="noopener" target="_blank">Taobao</a>
+        </li>
+    </ul>
+  </div>
 
       </div>
 
@@ -383,7 +517,7 @@
   </span>
   <span class="author" itemprop="copyrightHolder">Ranger Zhou</span>
 </div>
-  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
   </div>
 
         
@@ -404,15 +538,26 @@
   <script src="/lib/velocity/velocity.min.js"></script>
   <script src="/lib/velocity/velocity.ui.min.js"></script>
 <script src="/js/utils.js"></script><script src="/js/motion.js"></script>
-<script src="/js/schemes/muse.js"></script>
+<script src="/js/schemes/pisces.js"></script>
 <script src="/js/next-boot.js"></script>
 
 
 
   
+  <script>
+    (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      bp.src = (curProtocol === 'https') ? 'https://zz.bdstatic.com/linksubmit/push.js' : 'http://push.zhanzhang.baidu.com/push.js';
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+    })();
+  </script>
 
 
 
+
+  <script src="/js/local-search.js"></script>
 
 
 
