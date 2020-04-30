@@ -23,15 +23,15 @@ minify: false
 # Create your custom files in site directory `source/_data` and uncomment needed files below.
 custom_file_path:
   head: source/_data/head.swig
-  header: source/_data/header.swig
-  sidebar: source/_data/sidebar.swig
-  postMeta: source/_data/post-meta.swig
-  postBodyEnd: source/_data/post-body-end.swig
-  footer: source/_data/footer.swig
-  bodyEnd: source/_data/body-end.swig
-  variable: source/_data/variables.styl
-  mixin: source/_data/mixins.styl
-  style: source/_data/styles.styl
+  #header: source/_data/header.swig
+  #sidebar: source/_data/sidebar.swig
+  #postMeta: source/_data/post-meta.swig
+  #postBodyEnd: source/_data/post-body-end.swig
+  #footer: source/_data/footer.swig
+  #bodyEnd: source/_data/body-end.swig
+  #variable: source/_data/variables.styl
+  #mixin: source/_data/mixins.styl
+  #style: source/_data/styles.styl
 
 
 # ---------------------------------------------------------------
@@ -196,11 +196,12 @@ social_icons:
 # Blog rolls
 links_settings:
   icon: fa fa-link
-  title: Links
+  title: 墙裂推荐
   # Available values: block | inline
   layout: block
 
 links:
+  Taobao: http://rangerzhou.taobao.com
   #Title: http://yoursite.com
 
 # Table of Contents in the Sidebar
