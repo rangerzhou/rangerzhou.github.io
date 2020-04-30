@@ -12,6 +12,8 @@ copyright: true
 
 ___
 
+<center><iframe frameborder="no" border="0" marginwidth="0" marginheight="0" width=500 height=86 src="http://music.163.com/outchain/player?type=2&id=29722263&auto=0&height=66"></iframe></center>
+
 ### 1. 添加评论系统
 
 Next 主题支持多种评论系统：
