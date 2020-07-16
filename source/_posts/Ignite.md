@@ -58,6 +58,24 @@ Run - Edit Configurations - 选中 Application 下需要配置的项 - 右侧 Co
 
 ![image-20200317160517354](https://raw.githubusercontent.com/rangerzhou/ImageHosting/master/blog_resource/2020/ConfigIGNITE_HOME.png)
 
+### IGNITE 使用注意事项
+
+#### Ignite 日志
+
+[日志配置教程](https://www.ignite-service.cn/doc/java/#_9-日志)
+
+Ignite 默认启动于 *静默模式* ，会阻止 `INFO` 和 `DEBUG` 日志的输出。可在代码中关闭 *静默模式* ：
+
+``` java
+System.setProperty("IGNITE_QUIET", "false");
+```
+
+关闭后终端会打印出更详细的 log。
+
+#### 数据并置与关联查询
+
+
+
 ### IGNITE 工具使用
 
 #### ignitevisorcmd.sh 脚本
@@ -326,6 +344,19 @@ Caused by: class org.apache.ignite.spi.IgniteSpiException: Joining persistence n
   Control utility has completed execution at: 2020-04-20T10:07:15.597
   Execution time: 6297 ms
   ```
+
+
+
+**2020年5月27日更新：** 如果需要让集群自动调整基线拓扑，
+
+- 只有当集群处于激活状态时，基线拓扑才会自动调整
+- 此功能默认是禁用的，可以使用控制脚本开启该功能，还可以通过编程方式启用该功能
+- 必须配置自动调整超时时间
+
+``` java
+ignite.cluster().baselineAutoAdjustEnabled(true);
+ignite.cluster().baselineAutoAdjustTimeout(30000);
+```
 
 
 

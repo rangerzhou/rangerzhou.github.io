@@ -187,7 +187,7 @@ social:
   #FB Page: https://www.facebook.com/yourname || fab fa-facebook
   #StackOverflow: https://stackoverflow.com/yourname || fab fa-stack-overflow
   #YouTube: https://youtube.com/yourname || fab fa-youtube
-  Instagram: https://instagram.com/ranger.zhou || fab fa-instagram
+  #Instagram: https://instagram.com/ranger.zhou || fab fa-instagram
   #Skype: skype:yourname?call|chat || fab fa-skype
   Taobao: http://rangerzhou.taobao.com/ || fab fa-youtube
   WeChat: /images/wechat.jpg || fab fa-youtube
@@ -225,7 +225,7 @@ toc:
 # A button to open designated chat widget in sidebar.
 # Firstly, you need enable the chat service you want to activate its sidebar button.
 chat:
-  enable: true
+  enable: false
   #service: chatra
   service: tidio
   icon: fa fa-comment # Icon name in Font Awesome, set false to disable icon.
@@ -778,7 +778,7 @@ chatra:
 # See: https://www.tidiochat.com
 # Dashboard: https://www.tidiochat.com/panel/dashboard
 tidio:
-  enable: true
+  enable: false
 # Public Key, get it from dashboard. See: https://www.tidiochat.com/panel/settings/developer
   key: pyzi1umqeedawvqvq7vsvztbzu7hqhbl
 
