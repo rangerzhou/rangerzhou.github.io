@@ -19,7 +19,7 @@
 
 <script id="hexo-configurations">
     var NexT = window.NexT || {};
-    var CONFIG = {"hostname":"rangerzhou.top","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":true,"nav":null,"activeClass":"gitalk"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+    var CONFIG = {"hostname":"rangerzhou.top","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":"disqus","storage":true,"lazyload":true,"nav":null,"activeClass":"disqus"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
   </script>
 
   <meta name="description" content="Apache-ignite 相关记录。">
@@ -35,7 +35,7 @@
 <meta property="og:image" content="https://raw.githubusercontent.com/rangerzhou/ImageHosting/master/Pictures/ignitevisorcmd_cache.png">
 <meta property="og:image" content="https://raw.githubusercontent.com/rangerzhou/ImageHosting/master/Pictures/sqlline_!tables.png">
 <meta property="og:image" content="https://raw.githubusercontent.com/rangerzhou/ImageHosting/master/Pictures/sqlline_select*.png">
-<meta property="og:updated_time" content="2020-04-29T06:13:37.076Z">
+<meta property="og:updated_time" content="2020-06-05T06:33:00.310Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Apache-Ignite 相关记录">
 <meta name="twitter:description" content="Apache-ignite 相关记录。">
@@ -268,7 +268,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2020-04-29 14:13:37" itemprop="dateModified" datetime="2020-04-29T14:13:37+08:00">2020-04-29</time>
+                <time title="修改时间：2020-06-05 14:33:00" itemprop="dateModified" datetime="2020-06-05T14:33:00+08:00">2020-06-05</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -281,6 +281,20 @@
             </span>
 
           
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus：</span>
+    
+    <a title="disqus" href="/2020/04/01/Ignite/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2020/04/01/Ignite/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
 
         </div>
       </header>
@@ -307,7 +321,11 @@
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> ./IGNITE_HOME/gridgain-web-console-agent.sh </span></span><br><span class="line">[2020-03-05T16:51:21,014][INFO ][main][AgentLauncher] Starting Apache GridGain Web Console Agent...</span><br><span class="line">[2020-03-05T16:51:21,136][INFO ][main][AgentLauncher] </span><br><span class="line">[2020-03-05T16:51:21,136][INFO ][main][AgentLauncher] Web Console Agent configuration :</span><br><span class="line">[2020-03-05T16:51:21,237][INFO ][main][AgentLauncher] User's security tokens             : ********************************8204</span><br><span class="line">[2020-03-05T16:51:21,237][INFO ][main][AgentLauncher] URI to Ignite node REST server     : http://localhost:8080</span><br><span class="line">[2020-03-05T16:51:21,237][INFO ][main][AgentLauncher] URI to GridGain Web Console        : https://console.gridgain.com</span><br><span class="line">[2020-03-05T16:51:21,237][INFO ][main][AgentLauncher] Path to properties file            : default.properties</span><br><span class="line">[2020-03-05T16:51:21,237][INFO ][main][AgentLauncher] Path to JDBC drivers folder        : /home/ranger/opt/apache-ignite-2.8.0-bin/gridgain-web-console-agent-2020.02.00/jdbc-drivers</span><br><span class="line">[2020-03-05T16:51:21,237][INFO ][main][AgentLauncher] Demo mode                          : enabled</span><br><span class="line">[2020-03-05T16:51:21,237][INFO ][main][AgentLauncher] </span><br><span class="line">[2020-03-05T16:51:21,320][INFO ][main][WebSocketRouter] Starting Web Console Agent...</span><br><span class="line">[2020-03-05T16:51:21,342][INFO ][Connect thread][WebSocketRouter] Connecting to server: wss://console.gridgain.com</span><br><span class="line">[2020-03-05T16:51:24,098][INFO ][http-client-17][WebSocketRouter] Successfully completes handshake with server</span><br><span class="line">[2020-03-05T16:51:24,277][INFO ][pool-2-thread-1][ClusterHandler] Connected to node [url=http://localhost:8080]</span><br><span class="line">[2020-03-05T16:51:24,305][INFO ][pool-2-thread-1][ClustersWatcher] Connection successfully established to cluster with nodes: [B2454006]</span><br><span class="line">[2020-03-05T16:55:26,601][INFO ][http-client-19][AgentClusterDemo] DEMO: Starting embedded nodes for demo...</span><br></pre></td></tr></table></figure>
 <h3 id="idea-中配置-IGNITE-HOME"><a href="#idea-中配置-IGNITE-HOME" class="headerlink" title="idea 中配置 IGNITE_HOME"></a>idea 中配置 IGNITE_HOME</h3><p>Run - Edit Configurations - 选中 Application 下需要配置的项 - 右侧 Configuration 选项 - 配置 Environment variables - 添加环境变量即可。</p>
 <p><img src="https://raw.githubusercontent.com/rangerzhou/ImageHosting/master/blog_resource/2020/ConfigIGNITE_HOME.png" alt="image-20200317160517354"></p>
-<h3 id="IGNITE-工具使用"><a href="#IGNITE-工具使用" class="headerlink" title="IGNITE 工具使用"></a>IGNITE 工具使用</h3><h4 id="ignitevisorcmd-sh-脚本"><a href="#ignitevisorcmd-sh-脚本" class="headerlink" title="ignitevisorcmd.sh 脚本"></a>ignitevisorcmd.sh 脚本</h4><p>位置：<code>$IGNITE_HOME/bin/ignitevisorcmd.sh</code></p>
+<h3 id="IGNITE-使用注意事项"><a href="#IGNITE-使用注意事项" class="headerlink" title="IGNITE 使用注意事项"></a>IGNITE 使用注意事项</h3><h4 id="Ignite-日志"><a href="#Ignite-日志" class="headerlink" title="Ignite 日志"></a>Ignite 日志</h4><p><a href="https://www.ignite-service.cn/doc/java/#_9-日志" target="_blank" rel="noopener">日志配置教程</a></p>
+<p>Ignite 默认启动于 <em>静默模式</em> ，会阻止 <code>INFO</code> 和 <code>DEBUG</code> 日志的输出。可在代码中关闭 <em>静默模式</em> ：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">System.setProperty(<span class="string">"IGNITE_QUIET"</span>, <span class="string">"false"</span>);</span><br></pre></td></tr></table></figure>
+<p>关闭后终端会打印出更详细的 log。</p>
+<h4 id="数据并置与关联查询"><a href="#数据并置与关联查询" class="headerlink" title="数据并置与关联查询"></a>数据并置与关联查询</h4><h3 id="IGNITE-工具使用"><a href="#IGNITE-工具使用" class="headerlink" title="IGNITE 工具使用"></a>IGNITE 工具使用</h3><h4 id="ignitevisorcmd-sh-脚本"><a href="#ignitevisorcmd-sh-脚本" class="headerlink" title="ignitevisorcmd.sh 脚本"></a>ignitevisorcmd.sh 脚本</h4><p>位置：<code>$IGNITE_HOME/bin/ignitevisorcmd.sh</code></p>
 <p>可查看 node, cache, config 等详细信息，使用方法如下：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line">$ <span class="variable">$IGNITE_HOME</span>/bin/ignitevisorcmd.sh</span><br><span class="line">... ...</span><br><span class="line"><span class="comment"># 输入 open 加入网格</span></span><br><span class="line">visor&gt; open</span><br><span class="line">Local configuration files:</span><br><span class="line">+========================================================================================+</span><br><span class="line">|  <span class="comment">#  |                                                    Configuration File            |</span></span><br><span class="line">+========================================================================================+</span><br><span class="line">| 0   | config/default-config.xml                                                        |</span><br><span class="line">| 1   | benchmarks/config/ignite-base-config.xml                                         |</span><br><span class="line">| 2   | benchmarks/config/ignite-localhost-config.xml                                    |</span><br><span class="line">| 3   | benchmarks/config/ignite-multicast-config.xml                                    |</span><br><span class="line">... ...</span><br><span class="line">+----------------------------------------------------------------------------------------+</span><br><span class="line"><span class="comment"># 选择配置文件，选择 0 即可</span></span><br><span class="line">Choose configuration file number (<span class="string">'c'</span> to cancel) [0]: 0</span><br><span class="line">... ...</span><br><span class="line">Some useful commands:</span><br><span class="line">+--------------------------------------------+</span><br><span class="line">| Type <span class="string">'top'</span>    | to see full topology.      |</span><br><span class="line">| Type <span class="string">'node'</span>   | to see node statistics.    |</span><br><span class="line">| Type <span class="string">'cache'</span>  | to see cache statistics.   |</span><br><span class="line">| Type <span class="string">'tasks'</span>  | to see tasks statistics.   |</span><br><span class="line">| Type <span class="string">'config'</span> | to see node configuration. |</span><br><span class="line">+--------------------------------------------+</span><br><span class="line"></span><br><span class="line">Type <span class="string">'help'</span> to get <span class="built_in">help</span>.</span><br><span class="line"></span><br><span class="line">+---------------------------------------------------------------------------------+</span><br><span class="line">| Status               | Connected                                                |</span><br><span class="line">| Ignite instance name | &lt;default&gt;                                                |</span><br><span class="line">| Config path          | /home/ranger/opt/apache-ignite/config/default-config.xml |</span><br><span class="line">| Uptime               | 00:00:00                                                 |</span><br><span class="line">+---------------------------------------------------------------------------------+</span><br><span class="line">visor&gt; cache</span><br></pre></td></tr></table></figure>
 <p><strong>查看 node</strong></p>
@@ -396,6 +414,13 @@
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> ./control.sh --baseline auto_adjust <span class="built_in">disable</span></span></span><br><span class="line">Warning: the command will perform changes in baseline.</span><br><span class="line">Press 'y' to continue . . . y</span><br><span class="line">Control utility [ver. 2.8.0#20200226-sha1:341b01df]</span><br><span class="line">2020 Copyright(C) Apache Software Foundation</span><br><span class="line">User: ranger</span><br><span class="line">Time: 2020-04-20T10:07:09.300</span><br><span class="line">Command [BASELINE] started</span><br><span class="line">Arguments: --baseline auto_adjust disable</span><br><span class="line">--------------------------------------------------------------------------------</span><br><span class="line">Failed to execute baseline command='auto_adjust'</span><br><span class="line">Latest topology update failed.</span><br><span class="line">Connection to cluster failed. Latest topology update failed.</span><br><span class="line">Command [BASELINE] finished with code: 2</span><br><span class="line">Control utility has completed execution at: 2020-04-20T10:07:15.597</span><br><span class="line">Execution time: 6297 ms</span><br></pre></td></tr></table></figure>
 </li>
 </ul>
+<p><strong>2020年5月27日更新：</strong> 如果需要让集群自动调整基线拓扑，</p>
+<ul>
+<li>只有当集群处于激活状态时，基线拓扑才会自动调整</li>
+<li>此功能默认是禁用的，可以使用控制脚本开启该功能，还可以通过编程方式启用该功能</li>
+<li>必须配置自动调整超时时间</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ignite.cluster().baselineAutoAdjustEnabled(<span class="keyword">true</span>);</span><br><span class="line">ignite.cluster().baselineAutoAdjustTimeout(<span class="number">30000</span>);</span><br></pre></td></tr></table></figure>
 <h3 id="Ignite-使用注意事项"><a href="#Ignite-使用注意事项" class="headerlink" title="Ignite 使用注意事项"></a>Ignite 使用注意事项</h3><ul>
 <li><a href="https://www.ignite-service.cn/doc/java/Key-ValueDataGrid.html#_9-锁" target="_blank" rel="noopener">只有 <code>TRANSACTIONAL</code> 原子化模式中才支持锁</a>，分布式锁 Lock 不支持原子化模式 <code>ATOMIC</code>，<a href="[https://www.ignite-service.cn/doc/java/Key-ValueDataGrid.html#_8-%E4%BA%8B%E5%8A%A1](https://www.ignite-service.cn/doc/java/Key-ValueDataGrid.html#_8-事务">事务原子化模式</a>) 有三种（<code>TRANSACTIONAL</code>、<code>TRANSACTIONAL_SNAPSHOT</code>、<code>ATOMIC</code>），但是如果使用 <code>TRANSACTIONAL_SNAPSHOT</code> 的话，会提示 Lock 不支持 Enable <a href="https://www.ignite-service.cn/doc/sql/Architecture.html#_7-1-概述" target="_blank" rel="noopener">MVCC</a> ，所以要使用 <code>TRANSACTIONAL</code> 模式。</li>
 </ul>
@@ -467,7 +492,34 @@
 
           </div>
           
-    <div class="comments" id="gitalk-container"></div>
+      <div class="tabs tabs-comment">
+        <ul class="nav-tabs">
+            <li class="tab"><a href="#comment-disqus">disqus</a></li>
+            <li class="tab"><a href="#comment-gitalk">gitalk</a></li>
+            <li class="tab"><a href="#comment-livere">livere</a></li>
+        </ul>
+        <div class="tab-content">
+            <div class="tab-pane disqus" id="comment-disqus">
+              
+  <div class="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
+            </div>
+            <div class="tab-pane gitalk" id="comment-gitalk">
+              <div class="comments" id="gitalk-container"></div>
+            </div>
+            <div class="tab-pane livere" id="comment-livere">
+              
+  <div class="comments">
+    <div id="lv-container" data-id="city" data-uid="MTAyMC8yOTcyNS82Mjky"></div>
+  </div>
+  
+            </div>
+        </div>
+      </div>
 
 <script>
   window.addEventListener('tabs:register', () => {
@@ -514,7 +566,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#配置-Ignite-Web-控制台"><span class="nav-number">1.</span> <span class="nav-text">配置 Ignite Web 控制台</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#idea-中配置-IGNITE-HOME"><span class="nav-number">2.</span> <span class="nav-text">idea 中配置 IGNITE_HOME</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#IGNITE-工具使用"><span class="nav-number">3.</span> <span class="nav-text">IGNITE 工具使用</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#ignitevisorcmd-sh-脚本"><span class="nav-number">3.1.</span> <span class="nav-text">ignitevisorcmd.sh 脚本</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#sqlline-工具"><span class="nav-number">3.2.</span> <span class="nav-text">sqlline 工具</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Ignite持久化"><span class="nav-number">4.</span> <span class="nav-text">Ignite持久化</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#持久化"><span class="nav-number">4.1.</span> <span class="nav-text">持久化</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#持久化部分-Cache-示例"><span class="nav-number">4.2.</span> <span class="nav-text">持久化部分 Cache 示例</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#配置基线拓扑"><span class="nav-number">4.3.</span> <span class="nav-text">配置基线拓扑</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#禁用-Auto-just"><span class="nav-number">4.4.</span> <span class="nav-text">禁用 Auto-just</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Ignite-使用注意事项"><span class="nav-number">5.</span> <span class="nav-text">Ignite 使用注意事项</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Ignite-相关异常"><span class="nav-number">6.</span> <span class="nav-text">Ignite 相关异常</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Ignite-代码启动-client-无法连接终端启动的-server"><span class="nav-number">6.1.</span> <span class="nav-text">Ignite 代码启动 client 无法连接终端启动的 server</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#ignite-配置-web-console-报错"><span class="nav-number">6.2.</span> <span class="nav-text">ignite 配置 web-console 报错</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Ignite-启动异常"><span class="nav-number">6.3.</span> <span class="nav-text">Ignite 启动异常</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Ignite-接入-ZMQ-报错"><span class="nav-number">6.4.</span> <span class="nav-text">Ignite 接入 ZMQ 报错</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Ignite-持久化异常"><span class="nav-number">6.5.</span> <span class="nav-text">Ignite 持久化异常</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#文档"><span class="nav-number">7.</span> <span class="nav-text">文档</span></a></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#配置-Ignite-Web-控制台"><span class="nav-number">1.</span> <span class="nav-text">配置 Ignite Web 控制台</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#idea-中配置-IGNITE-HOME"><span class="nav-number">2.</span> <span class="nav-text">idea 中配置 IGNITE_HOME</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#IGNITE-使用注意事项"><span class="nav-number">3.</span> <span class="nav-text">IGNITE 使用注意事项</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Ignite-日志"><span class="nav-number">3.1.</span> <span class="nav-text">Ignite 日志</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#数据并置与关联查询"><span class="nav-number">3.2.</span> <span class="nav-text">数据并置与关联查询</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#IGNITE-工具使用"><span class="nav-number">4.</span> <span class="nav-text">IGNITE 工具使用</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#ignitevisorcmd-sh-脚本"><span class="nav-number">4.1.</span> <span class="nav-text">ignitevisorcmd.sh 脚本</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#sqlline-工具"><span class="nav-number">4.2.</span> <span class="nav-text">sqlline 工具</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Ignite持久化"><span class="nav-number">5.</span> <span class="nav-text">Ignite持久化</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#持久化"><span class="nav-number">5.1.</span> <span class="nav-text">持久化</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#持久化部分-Cache-示例"><span class="nav-number">5.2.</span> <span class="nav-text">持久化部分 Cache 示例</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#配置基线拓扑"><span class="nav-number">5.3.</span> <span class="nav-text">配置基线拓扑</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#禁用-Auto-just"><span class="nav-number">5.4.</span> <span class="nav-text">禁用 Auto-just</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Ignite-使用注意事项"><span class="nav-number">6.</span> <span class="nav-text">Ignite 使用注意事项</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Ignite-相关异常"><span class="nav-number">7.</span> <span class="nav-text">Ignite 相关异常</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Ignite-代码启动-client-无法连接终端启动的-server"><span class="nav-number">7.1.</span> <span class="nav-text">Ignite 代码启动 client 无法连接终端启动的 server</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#ignite-配置-web-console-报错"><span class="nav-number">7.2.</span> <span class="nav-text">ignite 配置 web-console 报错</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Ignite-启动异常"><span class="nav-number">7.3.</span> <span class="nav-text">Ignite 启动异常</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Ignite-接入-ZMQ-报错"><span class="nav-number">7.4.</span> <span class="nav-text">Ignite 接入 ZMQ 报错</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Ignite-持久化异常"><span class="nav-number">7.5.</span> <span class="nav-text">Ignite 持久化异常</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#文档"><span class="nav-number">8.</span> <span class="nav-text">文档</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
@@ -549,6 +601,18 @@
   <div class="links-of-author motion-element">
       <span class="links-of-author-item">
         <a href="https://github.com/rangerzhou" title="GitHub → https://github.com/rangerzhou" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:rangero_o@qq.com" title="E-Mail → mailto:rangero_o@qq.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://rangerzhou.taobao.com/" title="Taobao → http://rangerzhou.taobao.com/" rel="noopener" target="_blank"><i class="fab fa-youtube fa-fw"></i>Taobao</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="/images/wechat.jpg" title="WeChat → /images/wechat.jpg"><i class="fab fa-youtube fa-fw"></i>WeChat</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://blog.csdn.net/ranger0220?viewmode=contents" title="CSDN → http://blog.csdn.net/ranger0220?viewmode=contents" rel="noopener" target="_blank"><i class="fab fa-youtube fa-fw"></i>CSDN</a>
       </span>
   </div>
 
@@ -646,6 +710,37 @@
 
   
 
+<script>
+  function loadCount() {
+    var d = document, s = d.createElement('script');
+    s.src = 'https://rangerzhou.disqus.com/count.js';
+    s.id = 'dsq-count-scr';
+    (d.head || d.body).appendChild(s);
+  }
+  // defer loading until the whole page loading is completed
+  window.addEventListener('load', loadCount, false);
+</script>
+<script>
+  var disqus_config = function() {
+    this.page.url = "http://rangerzhou.top/2020/04/01/Ignite/";
+    this.page.identifier = "2020/04/01/Ignite/";
+    this.page.title = "Apache-Ignite 相关记录";
+    };
+  NexT.utils.loadComments(document.querySelector('#disqus_thread'), () => {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: disqus_config
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://rangerzhou.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  });
+</script>
+
 <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
 
 <script>
@@ -663,6 +758,22 @@ NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
     });
     gitalk.render('gitalk-container');
   }, window.Gitalk);
+});
+</script>
+
+<script>
+NexT.utils.loadComments(document.querySelector('#lv-container'), () => {
+  window.livereOptions = {
+    refer: location.pathname.replace(CONFIG.root, '').replace('index.html', '')
+  };
+  (function(d, s) {
+    var j, e = d.getElementsByTagName(s)[0];
+    if (typeof LivereTower === 'function') { return; }
+    j = d.createElement(s);
+    j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+    j.async = true;
+    e.parentNode.insertBefore(j, e);
+  })(document, 'script');
 });
 </script>
 
