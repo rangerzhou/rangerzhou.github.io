@@ -166,6 +166,17 @@ Enter password for jdbc:ignite:thin://localhost:
 # 随后即可输入 SQL 命令了
 0: jdbc:ignite:thin://localhost> !tables
 
+# sqlline.sh --verbose=true -u jdbc:ignite:thin://localhost 这种也可以
+$ sqlline.sh --verbose=true -u jdbc:ignite:thin://localhost
+issuing: !connect jdbc:ignite:thin://localhost '' '' org.apache.ignite.IgniteJdbcThinDriver
+Connecting to jdbc:ignite:thin://localhost
+Connected to: Apache Ignite (version 2.8.1#20200521-sha1:86422096)
+Driver: Apache Ignite Thin JDBC Driver (version 2.8.1#20200521-sha1:86422096)
+Autocommit status: true
+Transaction isolation: TRANSACTION_REPEATABLE_READ
+sqlline version 1.3.0
+0: jdbc:ignite:thin://localhost>
+
 ```
 
 **查看 tables**

@@ -697,3 +697,37 @@ make idegen -j8 # 或者 ./development/tools/idegen/idegen.sh
 grep oldStr -rl ./source | xargs sed -i 's/oldStr/newStr/g'
 ```
 
+
+
+#### 19. 项目迁移（包含提交记录）
+
+**方法一：**
+
+从原地址克隆一份裸版本库，比如原本托管于 GitHub，或者是本地的私有仓库：
+
+``` bash
+git clone --bare git://192.168.10.XX/git_repo/project_name.git
+```
+
+以镜像推送的方式上传代码到 新服务器上：
+
+``` bash
+cd project_name.git
+git push --mirror git@192.168.20.XX/path/to/path/new_project_name.git
+```
+
+**方法二：**
+
+假设你的remote是origin，用git remote set_url 更换地址：
+
+``` bash
+git remote set-url origin remote_git_address
+```
+
+然后用 git push 进行提交：
+
+``` bash
+git push
+```
+
+不过这种只会迁移当前分支到新的git上。
