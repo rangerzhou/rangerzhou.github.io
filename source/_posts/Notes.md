@@ -731,3 +731,19 @@ git push
 ```
 
 不过这种只会迁移当前分支到新的git上。
+
+
+
+#### 20. VirtualBox 共享文件夹
+
+1. 设置 - 共享文件夹 - + - 选择 PC 上的一个目录 share - 点击 OK
+
+2. 虚拟机中输入：
+
+   ``` shell
+   sudo mkdir /pcshare
+   sudo chmod 777 /pcshare
+   sudo mount -t vboxsf share /pcshare
+   ```
+
+   
