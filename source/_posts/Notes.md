@@ -736,14 +736,240 @@ git push
 
 #### 20. VirtualBox 共享文件夹
 
-1. 设置 - 共享文件夹 - + - 选择 PC 上的一个目录 share - 点击 OK
+1. 设置 - 共享文件夹 - + - 选择 PC 上的一个目录 Share - 点击 OK
 
 2. 虚拟机中输入：
 
    ``` shell
-   sudo mkdir /pcshare
-   sudo chmod 777 /pcshare
-   sudo mount -t vboxsf share /pcshare
+   sudo mkdir pcshare
+   sudo chmod 777 pcshare
+   sudo mount -t vboxsf Share pcshare/
    ```
 
-   
+
+
+
+#### 21. Linux jar 包运行常用命令
+
+##### 1. 运行方式1
+
+``` shell
+java -jar test.jar
+```
+
+当前 ssh 窗口被锁定，可按 CTRL+C 打断程序运行，或直接关闭窗口，程序退出。
+
+如何让窗口不锁定呢？
+
+##### 2. 运行方式2
+
+``` shell
+java -jar test.jar &
+```
+
+& 代表在后台运行。
+
+当前 ssh 窗口不被锁定，但是当窗口关闭时，程序终止运行。
+
+如何让窗口关闭时，程序仍然运行？
+
+##### 3. 运行方式3
+
+``` shell
+nohup java -jar test.jar &
+```
+
+nohup 的意思是不挂断运行命令，当账户退出或终端关闭时，程序仍然运行。
+
+当用 nohup 命令执行作业时，缺省情况下该作业的所有输出被重定向到 nohup.out 的文件中，除非另外指定输出文件。
+
+##### 4. 运行方式4
+
+``` shell
+nohup jar -jar test.jar > temp.txt &
+```
+
+command > out.file: 将 command 的输出重定向到 out.file 文件，即输出内容不打印到屏幕上，而是输出到 out.file 文件中。
+
+##### 5. 查看后台运行任务
+
+``` shell
+jobs
+```
+
+jobs 命令会列出所有后台执行的作业，并且每个作业前面会有个编号。
+
+如果想将某个作业调到前台控制，使用 fg 命令：
+
+``` shell
+fg 23
+```
+
+##### 6. 查看某端口占用的线程的 pid
+
+``` shell
+netstat -nlp | grep :1234
+```
+
+如果忘记进程号，通过如下命令查看当前运行 jar 包程序进程号：
+
+``` shell
+ps -ef | grep test.jar
+# 或者
+ps -aux | grep java
+```
+
+##### 7. 关闭进程
+
+``` shell
+kill -s 9 12345
+```
+
+
+
+#### 22. Ubuntu 18.04 修改 mysql 数据库存放位置
+
+停止 mysql
+
+``` shell
+sudo /etc/init.d/mysql stop
+```
+
+确认mysql 数据存放位置
+
+``` shell
+$ mysql -u root -p
+# 输入密码后进入命令操作
+mysql> show variables like '%dir%';
++-----------------------------------------+------------------------------+
+| Variable_name                           | Value                        |
++-----------------------------------------+------------------------------+
+| basedir                                 | /usr/                        |
+| binlog_direct_non_transactional_updates | OFF                          |
+| character_sets_dir                      | /usr/share/mysql/charsets/   |
+| datadir                                 | /var/lib/mysql/              | # datadir 即为数据存储位置
+| ignore_db_dirs                          |                              |
+| innodb_data_home_dir                    |                              |
+| innodb_log_group_home_dir               | ./                           |
+| innodb_max_dirty_pages_pct              | 75.000000                    |
+| innodb_max_dirty_pages_pct_lwm          | 0.000000                     |
+| innodb_tmpdir                           |                              |
+| innodb_undo_directory                   | ./                           |
+| lc_messages_dir                         | /usr/share/mysql/            |
+| plugin_dir                              | /usr/lib/mysql/plugin/       |
+| slave_load_tmpdir                       | /tmp                         |
+| tmpdir                                  | /tmp                         |
++-----------------------------------------+------------------------------+
+15 rows in set (0.00 sec)
+
+```
+
+关闭 mysql 服务
+
+``` shell
+service mysql stop
+# 或者
+sudo /etc/init.d/mysql stop
+```
+
+创建新的数据库路径
+
+``` shell
+mkdir /home/ranger/database/mysql
+```
+
+复制 mysql 原有的数据
+
+``` shell
+mv /var/lib/mysql /home/ranger/database/mysql
+```
+
+修改配置文件
+
+``` shell
+# 修改mysqld.cnf 中的 datadir
+sudo vim /etc/mysql/mysql.conf.d/mysqld.cnf
+datadir = /home/ranger/database/mysql
+
+# 修改启动文件
+vim /etc/apparmor.d/usr.sbin.mysqld
+# Allow data dir access
+  /var/lib/mysql/ r,
+  /var/lib/mysql/** rwk,
+  # 添加如下两行
+  /home/ranger/database/mysql/ r,
+  /home/ranger/database/mysql/** rwk,
+
+# 配置 AppArmor 访问控制规则
+sudo vim /etc/apparmor.d/tunables/alias
+alias /var/lib/mysql/ -> /home/ranger/database/mysql/,
+
+# 修改 socket 地址
+sudo vim /etc/apparmor.d/abstractions/mysql
+/home/ranger/database/mysql{,d}/mysql{,d}.sock rw,
+
+# 修改文件权限
+sudo chown -R ranger:ranger /home/ranger/database/mysql
+sudo chmod 755 /home/ranger/database/mysql
+```
+
+reload apparmor 配置并重启
+
+``` shell
+sudo service apparmor reload
+sudo service apparmor restart
+```
+
+重启 mysql
+
+``` shell
+sudo service mysql restart
+```
+
+如果启动异常，
+
+``` shell
+$ sudo /etc/init.d/mysql restart
+[....] Restarting mysql (via systemctl): mysql.serviceJob for mysql.service failed because the control process exited with error code.
+See "systemctl status mysql.service" and "journalctl -xe" for details.
+ failed!
+
+```
+
+输入 `journalctl -xe` 查看详细信息
+
+``` shell
+$ journalctl -xe
+-- Unit mysql.service has finished shutting down.
+Sep 17 14:01:08 Tricia systemd[1]: Starting MySQL Community Server...
+-- Subject: Unit mysql.service has begun start-up
+-- Defined-By: systemd
+-- Support: http://www.ubuntu.com/support
+--
+-- Unit mysql.service has begun starting up.
+Sep 17 14:01:08 Tricia mysql-systemd-start[32692]: my_print_defaults: [ERROR] Found option without preceding group in config file /etc/mysql/my.cnf at line 22!
+Sep 17 14:01:08 Tricia mysql-systemd-start[32692]: my_print_defaults: [ERROR] Fatal error in defaults handling. Program aborted!
+Sep 17 14:01:08 Tricia mysql-systemd-start[32692]: MySQL data dir not found at /var/lib/mysql. Please create one.
+... ...
+```
+
+找到问题修改。
+
+
+
+#### 23. Ubuntu 系统时间同步
+
+直接输入如下命令即可同步最新时间
+
+``` shell
+sudo date -s "$(wget -qSO- --max-redirect=0 google.com 2>&1 | grep Date: | cut -d' ' -f5-8)Z"
+```
+
+定时执行：
+
+``` shell
+sudo vim /etc/crontab
+# m h dom mon dow user command
+30 8  * * * /home/ranger/bin/SyncTime.sh
+```
+
