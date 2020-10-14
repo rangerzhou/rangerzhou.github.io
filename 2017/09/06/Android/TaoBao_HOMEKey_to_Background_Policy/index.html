@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 3.9.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/desert.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/desert.jpg">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <meta name="google-site-verification" content="OJnYjbr3wdT22qLrZSzyD9lAyBcXiXlEQ7-5wAnaWoQ">
+  <meta name="baidu-site-verification" content="vr4n4JeXgB">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"rangerzhou.top","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":"disqus","storage":true,"lazyload":true,"nav":null,"activeClass":"disqus"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="1 问题描述 小米项目有一项手机8小时待机功耗测试，同基线的两个项目A和B同条件测试最终待机结果差异过大，A手机8小时耗电为5%，B手机8小时耗电为12%，进一步调查发现B手机主要是淘宝在耗电，而A手机却没有，但是在测试前是都打开了淘宝的。">
+<meta name="keywords" content="netpolicy">
+<meta property="og:type" content="article">
+<meta property="og:title" content="淘宝进入后台后网络策略分析(Android进程调度ADJ算法部分内容分析)">
+<meta property="og:url" content="http://rangerzhou.top/2017/09/06/Android/TaoBao_HOMEKey_to_Background_Policy/index.html">
+<meta property="og:site_name" content="RangerZhou">
+<meta property="og:description" content="1 问题描述 小米项目有一项手机8小时待机功耗测试，同基线的两个项目A和B同条件测试最终待机结果差异过大，A手机8小时耗电为5%，B手机8小时耗电为12%，进一步调查发现B手机主要是淘宝在耗电，而A手机却没有，但是在测试前是都打开了淘宝的。">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2020-10-14T06:59:48.120Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="淘宝进入后台后网络策略分析(Android进程调度ADJ算法部分内容分析)">
+<meta name="twitter:description" content="1 问题描述 小米项目有一项手机8小时待机功耗测试，同基线的两个项目A和B同条件测试最终待机结果差异过大，A手机8小时耗电为5%，B手机8小时耗电为12%，进一步调查发现B手机主要是淘宝在耗电，而A手机却没有，但是在测试前是都打开了淘宝的。">
+
+<link rel="canonical" href="http://rangerzhou.top/2017/09/06/Android/TaoBao_HOMEKey_to_Background_Policy/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+<script src="//cdn.bootcss.com/pace/1.0.2/pace.min.js"></script>
+<link href="//cdn.bootcss.com/pace/1.0.2/themes/pink/pace-theme-flash.css" rel="stylesheet">
+
+  <title>淘宝进入后台后网络策略分析(Android进程调度ADJ算法部分内容分析) | RangerZhou</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-138158952-1"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-138158952-1');
+      }
+    </script>
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?24a6d3c4c0f292c5f682d26414c3994b";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">RangerZhou</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">Read the fucking source code</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-commonweal">
+
+    <a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a>
+
+  </li>
+        <li class="menu-item menu-item-official">
+
+    <a href="/official" rel="section"><i class="fa fa-user fa-fw"></i>official</a>
+
+  </li>
+        <li class="menu-item menu-item-shop">
+
+    <a href="http://rangerzhou.taobao.com/" rel="noopener" target="_blank"><i class="fa fa-user fa-fw"></i>shop</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://rangerzhou.top/2017/09/06/Android/TaoBao_HOMEKey_to_Background_Policy/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Ranger Zhou">
+      <meta itemprop="description" content="我是一个小流氓我从来也不浪，有一天我心血来潮耍了个流氓，我嘴里吹着小口哨我心里好得意，不知怎么哗啦啦啦啦我摔了一身泥">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="RangerZhou">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          淘宝进入后台后网络策略分析(Android进程调度ADJ算法部分内容分析)
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2017-09-06 09:36:16" itemprop="dateCreated datePublished" datetime="2017-09-06T09:36:16+08:00">2017-09-06</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-10-14 14:59:48" itemprop="dateModified" datetime="2020-10-14T14:59:48+08:00">2020-10-14</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Android/" itemprop="url" rel="index"><span itemprop="name">Android</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus：</span>
+    
+    <a title="disqus" href="/2017/09/06/Android/TaoBao_HOMEKey_to_Background_Policy/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2017/09/06/Android/TaoBao_HOMEKey_to_Background_Policy/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h3 id="1-问题描述"><a href="#1-问题描述" class="headerlink" title="1 问题描述"></a>1 问题描述</h3><blockquote>
+<p>小米项目有一项手机8小时待机功耗测试，同基线的两个项目A和B同条件测试最终待机结果差异过大，A手机8小时耗电为5%，B手机8小时耗电为12%，进一步调查发现B手机主要是淘宝在耗电，而A手机却没有，但是在测试前是都打开了淘宝的。</p>
+</blockquote>
+<a id="more"></a>
+<h3 id="2-初步分析"><a href="#2-初步分析" class="headerlink" title="2 初步分析"></a>2 初步分析</h3><p>首先需要知道为什么同基线同测试环境只有B手机的淘宝耗电，而A手机淘宝却没有耗电，在log中看到A手机的dumpsys netpolicy信息中淘宝的状态为：<code>UID=10139 state=16 (bg) rules=64 (REJECT_ALL)</code>，B手机netpolicy信息为：<code>UID=10141 state=3 (fg svc) rules=32 (ALLOW_ALL)</code>，其中REGECT_ALL和ALLOW_ALL指的是访问网络权限，A手机淘宝由于限制了网络访问，所以耗电比B手机要少，继续看log发现，A手机的淘宝进程被Kill，而B手机却没有，也测试了小米5和小米6，同样发现淘宝被Kill，切被Kill的方式各有不同，三部手机淘宝被Kill的方式有3中：</p>
+<ul>
+<li>lowmemorykiller：android内存管理机制，低内存时会把优先级低的进程kill掉。</li>
+<li>PowerKeeper kill：小米功耗优化的功能。</li>
+<li>com.miui.whetstone：小米的内存管理机制。</li>
+</ul>
+<p>正常情况下淘宝在后台会被PowerKeeper限制联网和同步，而处于foreground service优先级不会被限制，所以B手机在淘宝没有被Kill的情况下不会被限制网络，所以耗电的源头已经找到。</p>
+<p>那么为什么淘宝的状态会是fg svc呢，这种状态到底是淘宝自身导致还是android代码缺陷还存在疑问，对小米5，小米6，华为平板M3以及一加5均做了同样的测试，测试条件为：安装淘宝-打开-我的淘宝-登陆-HOME键-查看dumpsys netpolicy信息，发现淘宝的状态均为<code>state=3 (fg svc)</code>，初步结论为淘宝自身策略导致，接下来通过代码来进一步跟踪。</p>
+<h3 id="3-源码分析"><a href="#3-源码分析" class="headerlink" title="3 源码分析"></a>3 源码分析</h3><p>首先来看这个fg svc是什么东西，</p>
+<p>/<a href="http://androidxref.com/6.0.1_r10/xref/frameworks/" target="_blank" rel="noopener">frameworks</a>/<a href="http://androidxref.com/6.0.1_r10/xref/frameworks/base/" target="_blank" rel="noopener">base</a>/<a href="http://androidxref.com/6.0.1_r10/xref/frameworks/base/services/" target="_blank" rel="noopener">services</a>/<a href="http://androidxref.com/6.0.1_r10/xref/frameworks/base/services/core/" target="_blank" rel="noopener">core</a>/<a href="http://androidxref.com/6.0.1_r10/xref/frameworks/base/services/core/java/" target="_blank" rel="noopener">java</a>/<a href="http://androidxref.com/6.0.1_r10/xref/frameworks/base/services/core/java/com/" target="_blank" rel="noopener">com</a>/<a href="http://androidxref.com/6.0.1_r10/xref/frameworks/base/services/core/java/com/android/" target="_blank" rel="noopener">android</a>/<a href="http://androidxref.com/6.0.1_r10/xref/frameworks/base/services/core/java/com/android/server/" target="_blank" rel="noopener">server</a>/<a href="http://androidxref.com/6.0.1_r10/xref/frameworks/base/services/core/java/com/android/server/net/" target="_blank" rel="noopener">net</a>/<a href="http://androidxref.com/6.0.1_r10/xref/frameworks/base/services/core/java/com/android/server/net/NetworkPolicyManagerService.java" target="_blank" rel="noopener">NetworkPolicyManagerService.java</a></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">dump</span><span class="params">(FileDescriptor fd, PrintWriter writer, String[] args)</span> </span>&#123;</span><br><span class="line">    mContext.enforceCallingOrSelfPermission(DUMP, TAG);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">final</span> IndentingPrintWriter fout = <span class="keyword">new</span> IndentingPrintWriter(writer, <span class="string">"  "</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">final</span> ArraySet&lt;String&gt; argSet = <span class="keyword">new</span> ArraySet&lt;String&gt;(args.length);</span><br><span class="line">    <span class="keyword">for</span> (String arg : args) &#123;</span><br><span class="line">        argSet.add(arg);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">synchronized</span> (mUidRulesFirstLock) &#123;</span><br><span class="line">      ... ...</span><br><span class="line">            <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; size; i++) &#123;</span><br><span class="line">                <span class="keyword">final</span> <span class="keyword">int</span> uid = knownUids.keyAt(i);</span><br><span class="line">                fout.print(<span class="string">"UID="</span>);</span><br><span class="line">                fout.print(uid);</span><br><span class="line"></span><br><span class="line">                <span class="keyword">final</span> <span class="keyword">int</span> state = mUidState.get(uid, ActivityManager.PROCESS_STATE_CACHED_EMPTY);</span><br><span class="line">                fout.print(<span class="string">" state="</span>);</span><br><span class="line">                fout.print(state);</span><br><span class="line">                <span class="keyword">if</span> (state &lt;= ActivityManager.PROCESS_STATE_TOP) &#123;</span><br><span class="line">                    fout.print(<span class="string">" (fg)"</span>);</span><br><span class="line">                &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                    fout.print(state &lt;= ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE</span><br><span class="line">                            ? <span class="string">" (fg svc)"</span> : <span class="string">" (bg)"</span>);</span><br><span class="line">                &#125;</span><br><span class="line"></span><br><span class="line">                <span class="keyword">final</span> <span class="keyword">int</span> uidRules = mUidRules.get(uid, RULE_NONE);</span><br><span class="line">                fout.print(<span class="string">" rules="</span>);</span><br><span class="line">                fout.print(uidRulesToString(uidRules));</span><br><span class="line">                fout.println();</span><br><span class="line">            &#125;</span><br><span class="line">      ... ...</span><br></pre></td></tr></table></figure>
+<p>可以看出如果state &lt;= ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE，则dumpsys信息输出fg svc，看来重点就是进程的状态了，state是从mUidState中取出来的。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * Process state of UID changed; if needed, will trigger</span></span><br><span class="line"><span class="comment"> * &#123;<span class="doctag">@link</span> #updateRulesForDataUsageRestrictionsUL(int)&#125; and</span></span><br><span class="line"><span class="comment"> * &#123;<span class="doctag">@link</span> #updateRulesForPowerRestrictionsUL(int)&#125;</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">updateUidStateUL</span><span class="params">(<span class="keyword">int</span> uid, <span class="keyword">int</span> uidState)</span> </span>&#123;</span><br><span class="line">    Trace.traceBegin(Trace.TRACE_TAG_NETWORK, <span class="string">"updateUidStateUL"</span>);</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        <span class="keyword">final</span> <span class="keyword">int</span> oldUidState = mUidState.get(uid, ActivityManager.PROCESS_STATE_CACHED_EMPTY);</span><br><span class="line">        <span class="keyword">if</span> (oldUidState != uidState) &#123;</span><br><span class="line">            <span class="comment">// state changed, push updated rules</span></span><br><span class="line">            mUidState.put(uid, uidState); <span class="comment">// mUidState的put</span></span><br><span class="line">            updateRestrictBackgroundRulesOnUidStatusChangedUL(uid, oldUidState, uidState);</span><br><span class="line">            <span class="keyword">if</span> (isProcStateAllowedWhileIdleOrPowerSaveMode(oldUidState)</span><br><span class="line">                    != isProcStateAllowedWhileIdleOrPowerSaveMode(uidState) ) &#123;</span><br><span class="line">                <span class="keyword">if</span> (isUidIdle(uid)) &#123;</span><br><span class="line">                    updateRuleForAppIdleUL(uid);</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="keyword">if</span> (mDeviceIdleMode) &#123;</span><br><span class="line">                    updateRuleForDeviceIdleUL(uid);</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="keyword">if</span> (mRestrictPower) &#123;</span><br><span class="line">                    updateRuleForRestrictPowerUL(uid);</span><br><span class="line">                &#125;</span><br><span class="line">                updateRulesForPowerRestrictionsUL(uid);</span><br><span class="line">            &#125;</span><br><span class="line">            updateNetworkStats(uid, isUidStateForegroundUL(uidState));</span><br><span class="line">        &#125;</span><br><span class="line">    &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">        Trace.traceEnd(Trace.TRACE_TAG_NETWORK);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>查看updateUidStateUL的调用：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">final</span> <span class="keyword">private</span> IUidObserver mUidObserver = <span class="keyword">new</span> IUidObserver.Stub() &#123;</span><br><span class="line">    <span class="meta">@Override</span> <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onUidStateChanged</span><span class="params">(<span class="keyword">int</span> uid, <span class="keyword">int</span> procState)</span> <span class="keyword">throws</span> RemoteException </span>&#123;</span><br><span class="line">        Trace.traceBegin(Trace.TRACE_TAG_NETWORK, <span class="string">"onUidStateChanged"</span>);</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="keyword">synchronized</span> (mUidRulesFirstLock) &#123;</span><br><span class="line">                updateUidStateUL(uid, procState);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">            Trace.traceEnd(Trace.TRACE_TAG_NETWORK);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">systemReady</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    Trace.traceBegin(Trace.TRACE_TAG_NETWORK, <span class="string">"systemReady"</span>);</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> (!isBandwidthControlEnabled()) &#123;</span><br><span class="line">            Slog.w(TAG, <span class="string">"bandwidth controls disabled, unable to enforce policy"</span>);</span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        mUsageStats = LocalServices.getService(UsageStatsManagerInternal<span class="class">.<span class="keyword">class</span>)</span>;</span><br><span class="line">      ... ...</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            mActivityManager.registerUidObserver(mUidObserver,</span><br><span class="line">                    ActivityManager.UID_OBSERVER_PROCSTATE|ActivityManager.UID_OBSERVER_GONE); <span class="comment">// 注册</span></span><br><span class="line">            mNetworkManager.registerObserver(mAlertObserver);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (RemoteException e) &#123;</span><br><span class="line">            <span class="comment">// ignored; both services live in system_server</span></span><br><span class="line">        &#125;</span><br><span class="line">      ... ...</span><br></pre></td></tr></table></figure>
+<p>在上述代码中会监听UidState的改变，如果有变化则更新mUidState。</p>
+<p>/<a href="http://androidxref.com/6.0.1_r10/xref/frameworks/" target="_blank" rel="noopener">frameworks</a>/<a href="http://androidxref.com/6.0.1_r10/xref/frameworks/base/" target="_blank" rel="noopener">base</a>/<a href="http://androidxref.com/6.0.1_r10/xref/frameworks/base/services/" target="_blank" rel="noopener">services</a>/<a href="http://androidxref.com/6.0.1_r10/xref/frameworks/base/services/core/" target="_blank" rel="noopener">core</a>/<a href="http://androidxref.com/6.0.1_r10/xref/frameworks/base/services/core/java/" target="_blank" rel="noopener">java</a>/<a href="http://androidxref.com/6.0.1_r10/xref/frameworks/base/services/core/java/com/" target="_blank" rel="noopener">com</a>/<a href="http://androidxref.com/6.0.1_r10/xref/frameworks/base/services/core/java/com/android/" target="_blank" rel="noopener">android</a>/<a href="http://androidxref.com/6.0.1_r10/xref/frameworks/base/services/core/java/com/android/server/" target="_blank" rel="noopener">server</a>/<a href="http://androidxref.com/6.0.1_r10/xref/frameworks/base/services/core/java/com/android/server/am/" target="_blank" rel="noopener">am</a>/<a href="http://androidxref.com/6.0.1_r10/xref/frameworks/base/services/core/java/com/android/server/am/ActivityManagerService.java" target="_blank" rel="noopener">ActivityManagerService.java</a></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">registerUidObserver</span><span class="params">(IUidObserver observer, <span class="keyword">int</span> which)</span> </span>&#123;</span><br><span class="line">    enforceCallingPermission(android.Manifest.permission.SET_ACTIVITY_WATCHER,</span><br><span class="line">            <span class="string">"registerUidObserver()"</span>);</span><br><span class="line">    <span class="keyword">synchronized</span> (<span class="keyword">this</span>) &#123;</span><br><span class="line">        mUidObservers.register(observer, which); <span class="comment">// 把observer添加到mUidObservers</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>/<a href="http://androidxref.com/6.0.1_r10/xref/frameworks/" target="_blank" rel="noopener">frameworks</a>/<a href="http://androidxref.com/6.0.1_r10/xref/frameworks/base/" target="_blank" rel="noopener">base</a>/<a href="http://androidxref.com/6.0.1_r10/xref/frameworks/base/core/" target="_blank" rel="noopener">core</a>/<a href="http://androidxref.com/6.0.1_r10/xref/frameworks/base/core/java/" target="_blank" rel="noopener">java</a>/<a href="http://androidxref.com/6.0.1_r10/xref/frameworks/base/core/java/android/" target="_blank" rel="noopener">android</a>/<a href="http://androidxref.com/6.0.1_r10/xref/frameworks/base/core/java/android/os/" target="_blank" rel="noopener">os</a>/<a href="http://androidxref.com/6.0.1_r10/xref/frameworks/base/core/java/android/os/RemoteCallbackList.java" target="_blank" rel="noopener">RemoteCallbackList.java</a></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">register</span><span class="params">(E callback, Object cookie)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">synchronized</span> (mCallbacks) &#123;</span><br><span class="line">        <span class="keyword">if</span> (mKilled) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        IBinder binder = callback.asBinder();</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            Callback cb = <span class="keyword">new</span> Callback(callback, cookie);</span><br><span class="line">            binder.linkToDeath(cb, <span class="number">0</span>);</span><br><span class="line">            mCallbacks.put(binder, cb); <span class="comment">// put操作</span></span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">        &#125; <span class="keyword">catch</span> (RemoteException e) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>接下来看procState的传入：</p>
+<p>/<a href="http://androidxref.com/6.0.1_r10/xref/frameworks/" target="_blank" rel="noopener">frameworks</a>/<a href="http://androidxref.com/6.0.1_r10/xref/frameworks/base/" target="_blank" rel="noopener">base</a>/<a href="http://androidxref.com/6.0.1_r10/xref/frameworks/base/services/" target="_blank" rel="noopener">services</a>/<a href="http://androidxref.com/6.0.1_r10/xref/frameworks/base/services/core/" target="_blank" rel="noopener">core</a>/<a href="http://androidxref.com/6.0.1_r10/xref/frameworks/base/services/core/java/" target="_blank" rel="noopener">java</a>/<a href="http://androidxref.com/6.0.1_r10/xref/frameworks/base/services/core/java/com/" target="_blank" rel="noopener">com</a>/<a href="http://androidxref.com/6.0.1_r10/xref/frameworks/base/services/core/java/com/android/" target="_blank" rel="noopener">android</a>/<a href="http://androidxref.com/6.0.1_r10/xref/frameworks/base/services/core/java/com/android/server/" target="_blank" rel="noopener">server</a>/<a href="http://androidxref.com/6.0.1_r10/xref/frameworks/base/services/core/java/com/android/server/am/" target="_blank" rel="noopener">am</a>/<a href="http://androidxref.com/6.0.1_r10/xref/frameworks/base/services/core/java/com/android/server/am/ActivityManagerService.java" target="_blank" rel="noopener">ActivityManagerService.java</a></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">dispatchUidsChanged</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  ... ...</span><br><span class="line">    <span class="keyword">int</span> i = mUidObservers.beginBroadcast();</span><br><span class="line">    <span class="keyword">while</span> (i &gt; <span class="number">0</span>) &#123;</span><br><span class="line">      ... ...</span><br><span class="line">                    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                        <span class="keyword">if</span> ((which &amp; ActivityManager.UID_OBSERVER_PROCSTATE) != <span class="number">0</span>) &#123;</span><br><span class="line">                            <span class="keyword">if</span> (DEBUG_UID_OBSERVERS) Slog.i(TAG_UID_OBSERVERS,</span><br><span class="line">                                    <span class="string">"UID CHANGED uid="</span> + item.uid</span><br><span class="line">                                            + <span class="string">": "</span> + item.processState);</span><br><span class="line">                            <span class="comment">// 终于找到了procState的传入源</span></span><br><span class="line">                            observer.onUidStateChanged(item.uid, item.processState);</span><br><span class="line">                        &#125;</span><br><span class="line">      ... ...</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">final</span> <span class="keyword">void</span> <span class="title">enqueueUidChangeLocked</span><span class="params">(UidRecord uidRec, <span class="keyword">int</span> uid, <span class="keyword">int</span> change)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">final</span> UidRecord.ChangeItem pendingChange;</span><br><span class="line">    <span class="keyword">if</span> (uidRec == <span class="keyword">null</span> || uidRec.pendingChange == <span class="keyword">null</span>) &#123;</span><br><span class="line">        <span class="keyword">if</span> (mPendingUidChanges.size() == <span class="number">0</span>) &#123;</span><br><span class="line">            <span class="keyword">if</span> (DEBUG_UID_OBSERVERS) Slog.i(TAG_UID_OBSERVERS,</span><br><span class="line">                    <span class="string">"*** Enqueueing dispatch uid changed!"</span>);</span><br><span class="line">            mUiHandler.obtainMessage(DISPATCH_UIDS_CHANGED_UI_MSG).sendToTarget();</span><br><span class="line">        &#125;</span><br><span class="line">      ... ...</span><br><span class="line">        </span><br><span class="line"><span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">UiHandler</span> <span class="keyword">extends</span> <span class="title">Handler</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">UiHandler</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>(com.android.server.UiThread.get().getLooper(), <span class="keyword">null</span>, <span class="keyword">true</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">handleMessage</span><span class="params">(Message msg)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">switch</span> (msg.what) &#123;</span><br><span class="line">            ... ...</span><br><span class="line">        <span class="keyword">case</span> DISPATCH_UIDS_CHANGED_UI_MSG: &#123;</span><br><span class="line">            dispatchUidsChanged(); <span class="comment">// 消息处理，在dispatchUidsChanged中传入了ProcState</span></span><br><span class="line">        &#125; <span class="keyword">break</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>而procState实际上也是在ActivityManagerService.java中设置的，接下来看procState的set：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 计算adj，返回计算后RawAdj值，和applyOomAdjLocked一起在updateOomAdjLocked中调用</span></span><br><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">final</span> <span class="keyword">int</span> <span class="title">computeOomAdjLocked</span><span class="params">(ProcessRecord app, <span class="keyword">int</span> cachedAdj, ProcessRecord TOP_APP, <span class="keyword">boolean</span> doingAll, <span class="keyword">long</span> now)</span> </span>&#123;</span><br><span class="line">  ... ...</span><br><span class="line">    <span class="comment">// service情况</span></span><br><span class="line">    <span class="keyword">boolean</span> mayBeTop = <span class="keyword">false</span>; <span class="comment">// 是否显示在最顶部</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// 当adj &gt; 0或schedGroup为后台进程组或procState &gt; 2时执行</span></span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> is = app.services.size()-<span class="number">1</span>;</span><br><span class="line">            is &gt;= <span class="number">0</span> &amp;&amp; (adj &gt; ProcessList.FOREGROUND_APP_ADJ</span><br><span class="line">                    || schedGroup == ProcessList.SCHED_GROUP_BACKGROUND</span><br><span class="line">                    || procState &gt; ActivityManager.PROCESS_STATE_TOP);</span><br><span class="line">            is--) &#123;</span><br><span class="line">        ServiceRecord s = app.services.valueAt(is);</span><br><span class="line">        ... ...</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> conni = s.connections.size()-<span class="number">1</span>;</span><br><span class="line">                conni &gt;= <span class="number">0</span> &amp;&amp; (adj &gt; ProcessList.FOREGROUND_APP_ADJ</span><br><span class="line">                        || schedGroup == ProcessList.SCHED_GROUP_BACKGROUND</span><br><span class="line">                        || procState &gt; ActivityManager.PROCESS_STATE_TOP);</span><br><span class="line">                conni--) &#123;</span><br><span class="line">            <span class="comment">// 获取service所绑定的connections</span></span><br><span class="line">            ArrayList&lt;ConnectionRecord&gt; clist = s.connections.valueAt(conni);</span><br><span class="line">            <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>;</span><br><span class="line">                    i &lt; clist.size() &amp;&amp; (adj &gt; ProcessList.FOREGROUND_APP_ADJ</span><br><span class="line">                            || schedGroup == ProcessList.SCHED_GROUP_BACKGROUND</span><br><span class="line">                            || procState &gt; ActivityManager.PROCESS_STATE_TOP);</span><br><span class="line">                    i++) &#123;</span><br><span class="line">                <span class="comment">// XXX should compute this based on the max of</span></span><br><span class="line">                <span class="comment">// all connected clients.</span></span><br><span class="line">                ConnectionRecord cr = clist.get(i);</span><br><span class="line">                <span class="keyword">if</span> (cr.binding.client == app) &#123;</span><br><span class="line">                    <span class="comment">// Binding to ourself is not interesting.</span></span><br><span class="line">                    <span class="comment">// 当client与当前app同一进程，则continue</span></span><br><span class="line">                    <span class="keyword">continue</span>;</span><br><span class="line">                &#125;</span><br><span class="line"></span><br><span class="line">                <span class="keyword">if</span> ((cr.flags&amp;Context.BIND_WAIVE_PRIORITY) == <span class="number">0</span>) &#123;</span><br><span class="line">                    ProcessRecord client = cr.binding.client;</span><br><span class="line">                    <span class="comment">// 计算connections所对应的client进程的adj</span></span><br><span class="line">                    <span class="keyword">int</span> clientAdj = computeOomAdjLocked(client, cachedAdj,</span><br><span class="line">                            TOP_APP, doingAll, now);</span><br><span class="line">                    <span class="keyword">int</span> clientProcState = client.curProcState; <span class="comment">// client进程的状态</span></span><br><span class="line">                    ... ...</span><br><span class="line">                    <span class="comment">// 当绑定的是前台进程的情况</span></span><br><span class="line">                    <span class="keyword">if</span> ((cr.flags&amp;Context.BIND_NOT_FOREGROUND) == <span class="number">0</span>) &#123;</span><br><span class="line">                        <span class="comment">// This will treat important bound services identically to</span></span><br><span class="line">                        <span class="comment">// the top app, which may behave differently than generic</span></span><br><span class="line">                        <span class="comment">// foreground work.</span></span><br><span class="line">                        <span class="keyword">if</span> (client.curSchedGroup &gt; schedGroup) &#123;</span><br><span class="line">                            <span class="keyword">if</span> ((cr.flags&amp;Context.BIND_IMPORTANT) != <span class="number">0</span>) &#123;</span><br><span class="line">                                schedGroup = client.curSchedGroup;</span><br><span class="line">                            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                                schedGroup = ProcessList.SCHED_GROUP_DEFAULT;</span><br><span class="line">                            &#125;</span><br><span class="line">                        &#125;</span><br><span class="line">                        <span class="keyword">if</span> (clientProcState &lt;= ActivityManager.PROCESS_STATE_TOP) &#123;</span><br><span class="line">                            <span class="keyword">if</span> (clientProcState == ActivityManager.PROCESS_STATE_TOP) &#123;</span><br><span class="line">                                <span class="comment">// Special handling of clients who are in the top state.</span></span><br><span class="line">                                <span class="comment">// We *may* want to consider this process to be in the</span></span><br><span class="line">                                <span class="comment">// top state as well, but only if there is not another</span></span><br><span class="line">                                <span class="comment">// reason for it to be running.  Being on the top is a</span></span><br><span class="line">                                <span class="comment">// special state, meaning you are specifically running</span></span><br><span class="line">                                <span class="comment">// for the current top app.  If the process is already</span></span><br><span class="line">                                <span class="comment">// running in the background for some other reason, it</span></span><br><span class="line">                                <span class="comment">// is more important to continue considering it to be</span></span><br><span class="line">                                <span class="comment">// in the background state.</span></span><br><span class="line">                                <span class="comment">// 当client进程状态为前台时，则设置mayBeTop=true，并设置client进程procState=16</span></span><br><span class="line">                                mayBeTop = <span class="keyword">true</span>;</span><br><span class="line">                                clientProcState = ActivityManager.PROCESS_STATE_CACHED_EMPTY;</span><br><span class="line">                            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                                <span class="comment">// 当client进程状态 &lt; 2的前提下：若绑定前台service，则clientProcState=3；否则clientProcState=6</span></span><br><span class="line">                            ... ...</span><br><span class="line">                        &#125;</span><br><span class="line">                    &#125;</span><br><span class="line">                    ... ...</span><br></pre></td></tr></table></figure>
+<p><code>computeOomAdjLocked</code>是调整进程adj的三大护法之一，也是ADJ算法的核心方法：</p>
+<ul>
+<li><code>updateOomAdjLocked</code>：更新adj，当目标进程为空，或者被杀则返回false；否则返回true;<ul>
+<li><code>computeOomAdjLocked</code>：计算adj，设置adj和procState(进程状态)，返回计算后RawAdj值;</li>
+</ul>
+</li>
+<li><code>applyOomAdjLocked</code>：应用adj，当需要杀掉目标进程则返回false；否则返回true。</li>
+</ul>
+<p><code>updateOomAdjLocked</code>实现过程中依次会<code>computeOomAdjLocked</code>和<code>applyOomAdjLocked</code>，上面代码中主要是<code>computeOomAdjLocked</code>中的Service处理部分，如果service所绑定的connections所对应的client进程为前台进程，且client进程状态clientProcState == ActivityManager.PROCESS_STATE_TOP(值为2)，则设置mayBeTop=true。</p>
+<p>随后还有对adj的调整：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 当mayBeTop为true，且procState &gt; 2时</span></span><br><span class="line"><span class="keyword">if</span> (mayBeTop &amp;&amp; procState &gt; ActivityManager.PROCESS_STATE_TOP) &#123;</span><br><span class="line">    <span class="comment">// A client of one of our services or providers is in the top state.  We</span></span><br><span class="line">    <span class="comment">// *may* want to be in the top state, but not if we are already running in</span></span><br><span class="line">    <span class="comment">// the background for some other reason.  For the decision here, we are going</span></span><br><span class="line">    <span class="comment">// to pick out a few specific states that we want to remain in when a client</span></span><br><span class="line">    <span class="comment">// is top (states that tend to be longer-term) and otherwise allow it to go</span></span><br><span class="line">    <span class="comment">// to the top state.</span></span><br><span class="line">    <span class="keyword">switch</span> (procState) &#123;</span><br><span class="line">        <span class="keyword">case</span> ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND:</span><br><span class="line">        <span class="keyword">case</span> ActivityManager.PROCESS_STATE_IMPORTANT_BACKGROUND:</span><br><span class="line">        <span class="keyword">case</span> ActivityManager.PROCESS_STATE_SERVICE:</span><br><span class="line">            <span class="comment">// 对于procState = 6, 7, 10时，将procState设置为3</span></span><br><span class="line">            <span class="comment">// These all are longer-term states, so pull them up to the top</span></span><br><span class="line">            <span class="comment">// of the background states, but not all the way to the top state.</span></span><br><span class="line">            procState = ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE;</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        <span class="keyword">default</span>:</span><br><span class="line">            <span class="comment">// Otherwise, top is a better choice, so take it.</span></span><br><span class="line">            procState = ActivityManager.PROCESS_STATE_TOP;</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>分析到这里就找到了为什么淘宝进程最后的状态为3了，在调试的过程中发现打开淘宝后会启动一个service：<code>09-05 17:41:27.474  1486 21013 I ActivityManager: Start proc 5692:com.taobao.taobao:channel/u0a198 for service com.taobao.taobao/com.alibaba.analytics.AnalyticsService caller=com.taobao.taobao</code> ，就是这个service在<code>computeOomAdjLocked</code>所绑定的connections所对应的client进程为前台进程，通过在<code>if (cr.binding.client == app)</code>中添加log发现client为ProcessRecord{ffadbcb 21266:com.taobao.taobao/u0a88}，app为ProcessRecord{7a416b8 21766:com.taobao.taobao:channel/u0a88}，所以出现问题时client为<code>com.taobao.taobao</code>，app为<code>com.taobao.taobao:channel</code>，最终系统把mayBeTop设置为了true，当procState &gt; 2时，就会调整adj，最终把procState为3，而在<code>computeOomAdjLocked</code>的最后，把proState的值赋给了app.curProcState，最终淘宝的state就为3了。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">  <span class="function"><span class="keyword">private</span> <span class="keyword">final</span> <span class="keyword">int</span> <span class="title">computeOomAdjLocked</span><span class="params">(ProcessRecord app, <span class="keyword">int</span> cachedAdj, ProcessRecord TOP_APP, <span class="keyword">boolean</span> doingAll, <span class="keyword">long</span> now)</span> </span>&#123;</span><br><span class="line">      ... ...</span><br><span class="line">app.curAdj = app.modifyRawOomAdj(adj);</span><br><span class="line">      app.curSchedGroup = schedGroup;</span><br><span class="line">      app.curProcState = procState; <span class="comment">// 此处会把procState赋给app.curProcState</span></span><br><span class="line">      app.foregroundActivities = foregroundActivities;</span><br><span class="line">      <span class="keyword">return</span> app.curRawAdj;</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+<p>如果按HOME键的时候这个service还没有启动起来，则不会触发<code>computeOomAdjLocked</code>中把mayBeTop设为true的那段代码，也就不会调整procState了。</p>
+<h3 id="4-解决方案"><a href="#4-解决方案" class="headerlink" title="4 解决方案"></a>4 解决方案</h3><p>文中问题应该是淘宝利用Android漏洞故意为之，</p>
+<ul>
+<li>淘宝启动后，会启动两个进程<code>com.taobao.taobao</code>（UI进程）和<code>com.taobao.taobao:channel</code>（守护进程，也就是service进程）,守护进程是被绑定在淘宝进程，而在这个时候由于淘宝进程是前台进程，所以procState为PROCESS_STATE_TOP，值为2，而这个时候守护进程是后台运行的service，所以procState为PROCESS_STATE_SERVICE，值为10，当这两个条件同时满足的时候会将守护进程的procState设置为PROCESS_STATE_BOUND_FOREGROUND_SERVICE，值为3。</li>
+<li>按HOME键退出UI进程，也就是淘宝进程，退出后台后淘宝被cache起来，procState变成了PROCESS_STATE_CACHED_ACTIVITY，值为14，变成了低优先级，正常app都是这个逻辑，但是守护进程的procState并没有因为绑定进程的优先级降低而降低自己的优先级，依然是PROCESS_STATE_BOUND_FOREGROUND_SERVICE，值为3，相反为了保证守护进程能一直在后台运行，在computeOomAdjLocked方法最后将守护进程的procState赋值给UI进程淘宝，这时候淘宝的procState也变为了3，这就是我们看到的因为网络访问策略中淘宝因为procState为3而不限制网络访问。</li>
+</ul>
+<p>此处对淘宝做了特殊处理：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">... ...</span><br><span class="line"><span class="keyword">if</span> (cr.binding.client == app ||(cr.binding.client.processName.equals(<span class="string">"com.taobao.taobao"</span>) &amp;&amp; app.processName.equals(<span class="string">"com.taobao.taobao:channel"</span>))) &#123;</span><br><span class="line">                        <span class="comment">// Binding to ourself is not interesting.</span></span><br><span class="line">                        <span class="keyword">continue</span>;</span><br><span class="line">                    &#125;</span><br><span class="line">... ...</span><br></pre></td></tr></table></figure>
+<p>如此一来淘宝按HOME键之后的状态就变为<code>state=10 (bg)</code>了，后台时会禁止访问网络权限。</p>
+<h3 id="5-总结"><a href="#5-总结" class="headerlink" title="5 总结"></a>5 总结</h3><p>单是针对文中问题的分析已经到此结束，终其原因是Android framework层中承载activity/service/contentprovider/broadcastreceiver的进程根据组件运行状态而动态调节进程自身的状态，进程有两个比较重要的状态值adj(ProcessList.java中定义)和procState(ActivityManager.java中定义)，调整进程ADJ算法的核心方法<code>computeOomAdjLocked</code>除了对service的处理外还有对Activity和ContentProvider情况的处理，整个adj算法的分析还没有完全弄懂，此部分内容未完待续。</p>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>Ranger Zhou
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://rangerzhou.top/2017/09/06/Android/TaoBao_HOMEKey_to_Background_Policy/" title="淘宝进入后台后网络策略分析(Android进程调度ADJ算法部分内容分析)">http://rangerzhou.top/2017/09/06/Android/TaoBao_HOMEKey_to_Background_Policy/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/netpolicy/" rel="tag"># netpolicy</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2017/08/31/Android/Get_call_status_On_Android7.0/" rel="prev" title="Android7.0获取通话状态">
+      <i class="fa fa-chevron-left"></i> Android7.0获取通话状态
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2017/10/10/Others/Notes/" rel="next" title="Notes">
+      Notes <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+      <div class="tabs tabs-comment">
+        <ul class="nav-tabs">
+            <li class="tab"><a href="#comment-disqus">disqus</a></li>
+            <li class="tab"><a href="#comment-gitalk">gitalk</a></li>
+            <li class="tab"><a href="#comment-livere">livere</a></li>
+        </ul>
+        <div class="tab-content">
+            <div class="tab-pane disqus" id="comment-disqus">
+              
+  <div class="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
+            </div>
+            <div class="tab-pane gitalk" id="comment-gitalk">
+              <div class="comments" id="gitalk-container"></div>
+            </div>
+            <div class="tab-pane livere" id="comment-livere">
+              
+  <div class="comments">
+    <div id="lv-container" data-id="city" data-uid="MTAyMC8yOTcyNS82Mjky"></div>
+  </div>
+  
+            </div>
+        </div>
+      </div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-问题描述"><span class="nav-text">1 问题描述</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-初步分析"><span class="nav-text">2 初步分析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-源码分析"><span class="nav-text">3 源码分析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-解决方案"><span class="nav-text">4 解决方案</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-总结"><span class="nav-text">5 总结</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Ranger Zhou</p>
+  <div class="site-description" itemprop="description">我是一个小流氓我从来也不浪，有一天我心血来潮耍了个流氓，我嘴里吹着小口哨我心里好得意，不知怎么哗啦啦啦啦我摔了一身泥</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">49</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">8</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">16</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/rangerzhou" title="GitHub → https://github.com/rangerzhou" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:rangero_o@qq.com" title="E-Mail → mailto:rangero_o@qq.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://rangerzhou.taobao.com/" title="Taobao → http://rangerzhou.taobao.com/" rel="noopener" target="_blank"><i class="fab fa-youtube fa-fw"></i>Taobao</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="/images/wechat.jpg" title="WeChat → /images/wechat.jpg"><i class="fab fa-youtube fa-fw"></i>WeChat</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://blog.csdn.net/ranger0220?viewmode=contents" title="CSDN → http://blog.csdn.net/ranger0220?viewmode=contents" rel="noopener" target="_blank"><i class="fab fa-youtube fa-fw"></i>CSDN</a>
+      </span>
+  </div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      墙裂推荐
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="http://rangerzhou.taobao.com" title="http://rangerzhou.taobao.com" rel="noopener" target="_blank">Taobao</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Ranger Zhou</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script>
+<script src="/js/schemes/pisces.js"></script>
+<script src="/js/next-boot.js"></script>
+
+
+
+  
+  <script>
+    (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      bp.src = (curProtocol === 'https') ? 'https://zz.bdstatic.com/linksubmit/push.js' : 'http://push.zhanzhang.baidu.com/push.js';
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+    })();
+  </script>
+
+
+
+
+  <script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+<script>
+  function loadCount() {
+    var d = document, s = d.createElement('script');
+    s.src = 'https://rangerzhou.disqus.com/count.js';
+    s.id = 'dsq-count-scr';
+    (d.head || d.body).appendChild(s);
+  }
+  // defer loading until the whole page loading is completed
+  window.addEventListener('load', loadCount, false);
+</script>
+<script>
+  var disqus_config = function() {
+    this.page.url = "http://rangerzhou.top/2017/09/06/Android/TaoBao_HOMEKey_to_Background_Policy/";
+    this.page.identifier = "2017/09/06/Android/TaoBao_HOMEKey_to_Background_Policy/";
+    this.page.title = "淘宝进入后台后网络策略分析(Android进程调度ADJ算法部分内容分析)";
+    };
+  NexT.utils.loadComments(document.querySelector('#disqus_thread'), () => {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: disqus_config
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://rangerzhou.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  });
+</script>
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : 'b7bb504993135f5a2eab',
+      clientSecret: '6f83aec5c45d75e248e2914be90c4601e2e1dc44',
+      repo        : 'rangerzhou.github.io',
+      owner       : 'rangerzhou',
+      admin       : ['rangerzhou'],
+      id          : 'b0608cda3cc8e91831132be70a491a7b',
+        language: 'zh-CN',
+      distractionFreeMode: true
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
+
+<script>
+NexT.utils.loadComments(document.querySelector('#lv-container'), () => {
+  window.livereOptions = {
+    refer: location.pathname.replace(CONFIG.root, '').replace('index.html', '')
+  };
+  (function(d, s) {
+    var j, e = d.getElementsByTagName(s)[0];
+    if (typeof LivereTower === 'function') { return; }
+    j = d.createElement(s);
+    j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+    j.async = true;
+    e.parentNode.insertBefore(j, e);
+  })(document, 'script');
+});
+</script>
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/wanko.model.json"},"display":{"position":"right","width":300,"height":600},"mobile":{"show":false},"log":false});</script></body>
+</html>

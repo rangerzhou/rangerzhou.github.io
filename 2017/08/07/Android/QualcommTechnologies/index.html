@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 3.9.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/desert.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/desert.jpg">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <meta name="google-site-verification" content="OJnYjbr3wdT22qLrZSzyD9lAyBcXiXlEQ7-5wAnaWoQ">
+  <meta name="baidu-site-verification" content="vr4n4JeXgB">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"rangerzhou.top","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":"disqus","storage":true,"lazyload":true,"nav":null,"activeClass":"disqus"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="加密文章，输入密码阅读">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Qualcomm Technologies">
+<meta property="og:url" content="http://rangerzhou.top/2017/08/07/Android/QualcommTechnologies/index.html">
+<meta property="og:site_name" content="RangerZhou">
+<meta property="og:description" content="加密文章，输入密码阅读">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2019-12-31T04:33:39.561Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Qualcomm Technologies">
+<meta name="twitter:description" content="加密文章，输入密码阅读">
+
+<link rel="canonical" href="http://rangerzhou.top/2017/08/07/Android/QualcommTechnologies/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+<script src="//cdn.bootcss.com/pace/1.0.2/pace.min.js"></script>
+<link href="//cdn.bootcss.com/pace/1.0.2/themes/pink/pace-theme-flash.css" rel="stylesheet">
+
+  <title>Qualcomm Technologies | RangerZhou</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-138158952-1"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-138158952-1');
+      }
+    </script>
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?24a6d3c4c0f292c5f682d26414c3994b";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">RangerZhou</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">Read the fucking source code</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-commonweal">
+
+    <a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a>
+
+  </li>
+        <li class="menu-item menu-item-official">
+
+    <a href="/official" rel="section"><i class="fa fa-user fa-fw"></i>official</a>
+
+  </li>
+        <li class="menu-item menu-item-shop">
+
+    <a href="http://rangerzhou.taobao.com/" rel="noopener" target="_blank"><i class="fa fa-user fa-fw"></i>shop</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://rangerzhou.top/2017/08/07/Android/QualcommTechnologies/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Ranger Zhou">
+      <meta itemprop="description" content="我是一个小流氓我从来也不浪，有一天我心血来潮耍了个流氓，我嘴里吹着小口哨我心里好得意，不知怎么哗啦啦啦啦我摔了一身泥">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="RangerZhou">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Qualcomm Technologies
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2017-08-07 10:09:13" itemprop="dateCreated datePublished" datetime="2017-08-07T10:09:13+08:00">2017-08-07</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2019-12-31 12:33:39" itemprop="dateModified" datetime="2019-12-31T12:33:39+08:00">2019-12-31</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Android/" itemprop="url" rel="index"><span itemprop="name">Android</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus：</span>
+    
+    <a title="disqus" href="/2017/08/07/Android/QualcommTechnologies/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2017/08/07/Android/QualcommTechnologies/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script> <div id="hbe-security"> <div class="hbe-input-container"> <input type="password" class="hbe-form-control" id="pass" placeholder="请输入密码" /> <label for="pass">请输入密码</label> <div class="bottom-line"></div> </div> </div> <div id="decryptionError" style="display:none;">Incorrect Password!</div> <div id="noContentError" style="display:none;">No content to display!</div> <div id="encrypt-blog" style="display:none"> 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 </div><script src="/lib/crypto-js.js"></script><script src="/lib/blog-encrypt.js"></script><link href="/css/blog-encrypt.css" rel="stylesheet" type="text/css">
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>Ranger Zhou
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://rangerzhou.top/2017/08/07/Android/QualcommTechnologies/" title="Qualcomm Technologies">http://rangerzhou.top/2017/08/07/Android/QualcommTechnologies/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2017/08/05/Python/CatchSpecificedInfoToExcel/" rel="prev" title="获取目录及子目录中指定信息到excel">
+      <i class="fa fa-chevron-left"></i> 获取目录及子目录中指定信息到excel
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2017/08/15/Android/Get_SIMcard_info/" rel="next" title="SIM卡信息获取">
+      SIM卡信息获取 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+      <div class="tabs tabs-comment">
+        <ul class="nav-tabs">
+            <li class="tab"><a href="#comment-disqus">disqus</a></li>
+            <li class="tab"><a href="#comment-gitalk">gitalk</a></li>
+            <li class="tab"><a href="#comment-livere">livere</a></li>
+        </ul>
+        <div class="tab-content">
+            <div class="tab-pane disqus" id="comment-disqus">
+              
+  <div class="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
+            </div>
+            <div class="tab-pane gitalk" id="comment-gitalk">
+              <div class="comments" id="gitalk-container"></div>
+            </div>
+            <div class="tab-pane livere" id="comment-livere">
+              
+  <div class="comments">
+    <div id="lv-container" data-id="city" data-uid="MTAyMC8yOTcyNS82Mjky"></div>
+  </div>
+  
+            </div>
+        </div>
+      </div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Ranger Zhou</p>
+  <div class="site-description" itemprop="description">我是一个小流氓我从来也不浪，有一天我心血来潮耍了个流氓，我嘴里吹着小口哨我心里好得意，不知怎么哗啦啦啦啦我摔了一身泥</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">49</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">8</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">16</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/rangerzhou" title="GitHub → https://github.com/rangerzhou" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:rangero_o@qq.com" title="E-Mail → mailto:rangero_o@qq.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://rangerzhou.taobao.com/" title="Taobao → http://rangerzhou.taobao.com/" rel="noopener" target="_blank"><i class="fab fa-youtube fa-fw"></i>Taobao</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="/images/wechat.jpg" title="WeChat → /images/wechat.jpg"><i class="fab fa-youtube fa-fw"></i>WeChat</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://blog.csdn.net/ranger0220?viewmode=contents" title="CSDN → http://blog.csdn.net/ranger0220?viewmode=contents" rel="noopener" target="_blank"><i class="fab fa-youtube fa-fw"></i>CSDN</a>
+      </span>
+  </div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      墙裂推荐
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="http://rangerzhou.taobao.com" title="http://rangerzhou.taobao.com" rel="noopener" target="_blank">Taobao</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Ranger Zhou</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script>
+<script src="/js/schemes/pisces.js"></script>
+<script src="/js/next-boot.js"></script>
+
+
+
+  
+  <script>
+    (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      bp.src = (curProtocol === 'https') ? 'https://zz.bdstatic.com/linksubmit/push.js' : 'http://push.zhanzhang.baidu.com/push.js';
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+    })();
+  </script>
+
+
+
+
+  <script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+<script>
+  function loadCount() {
+    var d = document, s = d.createElement('script');
+    s.src = 'https://rangerzhou.disqus.com/count.js';
+    s.id = 'dsq-count-scr';
+    (d.head || d.body).appendChild(s);
+  }
+  // defer loading until the whole page loading is completed
+  window.addEventListener('load', loadCount, false);
+</script>
+<script>
+  var disqus_config = function() {
+    this.page.url = "http://rangerzhou.top/2017/08/07/Android/QualcommTechnologies/";
+    this.page.identifier = "2017/08/07/Android/QualcommTechnologies/";
+    this.page.title = "Qualcomm Technologies";
+    };
+  NexT.utils.loadComments(document.querySelector('#disqus_thread'), () => {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: disqus_config
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://rangerzhou.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  });
+</script>
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : 'b7bb504993135f5a2eab',
+      clientSecret: '6f83aec5c45d75e248e2914be90c4601e2e1dc44',
+      repo        : 'rangerzhou.github.io',
+      owner       : 'rangerzhou',
+      admin       : ['rangerzhou'],
+      id          : '9b2ead0e4d0a05ee34aaaaedffdfd7cf',
+        language: 'zh-CN',
+      distractionFreeMode: true
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
+
+<script>
+NexT.utils.loadComments(document.querySelector('#lv-container'), () => {
+  window.livereOptions = {
+    refer: location.pathname.replace(CONFIG.root, '').replace('index.html', '')
+  };
+  (function(d, s) {
+    var j, e = d.getElementsByTagName(s)[0];
+    if (typeof LivereTower === 'function') { return; }
+    j = d.createElement(s);
+    j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+    j.async = true;
+    e.parentNode.insertBefore(j, e);
+  })(document, 'script');
+});
+</script>
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/wanko.model.json"},"display":{"position":"right","width":300,"height":600},"mobile":{"show":false},"log":false});</script></body>
+</html>

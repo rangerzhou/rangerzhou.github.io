@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 3.9.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/desert.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/desert.jpg">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <meta name="google-site-verification" content="OJnYjbr3wdT22qLrZSzyD9lAyBcXiXlEQ7-5wAnaWoQ">
+  <meta name="baidu-site-verification" content="vr4n4JeXgB">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"rangerzhou.top","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":"disqus","storage":true,"lazyload":true,"nav":null,"activeClass":"disqus"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="加密文章，输入密码阅读">
+<meta name="keywords" content="Python">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Python学习笔记">
+<meta property="og:url" content="http://rangerzhou.top/2018/08/29/Python/Python_study/index.html">
+<meta property="og:site_name" content="RangerZhou">
+<meta property="og:description" content="加密文章，输入密码阅读">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2019-12-31T04:33:39.561Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Python学习笔记">
+<meta name="twitter:description" content="加密文章，输入密码阅读">
+
+<link rel="canonical" href="http://rangerzhou.top/2018/08/29/Python/Python_study/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+<script src="//cdn.bootcss.com/pace/1.0.2/pace.min.js"></script>
+<link href="//cdn.bootcss.com/pace/1.0.2/themes/pink/pace-theme-flash.css" rel="stylesheet">
+
+  <title>Python学习笔记 | RangerZhou</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-138158952-1"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-138158952-1');
+      }
+    </script>
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?24a6d3c4c0f292c5f682d26414c3994b";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">RangerZhou</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">Read the fucking source code</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-commonweal">
+
+    <a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a>
+
+  </li>
+        <li class="menu-item menu-item-official">
+
+    <a href="/official" rel="section"><i class="fa fa-user fa-fw"></i>official</a>
+
+  </li>
+        <li class="menu-item menu-item-shop">
+
+    <a href="http://rangerzhou.taobao.com/" rel="noopener" target="_blank"><i class="fa fa-user fa-fw"></i>shop</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://rangerzhou.top/2018/08/29/Python/Python_study/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Ranger Zhou">
+      <meta itemprop="description" content="我是一个小流氓我从来也不浪，有一天我心血来潮耍了个流氓，我嘴里吹着小口哨我心里好得意，不知怎么哗啦啦啦啦我摔了一身泥">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="RangerZhou">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Python学习笔记
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2018-08-29 19:56:30" itemprop="dateCreated datePublished" datetime="2018-08-29T19:56:30+08:00">2018-08-29</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2019-12-31 12:33:39" itemprop="dateModified" datetime="2019-12-31T12:33:39+08:00">2019-12-31</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Python/" itemprop="url" rel="index"><span itemprop="name">Python</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus：</span>
+    
+    <a title="disqus" href="/2018/08/29/Python/Python_study/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2018/08/29/Python/Python_study/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script> <div id="hbe-security"> <div class="hbe-input-container"> <input type="password" class="hbe-form-control" id="pass" placeholder="请输入密码" /> <label for="pass">请输入密码</label> <div class="bottom-line"></div> </div> </div> <div id="decryptionError" style="display:none;">Incorrect Password!</div> <div id="noContentError" style="display:none;">No content to display!</div> <div id="encrypt-blog" style="display:none"> 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 </div><script src="/lib/crypto-js.js"></script><script src="/lib/blog-encrypt.js"></script><link href="/css/blog-encrypt.css" rel="stylesheet" type="text/css">
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>Ranger Zhou
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://rangerzhou.top/2018/08/29/Python/Python_study/" title="Python学习笔记">http://rangerzhou.top/2018/08/29/Python/Python_study/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Python/" rel="tag"># Python</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2018/08/29/Technical/UbuntuBuildOpenGrok/" rel="prev" title="Ubuntu搭建OpenGrok在线代码浏览环境">
+      <i class="fa fa-chevron-left"></i> Ubuntu搭建OpenGrok在线代码浏览环境
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2018/10/05/Technical/The_Beauty_of_Data_Structures_and_Algorithms/" rel="next" title="数据结构与算法之美（1）——复杂度分析">
+      数据结构与算法之美（1）——复杂度分析 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+      <div class="tabs tabs-comment">
+        <ul class="nav-tabs">
+            <li class="tab"><a href="#comment-disqus">disqus</a></li>
+            <li class="tab"><a href="#comment-gitalk">gitalk</a></li>
+            <li class="tab"><a href="#comment-livere">livere</a></li>
+        </ul>
+        <div class="tab-content">
+            <div class="tab-pane disqus" id="comment-disqus">
+              
+  <div class="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
+            </div>
+            <div class="tab-pane gitalk" id="comment-gitalk">
+              <div class="comments" id="gitalk-container"></div>
+            </div>
+            <div class="tab-pane livere" id="comment-livere">
+              
+  <div class="comments">
+    <div id="lv-container" data-id="city" data-uid="MTAyMC8yOTcyNS82Mjky"></div>
+  </div>
+  
+            </div>
+        </div>
+      </div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Ranger Zhou</p>
+  <div class="site-description" itemprop="description">我是一个小流氓我从来也不浪，有一天我心血来潮耍了个流氓，我嘴里吹着小口哨我心里好得意，不知怎么哗啦啦啦啦我摔了一身泥</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">49</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">8</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">16</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/rangerzhou" title="GitHub → https://github.com/rangerzhou" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:rangero_o@qq.com" title="E-Mail → mailto:rangero_o@qq.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://rangerzhou.taobao.com/" title="Taobao → http://rangerzhou.taobao.com/" rel="noopener" target="_blank"><i class="fab fa-youtube fa-fw"></i>Taobao</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="/images/wechat.jpg" title="WeChat → /images/wechat.jpg"><i class="fab fa-youtube fa-fw"></i>WeChat</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://blog.csdn.net/ranger0220?viewmode=contents" title="CSDN → http://blog.csdn.net/ranger0220?viewmode=contents" rel="noopener" target="_blank"><i class="fab fa-youtube fa-fw"></i>CSDN</a>
+      </span>
+  </div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      墙裂推荐
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="http://rangerzhou.taobao.com" title="http://rangerzhou.taobao.com" rel="noopener" target="_blank">Taobao</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Ranger Zhou</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script>
+<script src="/js/schemes/pisces.js"></script>
+<script src="/js/next-boot.js"></script>
+
+
+
+  
+  <script>
+    (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      bp.src = (curProtocol === 'https') ? 'https://zz.bdstatic.com/linksubmit/push.js' : 'http://push.zhanzhang.baidu.com/push.js';
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+    })();
+  </script>
+
+
+
+
+  <script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+<script>
+  function loadCount() {
+    var d = document, s = d.createElement('script');
+    s.src = 'https://rangerzhou.disqus.com/count.js';
+    s.id = 'dsq-count-scr';
+    (d.head || d.body).appendChild(s);
+  }
+  // defer loading until the whole page loading is completed
+  window.addEventListener('load', loadCount, false);
+</script>
+<script>
+  var disqus_config = function() {
+    this.page.url = "http://rangerzhou.top/2018/08/29/Python/Python_study/";
+    this.page.identifier = "2018/08/29/Python/Python_study/";
+    this.page.title = "Python学习笔记";
+    };
+  NexT.utils.loadComments(document.querySelector('#disqus_thread'), () => {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: disqus_config
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://rangerzhou.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  });
+</script>
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : 'b7bb504993135f5a2eab',
+      clientSecret: '6f83aec5c45d75e248e2914be90c4601e2e1dc44',
+      repo        : 'rangerzhou.github.io',
+      owner       : 'rangerzhou',
+      admin       : ['rangerzhou'],
+      id          : 'd0a00c5d71c293105ce6639524f60aad',
+        language: 'zh-CN',
+      distractionFreeMode: true
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
+
+<script>
+NexT.utils.loadComments(document.querySelector('#lv-container'), () => {
+  window.livereOptions = {
+    refer: location.pathname.replace(CONFIG.root, '').replace('index.html', '')
+  };
+  (function(d, s) {
+    var j, e = d.getElementsByTagName(s)[0];
+    if (typeof LivereTower === 'function') { return; }
+    j = d.createElement(s);
+    j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+    j.async = true;
+    e.parentNode.insertBefore(j, e);
+  })(document, 'script');
+});
+</script>
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/wanko.model.json"},"display":{"position":"right","width":300,"height":600},"mobile":{"show":false},"log":false});</script></body>
+</html>

@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 3.9.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/desert.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/desert.jpg">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <meta name="google-site-verification" content="OJnYjbr3wdT22qLrZSzyD9lAyBcXiXlEQ7-5wAnaWoQ">
+  <meta name="baidu-site-verification" content="vr4n4JeXgB">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"rangerzhou.top","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":"disqus","storage":true,"lazyload":true,"nav":null,"activeClass":"disqus"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="1. 概述 权限的目的是保护用户隐私， Andriod 应用访问用户敏感数据（例如联系人、短信）和某些系统功能（例如相机、网络）时必须申请权限，系统会根据不同的功能选择自动授予权限或者提示用户批准权限请求。">
+<meta name="keywords" content="Android, Permission">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android_O系统层授予APP权限">
+<meta property="og:url" content="http://rangerzhou.top/2018/08/29/Android/Android_O_grant_permission_in_system/index.html">
+<meta property="og:site_name" content="RangerZhou">
+<meta property="og:description" content="1. 概述 权限的目的是保护用户隐私， Andriod 应用访问用户敏感数据（例如联系人、短信）和某些系统功能（例如相机、网络）时必须申请权限，系统会根据不同的功能选择自动授予权限或者提示用户批准权限请求。">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://otqux1hnn.bkt.clouddn.com/rangerzhou/180821pkgGrantPermission.png">
+<meta property="og:updated_time" content="2019-12-31T04:33:39.549Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Android_O系统层授予APP权限">
+<meta name="twitter:description" content="1. 概述 权限的目的是保护用户隐私， Andriod 应用访问用户敏感数据（例如联系人、短信）和某些系统功能（例如相机、网络）时必须申请权限，系统会根据不同的功能选择自动授予权限或者提示用户批准权限请求。">
+<meta name="twitter:image" content="http://otqux1hnn.bkt.clouddn.com/rangerzhou/180821pkgGrantPermission.png">
+
+<link rel="canonical" href="http://rangerzhou.top/2018/08/29/Android/Android_O_grant_permission_in_system/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+<script src="//cdn.bootcss.com/pace/1.0.2/pace.min.js"></script>
+<link href="//cdn.bootcss.com/pace/1.0.2/themes/pink/pace-theme-flash.css" rel="stylesheet">
+
+  <title>Android_O系统层授予APP权限 | RangerZhou</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-138158952-1"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-138158952-1');
+      }
+    </script>
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?24a6d3c4c0f292c5f682d26414c3994b";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">RangerZhou</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">Read the fucking source code</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-commonweal">
+
+    <a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a>
+
+  </li>
+        <li class="menu-item menu-item-official">
+
+    <a href="/official" rel="section"><i class="fa fa-user fa-fw"></i>official</a>
+
+  </li>
+        <li class="menu-item menu-item-shop">
+
+    <a href="http://rangerzhou.taobao.com/" rel="noopener" target="_blank"><i class="fa fa-user fa-fw"></i>shop</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://rangerzhou.top/2018/08/29/Android/Android_O_grant_permission_in_system/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Ranger Zhou">
+      <meta itemprop="description" content="我是一个小流氓我从来也不浪，有一天我心血来潮耍了个流氓，我嘴里吹着小口哨我心里好得意，不知怎么哗啦啦啦啦我摔了一身泥">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="RangerZhou">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Android_O系统层授予APP权限
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2018-08-29 19:21:59" itemprop="dateCreated datePublished" datetime="2018-08-29T19:21:59+08:00">2018-08-29</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2019-12-31 12:33:39" itemprop="dateModified" datetime="2019-12-31T12:33:39+08:00">2019-12-31</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Android/" itemprop="url" rel="index"><span itemprop="name">Android</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus：</span>
+    
+    <a title="disqus" href="/2018/08/29/Android/Android_O_grant_permission_in_system/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2018/08/29/Android/Android_O_grant_permission_in_system/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h3 id="1-概述"><a href="#1-概述" class="headerlink" title="1. 概述"></a>1. 概述</h3><blockquote>
+<p>权限的目的是保护用户隐私， Andriod 应用访问用户敏感数据（例如联系人、短信）和某些系统功能（例如相机、网络）时必须申请权限，系统会根据不同的功能选择自动授予权限或者提示用户批准权限请求。</p>
+</blockquote>
+<a id="more"></a>
+<h3 id="2-权限许可"><a href="#2-权限许可" class="headerlink" title="2. 权限许可"></a>2. 权限许可</h3><p>应用必须在 <code>AndroidManifest.xml</code> 中使用 <code>&lt;uses-permission&gt;</code> 标签对声明需要的权限，例如声明需要访问网络和发送短信的权限：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;</span><br><span class="line">&lt;manifest xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;</span><br><span class="line">    package=&quot;com.aptiv.helloworld&quot;&gt;</span><br><span class="line"></span><br><span class="line">    &lt;uses-permission android:name=&quot;android.permission.INTERNET&quot; /&gt;</span><br><span class="line">    &lt;uses-permission android:name=&quot;android.permission.SEND_SMS&quot; /&gt;</span><br><span class="line"></span><br><span class="line">    &lt;application ...&gt;</span><br><span class="line">		...</span><br><span class="line">    &lt;/application&gt;</span><br><span class="line"></span><br><span class="line">&lt;/manifest&gt;</span><br></pre></td></tr></table></figure>
+<p>在 Android 5.1 或更低版本，或者应用的 targetSdk 为22 或更低，用户必须在安装应用时授予 manifest 中列出的权限，否则应用无法安装；</p>
+<p>在 Android 6.0及以上，或者应用的 targetSdk 为23或者更高，应用必须在 manifest 中列出权限，并且必须在运行时请求其需要的每项 <strong>dangerous</strong> 权限，用户可以授予或拒绝每项权限，且即使用户拒绝权限请求，应用仍可以继续运行有限的功能；</p>
+<p>系统权限分为几个保护级别，我们一般只需要了解最重要的保护级别： <strong>normal</strong> 和 <strong>dangerous</strong>：</p>
+<ul>
+<li><strong>normal：</strong>默认值，低风险的权限采用此级别，在 app 安装时系统会自动授予此 app 请求的所有 normal 权限，无需征求用户的同意；</li>
+<li><strong>dangerous：</strong>较高风险的权限，如果应用声明其需要危险权限，则用户必须明确向应用授予该权限； 如果在 manifest 中列出的权限级别为 <strong>normal</strong> （也就是说，权限不会对用户的隐私或设备操作造成太大风险），系统会自动授予这些权限给应用。</li>
+</ul>
+<p>可以在/<a href="http://androidxref.com/8.1.0_r33/xref/frameworks/" target="_blank" rel="noopener">frameworks</a>/<a href="http://androidxref.com/8.1.0_r33/xref/frameworks/base/" target="_blank" rel="noopener">base</a>/<a href="http://androidxref.com/8.1.0_r33/xref/frameworks/base/core/" target="_blank" rel="noopener">core</a>/<a href="http://androidxref.com/8.1.0_r33/xref/frameworks/base/core/res/" target="_blank" rel="noopener">res</a>/<a href="http://androidxref.com/8.1.0_r33/xref/frameworks/base/core/res/AndroidManifest.xml" target="_blank" rel="noopener">AndroidManifest.xml</a>中查询各个权限的级别（protectionLevel属性）：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">permission</span> <span class="attr">android:name</span>=<span class="string">"android.permission.INTERNET"</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:description</span>=<span class="string">"@string/permdesc_createNetworkSockets"</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:label</span>=<span class="string">"@string/permlab_createNetworkSockets"</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:protectionLevel</span>=<span class="string">"normal|instant"</span> /&gt;</span></span><br><span class="line">... ...</span><br><span class="line"><span class="tag">&lt;<span class="name">permission</span> <span class="attr">android:name</span>=<span class="string">"android.permission.CAMERA"</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:permissionGroup</span>=<span class="string">"android.permission-group.CAMERA"</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:label</span>=<span class="string">"@string/permlab_camera"</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:description</span>=<span class="string">"@string/permdesc_camera"</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:protectionLevel</span>=<span class="string">"dangerous|instant"</span> /&gt;</span></span><br></pre></td></tr></table></figure>
+<p>也可以通过 <code>adb shell pm list permissions -g -d</code>命令查看危险权限列表：</p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">rangerzhou@zr:~ <span class="variable">$</span> adb shell pm list permissions <span class="literal">-g</span> <span class="literal">-d</span></span><br><span class="line">Dangerous Permissions:</span><br><span class="line"></span><br><span class="line">group:android.permission<span class="literal">-group</span>.CONTACTS</span><br><span class="line">  permission:android.permission.WRITE_CONTACTS</span><br><span class="line">  permission:android.permission.GET_ACCOUNTS</span><br><span class="line">  permission:android.permission.READ_CONTACTS</span><br><span class="line"></span><br><span class="line">group:android.permission<span class="literal">-group</span>.PHONE</span><br><span class="line">  permission:android.permission.READ_CALL_LOG</span><br><span class="line">  permission:android.permission.ANSWER_PHONE_CALLS</span><br><span class="line">  permission:android.permission.READ_PHONE_NUMBERS</span><br><span class="line">  permission:android.permission.READ_PHONE_STATE</span><br><span class="line">  permission:android.permission.CALL_PHONE</span><br><span class="line">  permission:android.permission.WRITE_CALL_LOG</span><br><span class="line">  permission:android.permission.USE_SIP</span><br><span class="line">  permission:android.permission.PROCESS_OUTGOING_CALLS</span><br><span class="line">  permission:com.android.voicemail.permission.ADD_VOICEMAIL</span><br><span class="line"></span><br><span class="line">... ...</span><br><span class="line"></span><br><span class="line">ungrouped:</span><br><span class="line">  permission:com.xiaomi.xmsf.permission.PAYMENT</span><br><span class="line">  permission:miui.permission.ACCESS_BLE_SETTINGS</span><br></pre></td></tr></table></figure>
+<h3 id="3-App简要安装流程"><a href="#3-App简要安装流程" class="headerlink" title="3. App简要安装流程"></a>3. App简要安装流程</h3><p><a href="http://rangerzhou.top/2017/06/26/Android_7.0_PackageManagerService%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/">点此查看安装流程</a> </p>
+<p><img src="http://otqux1hnn.bkt.clouddn.com/rangerzhou/180821pkgGrantPermission.png" alt="pkgGrantPermission"></p>
+<h3 id="4-系统层授予权限"><a href="#4-系统层授予权限" class="headerlink" title="4. 系统层授予权限"></a>4. 系统层授予权限</h3><p>假如在某些场景下我们需要 APP 无需申请，直接拥有某些权限，那么就需要在系统层直接授予相应的权限了。需要授予的权限分为安装时权限（ <strong>normal</strong> 级别）和运行时权限（ <strong>dangerous</strong> 级别）。</p>
+<h4 id="4-1-添加运行时权限"><a href="#4-1-添加运行时权限" class="headerlink" title="4.1 添加运行时权限"></a>4.1 添加运行时权限</h4><p>添加运行时权限的方法有两种：</p>
+<h5 id="4-1-1-在-system-etc-default-permissions-添加-default-permissions-xml-文件"><a href="#4-1-1-在-system-etc-default-permissions-添加-default-permissions-xml-文件" class="headerlink" title="4.1.1 在 system/etc/default-permissions 添加 default_permissions.xml 文件"></a>4.1.1 在 <code>system/etc/default-permissions</code> 添加 <code>default_permissions.xml</code> 文件</h5><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">exceptions</span>&gt;</span></span><br><span class="line">    <span class="comment">&lt;!-- This is an example of an exception:</span></span><br><span class="line"><span class="comment">    &lt;exception</span></span><br><span class="line"><span class="comment">        package="com.aptiv.helloworld"</span></span><br><span class="line"><span class="comment">      &lt;permission name="android.permission.RECORD_AUDIO" fixed="true"/&gt;</span></span><br><span class="line"><span class="comment">      &lt;permission name="android.permission.ACCESS_FINE_LOCATION" fixed="false"/&gt;</span></span><br><span class="line"><span class="comment">&lt;/exception&gt;</span></span><br></pre></td></tr></table></figure>
+<p>并添加权限(chmod a+r default_permissions.xml)：</p>
+<p>源码依据：</p>
+<p>/<a href="http://androidxref.com/8.1.0_r33/xref/frameworks/" target="_blank" rel="noopener">frameworks</a>/<a href="http://androidxref.com/8.1.0_r33/xref/frameworks/base/" target="_blank" rel="noopener">base</a>/<a href="http://androidxref.com/8.1.0_r33/xref/frameworks/base/services/" target="_blank" rel="noopener">services</a>/<a href="http://androidxref.com/8.1.0_r33/xref/frameworks/base/services/core/" target="_blank" rel="noopener">core</a>/<a href="http://androidxref.com/8.1.0_r33/xref/frameworks/base/services/core/java/" target="_blank" rel="noopener">java</a>/<a href="http://androidxref.com/8.1.0_r33/xref/frameworks/base/services/core/java/com/" target="_blank" rel="noopener">com</a>/<a href="http://androidxref.com/8.1.0_r33/xref/frameworks/base/services/core/java/com/android/" target="_blank" rel="noopener">android</a>/<a href="http://androidxref.com/8.1.0_r33/xref/frameworks/base/services/core/java/com/android/server/" target="_blank" rel="noopener">server</a>/<a href="http://androidxref.com/8.1.0_r33/xref/frameworks/base/services/core/java/com/android/server/pm/" target="_blank" rel="noopener">pm</a>/<a href="http://androidxref.com/8.1.0_r33/xref/frameworks/base/services/core/java/com/android/server/pm/DefaultPermissionGrantPolicy.java" target="_blank" rel="noopener">DefaultPermissionGrantPolicy.java</a></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">grantDefaultPermissions</span><span class="params">(<span class="keyword">int</span> userId)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (mService.hasSystemFeature(PackageManager.FEATURE_EMBEDDED, <span class="number">0</span>)) &#123;</span><br><span class="line">            grantAllRuntimePermissions(userId);</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            grantPermissionsToSysComponentsAndPrivApps(userId); <span class="comment">// runtime</span></span><br><span class="line">            grantDefaultSystemHandlerPermissions(userId); <span class="comment">// runtime</span></span><br><span class="line">            grantDefaultPermissionExceptions(userId); <span class="comment">// runtime</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">... ...</span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">grantDefaultPermissionExceptions</span><span class="params">(<span class="keyword">int</span> userId)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">synchronized</span> (mService.mPackages) &#123;</span><br><span class="line">            mHandler.removeMessages(MSG_READ_DEFAULT_PERMISSION_EXCEPTIONS);</span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> (mGrantExceptions == <span class="keyword">null</span>) &#123;</span><br><span class="line">                mGrantExceptions = readDefaultPermissionExceptionsLPw();</span><br><span class="line">            &#125;</span><br><span class="line">            ...</span><br><span class="line">    &#125;</span><br><span class="line">... ...</span><br><span class="line">    <span class="keyword">private</span> <span class="meta">@NonNull</span> ArrayMap&lt;String, List&lt;DefaultPermissionGrant&gt;&gt;</span><br><span class="line">            readDefaultPermissionExceptionsLPw() &#123;</span><br><span class="line">        File[] files = getDefaultPermissionFiles();</span><br><span class="line">        <span class="keyword">if</span> (files == <span class="keyword">null</span>) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">new</span> ArrayMap&lt;&gt;(<span class="number">0</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    ...</span><br><span class="line">    &#125; </span><br><span class="line">... ...</span><br><span class="line">    <span class="keyword">private</span> File[] getDefaultPermissionFiles() &#123;</span><br><span class="line">        ArrayList&lt;File&gt; ret = <span class="keyword">new</span> ArrayList&lt;File&gt;();</span><br><span class="line">        File dir = <span class="keyword">new</span> File(Environment.getRootDirectory(), <span class="string">"etc/default-permissions"</span>);</span><br><span class="line">        <span class="keyword">if</span> (dir.isDirectory() &amp;&amp; dir.canRead()) &#123;</span><br><span class="line">            Collections.addAll(ret, dir.listFiles());</span><br><span class="line">        &#125;</span><br><span class="line">        dir = <span class="keyword">new</span> File(Environment.getVendorDirectory(), <span class="string">"etc/default-permissions"</span>);</span><br><span class="line">        <span class="keyword">if</span> (dir.isDirectory() &amp;&amp; dir.canRead()) &#123;</span><br><span class="line">            Collections.addAll(ret, dir.listFiles());</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> ret.isEmpty() ? <span class="keyword">null</span> : ret.toArray(<span class="keyword">new</span> File[<span class="number">0</span>]);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<p>可以看出系统会在 <code>system/etc/default-permissions/</code> 目录下查找权限配置文件，只需按照格式添加 APP 对应的权限即可。</p>
+<h5 id="4-1-2-通过修改源码实现"><a href="#4-1-2-通过修改源码实现" class="headerlink" title="4.1.2 通过修改源码实现"></a>4.1.2 通过修改源码实现</h5><p>调用 <a href="http://androidxref.com/8.1.0_r33/xref/frameworks/base/services/core/java/com/android/server/pm/PackageManagerService.java" target="_blank" rel="noopener">PackageManagerService.java</a>.<strong>grantRuntimePermission(String packageName, String name, final int userId)</strong> 接口实现；</p>
+<p>授予权限又分为2种情况，一种是原本在<strong>manifest</strong>文件中声明了，一种是没有在<strong>manifest</strong>中声明，前者直接调用申请即可，后者则还需要把相应的权限添加到  <strong>pkg.requestedPermissions</strong> 中。需要在系统起来后就授予，故可以在 <strong>PackageManagerService</strong> 启动后就开始授予：</p>
+<p>/<a href="http://androidxref.com/8.1.0_r33/xref/frameworks/" target="_blank" rel="noopener">frameworks</a>/<a href="http://androidxref.com/8.1.0_r33/xref/frameworks/base/" target="_blank" rel="noopener">base</a>/<a href="http://androidxref.com/8.1.0_r33/xref/frameworks/base/services/" target="_blank" rel="noopener">services</a>/<a href="http://androidxref.com/8.1.0_r33/xref/frameworks/base/services/core/" target="_blank" rel="noopener">core</a>/<a href="http://androidxref.com/8.1.0_r33/xref/frameworks/base/services/core/java/" target="_blank" rel="noopener">java</a>/<a href="http://androidxref.com/8.1.0_r33/xref/frameworks/base/services/core/java/com/" target="_blank" rel="noopener">com</a>/<a href="http://androidxref.com/8.1.0_r33/xref/frameworks/base/services/core/java/com/android/" target="_blank" rel="noopener">android</a>/<a href="http://androidxref.com/8.1.0_r33/xref/frameworks/base/services/core/java/com/android/server/" target="_blank" rel="noopener">server</a>/<a href="http://androidxref.com/8.1.0_r33/xref/frameworks/base/services/core/java/com/android/server/pm/" target="_blank" rel="noopener">pm</a>/<a href="http://androidxref.com/8.1.0_r33/xref/frameworks/base/services/core/java/com/android/server/pm/PackageManagerService.java" target="_blank" rel="noopener">PackageManagerService.java</a></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">systemReady</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">synchronized</span> (mPackages) &#123;</span><br><span class="line">        ArrayList&lt;PreferredActivity&gt; removed = <span class="keyword">new</span> ArrayList&lt;PreferredActivity&gt;();</span><br><span class="line">        ... ...</span><br><span class="line">        <span class="comment">// Begin ...</span></span><br><span class="line">        <span class="keyword">for</span> (PackageParser.Package pkg : mPackages.values()) &#123;</span><br><span class="line">            <span class="keyword">if</span> (<span class="string">"com.aptiv.helloworld"</span>.equals(pkg.packageName)) &#123;</span><br><span class="line">                pkg.requestedPermissions.add(Manifest.permission.SEND_SMS); <span class="comment">// 未在 manifest 中声明</span></span><br><span class="line">                grantRuntimePermission(pkg.packageName, Manifest.permission.SEND_SMS, <span class="number">0</span>);</span><br><span class="line">                <span class="comment">// 如下已在 manifest 中声明</span></span><br><span class="line">                grantRuntimePermission(pkg.packageName, Manifest.permission.READ_CONTACTS, <span class="number">0</span>);</span><br><span class="line">                grantRuntimePermission(pkg.packageName, Manifest.permission.CAMERA, <span class="number">0</span>);</span><br><span class="line">                grantRuntimePermission(pkg.packageName, Manifest.permission.CALL_PHONE, <span class="number">0</span>);</span><br><span class="line"></span><br><span class="line">                Log.i(TAG, <span class="string">"NFC: "</span> + checkPermission(Manifest.permission.NFC, <span class="string">"com.aptiv.helloworld"</span>, <span class="number">0</span>));</span><br><span class="line">                Log.i(TAG, <span class="string">"INTERNET: "</span> + checkPermission(Manifest.permission.INTERNET, <span class="string">"com.aptiv.helloworld"</span>, <span class="number">0</span>));</span><br><span class="line">                Log.i(TAG, <span class="string">"CAMERA: "</span> + checkPermission(Manifest.permission.CAMERA, <span class="string">"com.aptiv.helloworld"</span>, <span class="number">0</span>));</span><br><span class="line">                Log.i(TAG, <span class="string">"READ_CONTACTS: "</span> + checkPermission(Manifest.permission.READ_CONTACTS, <span class="string">"com.aptiv.helloworld"</span>, <span class="number">0</span>));</span><br><span class="line">                Log.i(TAG, <span class="string">"SEND_SMS: "</span> + checkPermission(Manifest.permission.SEND_SMS, <span class="string">"com.aptiv.helloworld"</span>, <span class="number">0</span>));</span><br><span class="line"></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// End ...</span></span><br><span class="line">        ... ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>并可通过 <strong>checkPermission</strong> 方法检查权限是否添加成功，也可通过 Settings - Apps - xxx - Permissions 检查对应权限开关是否打开: </p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">checkPermission</span><span class="params">(String permName, String pkgName, <span class="keyword">int</span> userId)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (!sUserManager.exists(userId)) &#123;</span><br><span class="line">        <span class="keyword">return</span> PackageManager.PERMISSION_DENIED;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">final</span> <span class="keyword">int</span> callingUid = getCallingUid();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">synchronized</span> (mPackages) &#123;</span><br><span class="line">        <span class="keyword">final</span> PackageParser.Package p = mPackages.get(pkgName);</span><br><span class="line">        <span class="keyword">if</span> (p != <span class="keyword">null</span> &amp;&amp; p.mExtras != <span class="keyword">null</span>) &#123;</span><br><span class="line">            <span class="keyword">final</span> PackageSetting ps = (PackageSetting) p.mExtras;</span><br><span class="line">            <span class="keyword">if</span> (filterAppAccessLPr(ps, callingUid, userId)) &#123;</span><br><span class="line">                <span class="keyword">return</span> PackageManager.PERMISSION_DENIED;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">final</span> <span class="keyword">boolean</span> instantApp = ps.getInstantApp(userId);</span><br><span class="line">            <span class="keyword">final</span> PermissionsState permissionsState = ps.getPermissionsState();</span><br><span class="line">            <span class="keyword">if</span> (permissionsState.hasPermission(permName, userId)) &#123;</span><br><span class="line">                <span class="keyword">if</span> (instantApp) &#123;</span><br><span class="line">                    BasePermission bp = mSettings.mPermissions.get(permName);</span><br><span class="line">                    <span class="keyword">if</span> (bp != <span class="keyword">null</span> &amp;&amp; bp.isInstant()) &#123;</span><br><span class="line">                        <span class="keyword">return</span> PackageManager.PERMISSION_GRANTED;</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                    <span class="keyword">return</span> PackageManager.PERMISSION_GRANTED;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="comment">// Special case: ACCESS_FINE_LOCATION permission includes ACCESS_COARSE_LOCATION</span></span><br><span class="line">            <span class="keyword">if</span> (Manifest.permission.ACCESS_COARSE_LOCATION.equals(permName) &amp;&amp; permissionsState</span><br><span class="line">                    .hasPermission(Manifest.permission.ACCESS_FINE_LOCATION, userId)) &#123;</span><br><span class="line">                <span class="keyword">return</span> PackageManager.PERMISSION_GRANTED;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> PackageManager.PERMISSION_DENIED;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="4-2-添加安装时权限"><a href="#4-2-添加安装时权限" class="headerlink" title="4.2 添加安装时权限"></a>4.2 添加安装时权限</h4><p><a href="http://androidxref.com/8.1.0_r33/xref/frameworks/base/services/core/java/com/android/server/pm/PackageManagerService.java" target="_blank" rel="noopener">PackageManagerService.java</a> 会在 APP 安装时解析其中的 Manifest 文件，并会把其中声明的 permission 添加到一个 requestedPermissions Arraylist中:</p>
+<p><a href="http://androidxref.com/8.1.0_r33/xref/frameworks/" target="_blank" rel="noopener">frameworks</a>/<a href="http://androidxref.com/8.1.0_r33/xref/frameworks/base/" target="_blank" rel="noopener">base</a>/<a href="http://androidxref.com/8.1.0_r33/xref/frameworks/base/core/" target="_blank" rel="noopener">core</a>/<a href="http://androidxref.com/8.1.0_r33/xref/frameworks/base/core/java/" target="_blank" rel="noopener">java</a>/<a href="http://androidxref.com/8.1.0_r33/xref/frameworks/base/core/java/android/" target="_blank" rel="noopener">android</a>/<a href="http://androidxref.com/8.1.0_r33/xref/frameworks/base/core/java/android/content/" target="_blank" rel="noopener">content</a>/<a href="http://androidxref.com/8.1.0_r33/xref/frameworks/base/core/java/android/content/pm/" target="_blank" rel="noopener">pm</a>/<a href="http://androidxref.com/8.1.0_r33/xref/frameworks/base/core/java/android/content/pm/PackageParser.java" target="_blank" rel="noopener">PackageParser.java</a></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> Package <span class="title">parseBaseApk</span><span class="params">(File apkFile, AssetManager assets, <span class="keyword">int</span> flags)</span></span></span><br><span class="line"><span class="function">        <span class="keyword">throws</span> PackageParserException </span>&#123;<span class="comment">//start...</span></span><br><span class="line">    <span class="keyword">final</span> String apkPath = apkFile.getAbsolutePath();</span><br><span class="line">    ... ...</span><br><span class="line">    <span class="keyword">final</span> <span class="keyword">int</span> cookie = loadApkIntoAssetManager(assets, apkPath, flags);</span><br><span class="line"></span><br><span class="line">    Resources res = <span class="keyword">null</span>;</span><br><span class="line">    XmlResourceParser parser = <span class="keyword">null</span>;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        res = <span class="keyword">new</span> Resources(assets, mMetrics, <span class="keyword">null</span>);</span><br><span class="line">        parser = assets.openXmlResourceParser(cookie, ANDROID_MANIFEST_FILENAME); <span class="comment">// 解析AndroidManifest.xml</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">final</span> String[] outError = <span class="keyword">new</span> String[<span class="number">1</span>];</span><br><span class="line">        <span class="keyword">final</span> Package pkg = parseBaseApk(apkPath, res, parser, flags, outError);</span><br><span class="line">        <span class="keyword">if</span> (pkg == <span class="keyword">null</span>) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> PackageParserException(mParseError,</span><br><span class="line">                    apkPath + <span class="string">" (at "</span> + parser.getPositionDescription() + <span class="string">"): "</span> + outError[<span class="number">0</span>]);</span><br><span class="line">        &#125;</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> Package <span class="title">parseBaseApk</span><span class="params">(String apkPath, Resources res, XmlResourceParser parser, <span class="keyword">int</span> flags,</span></span></span><br><span class="line"><span class="function"><span class="params">        String[] outError)</span> <span class="keyword">throws</span> XmlPullParserException, IOException </span>&#123;</span><br><span class="line">    <span class="keyword">final</span> String splitName;</span><br><span class="line">    <span class="keyword">final</span> String pkgName;</span><br><span class="line">    ...</span><br><span class="line">    <span class="keyword">return</span> parseBaseApkCommon(pkg, <span class="keyword">null</span>, res, parser, flags, outError);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> Package <span class="title">parseBaseApkCommon</span><span class="params">(Package pkg, Set&lt;String&gt; acceptedTags, Resources res,</span></span></span><br><span class="line"><span class="function"><span class="params">        XmlResourceParser parser, <span class="keyword">int</span> flags, String[] outError)</span> <span class="keyword">throws</span> XmlPullParserException,</span></span><br><span class="line"><span class="function">        IOException </span>&#123;</span><br><span class="line">        ...</span><br><span class="line">        String tagName = parser.getName();</span><br><span class="line">        ...</span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> (tagName.equals(TAG_USES_PERMISSION)) &#123;</span><br><span class="line">            <span class="keyword">if</span> (!parseUsesPermission(pkg, res, parser)) &#123;</span><br><span class="line">                <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> (tagName.equals(TAG_USES_PERMISSION_SDK_M)</span><br><span class="line">                || tagName.equals(TAG_USES_PERMISSION_SDK_23)) &#123;</span><br><span class="line">            <span class="keyword">if</span> (!parseUsesPermission(pkg, res, parser)) &#123;</span><br><span class="line">                <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">boolean</span> <span class="title">parseUsesPermission</span><span class="params">(Package pkg, Resources res, XmlResourceParser parser)</span></span></span><br><span class="line"><span class="function">        <span class="keyword">throws</span> XmlPullParserException, IOException </span>&#123;</span><br><span class="line">    TypedArray sa = res.obtainAttributes(parser,</span><br><span class="line">            com.android.internal.R.styleable.AndroidManifestUsesPermission);</span><br><span class="line"></span><br><span class="line">    ... ...</span><br><span class="line"></span><br><span class="line">    <span class="keyword">int</span> index = pkg.requestedPermissions.indexOf(name);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (index == -<span class="number">1</span>) &#123;</span><br><span class="line">        pkg.requestedPermissions.add(name.intern()); <span class="comment">// </span></span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        Slog.w(TAG, <span class="string">"Ignoring duplicate uses-permissions/uses-permissions-sdk-m: "</span></span><br><span class="line">                + name + <span class="string">" in package: "</span> + pkg.packageName + <span class="string">" at: "</span></span><br><span class="line">                + parser.getPositionDescription());</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>若想添加 install 权限，只需在安装 APP 解析权限的时候把需要的权限添加上即可：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> android.Manifest;</span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">boolean</span> <span class="title">parseUsesPermission</span><span class="params">(Package pkg, Resources res, XmlResourceParser parser)</span></span></span><br><span class="line"><span class="function">            <span class="keyword">throws</span> XmlPullParserException, IOException </span>&#123;</span><br><span class="line">        TypedArray sa = res.obtainAttributes(parser,</span><br><span class="line">                com.android.internal.R.styleable.AndroidManifestUsesPermission);</span><br><span class="line"></span><br><span class="line">        ... ...</span><br><span class="line">        <span class="comment">// Begin ...</span></span><br><span class="line">        <span class="keyword">if</span> (<span class="string">"com.aptiv.helloworld"</span>.equals(pkg.packageName)) &#123;</span><br><span class="line">            pkg.requestedPermissions.add(Manifest.permission.NFC);</span><br><span class="line">            pkg.requestedPermissions.add(Manifest.permission.INTERNET);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// End ...</span></span><br><span class="line">        <span class="keyword">int</span> index = pkg.requestedPermissions.indexOf(name);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (index == -<span class="number">1</span>) &#123;</span><br><span class="line">            pkg.requestedPermissions.add(name.intern()); <span class="comment">// 把AndroidManifest.xml 中的 &lt;uses-permission&gt; 添加到 requestedPermissions 中</span></span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            Slog.w(TAG, <span class="string">"Ignoring duplicate uses-permissions/uses-permissions-sdk-m: "</span></span><br><span class="line">                    + name + <span class="string">" in package: "</span> + pkg.packageName + <span class="string">" at: "</span></span><br><span class="line">                    + parser.getPositionDescription());</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<p>同样可通过 <strong>checkPermission</strong> 方法检查权限是否添加成功。</p>
+<h3 id="5-应用"><a href="#5-应用" class="headerlink" title="5. 应用"></a>5. 应用</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">final</span> <span class="keyword">static</span> <span class="keyword">int</span> MY_PERMISSIONS_REQUEST_CODE = <span class="number">0x1000</span>;</span><br><span class="line"><span class="comment">// 所需申请的权限，需在 Manifest 中声明</span></span><br><span class="line">   <span class="keyword">private</span> <span class="keyword">static</span> String[] PERMISSION_GROUP = &#123;</span><br><span class="line">           Manifest.permission.READ_CALENDAR,</span><br><span class="line">           Manifest.permission.READ_EXTERNAL_STORAGE</span><br><span class="line">   &#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 申请权限</span></span><br><span class="line">   <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">checkPermissions</span><span class="params">()</span> </span>&#123;</span><br><span class="line">       Log.i(TAG, <span class="string">"checkPermissions"</span>);</span><br><span class="line">       <span class="keyword">if</span> (checkSelfPermission(Manifest.permission.READ_CALENDAR) != PackageManager.PERMISSION_GRANTED</span><br><span class="line">               || checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) &#123;</span><br><span class="line">           requestPermissions(PERMISSION_GROUP, MY_PERMISSIONS_REQUEST_CODE);</span><br><span class="line">       &#125;</span><br><span class="line">   &#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 申请后会回调此方法</span></span><br><span class="line">   <span class="meta">@Override</span></span><br><span class="line">   <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onRequestPermissionsResult</span><span class="params">(<span class="keyword">int</span> requestCode, @NonNull String[] permissions, @NonNull <span class="keyword">int</span>[] grantResults)</span> </span>&#123;</span><br><span class="line">       <span class="comment">//super.onRequestPermissionsResult(requestCode, permissions, grantResults);</span></span><br><span class="line">       <span class="keyword">switch</span> (requestCode) &#123;</span><br><span class="line">           <span class="keyword">case</span> MY_PERMISSIONS_REQUEST_CODE:</span><br><span class="line">               Log.i(TAG, <span class="string">"permissions.length: "</span> + permissions.length + <span class="string">", results.length: "</span> + grantResults.length);</span><br><span class="line">               <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; permissions.length || i &lt; grantResults.length; i++) &#123;</span><br><span class="line">                   Log.i(TAG, <span class="string">"permissions["</span> + i + <span class="string">"] : "</span> + grantResults[i]);</span><br><span class="line">                   <span class="keyword">if</span> (shouldShowRequestPermissionRationale(permissions[i])) &#123;</span><br><span class="line">                       <span class="comment">// 申请过权限但是被拒绝了，没有勾选 "不再提示" 的 checkbox</span></span><br><span class="line">                       permissionStr.append(<span class="string">"["</span>).append(permissions[i]).append(<span class="string">"] "</span>);</span><br><span class="line">                   &#125;</span><br><span class="line">               &#125;</span><br><span class="line">               showWaringDialog(permissionStr);</span><br><span class="line">               <span class="keyword">break</span>;</span><br><span class="line">       &#125;</span><br><span class="line">   &#125;</span><br><span class="line"></span><br><span class="line">   <span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">showWaringDialog</span><span class="params">(StringBuilder str)</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">       Log.i(TAG, <span class="string">"str.length: "</span> + str.length() + <span class="string">"str: "</span> + str);</span><br><span class="line">       <span class="keyword">if</span> (str.length() != <span class="number">0</span>) &#123;</span><br><span class="line">           AlertDialog dialog = <span class="keyword">new</span> AlertDialog.Builder(<span class="keyword">this</span>)</span><br><span class="line">                   .setTitle(<span class="string">"警告！"</span>)</span><br><span class="line">                   .setMessage(<span class="string">"需要 "</span> + str + <span class="string">"权限，请前往设置-&gt;应用-&gt;CalendarDemo-&gt;权限中打开相关权限，否则功能无法正常运行！"</span>)</span><br><span class="line">                   .setCancelable(<span class="keyword">false</span>)</span><br><span class="line">                   .setPositiveButton(<span class="string">"确定"</span>, <span class="keyword">new</span> DialogInterface.OnClickListener() &#123;</span><br><span class="line">                       <span class="meta">@Override</span></span><br><span class="line">                       <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onClick</span><span class="params">(DialogInterface dialog, <span class="keyword">int</span> which)</span> </span>&#123;</span><br><span class="line">                           <span class="comment">// TODO sth. when click Ok</span></span><br><span class="line">                           <span class="comment">// 一般情况下如果用户不授权的话，功能是无法运行的，做退出处理</span></span><br><span class="line">                           <span class="comment">//finish();</span></span><br><span class="line">                       &#125;</span><br><span class="line">                   &#125;)</span><br><span class="line">                   .setNegativeButton(<span class="string">"取消"</span>, <span class="keyword">new</span> DialogInterface.OnClickListener() &#123;</span><br><span class="line">                       <span class="meta">@Override</span></span><br><span class="line">                       <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onClick</span><span class="params">(DialogInterface dialog, <span class="keyword">int</span> which)</span> </span>&#123;</span><br><span class="line">                           <span class="comment">// TODO sth. when click Cancel</span></span><br><span class="line">                       &#125;</span><br><span class="line">                   &#125;)</span><br><span class="line">                   .create();</span><br><span class="line">           dialog.show();</span><br><span class="line">       &#125;</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>Ranger Zhou
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://rangerzhou.top/2018/08/29/Android/Android_O_grant_permission_in_system/" title="Android_O系统层授予APP权限">http://rangerzhou.top/2018/08/29/Android/Android_O_grant_permission_in_system/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Android-Permission/" rel="tag"># Android, Permission</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2018/06/13/Technical/Curl/" rel="prev" title="Curl">
+      <i class="fa fa-chevron-left"></i> Curl
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2018/08/29/Android/Ubuntu18.04_compileIssue/" rel="next" title="Ubuntu18.04编译问题">
+      Ubuntu18.04编译问题 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+      <div class="tabs tabs-comment">
+        <ul class="nav-tabs">
+            <li class="tab"><a href="#comment-disqus">disqus</a></li>
+            <li class="tab"><a href="#comment-gitalk">gitalk</a></li>
+            <li class="tab"><a href="#comment-livere">livere</a></li>
+        </ul>
+        <div class="tab-content">
+            <div class="tab-pane disqus" id="comment-disqus">
+              
+  <div class="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
+            </div>
+            <div class="tab-pane gitalk" id="comment-gitalk">
+              <div class="comments" id="gitalk-container"></div>
+            </div>
+            <div class="tab-pane livere" id="comment-livere">
+              
+  <div class="comments">
+    <div id="lv-container" data-id="city" data-uid="MTAyMC8yOTcyNS82Mjky"></div>
+  </div>
+  
+            </div>
+        </div>
+      </div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-概述"><span class="nav-text">1. 概述</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-权限许可"><span class="nav-text">2. 权限许可</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-App简要安装流程"><span class="nav-text">3. App简要安装流程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-系统层授予权限"><span class="nav-text">4. 系统层授予权限</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#4-1-添加运行时权限"><span class="nav-text">4.1 添加运行时权限</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#4-1-1-在-system-etc-default-permissions-添加-default-permissions-xml-文件"><span class="nav-text">4.1.1 在 system/etc/default-permissions 添加 default_permissions.xml 文件</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#4-1-2-通过修改源码实现"><span class="nav-text">4.1.2 通过修改源码实现</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#4-2-添加安装时权限"><span class="nav-text">4.2 添加安装时权限</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-应用"><span class="nav-text">5. 应用</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Ranger Zhou</p>
+  <div class="site-description" itemprop="description">我是一个小流氓我从来也不浪，有一天我心血来潮耍了个流氓，我嘴里吹着小口哨我心里好得意，不知怎么哗啦啦啦啦我摔了一身泥</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">49</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">8</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">16</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/rangerzhou" title="GitHub → https://github.com/rangerzhou" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:rangero_o@qq.com" title="E-Mail → mailto:rangero_o@qq.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://rangerzhou.taobao.com/" title="Taobao → http://rangerzhou.taobao.com/" rel="noopener" target="_blank"><i class="fab fa-youtube fa-fw"></i>Taobao</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="/images/wechat.jpg" title="WeChat → /images/wechat.jpg"><i class="fab fa-youtube fa-fw"></i>WeChat</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://blog.csdn.net/ranger0220?viewmode=contents" title="CSDN → http://blog.csdn.net/ranger0220?viewmode=contents" rel="noopener" target="_blank"><i class="fab fa-youtube fa-fw"></i>CSDN</a>
+      </span>
+  </div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      墙裂推荐
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="http://rangerzhou.taobao.com" title="http://rangerzhou.taobao.com" rel="noopener" target="_blank">Taobao</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Ranger Zhou</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script>
+<script src="/js/schemes/pisces.js"></script>
+<script src="/js/next-boot.js"></script>
+
+
+
+  
+  <script>
+    (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      bp.src = (curProtocol === 'https') ? 'https://zz.bdstatic.com/linksubmit/push.js' : 'http://push.zhanzhang.baidu.com/push.js';
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+    })();
+  </script>
+
+
+
+
+  <script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+<script>
+  function loadCount() {
+    var d = document, s = d.createElement('script');
+    s.src = 'https://rangerzhou.disqus.com/count.js';
+    s.id = 'dsq-count-scr';
+    (d.head || d.body).appendChild(s);
+  }
+  // defer loading until the whole page loading is completed
+  window.addEventListener('load', loadCount, false);
+</script>
+<script>
+  var disqus_config = function() {
+    this.page.url = "http://rangerzhou.top/2018/08/29/Android/Android_O_grant_permission_in_system/";
+    this.page.identifier = "2018/08/29/Android/Android_O_grant_permission_in_system/";
+    this.page.title = "Android_O系统层授予APP权限";
+    };
+  NexT.utils.loadComments(document.querySelector('#disqus_thread'), () => {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: disqus_config
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://rangerzhou.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  });
+</script>
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : 'b7bb504993135f5a2eab',
+      clientSecret: '6f83aec5c45d75e248e2914be90c4601e2e1dc44',
+      repo        : 'rangerzhou.github.io',
+      owner       : 'rangerzhou',
+      admin       : ['rangerzhou'],
+      id          : 'a2b678a7160e6c777b91a302ec435352',
+        language: 'zh-CN',
+      distractionFreeMode: true
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
+
+<script>
+NexT.utils.loadComments(document.querySelector('#lv-container'), () => {
+  window.livereOptions = {
+    refer: location.pathname.replace(CONFIG.root, '').replace('index.html', '')
+  };
+  (function(d, s) {
+    var j, e = d.getElementsByTagName(s)[0];
+    if (typeof LivereTower === 'function') { return; }
+    j = d.createElement(s);
+    j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+    j.async = true;
+    e.parentNode.insertBefore(j, e);
+  })(document, 'script');
+});
+</script>
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/wanko.model.json"},"display":{"position":"right","width":300,"height":600},"mobile":{"show":false},"log":false});</script></body>
+</html>
