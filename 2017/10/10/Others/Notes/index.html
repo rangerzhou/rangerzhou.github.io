@@ -29,7 +29,7 @@
 <meta property="og:site_name" content="RangerZhou">
 <meta property="og:description" content="Ubuntu 常见问题解决">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2020-10-13T01:42:11.740Z">
+<meta property="og:updated_time" content="2020-10-28T05:58:11.052Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Notes">
 <meta name="twitter:description" content="Ubuntu 常见问题解决">
@@ -261,7 +261,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2020-10-13 09:42:11" itemprop="dateModified" datetime="2020-10-13T09:42:11+08:00">2020-10-13</time>
+                <time title="修改时间：2020-10-28 13:58:11" itemprop="dateModified" datetime="2020-10-28T13:58:11+08:00">2020-10-28</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -538,6 +538,12 @@
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo date -s "$(wget -qSO- --max-redirect=0 google.com 2&gt;&amp;1 | grep Date: | cut -d' ' -f5-8)Z"</span><br></pre></td></tr></table></figure>
 <p>定时执行：</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">sudo vim /etc/crontab</span><br><span class="line"><span class="meta">#</span><span class="bash"> m h dom mon dow user <span class="built_in">command</span></span></span><br><span class="line">30 8  * * * /home/ranger/bin/SyncTime.sh</span><br></pre></td></tr></table></figure>
+<h4 id="24-Ubuntu-18-04-安装-微信-QQ"><a href="#24-Ubuntu-18-04-安装-微信-QQ" class="headerlink" title="24. Ubuntu 18.04 安装 微信/QQ"></a>24. Ubuntu 18.04 安装 微信/QQ</h4><p>安装</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">wget -O- https://deepin-wine.i-m.dev/setup.sh | sh</span><br><span class="line">sudo apt install deepin.com.wechat</span><br></pre></td></tr></table></figure>
+<p>安装后可能会出现界面中文字体显示方块的问题，解决方案如下：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="meta">$</span><span class="bash"> sudo apt-cache search wqy</span></span><br><span class="line">fonts-wqy-microhei - Sans-serif style CJK font derived from Droid</span><br><span class="line">fonts-wqy-zenhei - "WenQuanYi Zen Hei" A Hei-Ti Style (sans-serif) Chinese font</span><br><span class="line">xfonts-wqy - WenQuanYi Bitmap Song CJK font for X</span><br><span class="line"><span class="meta">#</span><span class="bash"> 安装上面三个字体</span></span><br><span class="line"><span class="meta">$</span><span class="bash"> sudo apt install fonts-wqy-microhei fonts-wqy-zenhei xfonts-wqy</span></span><br></pre></td></tr></table></figure>
+<p>同样可以替换安装包（deepin.com.wechat）为其他需要的软件，输入 sudo apt install install deepin. 按 tab 就显示了：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> sudo apt install deepin.com.qq.im</span></span><br><span class="line">deepin.cn.360.yasuo                  deepin.com.baidu.pan                 deepin.com.qq.b.crm                  deepin.com.qq.office                 deepin.com.thunderspeed              deepin.org.7-zip                   </span><br><span class="line">deepin.cn.com.winrar                 deepin.com.cmbchina                  deepin.com.qq.b.eim                  deepin.com.qq.rtx2015                deepin.com.wechat                    deepin.org.foobar2000              </span><br><span class="line">deepin.com.95579.cjsc                deepin.com.foxmail                   deepin.com.qq.im                     deepin.com.taobao.aliclient.qianniu  deepin.com.weixin.work                                                  </span><br><span class="line">deepin.com.aaa-logo                  deepin.com.gtja.fuyi                 deepin.com.qq.im.light               deepin.com.taobao.wangwang           deepin.net.263.em</span><br></pre></td></tr></table></figure>
 
     </div>
 
@@ -591,11 +597,14 @@
           
       <div class="tabs tabs-comment">
         <ul class="nav-tabs">
-            <li class="tab"><a href="#comment-disqus">disqus</a></li>
             <li class="tab"><a href="#comment-gitalk">gitalk</a></li>
+            <li class="tab"><a href="#comment-disqus">disqus</a></li>
             <li class="tab"><a href="#comment-livere">livere</a></li>
         </ul>
         <div class="tab-content">
+            <div class="tab-pane gitalk" id="comment-gitalk">
+              <div class="comments" id="gitalk-container"></div>
+            </div>
             <div class="tab-pane disqus" id="comment-disqus">
               
   <div class="comments">
@@ -604,9 +613,6 @@
     </div>
   </div>
   
-            </div>
-            <div class="tab-pane gitalk" id="comment-gitalk">
-              <div class="comments" id="gitalk-container"></div>
             </div>
             <div class="tab-pane livere" id="comment-livere">
               
@@ -663,7 +669,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-Ubuntu添加代理"><span class="nav-text">1. Ubuntu添加代理</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-Google服务器配置SS"><span class="nav-text">2. Google服务器配置SS</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-JDK"><span class="nav-text">3. JDK</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#3-1-安装JDK"><span class="nav-text">3.1 安装JDK</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#3-2-切换JDK"><span class="nav-text">3.2 切换JDK</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#4-完整卸载JDK"><span class="nav-text">4. 完整卸载JDK</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#5-切换Python版本"><span class="nav-text">5. 切换Python版本</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#6-JACK介绍"><span class="nav-text">6. JACK介绍</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#7-Ubuntu登录远程服务器"><span class="nav-text">7. Ubuntu登录远程服务器</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#8-samba配置共享目录"><span class="nav-text">8. samba配置共享目录</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#9-apk签名"><span class="nav-text">9. apk签名</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#10-AndroidStudio-导入调整-jar-包优先级"><span class="nav-text">10 AndroidStudio 导入调整 jar 包优先级</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#11-Ubuntu-18-04美化"><span class="nav-text">11 . Ubuntu 18.04美化</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#12-Ubuntu-18-04-过滤CSDN广告"><span class="nav-text">12. Ubuntu 18.04 过滤CSDN广告</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#13-Repo-切换所有分支"><span class="nav-text">13. Repo 切换所有分支</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#14-访问删除-root-目录"><span class="nav-text">14. 访问删除 /root 目录</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#15-crontab-定时任务"><span class="nav-text">15. crontab 定时任务</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#16-systemd-配置-service-开机启动"><span class="nav-text">16. systemd 配置 service 开机启动</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#17-使用-AndroidStudio-调试源码"><span class="nav-text">17. 使用 AndroidStudio 调试源码</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#18-批量查找并替换字符串"><span class="nav-text">18. 批量查找并替换字符串</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#19-项目迁移（包含提交记录）"><span class="nav-text">19. 项目迁移（包含提交记录）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#20-VirtualBox-共享文件夹"><span class="nav-text">20. VirtualBox 共享文件夹</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#21-Linux-jar-包运行常用命令"><span class="nav-text">21. Linux jar 包运行常用命令</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#1-运行方式1"><span class="nav-text">1. 运行方式1</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#2-运行方式2"><span class="nav-text">2. 运行方式2</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#3-运行方式3"><span class="nav-text">3. 运行方式3</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#4-运行方式4"><span class="nav-text">4. 运行方式4</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#5-查看后台运行任务"><span class="nav-text">5. 查看后台运行任务</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#6-查看某端口占用的线程的-pid"><span class="nav-text">6. 查看某端口占用的线程的 pid</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#7-关闭进程"><span class="nav-text">7. 关闭进程</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#22-Ubuntu-18-04-修改-mysql-数据库存放位置"><span class="nav-text">22. Ubuntu 18.04 修改 mysql 数据库存放位置</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#23-Ubuntu-系统时间同步"><span class="nav-text">23. Ubuntu 系统时间同步</span></a></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-Ubuntu添加代理"><span class="nav-text">1. Ubuntu添加代理</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-Google服务器配置SS"><span class="nav-text">2. Google服务器配置SS</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-JDK"><span class="nav-text">3. JDK</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#3-1-安装JDK"><span class="nav-text">3.1 安装JDK</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#3-2-切换JDK"><span class="nav-text">3.2 切换JDK</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#4-完整卸载JDK"><span class="nav-text">4. 完整卸载JDK</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#5-切换Python版本"><span class="nav-text">5. 切换Python版本</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#6-JACK介绍"><span class="nav-text">6. JACK介绍</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#7-Ubuntu登录远程服务器"><span class="nav-text">7. Ubuntu登录远程服务器</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#8-samba配置共享目录"><span class="nav-text">8. samba配置共享目录</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#9-apk签名"><span class="nav-text">9. apk签名</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#10-AndroidStudio-导入调整-jar-包优先级"><span class="nav-text">10 AndroidStudio 导入调整 jar 包优先级</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#11-Ubuntu-18-04美化"><span class="nav-text">11 . Ubuntu 18.04美化</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#12-Ubuntu-18-04-过滤CSDN广告"><span class="nav-text">12. Ubuntu 18.04 过滤CSDN广告</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#13-Repo-切换所有分支"><span class="nav-text">13. Repo 切换所有分支</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#14-访问删除-root-目录"><span class="nav-text">14. 访问删除 /root 目录</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#15-crontab-定时任务"><span class="nav-text">15. crontab 定时任务</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#16-systemd-配置-service-开机启动"><span class="nav-text">16. systemd 配置 service 开机启动</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#17-使用-AndroidStudio-调试源码"><span class="nav-text">17. 使用 AndroidStudio 调试源码</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#18-批量查找并替换字符串"><span class="nav-text">18. 批量查找并替换字符串</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#19-项目迁移（包含提交记录）"><span class="nav-text">19. 项目迁移（包含提交记录）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#20-VirtualBox-共享文件夹"><span class="nav-text">20. VirtualBox 共享文件夹</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#21-Linux-jar-包运行常用命令"><span class="nav-text">21. Linux jar 包运行常用命令</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#1-运行方式1"><span class="nav-text">1. 运行方式1</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#2-运行方式2"><span class="nav-text">2. 运行方式2</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#3-运行方式3"><span class="nav-text">3. 运行方式3</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#4-运行方式4"><span class="nav-text">4. 运行方式4</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#5-查看后台运行任务"><span class="nav-text">5. 查看后台运行任务</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#6-查看某端口占用的线程的-pid"><span class="nav-text">6. 查看某端口占用的线程的 pid</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#7-关闭进程"><span class="nav-text">7. 关闭进程</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#22-Ubuntu-18-04-修改-mysql-数据库存放位置"><span class="nav-text">22. Ubuntu 18.04 修改 mysql 数据库存放位置</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#23-Ubuntu-系统时间同步"><span class="nav-text">23. Ubuntu 系统时间同步</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#24-Ubuntu-18-04-安装-微信-QQ"><span class="nav-text">24. Ubuntu 18.04 安装 微信/QQ</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
@@ -807,6 +813,26 @@
 
   
 
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : 'b7bb504993135f5a2eab',
+      clientSecret: '6f83aec5c45d75e248e2914be90c4601e2e1dc44',
+      repo        : 'rangerzhou.github.io',
+      owner       : 'rangerzhou',
+      admin       : ['rangerzhou'],
+      id          : 'b317acf02b692caedf3a56eda4e6f1b5',
+        language: 'zh-CN',
+      distractionFreeMode: true
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
+
 <script>
   function loadCount() {
     var d = document, s = d.createElement('script');
@@ -836,26 +862,6 @@
       (d.head || d.body).appendChild(s);
     }
   });
-</script>
-
-<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
-
-<script>
-NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
-  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
-    var gitalk = new Gitalk({
-      clientID    : 'b7bb504993135f5a2eab',
-      clientSecret: '6f83aec5c45d75e248e2914be90c4601e2e1dc44',
-      repo        : 'rangerzhou.github.io',
-      owner       : 'rangerzhou',
-      admin       : ['rangerzhou'],
-      id          : 'b317acf02b692caedf3a56eda4e6f1b5',
-        language: 'zh-CN',
-      distractionFreeMode: true
-    });
-    gitalk.render('gitalk-container');
-  }, window.Gitalk);
-});
 </script>
 
 <script>
