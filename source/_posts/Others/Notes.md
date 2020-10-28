@@ -973,3 +973,39 @@ sudo vim /etc/crontab
 30 8  * * * /home/ranger/bin/SyncTime.sh
 ```
 
+
+
+#### 24. Ubuntu 18.04 安装 微信/QQ
+
+[github]: https://github.com/zq1997/deepin-wine
+
+安装
+
+``` shell
+wget -O- https://deepin-wine.i-m.dev/setup.sh | sh
+sudo apt install deepin.com.wechat
+
+```
+
+安装后可能会出现界面中文字体显示方块的问题，解决方案如下：
+
+``` shell
+
+$ sudo apt-cache search wqy
+fonts-wqy-microhei - Sans-serif style CJK font derived from Droid
+fonts-wqy-zenhei - "WenQuanYi Zen Hei" A Hei-Ti Style (sans-serif) Chinese font
+xfonts-wqy - WenQuanYi Bitmap Song CJK font for X
+# 安装上面三个字体
+$ sudo apt install fonts-wqy-microhei fonts-wqy-zenhei xfonts-wqy
+```
+
+同样可以替换安装包（deepin.com.wechat）为其他需要的软件，输入 sudo apt install install deepin. 按 tab 就显示了：
+
+``` shell
+$ sudo apt install deepin.com.qq.im
+deepin.cn.360.yasuo                  deepin.com.baidu.pan                 deepin.com.qq.b.crm                  deepin.com.qq.office                 deepin.com.thunderspeed              deepin.org.7-zip                   
+deepin.cn.com.winrar                 deepin.com.cmbchina                  deepin.com.qq.b.eim                  deepin.com.qq.rtx2015                deepin.com.wechat                    deepin.org.foobar2000              
+deepin.com.95579.cjsc                deepin.com.foxmail                   deepin.com.qq.im                     deepin.com.taobao.aliclient.qianniu  deepin.com.weixin.work                                                  
+deepin.com.aaa-logo                  deepin.com.gtja.fuyi                 deepin.com.qq.im.light               deepin.com.taobao.wangwang           deepin.net.263.em
+```
+
