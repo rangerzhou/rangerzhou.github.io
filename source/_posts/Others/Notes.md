@@ -1009,3 +1009,16 @@ deepin.com.95579.cjsc                deepin.com.foxmail                   deepin
 deepin.com.aaa-logo                  deepin.com.gtja.fuyi                 deepin.com.qq.im.light               deepin.com.taobao.wangwang           deepin.net.263.em
 ```
 
+#### 25. git status 中文显示为 ascii 码
+
+- 原因
+  在默认设置下，中文文件名在工作区状态输出，中文名不能正确显示，而是显示为八进制的字符编码。
+- 解决办法
+  将git 配置文件 `core.quotepath`项设置为false。
+  quotepath表示引用路径
+  加上`--global`表示全局配置
+
+``` shell
+git config --global core.quotepath false
+```
+
