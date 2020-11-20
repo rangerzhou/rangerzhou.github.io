@@ -318,7 +318,7 @@
 <p>d. 把 ignite-rest-http 从$IGNITE_HOME/libs/optional 拷贝到 $IGNITE_HOME/libs 目录下</p>
 <p>e. 启动ignite节点</p>
 <p>f. 启动Web Agent</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span> ./IGNITE_HOME/gridgain-web-console-agent.sh </span><br><span class="line">[2020-03-05T16:51:21,014][INFO ][main][AgentLauncher] Starting Apache GridGain Web Console Agent...</span><br><span class="line">[2020-03-05T16:51:21,136][INFO ][main][AgentLauncher] </span><br><span class="line">[2020-03-05T16:51:21,136][INFO ][main][AgentLauncher] Web Console Agent configuration :</span><br><span class="line">[2020-03-05T16:51:21,237][INFO ][main][AgentLauncher] User's security tokens             : ********************************8204</span><br><span class="line">[2020-03-05T16:51:21,237][INFO ][main][AgentLauncher] URI to Ignite node REST server     : http://localhost:8080</span><br><span class="line">[2020-03-05T16:51:21,237][INFO ][main][AgentLauncher] URI to GridGain Web Console        : https://console.gridgain.com</span><br><span class="line">[2020-03-05T16:51:21,237][INFO ][main][AgentLauncher] Path to properties file            : default.properties</span><br><span class="line">[2020-03-05T16:51:21,237][INFO ][main][AgentLauncher] Path to JDBC drivers folder        : /home/ranger/opt/apache-ignite-2.8.0-bin/gridgain-web-console-agent-2020.02.00/jdbc-drivers</span><br><span class="line">[2020-03-05T16:51:21,237][INFO ][main][AgentLauncher] Demo mode                          : enabled</span><br><span class="line">[2020-03-05T16:51:21,237][INFO ][main][AgentLauncher] </span><br><span class="line">[2020-03-05T16:51:21,320][INFO ][main][WebSocketRouter] Starting Web Console Agent...</span><br><span class="line">[2020-03-05T16:51:21,342][INFO ][Connect thread][WebSocketRouter] Connecting to server: wss://console.gridgain.com</span><br><span class="line">[2020-03-05T16:51:24,098][INFO ][http-client-17][WebSocketRouter] Successfully completes handshake with server</span><br><span class="line">[2020-03-05T16:51:24,277][INFO ][pool-2-thread-1][ClusterHandler] Connected to node [url=http://localhost:8080]</span><br><span class="line">[2020-03-05T16:51:24,305][INFO ][pool-2-thread-1][ClustersWatcher] Connection successfully established to cluster with nodes: [B2454006]</span><br><span class="line">[2020-03-05T16:55:26,601][INFO ][http-client-19][AgentClusterDemo] DEMO: Starting embedded nodes for demo...</span><br></pre></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> ./IGNITE_HOME/gridgain-web-console-agent.sh </span></span><br><span class="line">[2020-03-05T16:51:21,014][INFO ][main][AgentLauncher] Starting Apache GridGain Web Console Agent...</span><br><span class="line">[2020-03-05T16:51:21,136][INFO ][main][AgentLauncher] </span><br><span class="line">[2020-03-05T16:51:21,136][INFO ][main][AgentLauncher] Web Console Agent configuration :</span><br><span class="line">[2020-03-05T16:51:21,237][INFO ][main][AgentLauncher] User's security tokens             : ********************************8204</span><br><span class="line">[2020-03-05T16:51:21,237][INFO ][main][AgentLauncher] URI to Ignite node REST server     : http://localhost:8080</span><br><span class="line">[2020-03-05T16:51:21,237][INFO ][main][AgentLauncher] URI to GridGain Web Console        : https://console.gridgain.com</span><br><span class="line">[2020-03-05T16:51:21,237][INFO ][main][AgentLauncher] Path to properties file            : default.properties</span><br><span class="line">[2020-03-05T16:51:21,237][INFO ][main][AgentLauncher] Path to JDBC drivers folder        : /home/ranger/opt/apache-ignite-2.8.0-bin/gridgain-web-console-agent-2020.02.00/jdbc-drivers</span><br><span class="line">[2020-03-05T16:51:21,237][INFO ][main][AgentLauncher] Demo mode                          : enabled</span><br><span class="line">[2020-03-05T16:51:21,237][INFO ][main][AgentLauncher] </span><br><span class="line">[2020-03-05T16:51:21,320][INFO ][main][WebSocketRouter] Starting Web Console Agent...</span><br><span class="line">[2020-03-05T16:51:21,342][INFO ][Connect thread][WebSocketRouter] Connecting to server: wss://console.gridgain.com</span><br><span class="line">[2020-03-05T16:51:24,098][INFO ][http-client-17][WebSocketRouter] Successfully completes handshake with server</span><br><span class="line">[2020-03-05T16:51:24,277][INFO ][pool-2-thread-1][ClusterHandler] Connected to node [url=http://localhost:8080]</span><br><span class="line">[2020-03-05T16:51:24,305][INFO ][pool-2-thread-1][ClustersWatcher] Connection successfully established to cluster with nodes: [B2454006]</span><br><span class="line">[2020-03-05T16:55:26,601][INFO ][http-client-19][AgentClusterDemo] DEMO: Starting embedded nodes for demo...</span><br></pre></td></tr></table></figure>
 <h3 id="idea-中配置-IGNITE-HOME"><a href="#idea-中配置-IGNITE-HOME" class="headerlink" title="idea 中配置 IGNITE_HOME"></a>idea 中配置 IGNITE_HOME</h3><p>Run - Edit Configurations - 选中 Application 下需要配置的项 - 右侧 Configuration 选项 - 配置 Environment variables - 添加环境变量即可。</p>
 <p><img src="https://raw.githubusercontent.com/rangerzhou/ImageHosting/master/blog_resource/2020/ConfigIGNITE_HOME.png" alt="image-20200317160517354"></p>
 <h3 id="IGNITE-使用注意事项"><a href="#IGNITE-使用注意事项" class="headerlink" title="IGNITE 使用注意事项"></a>IGNITE 使用注意事项</h3><h4 id="Ignite-日志"><a href="#Ignite-日志" class="headerlink" title="Ignite 日志"></a>Ignite 日志</h4><p><a href="https://www.ignite-service.cn/doc/java/#_9-日志" target="_blank" rel="noopener">日志配置教程</a></p>
@@ -479,7 +479,10 @@
     <a href="/2020/02/26/Work/EIIPProjectNotes/" rel="prev" title="EIIP 项目记录">
       <i class="fa fa-chevron-left"></i> EIIP 项目记录
     </a></div>
-      <div class="post-nav-item"></div>
+      <div class="post-nav-item">
+    <a href="/2020/10/14/Android/AndroidDevelop_001_AndroidArchitecture/" rel="next" title="Android 底层学习系列（1）-Android 平台架构">
+      Android 底层学习系列（1）-Android 平台架构 <i class="fa fa-chevron-right"></i>
+    </a></div>
     </div>
       </footer>
     
@@ -494,14 +497,11 @@
           
       <div class="tabs tabs-comment">
         <ul class="nav-tabs">
-            <li class="tab"><a href="#comment-gitalk">gitalk</a></li>
             <li class="tab"><a href="#comment-disqus">disqus</a></li>
+            <li class="tab"><a href="#comment-gitalk">gitalk</a></li>
             <li class="tab"><a href="#comment-livere">livere</a></li>
         </ul>
         <div class="tab-content">
-            <div class="tab-pane gitalk" id="comment-gitalk">
-              <div class="comments" id="gitalk-container"></div>
-            </div>
             <div class="tab-pane disqus" id="comment-disqus">
               
   <div class="comments">
@@ -510,6 +510,9 @@
     </div>
   </div>
   
+            </div>
+            <div class="tab-pane gitalk" id="comment-gitalk">
+              <div class="comments" id="gitalk-container"></div>
             </div>
             <div class="tab-pane livere" id="comment-livere">
               
@@ -710,26 +713,6 @@
 
   
 
-<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
-
-<script>
-NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
-  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
-    var gitalk = new Gitalk({
-      clientID    : 'b7bb504993135f5a2eab',
-      clientSecret: '6f83aec5c45d75e248e2914be90c4601e2e1dc44',
-      repo        : 'rangerzhou.github.io',
-      owner       : 'rangerzhou',
-      admin       : ['rangerzhou'],
-      id          : 'd91c36f9066e5e10f026dbef16c8b3e9',
-        language: 'zh-CN',
-      distractionFreeMode: true
-    });
-    gitalk.render('gitalk-container');
-  }, window.Gitalk);
-});
-</script>
-
 <script>
   function loadCount() {
     var d = document, s = d.createElement('script');
@@ -759,6 +742,26 @@ NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
       (d.head || d.body).appendChild(s);
     }
   });
+</script>
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : 'b7bb504993135f5a2eab',
+      clientSecret: '6f83aec5c45d75e248e2914be90c4601e2e1dc44',
+      repo        : 'rangerzhou.github.io',
+      owner       : 'rangerzhou',
+      admin       : ['rangerzhou'],
+      id          : 'd91c36f9066e5e10f026dbef16c8b3e9',
+        language: 'zh-CN',
+      distractionFreeMode: true
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
 </script>
 
 <script>

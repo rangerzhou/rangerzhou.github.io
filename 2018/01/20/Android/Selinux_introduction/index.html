@@ -314,7 +314,7 @@
 <li>控制范围覆盖文件系统、目录、文件、文件启动描述符、端口、消息接口和网络接口</li>
 </ul>
 <p>需要指出的是linux权限管理的两套机制。自主访问控制（DAC）和强制访问控制（MAC). DAC可以简单理解为我是root用户，有就有权限访问任何资源，打开任何文件。而user用户访问某些文件就会限制。这种控制方式有个很大的弊端就是一旦获得root权限，就可以为所欲为。MAC就是selinux搞的这一套，当你具有某些身份的时候，才能访问对应的资源。我们目前系统两套机制都起作用。相当于对资源管理有两道门，只有通过两道门才能访问到资源。</p>
-<h3 id="3-查看SELinux权限"><a href="#3-查看SELinux权限" class="headerlink" title="3. 查看SELinux权限"></a>3. 查看SELinux权限</h3><h5 id="3-1-查看文件所具有的selinux相关标识：ls-lZ"><a href="#3-1-查看文件所具有的selinux相关标识：ls-lZ" class="headerlink" title="3.1 查看文件所具有的selinux相关标识：ls -lZ"></a>3.1 查看文件所具有的selinux相关标识：ls -lZ</h5><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span> adb shell ls -lZ</span><br><span class="line">total 1720</span><br><span class="line">dr-xr-xr-x   3 root      root   u:object_r:cgroup:s0                 0 1970-06-12 16:06 acct</span><br><span class="line">drwxrwx---   6 system    cache  u:object_r:cache_file:s0          4096 1970-06-12 15:38 cache</span><br><span class="line">drwxr-xr-x   4 root      root   u:object_r:configfs:s0               0 1970-01-01 01:00 config</span><br><span class="line">drwxr-xr-x   6 root      root   u:object_r:system_file:s0         4096 1970-01-01 01:00 cust</span><br><span class="line">drwxrwx--x  50 system    system u:object_r:system_data_file:s0    4096 1970-06-12 15:38 data</span><br><span class="line">lrwxrwxrwx   1 root      root   u:object_r:rootfs:s0                23 1970-01-01 01:00 default.prop -&gt; system/etc/prop.default</span><br><span class="line">drwxr-xr-x  15 root      root   u:object_r:device:s0              3640 1970-06-12 16:06 dev</span><br><span class="line">drwxr-xr-x   4 root      root   u:object_r:adsprpcd_file:s0       4096 1970-01-01 08:00 dsp</span><br><span class="line">... ...</span><br><span class="line">drwxr-xr-x   4 root      root   u:object_r:storage_file:s0          80 1970-06-12 16:06 storage</span><br><span class="line">dr-xr-xr-x  19 root      root   u:object_r:sysfs:s0                  0 1970-06-12 16:06 sys</span><br><span class="line">drwxr-xr-x  18 root      root   u:object_r:system_file:s0         4096 1970-01-01 01:00 system</span><br><span class="line">-rw-r--r--   1 root      root   u:object_r:rootfs:s0              5222 1970-01-01 01:00 ueventd.rc</span><br><span class="line">drwxr-xr-x  16 root      root   u:object_r:vendor_file:s0         4096 1970-01-01 01:00 vendor</span><br><span class="line">-rw-r--r--   1 root      root   u:object_r:rootfs:s0               524 1970-01-01 01:00 verity_key</span><br></pre></td></tr></table></figure>
+<h3 id="3-查看SELinux权限"><a href="#3-查看SELinux权限" class="headerlink" title="3. 查看SELinux权限"></a>3. 查看SELinux权限</h3><h5 id="3-1-查看文件所具有的selinux相关标识：ls-lZ"><a href="#3-1-查看文件所具有的selinux相关标识：ls-lZ" class="headerlink" title="3.1 查看文件所具有的selinux相关标识：ls -lZ"></a>3.1 查看文件所具有的selinux相关标识：ls -lZ</h5><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> adb shell ls -lZ</span></span><br><span class="line">total 1720</span><br><span class="line">dr-xr-xr-x   3 root      root   u:object_r:cgroup:s0                 0 1970-06-12 16:06 acct</span><br><span class="line">drwxrwx---   6 system    cache  u:object_r:cache_file:s0          4096 1970-06-12 15:38 cache</span><br><span class="line">drwxr-xr-x   4 root      root   u:object_r:configfs:s0               0 1970-01-01 01:00 config</span><br><span class="line">drwxr-xr-x   6 root      root   u:object_r:system_file:s0         4096 1970-01-01 01:00 cust</span><br><span class="line">drwxrwx--x  50 system    system u:object_r:system_data_file:s0    4096 1970-06-12 15:38 data</span><br><span class="line">lrwxrwxrwx   1 root      root   u:object_r:rootfs:s0                23 1970-01-01 01:00 default.prop -&gt; system/etc/prop.default</span><br><span class="line">drwxr-xr-x  15 root      root   u:object_r:device:s0              3640 1970-06-12 16:06 dev</span><br><span class="line">drwxr-xr-x   4 root      root   u:object_r:adsprpcd_file:s0       4096 1970-01-01 08:00 dsp</span><br><span class="line">... ...</span><br><span class="line">drwxr-xr-x   4 root      root   u:object_r:storage_file:s0          80 1970-06-12 16:06 storage</span><br><span class="line">dr-xr-xr-x  19 root      root   u:object_r:sysfs:s0                  0 1970-06-12 16:06 sys</span><br><span class="line">drwxr-xr-x  18 root      root   u:object_r:system_file:s0         4096 1970-01-01 01:00 system</span><br><span class="line">-rw-r--r--   1 root      root   u:object_r:rootfs:s0              5222 1970-01-01 01:00 ueventd.rc</span><br><span class="line">drwxr-xr-x  16 root      root   u:object_r:vendor_file:s0         4096 1970-01-01 01:00 vendor</span><br><span class="line">-rw-r--r--   1 root      root   u:object_r:rootfs:s0               524 1970-01-01 01:00 verity_key</span><br></pre></td></tr></table></figure>
 <p>以storage文件夹为例，各个部分的含义解析如下：</p>
 <p>drwxr-xr-x   4 root      root   u:object_r:adsprpcd_file:s0       4096 1970-01-01 08:00 dsp</p>
 <p><img src="http://otqux1hnn.bkt.clouddn.com/rangerzhou/180420/selinux_dsp.png" alt="selinux_dsp"></p>
@@ -417,14 +417,11 @@
           
       <div class="tabs tabs-comment">
         <ul class="nav-tabs">
-            <li class="tab"><a href="#comment-gitalk">gitalk</a></li>
             <li class="tab"><a href="#comment-disqus">disqus</a></li>
+            <li class="tab"><a href="#comment-gitalk">gitalk</a></li>
             <li class="tab"><a href="#comment-livere">livere</a></li>
         </ul>
         <div class="tab-content">
-            <div class="tab-pane gitalk" id="comment-gitalk">
-              <div class="comments" id="gitalk-container"></div>
-            </div>
             <div class="tab-pane disqus" id="comment-disqus">
               
   <div class="comments">
@@ -433,6 +430,9 @@
     </div>
   </div>
   
+            </div>
+            <div class="tab-pane gitalk" id="comment-gitalk">
+              <div class="comments" id="gitalk-container"></div>
             </div>
             <div class="tab-pane livere" id="comment-livere">
               
@@ -633,26 +633,6 @@
 
   
 
-<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
-
-<script>
-NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
-  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
-    var gitalk = new Gitalk({
-      clientID    : 'b7bb504993135f5a2eab',
-      clientSecret: '6f83aec5c45d75e248e2914be90c4601e2e1dc44',
-      repo        : 'rangerzhou.github.io',
-      owner       : 'rangerzhou',
-      admin       : ['rangerzhou'],
-      id          : '8d93eb500e22ebde27372db7853a69c9',
-        language: 'zh-CN',
-      distractionFreeMode: true
-    });
-    gitalk.render('gitalk-container');
-  }, window.Gitalk);
-});
-</script>
-
 <script>
   function loadCount() {
     var d = document, s = d.createElement('script');
@@ -682,6 +662,26 @@ NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
       (d.head || d.body).appendChild(s);
     }
   });
+</script>
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : 'b7bb504993135f5a2eab',
+      clientSecret: '6f83aec5c45d75e248e2914be90c4601e2e1dc44',
+      repo        : 'rangerzhou.github.io',
+      owner       : 'rangerzhou',
+      admin       : ['rangerzhou'],
+      id          : '8d93eb500e22ebde27372db7853a69c9',
+        language: 'zh-CN',
+      distractionFreeMode: true
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
 </script>
 
 <script>

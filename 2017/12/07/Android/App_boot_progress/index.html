@@ -298,7 +298,7 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script> <div id="hbe-security"> <div class="hbe-input-container"> <input type="password" class="hbe-form-control" id="pass" placeholder="请输入密码" /> <label for="pass">请输入密码</label> <div class="bottom-line"></div> </div> </div> <div id="decryptionError" style="display:none;">Incorrect Password!</div> <div id="noContentError" style="display:none;">No content to display!</div> <div id="encrypt-blog" style="display:none"> U2FsdGVkX1+ju+JyWMuimgoJzFuMF7E+krkwyJXAH+5vpSFLD7NB5noYlK/2YdP6ot7wyO9G/1GtxaXNh6UTqe/UcKvjXhOLQRqUXI90uRVo6JFmvi9iPwuXjUaFb6WPaeuPO3pZrSxZNogtlXkMMMW9h2/r+x6zRORwax/weAx3gcFvJ/dkVrI8Uvrwwm5MT9J/hUnSn2KkrlCuo3ZH02snnDWUsEqzyDh6lDqbi2U4V4c/KbIgQsh3eotpQYDTGsVyWb6rl3YnLYg1RKfSjZI8e0m178VS233iL68aJQXstsY0sIVobM/inxzRI6aJZ46obyVay8LT6EePzcM4umXBQPmbO0Uk8F9JVrw8WV06Trb5564iQ/+ySf8V1bJ96uEsIXGRuFmp13iyA6qTXnPxIQLXUjVtKiio2qqv/ABXVS545WQ2YXOlAWyLyPy6KEOxEnGpRuEiJcakdXAGIw8ik9KJv2cM+FLODLNDYW+WivKbGemngU51kSZYAxE2SDmijk70M5yPBjyhcaETT9Fr8FcQl6v4NjvL3AiDsHA= </div><script src="/lib/crypto-js.js"></script><script src="/lib/blog-encrypt.js"></script><link href="/css/blog-encrypt.css" rel="stylesheet" type="text/css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script> <div id="hbe-security"> <div class="hbe-input-container"> <input type="password" class="hbe-form-control" id="pass" placeholder="请输入密码" /> <label for="pass">请输入密码</label> <div class="bottom-line"></div> </div> </div> <div id="decryptionError" style="display:none;">Incorrect Password!</div> <div id="noContentError" style="display:none;">No content to display!</div> <div id="encrypt-blog" style="display:none"> U2FsdGVkX18yK4H7QFSD3pfydZ7nuWRSeMBFyITRnfr3W911vtsdNzJErdE8U1taB48x/FK9iiIoWPnfj/x4H+fk7qNxaUAwEOoJy6GTPD+vFn2JhyodX53l1j1ay5JPiR2Dn0di7SBf4ksl4x75/fBg/HUXX5c57k9FAGL5Hp9DYEGwe4pNADMcZUOv+MDQCK9PTCKBcSKXVq97EbgEugwFBV0vy0fTNfOADen3+tgjiamzQUWpyQtC7I4GmeT6H3hAFVsTd3HzB2o7Kg4g0ke0muH2uJu9JFoe9INJISSI5RRDLivY5wXta046PEbVcLvgTqNmC976HW9X0ouwYY+aoLillIdFMtlNVhpu6vLLEm/Ey81Y0wECrj7p7dhnT1qDcK31xMbDHffxwtKmW54CWDg01YMp1Gh79m8iV5DTocNyMqukh5VaguyPUnO6SjaQsllrQwNDpxOT/tR3OjMTE7jBMfvzm7np9E8bYt9X29XjLtv83Eh86zyA+JFioupkTnK6aYxObDYy2JgB6e9hJZGH7wSTaYLsoezfuOE= </div><script src="/lib/crypto-js.js"></script><script src="/lib/blog-encrypt.js"></script><link href="/css/blog-encrypt.css" rel="stylesheet" type="text/css">
     </div>
 
     
@@ -351,14 +351,11 @@
           
       <div class="tabs tabs-comment">
         <ul class="nav-tabs">
-            <li class="tab"><a href="#comment-gitalk">gitalk</a></li>
             <li class="tab"><a href="#comment-disqus">disqus</a></li>
+            <li class="tab"><a href="#comment-gitalk">gitalk</a></li>
             <li class="tab"><a href="#comment-livere">livere</a></li>
         </ul>
         <div class="tab-content">
-            <div class="tab-pane gitalk" id="comment-gitalk">
-              <div class="comments" id="gitalk-container"></div>
-            </div>
             <div class="tab-pane disqus" id="comment-disqus">
               
   <div class="comments">
@@ -367,6 +364,9 @@
     </div>
   </div>
   
+            </div>
+            <div class="tab-pane gitalk" id="comment-gitalk">
+              <div class="comments" id="gitalk-container"></div>
             </div>
             <div class="tab-pane livere" id="comment-livere">
               
@@ -566,26 +566,6 @@
 
   
 
-<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
-
-<script>
-NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
-  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
-    var gitalk = new Gitalk({
-      clientID    : 'b7bb504993135f5a2eab',
-      clientSecret: '6f83aec5c45d75e248e2914be90c4601e2e1dc44',
-      repo        : 'rangerzhou.github.io',
-      owner       : 'rangerzhou',
-      admin       : ['rangerzhou'],
-      id          : '0326dca4da32594354708294f838c84a',
-        language: 'zh-CN',
-      distractionFreeMode: true
-    });
-    gitalk.render('gitalk-container');
-  }, window.Gitalk);
-});
-</script>
-
 <script>
   function loadCount() {
     var d = document, s = d.createElement('script');
@@ -615,6 +595,26 @@ NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
       (d.head || d.body).appendChild(s);
     }
   });
+</script>
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : 'b7bb504993135f5a2eab',
+      clientSecret: '6f83aec5c45d75e248e2914be90c4601e2e1dc44',
+      repo        : 'rangerzhou.github.io',
+      owner       : 'rangerzhou',
+      admin       : ['rangerzhou'],
+      id          : '0326dca4da32594354708294f838c84a',
+        language: 'zh-CN',
+      distractionFreeMode: true
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
 </script>
 
 <script>
