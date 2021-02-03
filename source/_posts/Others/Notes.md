@@ -1022,3 +1022,26 @@ deepin.com.aaa-logo                  deepin.com.gtja.fuyi                 deepin
 git config --global core.quotepath false
 ```
 
+#### 26. 更新 fork 而来的仓库代码
+
+有两种方法
+
+##### 26.1 git 命令操作
+
+``` shell
+# 查看远程分支列表
+$ git remote -v
+# 增加源分支地址到你项目远程分支列表中(此处是关键)，先得将原来的仓库指定为 upstream，命令为
+$ git remote add upstream git@github.com:xxx/xxx.git
+# fetch 源分支的新版本到本地
+$ git fetch upstream
+# 合并两个版本的代码
+$ git merge upstream/master
+# 将合并后的代码 push 到 github 上去
+$ git push origin master
+```
+
+##### 26.2 github 方式
+
+https://blog.csdn.net/qq1332479771/article/details/56087333
+
