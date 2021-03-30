@@ -990,7 +990,6 @@ sudo apt install deepin.com.wechat
 安装后可能会出现界面中文字体显示方块的问题，解决方案如下：
 
 ``` shell
-
 $ sudo apt-cache search wqy
 fonts-wqy-microhei - Sans-serif style CJK font derived from Droid
 fonts-wqy-zenhei - "WenQuanYi Zen Hei" A Hei-Ti Style (sans-serif) Chinese font
@@ -998,6 +997,16 @@ xfonts-wqy - WenQuanYi Bitmap Song CJK font for X
 # 安装上面三个字体
 $ sudo apt install fonts-wqy-microhei fonts-wqy-zenhei xfonts-wqy
 ```
+
+其他异常：
+
+``` shell
+The following packages have unmet dependencies:
+ com.qq.weixin.deepin:i386 : Depends: libc6:i386 (>= 2.28) but 2.27-3ubuntu1.4 is to be installed
+E: Unable to correct problems, you have held broken packages.
+```
+
+
 
 同样可以替换安装包（deepin.com.wechat）为其他需要的软件，输入 sudo apt install install deepin. 按 tab 就显示了：
 
