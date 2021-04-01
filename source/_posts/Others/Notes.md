@@ -975,11 +975,11 @@ sudo vim /etc/crontab
 
 
 
-#### 24. Ubuntu 18.04 安装 微信/QQ
+#### 24. Ubuntu 安装 微信/QQ
 
 [github]: https://github.com/zq1997/deepin-wine
 
-安装
+##### 24.1 LinuxMint19.3（Ubuntu 18.04）版本安装
 
 ``` shell
 wget -O- https://deepin-wine.i-m.dev/setup.sh | sh
@@ -1018,6 +1018,15 @@ deepin.com.95579.cjsc                deepin.com.foxmail                   deepin
 deepin.com.aaa-logo                  deepin.com.gtja.fuyi                 deepin.com.qq.im.light               deepin.com.taobao.wangwang           deepin.net.263.em
 ```
 
+##### 24.2 LinuxMint20（Ubuntu 20.04） 版本安装
+
+``` shell
+wget -O- https://deepin-wine.i-m.dev/setup.sh | sh
+sudo apt install com.qq.weixin.deepin com.qq.im.deepin
+```
+
+官网最新版本依赖高版本 libc6 库，而 Ubuntu 18.04 最高只支持 libc6-2.27 版本，所以 Ubuntu 18.04 无法安装 deepin-wine github 中的新版本，**千万不要尝试升级 libc6**，不要问我是怎么知道的，除非你想重装系统……
+
 #### 25. git status 中文显示为 ascii 码
 
 - 原因
@@ -1054,3 +1063,6 @@ $ git push origin master
 
 https://blog.csdn.net/qq1332479771/article/details/56087333
 
+#### 27. Linux Mint20 添加打印机
+
+Settings - Printers - Add - Find Network Print - 右侧输入打印机 IP - Find - 左侧 JetDirect(xxx.xxx.xxx.xxx) - 右侧 Forward

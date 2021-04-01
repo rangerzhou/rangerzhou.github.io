@@ -33,6 +33,22 @@ HDD 1T分区：
 /home/xxx/work # 挂载到 /home/xxx/ 目录下
 ```
 
+### 2. 挂载硬盘
+
+查看硬盘信息
+
+``` shell
+# 查看硬盘信息
+sudo fdisk -l
+# 创建挂载目录
+mkdir ~/work
+# 挂载
+mount /dev/sda1 ~/work
+# 开机自动挂载
+sudo vim /etc/fstab
+/dev/sda1 ~/work（挂载目录） ext4（文件格式） defaults 0 0
+```
+
 
 
 ## 二. Ubuntu 18.04 初始化
@@ -85,6 +101,12 @@ fcitx-config-gtk3
 fcitx设置 >>附加组件>>勾选高级 >>取消经典界面
 Configure>>  Addon  >>Advanced>>Classic
 ```
+
+**在 Linux mint 20(Ubuntu 20.04) 中安装搜狗输入法**
+
+- [下载安装包并双击安装](https://pinyin.sogou.com/linux/?r=pinyin)
+- 注销电脑
+- 点击电脑左下角，输入 fcitx，打开 Fcitx Configuration（或者使用命令：`fcitx-config-gtk3`），点击 + ，取消勾选 *Only Show Current Language* ，添加搜狗输入法即可。
 
 ### 6. sudo no password
 
@@ -312,6 +334,18 @@ Type=Application
 Categories=Development
 Name[en_US]=AndroidStudio.txt
 ```
+
+新版本生成方式：`Tools - Create Desktop Entry` 即可点击电脑左下角搜索 Studio.
+
+无法输入中文：在 studio.sh 中 #!/bin/sh 下面添加如下：
+
+``` shell
+export GTK_IM_MODULE=fcitx 
+export QT_IM_MODULE=fcitx 
+export XMODIFIERS="@im=fcitx"
+```
+
+
 
 ### 19. 配置 samba 共享
 
@@ -902,6 +936,23 @@ $ ttygif myrecording
 安装和使用方式见 github：https://github.com/nbedos/termtosvg
 
 **ttygif** 使用更简单。
+
+### 34. 安装 ohmyzsh
+
+https://github.com/ohmyzsh/ohmyzsh
+
+安装
+
+``` shell
+sudo apt install zsh
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+```
+
+配置
+
+``` shell
+vim ~/.zsh
+```
 
 
 
