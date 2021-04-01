@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
 <meta name="theme-color" content="#222">
-<meta name="generator" content="Hexo 3.9.0">
+<meta name="generator" content="Hexo 5.4.0">
   <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
   <link rel="icon" type="image/png" sizes="32x32" href="/images/desert.jpg">
   <link rel="icon" type="image/png" sizes="16x16" href="/images/desert.jpg">
@@ -23,20 +23,20 @@
   </script>
 
   <meta name="description" content="HomeAssistant 接入和风天气。">
-<meta name="keywords" content="HeWeather">
 <meta property="og:type" content="article">
 <meta property="og:title" content="HomeAssistant 集成和风天气">
 <meta property="og:url" content="http://rangerzhou.top/2019/06/28/HomeAssistant/HassHeWeatherIntegrate/index.html">
 <meta property="og:site_name" content="RangerZhou">
 <meta property="og:description" content="HomeAssistant 接入和风天气。">
-<meta property="og:locale" content="zh-CN">
+<meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://raw.githubusercontent.com/rangerzhou/ImageHosting/master/blog_resource/2019/HeWeather_001.PNG">
 <meta property="og:image" content="https://raw.githubusercontent.com/rangerzhou/ImageHosting/master/blog_resource/2019/HeWeather_002.PNG">
 <meta property="og:image" content="https://raw.githubusercontent.com/rangerzhou/ImageHosting/master/Hass_Resources/HeWeather.png">
-<meta property="og:updated_time" content="2020-10-14T06:54:48.272Z">
+<meta property="article:published_time" content="2019-06-28T07:05:50.000Z">
+<meta property="article:modified_time" content="2020-10-14T06:54:48.272Z">
+<meta property="article:author" content="Ranger Zhou">
+<meta property="article:tag" content="HeWeather">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="HomeAssistant 集成和风天气">
-<meta name="twitter:description" content="HomeAssistant 接入和风天气。">
 <meta name="twitter:image" content="https://raw.githubusercontent.com/rangerzhou/ImageHosting/master/blog_resource/2019/HeWeather_001.PNG">
 
 <link rel="canonical" href="http://rangerzhou.top/2019/06/28/HomeAssistant/HassHeWeatherIntegrate/">
@@ -306,23 +306,23 @@
         <blockquote>
 <p>HomeAssistant 接入和风天气。</p>
 </blockquote>
-<a id="more"></a>
+<span id="more"></span>
 <p>HA Version: 0.94.4</p>
-<p>首先用京东帐号申请一个<a href="https://wx.jdcloud.com/market/datas/26/10610" target="_blank" rel="noopener">和风API</a>，请注意，是京东万象平台，不是从风天气官网申请的 API 。</p>
+<p>首先用京东帐号申请一个<a target="_blank" rel="noopener" href="https://wx.jdcloud.com/market/datas/26/10610">和风API</a>，请注意，是京东万象平台，不是从风天气官网申请的 API 。</p>
 <h2 id="1-hf-weather-组件实现"><a href="#1-hf-weather-组件实现" class="headerlink" title="1. hf_weather 组件实现"></a>1. hf_weather 组件实现</h2><h3 id="1-1-预览"><a href="#1-1-预览" class="headerlink" title="1.1. 预览"></a>1.1. 预览</h3><p><img src="https://raw.githubusercontent.com/rangerzhou/ImageHosting/master/blog_resource/2019/HeWeather_001.PNG" alt="001"></p>
 <p><img src="https://raw.githubusercontent.com/rangerzhou/ImageHosting/master/blog_resource/2019/HeWeather_002.PNG" alt="002"></p>
-<h3 id="1-2-下载组件"><a href="#1-2-下载组件" class="headerlink" title="1.2 下载组件"></a>1.2 下载组件</h3><p><a href="https://github.com/rangerzhou/HomeAssistant/tree/master/hf_weather" target="_blank" rel="noopener">下载组件</a> ,放入 HA 对应目录。</p>
+<h3 id="1-2-下载组件"><a href="#1-2-下载组件" class="headerlink" title="1.2 下载组件"></a>1.2 下载组件</h3><p><a target="_blank" rel="noopener" href="https://github.com/rangerzhou/HomeAssistant/tree/master/hf_weather">下载组件</a> ,放入 HA 对应目录。</p>
 <h3 id="1-3-配置-configurations-yaml"><a href="#1-3-配置-configurations-yaml" class="headerlink" title="1.3. 配置 configurations.yaml"></a>1.3. 配置 configurations.yaml</h3><p>配置 configuration.yaml</p>
 <figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">weather:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">platform:</span> <span class="string">hf_weather</span></span><br><span class="line">    <span class="attr">name:</span> <span class="string">hefengweather</span></span><br><span class="line">    <span class="attr">city:</span> <span class="string">shanghai</span></span><br><span class="line">    <span class="attr">appkey:</span> <span class="string">YOUR_API_KEY</span></span><br></pre></td></tr></table></figure>
 <p>启用 sun 组件</p>
 <figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">sun:</span></span><br></pre></td></tr></table></figure>
 <p>lovelace 启用天气卡片（首页右上角“配置 UI - 原始配置编辑器”）</p>
-<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 引入自定义卡片hf_weather-card</span></span><br><span class="line"><span class="attr">resources:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">type:</span> <span class="string">module</span></span><br><span class="line">    <span class="attr">url:</span> <span class="string">/local/custom-lovelace/hf_weather-card/hf_weather-card.js</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">type:</span> <span class="string">module</span></span><br><span class="line">    <span class="attr">url:</span> <span class="string">/local/custom-lovelace/hf_weather-card/hf_weather-more-info.js</span></span><br><span class="line"><span class="comment"># 在view里面的cards节点，增加天气卡片类型</span></span><br><span class="line"><span class="attr">views:</span></span><br><span class="line">    <span class="attr">path:</span> <span class="string">default_view</span></span><br><span class="line">    <span class="attr">title:</span> <span class="string">Home</span></span><br><span class="line">    <span class="attr">cards:</span></span><br><span class="line">    <span class="string">...</span> <span class="string">...</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">type:</span> <span class="string">'custom:hf_weather-card'</span> <span class="comment"># card类型</span></span><br><span class="line">        <span class="attr">entity:</span> <span class="string">weather.hefengweather</span> <span class="comment"># entityid</span></span><br><span class="line">        <span class="attr">mode:</span> <span class="string">daily</span> <span class="comment"># hourly按小时天气预报、daily按天天气预报，不设置则同时显示</span></span><br><span class="line">        <span class="attr">title:</span> <span class="string">和风天气</span> <span class="comment"># 标题，不设置则使用entity的friendly_name</span></span><br><span class="line">        <span class="attr">icons:</span> <span class="string">/local/custom-lovelace/hf_weather-card/icons/animated/</span>  <span class="comment"># 图标路径，不设置则采用cdn，结尾要有"/"</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 引入自定义卡片hf_weather-card</span></span><br><span class="line"><span class="attr">resources:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">type:</span> <span class="string">module</span></span><br><span class="line">    <span class="attr">url:</span> <span class="string">/local/custom-lovelace/hf_weather-card/hf_weather-card.js</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">type:</span> <span class="string">module</span></span><br><span class="line">    <span class="attr">url:</span> <span class="string">/local/custom-lovelace/hf_weather-card/hf_weather-more-info.js</span></span><br><span class="line"><span class="comment"># 在view里面的cards节点，增加天气卡片类型</span></span><br><span class="line"><span class="attr">views:</span></span><br><span class="line">    <span class="attr">path:</span> <span class="string">default_view</span></span><br><span class="line">    <span class="attr">title:</span> <span class="string">Home</span></span><br><span class="line">    <span class="attr">cards:</span></span><br><span class="line">    <span class="string">...</span> <span class="string">...</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">type:</span> <span class="string">&#x27;custom:hf_weather-card&#x27;</span> <span class="comment"># card类型</span></span><br><span class="line">        <span class="attr">entity:</span> <span class="string">weather.hefengweather</span> <span class="comment"># entityid</span></span><br><span class="line">        <span class="attr">mode:</span> <span class="string">daily</span> <span class="comment"># hourly按小时天气预报、daily按天天气预报，不设置则同时显示</span></span><br><span class="line">        <span class="attr">title:</span> <span class="string">和风天气</span> <span class="comment"># 标题，不设置则使用entity的friendly_name</span></span><br><span class="line">        <span class="attr">icons:</span> <span class="string">/local/custom-lovelace/hf_weather-card/icons/animated/</span>  <span class="comment"># 图标路径，不设置则采用cdn，结尾要有&quot;/&quot;</span></span><br></pre></td></tr></table></figure>
 <p>如果不从原始编辑器中添加，也可添加 ENTITY，在 entity 的编辑器中编辑如下：</p>
-<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">entity:</span> <span class="string">weather.hefengweather</span></span><br><span class="line"><span class="attr">icons:</span> <span class="string">/local/custom-lovelace/hf_weather-card/icons/animated/</span></span><br><span class="line"><span class="attr">title:</span> <span class="string">和风天气</span></span><br><span class="line"><span class="attr">type:</span> <span class="string">'custom:hf_weather-card'</span></span><br><span class="line"><span class="attr">mode:</span> <span class="string">hourly</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">entity:</span> <span class="string">weather.hefengweather</span></span><br><span class="line"><span class="attr">icons:</span> <span class="string">/local/custom-lovelace/hf_weather-card/icons/animated/</span></span><br><span class="line"><span class="attr">title:</span> <span class="string">和风天气</span></span><br><span class="line"><span class="attr">type:</span> <span class="string">&#x27;custom:hf_weather-card&#x27;</span></span><br><span class="line"><span class="attr">mode:</span> <span class="string">hourly</span></span><br></pre></td></tr></table></figure>
 <h2 id="2-HeWeather组件实现"><a href="#2-HeWeather组件实现" class="headerlink" title="2. HeWeather组件实现"></a>2. HeWeather组件实现</h2><p><img src="https://raw.githubusercontent.com/rangerzhou/ImageHosting/master/Hass_Resources/HeWeather.png" alt="HeWeather"></p>
-<h3 id="2-1-下载组件"><a href="#2-1-下载组件" class="headerlink" title="2.1 下载组件"></a>2.1 下载组件</h3><p><a href="https://github.com/rangerzhou/HomeAssistant/tree/master/HeWeather" target="_blank" rel="noopener">下载组件</a> ，放入 HA 对应目录。</p>
-<h3 id="2-2-配置"><a href="#2-2-配置" class="headerlink" title="2.2 配置"></a>2.2 配置</h3><p>编辑 <a href="https://github.com/rangerzhou/HomeAssistant/blob/master/HeWeather/packages/heweather.yaml" target="_blank" rel="noopener">heweather.yaml</a> ，填充对应 appkey ，</p>
+<h3 id="2-1-下载组件"><a href="#2-1-下载组件" class="headerlink" title="2.1 下载组件"></a>2.1 下载组件</h3><p><a target="_blank" rel="noopener" href="https://github.com/rangerzhou/HomeAssistant/tree/master/HeWeather">下载组件</a> ，放入 HA 对应目录。</p>
+<h3 id="2-2-配置"><a href="#2-2-配置" class="headerlink" title="2.2 配置"></a>2.2 配置</h3><p>编辑 <a target="_blank" rel="noopener" href="https://github.com/rangerzhou/HomeAssistant/blob/master/HeWeather/packages/heweather.yaml">heweather.yaml</a> ，填充对应 appkey ，</p>
 <figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">sensor:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">platform:</span> <span class="string">heweather</span></span><br><span class="line">    <span class="attr">city:</span> <span class="string">shanghai</span></span><br><span class="line">    <span class="attr">appkey:</span> <span class="number">905195</span><span class="string">***************3627c7f781d</span></span><br><span class="line">    <span class="string">...</span> <span class="string">...</span></span><br></pre></td></tr></table></figure>
 <p>配置 configurations.yaml ，添加 packages：</p>
 <figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">homeassistant:</span></span><br><span class="line">  <span class="string">...</span> <span class="string">...</span></span><br><span class="line">  <span class="attr">customize:</span> <span class="type">!include</span> <span class="string">customize.yaml</span></span><br><span class="line">  <span class="attr">packages:</span> <span class="type">!include_dir_named</span> <span class="string">packages</span> <span class="comment"># 添加此行</span></span><br></pre></td></tr></table></figure>
@@ -366,8 +366,8 @@
       <i class="fa fa-chevron-left"></i> HomeAssistant 集成小米空气净化器2
     </a></div>
       <div class="post-nav-item">
-    <a href="/2019/10/25/Android/JNI-Study/" rel="next" title="Android JNI原理-loadLibrary动态库加载过程">
-      Android JNI原理-loadLibrary动态库加载过程 <i class="fa fa-chevron-right"></i>
+    <a href="/2019/10/14/Android/AndroidDevelop_002/" rel="next" title="Android 底层学习系列（1）-Android 平台架构">
+      Android 底层学习系列（1）-Android 平台架构 <i class="fa fa-chevron-right"></i>
     </a></div>
     </div>
       </footer>
@@ -455,7 +455,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-hf-weather-组件实现"><span class="nav-text">1. hf_weather 组件实现</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-1-预览"><span class="nav-text">1.1. 预览</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-2-下载组件"><span class="nav-text">1.2 下载组件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-3-配置-configurations-yaml"><span class="nav-text">1.3. 配置 configurations.yaml</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-HeWeather组件实现"><span class="nav-text">2. HeWeather组件实现</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-1-下载组件"><span class="nav-text">2.1 下载组件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2-配置"><span class="nav-text">2.2 配置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-3-HA-中添加-entity"><span class="nav-text">2.3 HA 中添加 entity</span></a></li></ol></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-hf-weather-%E7%BB%84%E4%BB%B6%E5%AE%9E%E7%8E%B0"><span class="nav-text">1. hf_weather 组件实现</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-1-%E9%A2%84%E8%A7%88"><span class="nav-text">1.1. 预览</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-2-%E4%B8%8B%E8%BD%BD%E7%BB%84%E4%BB%B6"><span class="nav-text">1.2 下载组件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-3-%E9%85%8D%E7%BD%AE-configurations-yaml"><span class="nav-text">1.3. 配置 configurations.yaml</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-HeWeather%E7%BB%84%E4%BB%B6%E5%AE%9E%E7%8E%B0"><span class="nav-text">2. HeWeather组件实现</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-1-%E4%B8%8B%E8%BD%BD%E7%BB%84%E4%BB%B6"><span class="nav-text">2.1 下载组件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2-%E9%85%8D%E7%BD%AE"><span class="nav-text">2.2 配置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-3-HA-%E4%B8%AD%E6%B7%BB%E5%8A%A0-entity"><span class="nav-text">2.3 HA 中添加 entity</span></a></li></ol></li></ol></div>
       </div>
       <!--/noindex-->
 
@@ -469,7 +469,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">49</span>
+          <span class="site-state-item-count">53</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -536,7 +536,7 @@
 <div class="copyright">
   
   &copy; 
-  <span itemprop="copyrightYear">2020</span>
+  <span itemprop="copyrightYear">2021</span>
   <span class="with-love">
     <i class="fa fa-heart"></i>
   </span>
@@ -562,9 +562,17 @@
   <script src="/lib/anime.min.js"></script>
   <script src="/lib/velocity/velocity.min.js"></script>
   <script src="/lib/velocity/velocity.ui.min.js"></script>
-<script src="/js/utils.js"></script><script src="/js/motion.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
 <script src="/js/schemes/pisces.js"></script>
+
+
 <script src="/js/next-boot.js"></script>
+
 
 
 
@@ -582,7 +590,9 @@
 
 
 
-  <script src="/js/local-search.js"></script>
+  
+<script src="/js/local-search.js"></script>
+
 
 
 

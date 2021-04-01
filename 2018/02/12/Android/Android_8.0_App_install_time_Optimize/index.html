@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
 <meta name="theme-color" content="#222">
-<meta name="generator" content="Hexo 3.9.0">
+<meta name="generator" content="Hexo 5.4.0">
   <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
   <link rel="icon" type="image/png" sizes="32x32" href="/images/desert.jpg">
   <link rel="icon" type="image/png" sizes="16x16" href="/images/desert.jpg">
@@ -23,17 +23,17 @@
   </script>
 
   <meta name="description" content="APP的安装有四种方式">
-<meta name="keywords" content="appInstall">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Android8.0-App安装时间优化">
 <meta property="og:url" content="http://rangerzhou.top/2018/02/12/Android/Android_8.0_App_install_time_Optimize/index.html">
 <meta property="og:site_name" content="RangerZhou">
 <meta property="og:description" content="APP的安装有四种方式">
-<meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2020-10-14T06:56:48.984Z">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2018-02-12T02:57:56.000Z">
+<meta property="article:modified_time" content="2020-10-14T06:56:48.984Z">
+<meta property="article:author" content="Ranger Zhou">
+<meta property="article:tag" content="appInstall">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Android8.0-App安装时间优化">
-<meta name="twitter:description" content="APP的安装有四种方式">
 
 <link rel="canonical" href="http://rangerzhou.top/2018/02/12/Android/Android_8.0_App_install_time_Optimize/">
 
@@ -302,14 +302,14 @@
         <blockquote>
 <p>APP的安装有四种方式</p>
 </blockquote>
-<a id="more"></a>
+<span id="more"></span>
 <ul>
 <li>系统应用安装——开机时完成，没有安装界面；</li>
 <li>应用市场安装——通过应用市场完成，有安装界面，有些market开启无障碍开关和root后可静默安装；</li>
 <li>adb安装：使用adb install安装，和pm install一样，没有安装界面；</li>
 <li>第三方点击安装：点击存储在手机设备或者SD卡中的APK文件安装，通过PackageInstall处理，有安装界面；</li>
 </ul>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> android.util.BoostFramework;</span><br><span class="line">... ...</span><br><span class="line">        <span class="keyword">private</span> <span class="keyword">static</span> BoostFramework sPerfBoost = <span class="keyword">null</span>;</span><br><span class="line">... ...</span><br><span class="line">            <span class="keyword">if</span> (sPerfBoost == <span class="keyword">null</span>) &#123;</span><br><span class="line">                sPerfBoost = <span class="keyword">new</span> BoostFramework();</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">if</span> (sPerfBoost != <span class="keyword">null</span>) &#123;</span><br><span class="line">                sPerfBoost.perfHint(BoostFramework.VENDOR_HINT_PACKAGE_INSTALL_BOOST, <span class="keyword">null</span>, <span class="number">6000</span>, -<span class="number">1</span>);</span><br><span class="line">                Slog.d(TAG, <span class="string">"perflock acquired for PackageInstallService"</span>);</span><br><span class="line">            &#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> android.util.BoostFramework;</span><br><span class="line">... ...</span><br><span class="line">        <span class="keyword">private</span> <span class="keyword">static</span> BoostFramework sPerfBoost = <span class="keyword">null</span>;</span><br><span class="line">... ...</span><br><span class="line">            <span class="keyword">if</span> (sPerfBoost == <span class="keyword">null</span>) &#123;</span><br><span class="line">                sPerfBoost = <span class="keyword">new</span> BoostFramework();</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">if</span> (sPerfBoost != <span class="keyword">null</span>) &#123;</span><br><span class="line">                sPerfBoost.perfHint(BoostFramework.VENDOR_HINT_PACKAGE_INSTALL_BOOST, <span class="keyword">null</span>, <span class="number">6000</span>, -<span class="number">1</span>);</span><br><span class="line">                Slog.d(TAG, <span class="string">&quot;perflock acquired for PackageInstallService&quot;</span>);</span><br><span class="line">            &#125;</span><br></pre></td></tr></table></figure>
 
     </div>
 
@@ -451,7 +451,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">49</span>
+          <span class="site-state-item-count">53</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -518,7 +518,7 @@
 <div class="copyright">
   
   &copy; 
-  <span itemprop="copyrightYear">2020</span>
+  <span itemprop="copyrightYear">2021</span>
   <span class="with-love">
     <i class="fa fa-heart"></i>
   </span>
@@ -544,9 +544,17 @@
   <script src="/lib/anime.min.js"></script>
   <script src="/lib/velocity/velocity.min.js"></script>
   <script src="/lib/velocity/velocity.ui.min.js"></script>
-<script src="/js/utils.js"></script><script src="/js/motion.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
 <script src="/js/schemes/pisces.js"></script>
+
+
 <script src="/js/next-boot.js"></script>
+
 
 
 
@@ -564,7 +572,9 @@
 
 
 
-  <script src="/js/local-search.js"></script>
+  
+<script src="/js/local-search.js"></script>
+
 
 
 

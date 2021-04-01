@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
 <meta name="theme-color" content="#222">
-<meta name="generator" content="Hexo 3.9.0">
+<meta name="generator" content="Hexo 5.4.0">
   <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
   <link rel="icon" type="image/png" sizes="32x32" href="/images/desert.jpg">
   <link rel="icon" type="image/png" sizes="16x16" href="/images/desert.jpg">
@@ -28,12 +28,12 @@
 <meta property="og:url" content="http://rangerzhou.top/2019/06/03/HomeAssistant/HASS-Xiaomi-Airpurifier-integrate/index.html">
 <meta property="og:site_name" content="RangerZhou">
 <meta property="og:description" content="在 Home Assistant 中集成小米空气净化器2（底部标签型号：AC-M2-AA），网上各种配置比较杂乱，且没有找到针对此净化器完美的配置，可能是因为 HA 更新了，旧的配置失效了，本文写作时 HA 的版本是 0.93.2">
-<meta property="og:locale" content="zh-CN">
+<meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://raw.githubusercontent.com/rangerzhou/ImageHosting/master/Hass_Resources/ScreenShots_AirPurifier2.PNG">
-<meta property="og:updated_time" content="2020-10-14T06:55:44.628Z">
+<meta property="article:published_time" content="2019-06-03T05:42:56.000Z">
+<meta property="article:modified_time" content="2020-10-14T06:55:44.628Z">
+<meta property="article:author" content="Ranger Zhou">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="HomeAssistant 集成小米空气净化器2">
-<meta name="twitter:description" content="在 Home Assistant 中集成小米空气净化器2（底部标签型号：AC-M2-AA），网上各种配置比较杂乱，且没有找到针对此净化器完美的配置，可能是因为 HA 更新了，旧的配置失效了，本文写作时 HA 的版本是 0.93.2">
 <meta name="twitter:image" content="https://raw.githubusercontent.com/rangerzhou/ImageHosting/master/Hass_Resources/ScreenShots_AirPurifier2.PNG">
 
 <link rel="canonical" href="http://rangerzhou.top/2019/06/03/HomeAssistant/HASS-Xiaomi-Airpurifier-integrate/">
@@ -303,7 +303,7 @@
         <blockquote>
 <p>在 Home Assistant 中集成小米空气净化器2（底部标签型号：AC-M2-AA），网上各种配置比较杂乱，且没有找到针对此净化器完美的配置，可能是因为 HA 更新了，旧的配置失效了，本文写作时 HA 的版本是 0.93.2</p>
 </blockquote>
-<a id="more"></a>
+<span id="more"></span>
 <p>HA Release: 0.94.4</p>
 <p>净化器型号: AC-M2-AA</p>
 <p>Model info: zhimi.airpurifier.m2</p>
@@ -311,38 +311,38 @@
 <p><img src="https://raw.githubusercontent.com/rangerzhou/ImageHosting/master/Hass_Resources/ScreenShots_AirPurifier2.PNG" alt="米空气净化器2"></p>
 <p>参考了 2 篇小米空气净化器2配置的文章：</p>
 <ul>
-<li><a href="https://bbs.hassbian.com/thread-1657-1-1.html" target="_blank" rel="noopener">最新小米空气净化器2代接入HASS方法及HA控制面板</a> </li>
-<li><a href="https://bbs.hassbian.com/thread-6065-1-1.html" target="_blank" rel="noopener">小米空气净化器2代接入HA控制面板问题</a></li>
+<li><a target="_blank" rel="noopener" href="https://bbs.hassbian.com/thread-1657-1-1.html">最新小米空气净化器2代接入HASS方法及HA控制面板</a> </li>
+<li><a target="_blank" rel="noopener" href="https://bbs.hassbian.com/thread-6065-1-1.html">小米空气净化器2代接入HA控制面板问题</a></li>
 </ul>
 <p>此文配置针对这两篇文章的配置文件有所修改，以解决可能由于 HA 版本更新出现的问题，下面是详细配置步骤。</p>
 <h3 id="1-获取-Token"><a href="#1-获取-Token" class="headerlink" title="1. 获取 Token"></a>1. 获取 Token</h3><p>有 3 种方法获取 token 。</p>
 <p>第一种，HACHINA 定制的树莓派集成了 miio 工具，可直接使用命令获取 token：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span> miio discover</span><br><span class="line">INFO  Discovering devices. Press Ctrl+C to stop.</span><br><span class="line"></span><br><span class="line">Device ID: 6264xxxx</span><br><span class="line">Model info: zhimi.airpurifier.m2</span><br><span class="line">Address: 192.168.xxx.xxx</span><br><span class="line">Token: 9c9aa**************************** via auto-token</span><br><span class="line">Support: At least basic</span><br></pre></td></tr></table></figure>
-<p>第二种，安装 <a href="https://github.com/rangerzhou/ImageHosting/tree/master/apps" target="_blank" rel="noopener">米家 APP (5.4.63版本)</a>，此版本可以直接显示 token ，不知道会不会哪天就被封了……</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> miio discover</span></span><br><span class="line">INFO  Discovering devices. Press Ctrl+C to stop.</span><br><span class="line"></span><br><span class="line">Device ID: 6264xxxx</span><br><span class="line">Model info: zhimi.airpurifier.m2</span><br><span class="line">Address: 192.168.xxx.xxx</span><br><span class="line">Token: 9c9aa**************************** via auto-token</span><br><span class="line">Support: At least basic</span><br></pre></td></tr></table></figure>
+<p>第二种，安装 <a target="_blank" rel="noopener" href="https://github.com/rangerzhou/ImageHosting/tree/master/apps">米家 APP (5.4.63版本)</a>，此版本可以直接显示 token ，不知道会不会哪天就被封了……</p>
 <p>第三种，安装 python-miio 工具：</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sudo pip3 install python-miio</span><br><span class="line">mirobo discover --handshake 1</span><br></pre></td></tr></table></figure>
-<h3 id="2-新建-packages-目录"><a href="#2-新建-packages-目录" class="headerlink" title="2. 新建 packages 目录"></a>2. 新建 packages 目录</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span> 在 /home/pi/homeassistant/ 新建 packages 目录</span><br><span class="line"><span class="meta">$</span> mkdir packages</span><br></pre></td></tr></table></figure>
-<h3 id="3-在-configuration-yaml-中配置-packages"><a href="#3-在-configuration-yaml-中配置-packages" class="headerlink" title="3. 在 configuration.yaml 中配置 packages"></a>3. 在 configuration.yaml 中配置 packages</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span> vim configuration.yaml</span><br><span class="line">homeassistant:</span><br><span class="line">  name: Home</span><br><span class="line">  latitude: </span><br><span class="line">  longitude:</span><br><span class="line">  unit_system: metric</span><br><span class="line">  time_zone: Asia/Shanghai</span><br><span class="line">  customize: !include customize.yaml</span><br><span class="line">  packages: !include_dir_named packages</span><br></pre></td></tr></table></figure>
-<h3 id="4-下载-packages-文件"><a href="#4-下载-packages-文件" class="headerlink" title="4. 下载 packages 文件"></a>4. 下载 packages 文件</h3><p>下载 <a href="https://github.com/rangerzhou/HomeAssistant/tree/master/xiaomiAirPurifier2/packages" target="_blank" rel="noopener"> xiaomi_air_pufifier.yaml</a> 放入 <code>~/homeassistant/packages</code> 目录下，此文件修复了上面参考链接里的bug和 HA 升级导致的几个问题，主要为：</p>
+<h3 id="2-新建-packages-目录"><a href="#2-新建-packages-目录" class="headerlink" title="2. 新建 packages 目录"></a>2. 新建 packages 目录</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 在 /home/pi/homeassistant/ 新建 packages 目录</span></span><br><span class="line"><span class="meta">$</span><span class="bash"> mkdir packages</span></span><br></pre></td></tr></table></figure>
+<h3 id="3-在-configuration-yaml-中配置-packages"><a href="#3-在-configuration-yaml-中配置-packages" class="headerlink" title="3. 在 configuration.yaml 中配置 packages"></a>3. 在 configuration.yaml 中配置 packages</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> vim configuration.yaml</span></span><br><span class="line">homeassistant:</span><br><span class="line">  name: Home</span><br><span class="line">  latitude: </span><br><span class="line">  longitude:</span><br><span class="line">  unit_system: metric</span><br><span class="line">  time_zone: Asia/Shanghai</span><br><span class="line">  customize: !include customize.yaml</span><br><span class="line">  packages: !include_dir_named packages</span><br></pre></td></tr></table></figure>
+<h3 id="4-下载-packages-文件"><a href="#4-下载-packages-文件" class="headerlink" title="4. 下载 packages 文件"></a>4. 下载 packages 文件</h3><p>下载 <a target="_blank" rel="noopener" href="https://github.com/rangerzhou/HomeAssistant/tree/master/xiaomiAirPurifier2/packages"> xiaomi_air_pufifier.yaml</a> 放入 <code>~/homeassistant/packages</code> 目录下，此文件修复了上面参考链接里的bug和 HA 升级导致的几个问题，主要为：</p>
 <ul>
 <li>增加 sensors: xiaomi_ap_filter_used 和 xiaomi_ap_filter_life，以在主界面显示滤芯使用时长和滤芯寿命</li>
 <li>修复提示音无效（HA 升级，service 名称改变导致）</li>
 </ul>
 <p><strong>注意：需要替换文件中的 host 和 token ！！！</strong>  </p>
-<h3 id="5-配置-home-assistant-custom-ui"><a href="#5-配置-home-assistant-custom-ui" class="headerlink" title="5. 配置 home-assistant-custom-ui"></a>5. 配置 home-assistant-custom-ui</h3><p>根据 <a href="https://github.com/andrey-git/home-assistant-custom-ui" target="_blank" rel="noopener">home-assistant-custom-ui 官方 github</a> 中的 README 配置，具体如下：</p>
-<p><strong>a. Installing:</strong> <a href="https://github.com/andrey-git/home-assistant-custom-ui/blob/master/docs/installing.md" target="_blank" rel="noopener">详细参考此文</a> </p>
+<h3 id="5-配置-home-assistant-custom-ui"><a href="#5-配置-home-assistant-custom-ui" class="headerlink" title="5. 配置 home-assistant-custom-ui"></a>5. 配置 home-assistant-custom-ui</h3><p>根据 <a target="_blank" rel="noopener" href="https://github.com/andrey-git/home-assistant-custom-ui">home-assistant-custom-ui 官方 github</a> 中的 README 配置，具体如下：</p>
+<p><strong>a. Installing:</strong> <a target="_blank" rel="noopener" href="https://github.com/andrey-git/home-assistant-custom-ui/blob/master/docs/installing.md">详细参考此文</a> </p>
 <p><strong>自动安装</strong>，在 ~/home/homeassistant/ 下载 update.sh ：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span> 在 ~/home/homeassistant/ 下载 update.sh</span><br><span class="line"><span class="meta">$</span> curl -o update.sh "https://raw.githubusercontent.com/andrey-git/home-assistant-custom-ui/master/update.sh?raw=true"</span><br></pre></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 在 ~/home/homeassistant/ 下载 update.sh</span></span><br><span class="line"><span class="meta">$</span><span class="bash"> curl -o update.sh <span class="string">&quot;https://raw.githubusercontent.com/andrey-git/home-assistant-custom-ui/master/update.sh?raw=true&quot;</span></span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
 <p><strong>手动安装</strong>：</p>
-<p>在 <code>~/homeassistant/</code> 创建 <code>www/custom_ui</code> 目录，从 <a href="https://github.com/andrey-git/home-assistant-custom-ui" target="_blank" rel="noopener">Github</a> 下载 state-card-custom-ui.html, state-card-custom-ui.html.gz, state-card-custom-ui-es5.html, state-card-custom-ui-es5.html.gz 放入到 <code>~/.homeassistant/www/custom_ui/</code> 。</p>
-<p>下载 <a href="https://github.com/andrey-git/home-assistant-customizer/tree/master/customizer" target="_blank" rel="noopener">此链接文件</a>  到 <code>~/home/homeassistant/custom_components/customizer</code> 。</p>
-<p><strong>b. Activating:</strong> <a href="https://github.com/andrey-git/home-assistant-custom-ui/blob/master/docs/activating.md" target="_blank" rel="noopener">详细参考此文</a> ，1.1 ～ 1.8 选择其中一种方法即可，我是选的 1.2，配置 configuration.yaml:</p>
-<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">homeassistant:</span></span><br><span class="line">  <span class="attr">name:</span></span><br><span class="line">  <span class="attr">latitude:</span></span><br><span class="line">  <span class="attr">longitude:</span></span><br><span class="line">  <span class="string">...</span> <span class="string">...</span></span><br><span class="line">  <span class="attr">packages:</span> <span class="type">!include_dir_named</span> <span class="string">packages</span></span><br><span class="line">  <span class="attr">customize_glob:</span></span><br><span class="line">    <span class="string">"*.*"</span><span class="string">:</span></span><br><span class="line">      <span class="attr">custom_ui_state_card:</span> <span class="string">state-card-custom-ui</span></span><br><span class="line"><span class="string">...</span> <span class="string">...</span></span><br><span class="line"><span class="attr">frontend:</span></span><br><span class="line">  <span class="attr">extra_html_url:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">/local/custom_ui/state-card-custom-ui.html</span></span><br><span class="line">  <span class="attr">extra_html_url_es5:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">/local/custom_ui/state-card-custom-ui-es5.html</span></span><br></pre></td></tr></table></figure>
+<p>在 <code>~/homeassistant/</code> 创建 <code>www/custom_ui</code> 目录，从 <a target="_blank" rel="noopener" href="https://github.com/andrey-git/home-assistant-custom-ui">Github</a> 下载 state-card-custom-ui.html, state-card-custom-ui.html.gz, state-card-custom-ui-es5.html, state-card-custom-ui-es5.html.gz 放入到 <code>~/.homeassistant/www/custom_ui/</code> 。</p>
+<p>下载 <a target="_blank" rel="noopener" href="https://github.com/andrey-git/home-assistant-customizer/tree/master/customizer">此链接文件</a>  到 <code>~/home/homeassistant/custom_components/customizer</code> 。</p>
+<p><strong>b. Activating:</strong> <a target="_blank" rel="noopener" href="https://github.com/andrey-git/home-assistant-custom-ui/blob/master/docs/activating.md">详细参考此文</a> ，1.1 ～ 1.8 选择其中一种方法即可，我是选的 1.2，配置 configuration.yaml:</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">homeassistant:</span></span><br><span class="line">  <span class="attr">name:</span></span><br><span class="line">  <span class="attr">latitude:</span></span><br><span class="line">  <span class="attr">longitude:</span></span><br><span class="line">  <span class="string">...</span> <span class="string">...</span></span><br><span class="line">  <span class="attr">packages:</span> <span class="type">!include_dir_named</span> <span class="string">packages</span></span><br><span class="line">  <span class="attr">customize_glob:</span></span><br><span class="line">    <span class="string">&quot;*.*&quot;</span><span class="string">:</span></span><br><span class="line">      <span class="attr">custom_ui_state_card:</span> <span class="string">state-card-custom-ui</span></span><br><span class="line"><span class="string">...</span> <span class="string">...</span></span><br><span class="line"><span class="attr">frontend:</span></span><br><span class="line">  <span class="attr">extra_html_url:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">/local/custom_ui/state-card-custom-ui.html</span></span><br><span class="line">  <span class="attr">extra_html_url_es5:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">/local/custom_ui/state-card-custom-ui-es5.html</span></span><br><span class="line">    </span><br><span class="line"></span><br></pre></td></tr></table></figure>
 <h3 id="6-添加-HA-已有的空气净化器组件-可选，加不加不影响，这个是官方支持的"><a href="#6-添加-HA-已有的空气净化器组件-可选，加不加不影响，这个是官方支持的" class="headerlink" title="6. 添加 HA 已有的空气净化器组件 (可选，加不加不影响，这个是官方支持的)"></a>6. 添加 HA 已有的空气净化器组件 (可选，加不加不影响，这个是官方支持的)</h3><p>configuration.yaml</p>
 <figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">fan:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">platform:</span> <span class="string">xiaomi_miio</span></span><br><span class="line">    <span class="attr">name:</span> <span class="string">AirPurifierm2</span></span><br><span class="line">    <span class="attr">host:</span> <span class="number">192.168</span><span class="number">.31</span><span class="number">.174</span></span><br><span class="line">    <span class="attr">token:</span> <span class="string">*****************</span></span><br><span class="line">    <span class="attr">model:</span> <span class="string">zhimi.airpurifier.m2</span></span><br></pre></td></tr></table></figure>
 <p>HA 官方支持小米空气净化器的，只是面板选项较少，如上图中的风扇卡片。</p>
 <h3 id="7-检测配置并运行"><a href="#7-检测配置并运行" class="headerlink" title="7. 检测配置并运行"></a>7. 检测配置并运行</h3><p>保存以上配置文件后检测配置，可能会出现如下提示：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Invalid config for [automation]: required key not provided @ data['action']. Got Nonerequired key not provided @ data['trigger']. Got None. (See ?, line ?). Please check the docs at https://home-assistant.io/components/automation/</span><br></pre></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Invalid config for [automation]: required key not provided @ data[&#x27;action&#x27;]. Got Nonerequired key not provided @ data[&#x27;trigger&#x27;]. Got None. (See ?, line ?). Please check the docs at https://home-assistant.io/components/automation/</span><br></pre></td></tr></table></figure>
 <p>原因是你的 automations.yaml 中没有内容，有人测试必须包含 <code>trigger:</code> 和 <code>action:</code> 两项内容才不报错，或者在 <code>configuration.yaml</code> 中注释 <code>automation: !include automations.yaml</code> 也可以。</p>
 <p>重新运行 HA 不出意外应该可以显示上图中的内容了。</p>
 
@@ -470,7 +470,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-获取-Token"><span class="nav-text">1. 获取 Token</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-新建-packages-目录"><span class="nav-text">2. 新建 packages 目录</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-在-configuration-yaml-中配置-packages"><span class="nav-text">3. 在 configuration.yaml 中配置 packages</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-下载-packages-文件"><span class="nav-text">4. 下载 packages 文件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-配置-home-assistant-custom-ui"><span class="nav-text">5. 配置 home-assistant-custom-ui</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-添加-HA-已有的空气净化器组件-可选，加不加不影响，这个是官方支持的"><span class="nav-text">6. 添加 HA 已有的空气净化器组件 (可选，加不加不影响，这个是官方支持的)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-检测配置并运行"><span class="nav-text">7. 检测配置并运行</span></a></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E8%8E%B7%E5%8F%96-Token"><span class="nav-text">1. 获取 Token</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E6%96%B0%E5%BB%BA-packages-%E7%9B%AE%E5%BD%95"><span class="nav-text">2. 新建 packages 目录</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E5%9C%A8-configuration-yaml-%E4%B8%AD%E9%85%8D%E7%BD%AE-packages"><span class="nav-text">3. 在 configuration.yaml 中配置 packages</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-%E4%B8%8B%E8%BD%BD-packages-%E6%96%87%E4%BB%B6"><span class="nav-text">4. 下载 packages 文件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-%E9%85%8D%E7%BD%AE-home-assistant-custom-ui"><span class="nav-text">5. 配置 home-assistant-custom-ui</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-%E6%B7%BB%E5%8A%A0-HA-%E5%B7%B2%E6%9C%89%E7%9A%84%E7%A9%BA%E6%B0%94%E5%87%80%E5%8C%96%E5%99%A8%E7%BB%84%E4%BB%B6-%E5%8F%AF%E9%80%89%EF%BC%8C%E5%8A%A0%E4%B8%8D%E5%8A%A0%E4%B8%8D%E5%BD%B1%E5%93%8D%EF%BC%8C%E8%BF%99%E4%B8%AA%E6%98%AF%E5%AE%98%E6%96%B9%E6%94%AF%E6%8C%81%E7%9A%84"><span class="nav-text">6. 添加 HA 已有的空气净化器组件 (可选，加不加不影响，这个是官方支持的)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-%E6%A3%80%E6%B5%8B%E9%85%8D%E7%BD%AE%E5%B9%B6%E8%BF%90%E8%A1%8C"><span class="nav-text">7. 检测配置并运行</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
@@ -484,7 +484,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">49</span>
+          <span class="site-state-item-count">53</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -551,7 +551,7 @@
 <div class="copyright">
   
   &copy; 
-  <span itemprop="copyrightYear">2020</span>
+  <span itemprop="copyrightYear">2021</span>
   <span class="with-love">
     <i class="fa fa-heart"></i>
   </span>
@@ -577,9 +577,17 @@
   <script src="/lib/anime.min.js"></script>
   <script src="/lib/velocity/velocity.min.js"></script>
   <script src="/lib/velocity/velocity.ui.min.js"></script>
-<script src="/js/utils.js"></script><script src="/js/motion.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
 <script src="/js/schemes/pisces.js"></script>
+
+
 <script src="/js/next-boot.js"></script>
+
 
 
 
@@ -597,7 +605,9 @@
 
 
 
-  <script src="/js/local-search.js"></script>
+  
+<script src="/js/local-search.js"></script>
+
 
 
 

@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
 <meta name="theme-color" content="#222">
-<meta name="generator" content="Hexo 3.9.0">
+<meta name="generator" content="Hexo 5.4.0">
   <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
   <link rel="icon" type="image/png" sizes="32x32" href="/images/desert.jpg">
   <link rel="icon" type="image/png" sizes="16x16" href="/images/desert.jpg">
@@ -22,18 +22,18 @@
     var CONFIG = {"hostname":"rangerzhou.top","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":"disqus","storage":true,"lazyload":true,"nav":null,"activeClass":"disqus"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
   </script>
 
-  <meta name="description" content="在 JDK 1.2 之后，Java 对引用的概念进行了扩充，将引用分为强引用（Strong Reference）、软引用（Soft Reference）、弱引用（Weak Reference）、虚引用（Phantom Reference）四种，引用强度：强引用 &amp;gt; 软引用 &amp;gt; 弱引用 &amp;gt; 虚引用。">
+  <meta name="description" content="在 JDK 1.2 之后，Java 对引用的概念进行了扩充，将引用分为强引用（Strong Reference）、软引用（Soft Reference）、弱引用（Weak Reference）、虚引用（Phantom Reference）四种，引用强度：强引用 &gt; 软引用 &gt; 弱引用 &gt; 虚引用。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Java中的强引用、软引用、弱引用、虚引用">
 <meta property="og:url" content="http://rangerzhou.top/2019/02/27/Technical/Java-Strong-Soft-Weak-Phantom-reference/index.html">
 <meta property="og:site_name" content="RangerZhou">
-<meta property="og:description" content="在 JDK 1.2 之后，Java 对引用的概念进行了扩充，将引用分为强引用（Strong Reference）、软引用（Soft Reference）、弱引用（Weak Reference）、虚引用（Phantom Reference）四种，引用强度：强引用 &amp;gt; 软引用 &amp;gt; 弱引用 &amp;gt; 虚引用。">
-<meta property="og:locale" content="zh-CN">
+<meta property="og:description" content="在 JDK 1.2 之后，Java 对引用的概念进行了扩充，将引用分为强引用（Strong Reference）、软引用（Soft Reference）、弱引用（Weak Reference）、虚引用（Phantom Reference）四种，引用强度：强引用 &gt; 软引用 &gt; 弱引用 &gt; 虚引用。">
+<meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://raw.githubusercontent.com/rangerzhou/ImageHosting/master/blog_resource/2020/SenXi.jpg">
-<meta property="og:updated_time" content="2020-10-14T06:49:53.524Z">
+<meta property="article:published_time" content="2019-02-27T05:10:18.000Z">
+<meta property="article:modified_time" content="2020-10-14T06:49:53.524Z">
+<meta property="article:author" content="Ranger Zhou">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Java中的强引用、软引用、弱引用、虚引用">
-<meta name="twitter:description" content="在 JDK 1.2 之后，Java 对引用的概念进行了扩充，将引用分为强引用（Strong Reference）、软引用（Soft Reference）、弱引用（Weak Reference）、虚引用（Phantom Reference）四种，引用强度：强引用 &amp;gt; 软引用 &amp;gt; 弱引用 &amp;gt; 虚引用。">
 <meta name="twitter:image" content="https://raw.githubusercontent.com/rangerzhou/ImageHosting/master/blog_resource/2020/SenXi.jpg">
 
 <link rel="canonical" href="http://rangerzhou.top/2019/02/27/Technical/Java-Strong-Soft-Weak-Phantom-reference/">
@@ -300,11 +300,11 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <p><img src="https://raw.githubusercontent.com/rangerzhou/ImageHosting/master/blog_resource/2020/SenXi.jpg" alt></p>
+        <p><img src="https://raw.githubusercontent.com/rangerzhou/ImageHosting/master/blog_resource/2020/SenXi.jpg" alt=""></p>
 <blockquote>
 <p>在 JDK 1.2 之后，Java 对引用的概念进行了扩充，将引用分为<strong>强引用（Strong Reference）</strong>、<strong>软引用（Soft Reference）</strong>、<strong>弱引用（Weak Reference）</strong>、<strong>虚引用（Phantom Reference）</strong>四种，引用强度：强引用 &gt; 软引用 &gt; 弱引用 &gt; 虚引用。</p>
 </blockquote>
-<a id="more"></a>
+<span id="more"></span>
 <h3 id="0-对象和引用"><a href="#0-对象和引用" class="headerlink" title="0. 对象和引用"></a>0. 对象和引用</h3><p>在 Java 中，有一组名词经常一起出现，就是“对象和对象引用”，这 2 个概念很容易混淆。</p>
 <p><strong>何谓对象？</strong></p>
 <p>在 Java 中有一句比较流行的话，叫做“万物皆对象”，这是 Java 语言设计之初的理念之一。要理解什么是对象，需要跟类一起结合起来理解。下面这段话引自《Java 编程思想》中的一段原话：</p>
@@ -313,17 +313,17 @@
 <p><strong>何谓对象引用？</strong></p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">每种编程语言都有自己的数据处理方式。有些时候，程序员必须注意将要处理的数据是什么类型。你是直接操纵元素，还是用某种基于特殊语法的间接表示（例如 C/C++ 里的指针）来操作对象。所有这些在 Java 里都得到了简化，一切都被视为对象。因此，我们可采用一种统一的语法。尽管将一切都“看作”对象，但操纵的标识符实际是指向一个对象的“引用”（reference）。</span><br></pre></td></tr></table></figure>
 <p>这段话来自于《Java 编程思想》，很显然，从这段话可以看出对象和对象引用不是一回事，是两个完全不同的概念。举个例子，我们通常会用下面这一行代码来创建一个对象：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Person person = <span class="keyword">new</span> Person(<span class="string">"张三"</span>);</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Person person = <span class="keyword">new</span> Person(<span class="string">&quot;张三&quot;</span>);</span><br></pre></td></tr></table></figure>
 <p>有人会说，这里的 person 是一个对象，是 Person 类的一个实例。</p>
 <p>也有人会说，这里的 person 并不是真正的对象，而是指向所创建的对象的引用。</p>
 <p>到底哪种说法是对的？我们先不急着纠结哪种说法是对的，再看两行代码：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Person person;</span><br><span class="line">person = <span class="keyword">new</span> Person(<span class="string">"张三"</span>);</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Person person;</span><br><span class="line">person = <span class="keyword">new</span> Person(<span class="string">&quot;张三&quot;</span>);</span><br></pre></td></tr></table></figure>
 <p>这两行代码实现的功能和上面的一行代码是完全一样的。大家都知道，<strong>在 Java 中 new 是用来在堆上创建对象用的</strong>，如果 person 是一个对象的话，那么第二行为何还要通过 new 来创建对象呢？由此可见，person 并不是所创建的对象，是什么？上面的一段话说的很清楚，“操纵的标识符实际是指向一个对象的引用”，也就是说 person 是一个引用，是指向一个可以指向 Person 类的对象的引用。真正创建对象的语句是右边的 new Person(“张三”)。</p>
 <p>再看一个例子：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Person person;</span><br><span class="line">person = <span class="keyword">new</span> Person(<span class="string">"张三"</span>);</span><br><span class="line">person = <span class="keyword">new</span> Person(<span class="string">"李四"</span>);</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Person person;</span><br><span class="line">person = <span class="keyword">new</span> Person(<span class="string">&quot;张三&quot;</span>);</span><br><span class="line">person = <span class="keyword">new</span> Person(<span class="string">&quot;李四&quot;</span>);</span><br></pre></td></tr></table></figure>
 <p>这里让 person 先指向了“张三”这个对象，然后又指向了“李四”这个对象。也就是说，Person person，这句话只是声明了一个 Person 类的引用，它可以指向任何 Person 类的实例。</p>
 <p>也就是说，一个引用可以指向多个对象，而一个对象可不可以被多个引用所指呢？答案当然是可以的。</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Person person1 = <span class="keyword">new</span> Person(<span class="string">"张三"</span>);</span><br><span class="line">Person person2 = person1;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Person person1 = <span class="keyword">new</span> Person(<span class="string">&quot;张三&quot;</span>);</span><br><span class="line">Person person2 = person1;</span><br></pre></td></tr></table></figure>
 <p>person1 和 person2 都指向了“张三”这个对象。</p>
 <hr>
 <p>在 JDK 1.2 之后，Java 对引用的概念进行了扩充，将引用分为强引用（Strong Reference）<strong>、</strong>软引用（Soft Reference）<strong>、</strong>弱引用（Weak Reference）<strong>、</strong>虚引用（Phantom Reference）4 种，这 4 种引用强度依次逐渐减弱，引用强度：强引用 &gt; 软引用 &gt; 弱引用 &gt; 虚引用。</p>
@@ -337,23 +337,23 @@
 <p>当把 a = null 时，这时 a 不再指向 A 的地址。按道理：当某个对象不再被其它对象引用的时候，会被 GC 回收，而 a = null 时，A 对象不能被回收，B 还依赖于 A，造成了内存泄漏。</p>
 <p>强引用最重要的就是它能够让引用变强，这就决定了它和 GC 的交互，如果一个对象通过强引用链接可到达，它就不会被 GC 回收。</p>
 <h3 id="2-软引用-SoftReference"><a href="#2-软引用-SoftReference" class="headerlink" title="2. 软引用 SoftReference"></a>2. 软引用 SoftReference</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">软引用是用来描述一些还有用但并非必须的对象。对于软引用关联着的对象，在系统将要发生内存溢出异常之前，将会把这些对象列进回收范围之中进行第二次回收。如果这次回收还没有足够的内存，才会抛出内存溢出异常。在 JDK 1.2 之后，提供了 SoftReference 类来实现软引用。---《深入理解 Java 虚拟机》</span><br></pre></td></tr></table></figure>
-<p><a href="https://developer.android.com/reference/java/lang/ref/SoftReference" target="_blank" rel="noopener">SoftReference</a> 只有在内存不足的时候 JVM 才会回收该对象，当 JVM 中的内存不足的时候，垃圾回收器会释放那些只被软引用所指向的对象。如果全部释放完这些对象之后，内存还不足，才会抛出 OutOfMemoryError。</p>
+<p><a target="_blank" rel="noopener" href="https://developer.android.com/reference/java/lang/ref/SoftReference">SoftReference</a> 只有在内存不足的时候 JVM 才会回收该对象，当 JVM 中的内存不足的时候，垃圾回收器会释放那些只被软引用所指向的对象。如果全部释放完这些对象之后，内存还不足，才会抛出 OutOfMemoryError。</p>
 <p>由于软引用可到达的对象比弱引用可达到的对象滞留内存时间会长一些，我们可以利用这个特性来做缓存，比如网页缓存、图片缓存等。</p>
 <p><strong>浏览器网页缓存实例</strong></p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">Browser prev = new Browser();					// 获取页面进行浏览</span><br><span class="line">SoftReference sr = new SoftReference(prev);		// 浏览完毕后置为软引用</span><br><span class="line">if(sr.get()!=null) &#123;</span><br><span class="line">    rev = (Browser)sr.get();					// 还没有被回收器回收，直接获取</span><br><span class="line">&#125; else &#123;</span><br><span class="line">    prev = new Browser();						// 由于内存吃紧，所以回收了软引用的对象</span><br><span class="line">    sr = new SoftReference(prev);				// 重新构建</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">Browser prev &#x3D; new Browser();					&#x2F;&#x2F; 获取页面进行浏览</span><br><span class="line">SoftReference sr &#x3D; new SoftReference(prev);		&#x2F;&#x2F; 浏览完毕后置为软引用</span><br><span class="line">if(sr.get()!&#x3D;null) &#123;</span><br><span class="line">    rev &#x3D; (Browser)sr.get();					&#x2F;&#x2F; 还没有被回收器回收，直接获取</span><br><span class="line">&#125; else &#123;</span><br><span class="line">    prev &#x3D; new Browser();						&#x2F;&#x2F; 由于内存吃紧，所以回收了软引用的对象</span><br><span class="line">    sr &#x3D; new SoftReference(prev);				&#x2F;&#x2F; 重新构建</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>相比弱引用，它阻止垃圾回收器其指向的对象的能力强一些。如果一个对象是弱引用可到达，那么这个对象会被垃圾回收器接下来的回收周期销毁。但是如果是软引用可以到达，那么这个对象会停留在内存更时间上长一些，<strong>当内存不足时垃圾回收器才会回收这些软引用可到达的对象</strong>。</p>
 <p>软引用可以和一个引用队列（ReferenceQueue）联合使用，如果软引用所引用的对象被垃圾回收器回收，JVM 就会把这个软引用加入到与之关联的引用队列中。</p>
 <h3 id="3-弱引用-WeakReference"><a href="#3-弱引用-WeakReference" class="headerlink" title="3. 弱引用 WeakReference"></a>3. 弱引用 WeakReference</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">弱引用也是用来描述非必须对象的，但是它的强度比软引用更弱一些，被弱引用关联的对象只能生存到下一次垃圾收集发生之前。当垃圾收集器工作时，无论当前内存是否足够，都会回收掉只被弱引用关联的对象。在 JDK 1.2 之后，提供了 WeakReference 类来实现弱引用。---《深入理解 Java 虚拟机》</span><br></pre></td></tr></table></figure>
-<p><a href="https://developer.android.com/reference/java/lang/ref/WeakReference.html" target="_blank" rel="noopener">WeakReference</a> 与软引用的区别在于：只具有弱引用的对象拥有更短暂的生命周期。在垃圾回收器线程扫描它所管辖的内存区域的过程中，一旦发现了只具有弱引用的对象，不管当前内存空间足够与否，都会回收它的内存。不过，由于垃圾回收器是一个优先级很低的线程，因此不一定会很快发现那些只具有弱引用的对象。</p>
+<p><a target="_blank" rel="noopener" href="https://developer.android.com/reference/java/lang/ref/WeakReference.html">WeakReference</a> 与软引用的区别在于：只具有弱引用的对象拥有更短暂的生命周期。在垃圾回收器线程扫描它所管辖的内存区域的过程中，一旦发现了只具有弱引用的对象，不管当前内存空间足够与否，都会回收它的内存。不过，由于垃圾回收器是一个优先级很低的线程，因此不一定会很快发现那些只具有弱引用的对象。</p>
 <p>一旦弱引用对象开始返回 null，该弱引用指向的对象就被标记成了垃圾。而这个弱引用对象（非其指向的对象）就没有什么用了。弱引用可以和一个引用队列（ReferenceQueue）联合使用，如果弱引用所指向的对象被垃圾回收，Java 虚拟机就会把这个弱引用加入到与之关联的引用队列中。</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">A a = <span class="keyword">new</span> A();</span><br><span class="line">WeakReference b = <span class="keyword">new</span> WeakReference(a);</span><br></pre></td></tr></table></figure>
 <p>当 a = null 时，这个时候 <strong>A 只被弱引用依赖</strong>，GC 会立刻回收 A 对象，这就是弱引用的好处，避免内存泄漏。</p>
 <h3 id="4-虚引用-PhantomReference"><a href="#4-虚引用-PhantomReference" class="headerlink" title="4. 虚引用 PhantomReference"></a>4. 虚引用 PhantomReference</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">虚引用也称为幽灵引用或者幻影引用，它是最弱的一种引用关系。一个对象是否有虚引用的存在，完全不会对其生存时间构成影响，也无法通过虚引用来取得一个对象实例。为一个对象设置虚引用关联的唯一目的就是能在这个对象被收集器回收时收到一个系统通知。在 JDK 1.2 之后，提供了 PhantomReference 类来实现虚引用。---《深入理解 Java 虚拟机》</span><br></pre></td></tr></table></figure>
-<p><a href="https://developer.android.com/reference/java/lang/ref/PhantomReference" target="_blank" rel="noopener">PhantomReference</a> 与软引用，弱引用不同，虚引用指向的对象十分脆弱，我们不可以通过 get 方法来得到其指向的对象，get() 永远返回 null 。它的唯一作用就是当其指向的对象被回收之后，自己被加入到引用队列，用作记录该引用指向的对象已被销毁。</p>
-<h3 id="5-引用队列-ReferenceQueue"><a href="#5-引用队列-ReferenceQueue" class="headerlink" title="5. 引用队列 ReferenceQueue"></a>5. 引用队列 ReferenceQueue</h3><p><a href="https://developer.android.com/reference/java/lang/ref/ReferenceQueue.html" target="_blank" rel="noopener">ReferenceQueue</a> 配合 Reference 子类等使用，当引用对象所指向的内存空间被 GC 回收后，该引用对象则被追加到引用队列的末尾。</p>
-<h3 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h3><p>Java 到底是值传递还是引用传递？ <a href="https://www.zhihu.com/question/31203609" target="_blank" rel="noopener">https://www.zhihu.com/question/31203609</a></p>
-<p>理解 Java 中的弱引用 <a href="https://droidyue.com/blog/2014/10/12/understanding-weakreference-in-java/index.html" target="_blank" rel="noopener">https://droidyue.com/blog/2014/10/12/understanding-weakreference-in-java/index.html</a></p>
-<p>Java 中的强引用、软引用、弱引用、虚引用有什么用？ <a href="https://www.zhihu.com/question/37401125" target="_blank" rel="noopener">https://www.zhihu.com/question/37401125</a></p>
+<p><a target="_blank" rel="noopener" href="https://developer.android.com/reference/java/lang/ref/PhantomReference">PhantomReference</a> 与软引用，弱引用不同，虚引用指向的对象十分脆弱，我们不可以通过 get 方法来得到其指向的对象，get() 永远返回 null 。它的唯一作用就是当其指向的对象被回收之后，自己被加入到引用队列，用作记录该引用指向的对象已被销毁。</p>
+<h3 id="5-引用队列-ReferenceQueue"><a href="#5-引用队列-ReferenceQueue" class="headerlink" title="5. 引用队列 ReferenceQueue"></a>5. 引用队列 ReferenceQueue</h3><p><a target="_blank" rel="noopener" href="https://developer.android.com/reference/java/lang/ref/ReferenceQueue.html">ReferenceQueue</a> 配合 Reference 子类等使用，当引用对象所指向的内存空间被 GC 回收后，该引用对象则被追加到引用队列的末尾。</p>
+<h3 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h3><p>Java 到底是值传递还是引用传递？ <a target="_blank" rel="noopener" href="https://www.zhihu.com/question/31203609">https://www.zhihu.com/question/31203609</a></p>
+<p>理解 Java 中的弱引用 <a target="_blank" rel="noopener" href="https://droidyue.com/blog/2014/10/12/understanding-weakreference-in-java/index.html">https://droidyue.com/blog/2014/10/12/understanding-weakreference-in-java/index.html</a></p>
+<p>Java 中的强引用、软引用、弱引用、虚引用有什么用？ <a target="_blank" rel="noopener" href="https://www.zhihu.com/question/37401125">https://www.zhihu.com/question/37401125</a></p>
 <p>《深入理解 Java 虚拟机：JVM 高级特性与最佳实践》</p>
 
     </div>
@@ -480,7 +480,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#0-对象和引用"><span class="nav-text">0. 对象和引用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-强引用-StrongReference"><span class="nav-text">1. 强引用 StrongReference</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-软引用-SoftReference"><span class="nav-text">2. 软引用 SoftReference</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-弱引用-WeakReference"><span class="nav-text">3. 弱引用 WeakReference</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-虚引用-PhantomReference"><span class="nav-text">4. 虚引用 PhantomReference</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-引用队列-ReferenceQueue"><span class="nav-text">5. 引用队列 ReferenceQueue</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Reference"><span class="nav-text">Reference</span></a></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#0-%E5%AF%B9%E8%B1%A1%E5%92%8C%E5%BC%95%E7%94%A8"><span class="nav-text">0. 对象和引用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E5%BC%BA%E5%BC%95%E7%94%A8-StrongReference"><span class="nav-text">1. 强引用 StrongReference</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E8%BD%AF%E5%BC%95%E7%94%A8-SoftReference"><span class="nav-text">2. 软引用 SoftReference</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E5%BC%B1%E5%BC%95%E7%94%A8-WeakReference"><span class="nav-text">3. 弱引用 WeakReference</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-%E8%99%9A%E5%BC%95%E7%94%A8-PhantomReference"><span class="nav-text">4. 虚引用 PhantomReference</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-%E5%BC%95%E7%94%A8%E9%98%9F%E5%88%97-ReferenceQueue"><span class="nav-text">5. 引用队列 ReferenceQueue</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Reference"><span class="nav-text">Reference</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
@@ -494,7 +494,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">49</span>
+          <span class="site-state-item-count">53</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -561,7 +561,7 @@
 <div class="copyright">
   
   &copy; 
-  <span itemprop="copyrightYear">2020</span>
+  <span itemprop="copyrightYear">2021</span>
   <span class="with-love">
     <i class="fa fa-heart"></i>
   </span>
@@ -587,9 +587,17 @@
   <script src="/lib/anime.min.js"></script>
   <script src="/lib/velocity/velocity.min.js"></script>
   <script src="/lib/velocity/velocity.ui.min.js"></script>
-<script src="/js/utils.js"></script><script src="/js/motion.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
 <script src="/js/schemes/pisces.js"></script>
+
+
 <script src="/js/next-boot.js"></script>
+
 
 
 
@@ -607,7 +615,9 @@
 
 
 
-  <script src="/js/local-search.js"></script>
+  
+<script src="/js/local-search.js"></script>
+
 
 
 
