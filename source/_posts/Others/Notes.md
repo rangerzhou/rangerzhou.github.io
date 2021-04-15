@@ -1066,3 +1066,16 @@ https://blog.csdn.net/qq1332479771/article/details/56087333
 #### 27. Linux Mint20 添加打印机
 
 Settings - Printers - Add - Find Network Print - 右侧输入打印机 IP - Find - 左侧 JetDirect(xxx.xxx.xxx.xxx) - 右侧 Forward
+
+#### 28. AndroidStudio 虚拟机无法启动 /dev/kvm is not found
+
+提示 `/dev/kvm is not found`
+
+解决方法
+
+``` shell
+sudo apt install qemu-kvm
+sudo kvm-ok
+# 重启电脑，F10(惠普) 进入 BIOS - Security(或者Advanced) - SystemSecurity - Virtualization Thchnology, 启动即可
+```
+
