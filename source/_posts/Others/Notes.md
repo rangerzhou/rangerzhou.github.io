@@ -1021,8 +1021,10 @@ deepin.com.aaa-logo                  deepin.com.gtja.fuyi                 deepin
 ##### 24.2 LinuxMint20（Ubuntu 20.04） 版本安装
 
 ``` shell
-wget -O- https://deepin-wine.i-m.dev/setup.sh | sh
-sudo apt install com.qq.weixin.deepin com.qq.im.deepin
+$ wget -O- https://deepin-wine.i-m.dev/setup.sh | sh
+$ sudo apt install com.qq.weixin.deepin com.qq.im.deepin
+### 如无法发送照片
+$ sudo apt install libjpeg62:i386
 ```
 
 官网最新版本依赖高版本 libc6 库，而 Ubuntu 18.04 最高只支持 libc6-2.27 版本，所以 Ubuntu 18.04 无法安装 deepin-wine github 中的新版本，**千万不要尝试升级 libc6**，不要问我是怎么知道的，除非你想重装系统……
