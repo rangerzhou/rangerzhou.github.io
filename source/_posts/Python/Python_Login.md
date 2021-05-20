@@ -78,7 +78,7 @@ def login(User,Passwd):
 		return
 
 User = 'wjl0n2'
-Passwd = 'zr.202104'
+Passwd = '123456'
 login(User, Passwd)
 schedule.every(5).seconds.do(login,User,Passwd) # 每隔 5 秒执行一次
 
