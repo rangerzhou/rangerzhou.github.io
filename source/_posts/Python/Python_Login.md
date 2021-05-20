@@ -132,3 +132,10 @@ $ ps -aux | grep aptiv-network
 root      807325  2.0  0.0  34868 21708 ?        Ss   15:15   0:00 /usr/bin/python3 /home/ranger/bin/aptiv-network.py &
 ```
 
+
+
+
+
+参考：
+
+https://blog.csdn.net/zhusongziye/article/details/91353222
