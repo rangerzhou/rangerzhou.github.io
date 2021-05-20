@@ -30,7 +30,7 @@ top:
 
 代码如下：
 
-network.py
+aptiv-network.py
 
 ``` python
 import requests
@@ -90,38 +90,45 @@ while 1:
 ### 4. 配置开机启动脚本
 
 ``` shell
-$ sudo vim /etc/systemd/system/network.service
+# 编辑 systemd service
+$ sudo cat /etc/systemd/system/aptiv-network.service
 [Unit]
-Description=Network Authentication
+Description=Aptiv Network Authentication
 After=network.target
 
 [Service]
 Type=simple
 User=root
 Group=root
-ExecStart=sudo /usr/bin/python3 ~/bin/network.py
+ExecStart=/usr/bin/python3 /home/ranger/bin/aptiv-network.py & # 使用绝对路径
 
 [Install]
 WantedBy=multi-user.target
 
+# enable systemd service
 $ sudo systemctl enable network.service
+enabled
+
 $ sudo systemctl is-enabled network.service
 enable
+
 $ sudo systemctl daemon-reload
 $ sudo systemctl start network.service
-$ sudo systemctl status network.service
-● aptiv-network.service - Network Authentication
-     Loaded: loaded (/etc/systemd/system/network.service; enabled; vendor preset: enabled)
-     Active: active (running) since Thu 2021-05-20 14:40:13 CST; 20ms ago
-   Main PID: 802008 (sudo)
-      Tasks: 2 (limit: 38099)
-     Memory: 2.3M
-     CGroup: /system.slice/aptiv-network.service
-             ├─802008 /usr/bin/sudo /usr/bin/python3 ~/bin/network.py
-             └─802028 /usr/bin/python3 ~/bin/network.py
 
-5月 20 14:40:13 mintos systemd[1]: Started Network Authentication.
-5月 20 14:40:13 mintos sudo[802008]:     root : TTY=unknown ; PWD=/ ; USER=root ; COMMAND=/usr/bin/python3 ~/bin/network.py
-5月 20 14:40:13 mintos sudo[802008]: pam_unix(sudo:session): session opened for user root by (uid=0)
+$ sudo systemctl status network.service
+● aptiv-network.service - Aptiv Network Authentication
+     Loaded: loaded (/etc/systemd/system/aptiv-network.service; enabled; vendor preset: enabled)
+     Active: active (running) since Thu 2021-05-20 15:15:26 CST; 22ms ago
+   Main PID: 807325 (python3)
+      Tasks: 1 (limit: 38099)
+     Memory: 2.8M
+     CGroup: /system.slice/aptiv-network.service
+             └─807325 /usr/bin/python3 /home/ranger/bin/aptiv-network.py &
+
+5月 20 15:15:26 mintos systemd[1]: Started Aptiv Network Authentication.
+
+# 查看进程看是否启动成功
+$ ps -aux | grep aptiv-network                      
+root      807325  2.0  0.0  34868 21708 ?        Ss   15:15   0:00 /usr/bin/python3 /home/ranger/bin/aptiv-network.py &
 ```
 
