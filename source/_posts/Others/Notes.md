@@ -1081,3 +1081,8 @@ sudo kvm-ok
 # 重启电脑，F10(惠普) 进入 BIOS - Security(或者Advanced) - SystemSecurity - Virtualization Thchnology, 启动即可
 ```
 
+#### 29. Ubuntu 中 AndroidStudio 只识别文件传输模式
+
+智能识别文件传输模式，仅充电模式无法识别调试，根据如下链接配置 51-android
+
+https://github.com/snowdream/51-android
