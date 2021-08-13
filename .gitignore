@@ -3,6 +3,7 @@ Thumbs.db
 db.json
 *.log
 public/
+themes/next
 node_modules/
 .deploy*/
 package-lock
