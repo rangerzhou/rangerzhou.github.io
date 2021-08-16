@@ -16,6 +16,10 @@ password:
 sudo npm install hexo-cli -g
 sudo npm install hexo-deployer-git --save
 sudo npm install hexo --save
+npm install hexo-server
+# 如出现 cannot get / ，查看 public 中是否有 index.html，如果没有
+sudo npm audit fix
+sudo npm install
 
 卸载
 sudo npm uninstall hexo-cli -g // 3.0.0 及之后版本
