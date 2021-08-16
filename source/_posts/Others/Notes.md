@@ -1086,3 +1086,30 @@ sudo kvm-ok
 智能识别文件传输模式，仅充电模式无法识别调试，根据如下链接配置 51-android
 
 https://github.com/snowdream/51-android
+
+#### 30. Github 不再支持密码验证
+
+从 2021 年 8 月13 日开始，github 不再支持密码验证
+
+``` shell
+remote: Support for password authentication was removed on August 13, 2021. Please use a personal access token instead
+```
+
+**解决办法**
+
+进入 github，右上角 Settings - Developer settings - Personal access tokens - Generate new token, 设置 token 有效期，访问权限等，
+
+- 使用 token 从命令行访问仓库，勾选 repo
+- 使用 token 从命令行删除仓库，勾选 delete_repo
+- 其他按需勾选
+
+点击 Generate token 生成令牌，保存好生成的 token，因为只会出现一次。
+
+随后 push 代码的时候把 token 粘贴到 密码的位置，也可以把 token 直接添加到远程仓库链接中，这样就不会每次提交代码都需要输入 token 了：
+
+``` shell
+git remote set-url origin https://<your_token>@github.com/<USERNAME>/<REPO>.git
+# 例
+git remote set-url origin https://ghp_0kMUaJGbjAQ49KGpBNeOy2iCUvafabcdefgh@github.com/username/helloworld.git/
+```
+
