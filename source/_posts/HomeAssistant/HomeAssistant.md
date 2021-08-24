@@ -14,7 +14,15 @@ top:
 
 ### 安装与启动
 
-安装：https://www.hachina.io/docs/330.html
+安装
+
+``` shell
+# sudo 安装，hass 可执行程序在  /usr/local/bin/hass
+# 不带 sudo，hass 可执行程序在 /home/ranger/opt/anaconda3/envs/hass/bin/hass
+pip3 install homeassistant
+```
+
+
 
 升级
 
@@ -41,25 +49,24 @@ ExecStart=/home/ranger/anaconda3/envs/python3.8/bin/hass
 WantedBy=multi-user.target
 ```
 
-重新加载systemd
+``` shell
+# 重新加载systemd
+sudo systemctl --system daemon-reload
 
-`sudo systemctl --system daemon-reload`
+# 加入启动项：
+sudo systemctl enable home-assistant@ranger.service
 
-加入启动项：
+# 启动服务：
+sudo systemctl start home-assistant@ranger.service
 
-`sudo systemctl enable home-assistant@pi.service`
+# 查看服务：
+sudo systemctl status home-assistant@ranger.service
 
-启动服务：
+# 若查看系统启动服务可以用
+systemctl list-units --type service
+```
 
-`sudo systemctl start home-assistant@pi.service`
 
-查看服务：
-
-`sudo systemctl status home-assistant@pi.service`
-
-若查看系统启动服务可以用
-
-`systemctl list-units --type service`
 
 #### 创建 Hass 快捷命令
 
@@ -377,14 +384,13 @@ sudo reboot
 
 3. not initializing bluetooth_tracker because could not install requirement pybluez==0.22
 
-   ``` shell
-   sudo apt-get update
-   sudo apt-get install python-pip python-dev ipython
-   
-   sudo apt-get install bluetooth libbluetooth-dev
-   sudo pip install pybluez
-   ```
+``` shell
+sudo apt-get update
+sudo apt-get install python-pip python-dev ipython
 
+sudo apt-get install bluetooth libbluetooth-dev
+sudo pip install pybluez
+```
 
 
 
