@@ -146,3 +146,89 @@ livere_uid: data-uid-value
 <link href="//cdn.bootcss.com/pace/1.0.2/themes/pink/pace-theme-flash.css" rel="stylesheet">
 ```
 
+### 3. 添加音乐播放器
+
+[参考]( https://enfangzhong.github.io/2019/12/08/Hexo%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2%E6%B7%BB%E5%8A%A0APlayer%E9%9F%B3%E4%B9%90%E6%92%AD%E6%94%BE%E5%99%A8%E5%8A%9F%E8%83%BD/)
+
+#### 3.1 下载 APlayer 源码
+
+``` shell
+git clone https://github.com/DIYgod/APlayer.git
+```
+
+把 *dist* 文件夹复制到 *\themes\next\source* 目录中。
+
+#### 3.2 编辑喜欢的音乐列表
+
+在 *dist* 目录里，新建 *music.js* 文件，并把如下代码粘贴进去：
+
+``` js
+const ap = new APlayer({
+    container: document.getElementById('aplayer'),
+    fixed: true,
+    autoplay: false,
+    audio: [{
+        name: '麻雀',
+        artist: '李荣浩',
+        url: '/dist/MusicList/麻雀.mp3',
+        cover: 'http://p1.music.126.net/c5NVKUIAUcyN4BQUDbGnEg==/109951163221157827.jpg?param=130y130',
+    },
+    {
+        name: "平凡之路",
+        artist: '朴树',
+        url: 'http://www.ytmp3.cn/down/59211.mp3',
+        cover: 'http://p1.music.126.net/W_5XiCv3rGS1-J7EXpHSCQ==/18885211718782327.jpg?param=130y130',
+    },
+    {
+        name: '这些民谣 - 一次听个够',
+        artist: '翁大涵',
+        url: 'http://www.ytmp3.cn/down/60222.mp3',
+        cover: 'http://p2.music.126.net/Wx5GNJEpay2JbfVUJc4Aew==/109951163094853876.jpg?param=130y130',
+    },
+    {
+        name: '你的酒馆对我打了烊',
+        artist: '陈雪凝',
+        url: 'http://www.ytmp3.cn/down/59770.mp3',
+        cover: 'http://p1.music.126.net/LiRR__0pJHSivqBHZzbMUw==/109951163816225567.jpg?param=130y130',
+    },
+    {
+        name: 'Something Just Like This',
+        artist: 'The Chainsmokers',
+        url: 'http://www.ytmp3.cn/down/50463.mp3',
+        cover: 'http://p2.music.126.net/ggnyubDdMxrhpqYvpZbhEQ==/3302932937412681.jpg?param=130y130',
+    },
+    {
+        name: 'Good Time',
+        artist: 'Owl City&Carly Rae Jepsen',
+        url: 'http://www.ytmp3.cn/down/34148.mp3',
+        cover: 'http://p1.music.126.net/c5NVKUIAUcyN4BQUDbGnEg==/109951163221157827.jpg?param=130y130',
+    }]
+});
+```
+
+可以使用网上链接，也可以使用本地音乐文件（比如麻雀.mp3）。
+
+#### 3.3 在 next 主题下的 layout 中引入 APlayer 音乐播放器源码
+
+在 *\themes\next\layout_layout.swig* 文件 *body* 标签体内中，里新增如下代码：
+
+``` html
+<body itemscope itemtype="http://schema.org/WebPage">
+
+<!-- 加入APlayer音乐播放器 -->
+<link rel="stylesheet" href="/dist/APlayer.min.css">
+<div id="aplayer"></div>
+<script type="text/javascript" src="/dist/APlayer.min.js"></script>
+<script type="text/javascript" src="/dist/music.js"></script>
+<!-- 加入APlayer音乐播放器 -->
+
+  <div class="container{%- if theme.motion.enable %} use-motion{%- endif %}">
+    <div class="headband"></div>
+```
+
+#### 3.4 重新部署
+
+``` shell
+hexo clean;hexo g;hexo d
+```
+
