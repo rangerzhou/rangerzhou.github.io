@@ -12,6 +12,37 @@ top:
 
 <!--more-->
 
+### 2021 年 10 月 8 日更新
+
+安装教程：https://www.home-assistant.io/installation/raspberrypi
+
+#### 坑1：no supervisor internet connection
+
+``` shell
+
+21-02-02 15:47:18 WARNING (MainThread) [supervisor.homeassistant.core] Error on Home Assistant installation. Retry in 30sec
+21-02-02 15:47:48 WARNING (MainThread) [supervisor.jobs] 'Updater.fetch_data' blocked from execution, no supervisor internet connection
+21-02-02 15:47:48 WARNING (MainThread) [supervisor.homeassistant.core] Error on Home Assistant installation. Retry in 30sec
+21-02-02 15:48:18 WARNING (MainThread) [supervisor.jobs] 'Updater.fetch_data' blocked from execution, no supervisor internet connection
+
+```
+
+解决：
+
+刷完系统后，在 hassos-boot 根目录新建 *CONFIG* 目录，在其中创建 timesyncd.conf
+
+``` conf
+[Time]
+NTP=0.pool.ntp.org 1.pool.ntp.org 2.pool.ntp.org 3.pool.ntp.org
+FallbackNTP=0.pool.ntp.org 1.pool.ntp.org 2.pool.ntp.org 3.pool.ntp.org
+```
+
+如果还是不行，换个网络……   我就被公司网络坑惨了
+
+---
+
+
+
 ### 刷入 HASSOS 到 microSD 卡
 
 下载最新 [HASSOS](https://github.com/home-assistant/hassos/releases) 镜像，使用 [balena Etcher](https://www.balena.io/etcher/) 工具烧录到 microSD 卡。
