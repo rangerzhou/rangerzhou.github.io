@@ -33,6 +33,12 @@ const ap = new APlayer({
         cover: 'http://p1.music.126.net/c5NVKUIAUcyN4BQUDbGnEg==/109951163221157827.jpg?param=130y130',
     },
     {
+        name: "无赖",
+        artist: '郑中基',
+        url: "/dist/MusicList/无赖.mp3",
+        cover: 'http://p1.music.126.net/LiRR__0pJHSivqBHZzbMUw==/109951163816225567.jpg?param=130y130',
+    },
+    {
         name: "平凡之路",
         artist: '朴树',
         url: '/dist/MusicList/平凡之路.mp3',
