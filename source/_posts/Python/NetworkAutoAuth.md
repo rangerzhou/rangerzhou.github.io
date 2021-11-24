@@ -8,7 +8,7 @@ password: zr.
 top:
 ---
 
-> 公司自己安装的操作系统，网络每隔 8 小时需要手动 ~~点击登录~~ 认证一次，尤其是，本脚本每隔 5 秒钟检测一次网络状态，若认证超时则自动重新认证，可代替手动认证，太懒了没办法。
+> 公司自己安装的操作系统，网络每隔 8 小时需要手动 ~~点击登录~~ 认证一次，本脚本每隔 5 秒钟检测一次网络状态，若认证超时则自动重新认证，可代替手动认证，太懒了没办法 O(∩_∩)O~
 
 
 
@@ -25,8 +25,6 @@ top:
 ``` shell
 $ sudo apt install krb5-user
 ```
-
-
 
 #### 1.2 生成秘钥表
 
@@ -46,13 +44,13 @@ slot KVNO Principal
 ktutil:  q
 ```
 
-**<font color = red>需要修改秘钥表的保存位置</font>**
+<font color = red>**注意必须是大写的 @APTIV.COM，需要修改秘钥表的保存位置，在 Linux 生成 keytab 比较方便，经测试生成的 keytab 文件 windows 下也可使用**</font>
 
 #### 1.3 认证
 
 ``` shell
 # kinit 获取并缓存 principal（当前主体）的初始票据授予票据（TGT），用于 Kerberos 系统进行身份安全验证
-$ kinit -k -t /home/ranger/bin/NetworkAutoAuth/ranger.keytab ran.zhou@APTIV.COM
+$ kinit -k -t /home/ranger/bin/NetworkAutoAuth/ranger.keytab ran.zhou@APTIV.COM # 大写的 @APTIV.COM
 # APTIV 网络认证
 $ curl -v --negotiate -u : 'http://internet-ap.aptiv.com:6080/php/browser_challenge.php?vsys=1&rule=77&preauthid=&returnreq=y'
 ```
@@ -193,8 +191,6 @@ while 1:
 <font color = red>**需修改 *kinitcmd* 值为自己 keytab 的目录 和 *用户名*** </font>
 
 编辑 **network_auto_auth.service** ，和 **bootstart.sh** 放在同一目录，执行 **bootstart.sh** 即可启动脚本认证并开机自动启动。
-
-
 
 ---
 
@@ -341,3 +337,18 @@ $ cat monitor.log
 1593664, Tue 27 Jul 2021 11:10:02 AM CST
 ```
 
+### 5. Windows 下使用
+
+#### 5.1 安装 Kerberos-Windows 客户端
+
+下载地址：http://web.mit.edu/kerberos/dist/，选择 MIT Kerberos for Windows 4.1，重启电脑，会自动配置环境变量到 path，但是需要把对应的环境变量移动到最前面，默认安装路径：C:\Program Files\MIT\Kerberos\bin ，使用 *C:\Program Files\MIT\Kerberos\bin* 下的 `klist` `kinit` 命令
+
+#### 5.2 Windows 安装 curl
+
+下载地址：https://curl.se/windows/
+
+#### 5.3 其他步骤
+
+同 Linux
+
+在 Linux 生成 keytab 比较方便，经测试生成的 keytab 文件 windows 下也可使用
