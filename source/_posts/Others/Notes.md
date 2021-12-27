@@ -346,40 +346,56 @@ sshpass -p user000 ssh user@10.241.9.102
 
 
 
-#### 8. samba配置共享目录
+#### 8. samba配置共享目录(MintOS 20.04)
+
+Mintos 20.04 共享，Windows 10 访问
 
 ```shell
 #1. 安装
 sudo apt install samba
-sudo apt install smbclient
 
 #2. 配置
-sudo cp /etc/samba/smb.conf /etc/samba/smb.conf.bak
 sudo vim /etc/samba/smb.conf
 末尾添加如下：
 [share]
-    comment = Shared Folder with username and password
-    path = /home/rangerzhou/share/
-    available = yes
+    comment = MyShare
+    path = /home/range/MyShare/
     browseable = yes
-    public = yes
     writable = yes
-#    create mask = 777
-#    directory mask = 777
-#    force user = nobody
-#    force group = nogroup
-#    valid users = ran.zhou
+    create mask = 0644
+    directory mask = 0755
+    valid users = ranger # 第 4 步创建访问密码
+    #available = yes
+    #public = yes
+    #force user = nobody
+    #force group = nogroup
+在 global 块中添加如下
+# Enable ntlm auth to fix the login issue from Windows 10
+   ntlm auth = true
 
 #3. 创建共享目录
 mkdir ~/share
 chmod 777 ~/share
 
 #4. 创建Samba用户
-sudo touch /etc/samba/smbpasswd
-sudo smbpasswd -a rangerzhou #设置Windows访问时需要的密码
-sudo samba restart
+#sudo touch /etc/samba/smbpasswd
+sudo smbpasswd -a ranger # 设置 Windows 访问时需要的密码，ranger 为访问时的用户名，最好是当前电脑已存在的用户
+sudo /etc/init.d/smbd restart
+#sudo samba restart
 # https://www.cnblogs.com/phinecos/archive/2009/06/06/1497717.html
 #https://blog.csdn.net/qiqzhang/article/details/78148682
+
+#5. windows 配置
+Control Panel - Credential Manager - Windows Credentials - Add a Window credential
+输入上面配置的用户名和密码，至此 windows10 已可访问
+#6. samba 重新安装
+# 卸载
+sudo apt remove samba
+sudo apt purge samba
+sudo apt purge samba-common
+# 卸载后 /etc/samba 目录也不存在了
+#重装
+sudo apt install samba
 ```
 
 #### 9. apk签名
