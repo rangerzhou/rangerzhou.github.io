@@ -205,7 +205,7 @@ open_driver() 主要干了三件事：
 
 - 调用  open 打开驱动，open 函数会经过系统调用，最终执行 binder 驱动程序中的 binder_open 函数；
 - 调用 ioctl 获取 BINDER_VERSION；
-- 调用 ioctl 设置当前进程最大的 Binder 线程数量，这里设置的线程数是 15 个；
+- 调用 ioctl 设置当前进程最大的 Binder 线程数量，这里设置的线程数是 15 个（15 是 binder 非主线程的数量，还有个 binder 主线程，所以最大线程数是 15 +1 +其他没有调用 spawnPooledThread()，直接调用 joinThreadPool() 将当前线程直接加入 binder 线程队列的线程）；
 
 **总结**
 
@@ -488,14 +488,14 @@ using AidlServiceManager = android::os::IServiceManager;
 //位于IServiceManager.h文件
 DECLARE_META_INTERFACE(ServiceManager)
 //位于IServiceManager.cpp文件
-IMPLEMENT_META_INTERFACE(ServiceManager,"android.os.IServiceManager")
+DO_NOT_DIRECTLY_USE_ME_IMPLEMENT_META_INTERFACE(ServiceManager, "android.os.IServiceManager")
 ```
 
 而 Android 旧版本中会分别在 [frameworks/native/libs/binder/include/binder/IServiceManager.h]() 和 [frameworks/native/libs/binder/IServiceManager.cpp]() 中定义如上两行代码调用模板函数。
 
 所以传入的 INTERFACE 就是 ServiceManager，对应的 IInterface.h 中的定义为：
 
-``` cpp
+``` c++
 #define DECLARE_META_INTERFACE(INTERFACE)                               \
 public:                                                                 \
     static const ::android::String16 descriptor;                        \
@@ -507,7 +507,7 @@ public:                                                                 \
 
 DECLARE_META_INTERFACE 部分只是声明，略过，接下来看实现部分（也是在 IInterface.h 中）：
 
-``` cpp
+``` c++
 #define IMPLEMENT_META_INTERFACE(INTERFACE, NAME)                       \
     DO_NOT_DIRECTLY_USE_ME_IMPLEMENT_META_INTERFACE(INTERFACE, NAME)    \
 #endif

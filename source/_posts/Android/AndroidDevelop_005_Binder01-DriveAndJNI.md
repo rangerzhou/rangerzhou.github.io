@@ -751,12 +751,23 @@ Binder 实体和 Binder 引用都是内核（Binder 驱动）中的数据结构�
 
 引用关系：BpBinder ——> binder_ref ——> binder_node ——> BBinder
 
+## 8. Binder 相关的类
+
+![Binder_涉及类](https://gitee.com/rangerzhou/ImageHosting/raw/master/blog_resource/2022/Binder_涉及类.png "Binder 涉及类")
+
+
+
+## 9. Binder 类图
+
+![Binder_类图](https://gitee.com/rangerzhou/ImageHosting/raw/master/blog_resource/2022/Binder_类图.png "Binder 类图")
+
+- Binder(Java) 对象持有的 mObject 是 JavaBBinderHolder 的引用；
+- JavaBBinderHolder 对象持有一个 mBinder 弱引用，promote 为强引用后指向 JavaBBinder 对象；
+- JavaBBinder 对象持有的 mObject 是 Binder 对象的 GlobalRef（将 Binder 对象加入到 art::globals_ 列表中，这样 Binder 对象在每次 GC 时都会被标记为 GC Root，也便无法被回收，只有当 JavaBBinder 对象销毁时，Binder 对象才能从 art::globals_ 中清除，才能被销毁）；
+- 
+
 
 
 补充待整理：
 
 BinderProxy 就是 BpBinder，"BpBinder" 中的 "p" 即 Proxy，只不过 BpBinder 是 Native 层的，BinderProxy 是 Java 层的。BinderProxy 和 BpBinder 分别继承自 Java 和 Native 层的 IBinder 接口，即 IBinder.h 和 IBinder.java，它们可以看作同一个接口，都定义了 transact 等方法。
-
-[掌握 binder 机制？先搞懂这几个关键类！](https://zhuanlan.zhihu.com/p/347796301#:~:text=BinderProxy%20%E5%85%88%E7%BB%99%E5%87%BA%E7%BB%93%E8%AE%BA%EF%BC%9ABinderProxy%20%E5%B0%B1%E6%98%AF%20BpBinder%EF%BC%8C%22BpBinder%22%20%E4%B8%AD%E7%9A%84%20%22p%22%20%E5%8D%B3%20Proxy%EF%BC%8C%E5%8F%AA%E4%B8%8D%E8%BF%87,%E5%B1%82%E7%9A%84%20IBinder%20%E6%8E%A5%E5%8F%A3%EF%BC%8C%E5%8D%B3%20IBinder.h%20%E5%92%8C%20IBinder.java%EF%BC%8C%E5%AE%83%E4%BB%AC%E5%8F%AF%E4%BB%A5%E7%9C%8B%E4%BD%9C%E5%90%8C%E4%B8%80%E4%B8%AA%E6%8E%A5%E5%8F%A3%EF%BC%8C%E9%83%BD%E5%AE%9A%E4%B9%89%E4%BA%86%20transact%20%E7%AD%89%E6%96%B9%E6%B3%95%E3%80%82)
-
-Binder 和 IBinder关系：https://blog.csdn.net/miao_dingxiao/article/details/53130581
