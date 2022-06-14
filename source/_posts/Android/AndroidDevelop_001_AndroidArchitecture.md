@@ -1,6 +1,6 @@
 ---
-title: Android 底层开发(0)-Android 平台架构
-date: 2020-01-01 14:22:15
+title: Android - 平台架构
+date: 2021-06-01 14:22:15
 tags:
 categories: Android
 copyright: true
@@ -9,7 +9,7 @@ password:
 
 >
 >
->Android 平台架构
+>Android 平台架构概述。
 
 <!--more-->
 

@@ -1,6 +1,6 @@
 ---
-title: Android 底层开发 - idle 进程和 kthreadd 进程启动
-date: 2020-02-01 14:31:01
+title: Android - idle/kthreadd 进程启动
+date: 2021-06-15 14:31:01
 tags:
 categories: Android
 copyright: true

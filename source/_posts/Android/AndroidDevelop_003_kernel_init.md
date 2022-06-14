@@ -1,6 +1,6 @@
 ---
-title: Android 底层开发 - init 进程启动
-date: 2020-03-01 10:30:09
+title: Android - init 进程启动
+date: 2021-07-10 10:30:09
 tags:
 categories: Android
 copyright: true
