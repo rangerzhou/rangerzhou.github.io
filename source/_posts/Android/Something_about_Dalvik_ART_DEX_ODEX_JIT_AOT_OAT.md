@@ -48,6 +48,8 @@ Dalvik 是运行时解释 dex 文件，安装比较快，开启应用比较慢�
 
 比较喜欢一个骑自行车的例子，Dalvik 好比一个已经折叠起来的自行车，每次骑之前都要先组装才能骑，ART 相当于一个已经组装好的自行车，每次直接骑着就走了。
 
+https://source.android.com/devices/tech/dalvik?hl=zh-cn
+
 # 2. dex＆odex＆oat
 
 ## 2.1 dex
@@ -56,7 +58,15 @@ dex ( Dalvik Executable )，本质上 java 文件编译后都是字节码，只�
 
 ## 2.2 odex
 
- odex( Optimized dex )，即优化的 dex，主要是为了提高 DVM 的运行速度，在编译打包 APK 时，Java 类会被编译成一个或者多个字节码文件（ .class ），通过 dx 工具 CLASS 文件转换成一个 DEX（ Dalvik Executable ）文件。 通常情况下，我们看到的 Android 应用程序实际上是一个以 .apk 为后缀名的压缩文件。我们可以通过压缩工具对 apk 进行解压，解压出来的内容中有一个名为 classes.dex 的文件。那么我们首次开机的时候系统需要将其从 apk 中解压出来保存在 `data/app` 目录中。 **如果当前运行在 Dalvik 虚拟机下**，Dalvik 会对 classes.dex 进行一次“翻译”，“翻译”的过程也就是守护进程 installd 的函数 dexopt 来对 dex 字节码进行优化，实际上也就是由 dex 文件生成 odex 文件，最终 odex 文件被保存在手机的 VM 缓存目录 `data/dalvik-cache` 下（**注意！这里所生成的 odex 文件依旧是以 dex 为后缀名，格式如：`system@priv-app@Settings@Settings.apk@classes.dex`**）。**如果当前运行于 ART 模式下**，  ART 同样会在首次进入系统的时候调用 `/system/bin/dexopt` （此处应该是 dex2oat 工具吧）工具来将 dex 字节码翻译成本地机器码，保存在 `data/dalvik-cache` 下。 那么这里需要注意的是，无论是对 dex 字节码进行优化，还是将 dex 字节码翻译成本地机器码，最终得到的结果都是保存在相同名称的一个 odex 文件里面的，但是前者对应的是一个 .dex 文件（表示这是一个优化过的 dex），后者对应的是一个 **.oat ** 文件。通过这种方式，原来任何通过绝对路径引用了该 odex 文件的代码就都不需要修改了。 由于在系统首次启动时会对应用进行安装，那么在预置 APK 比较多的情况下，将会大大增加系统首次启动的时间。
+ odex( Optimized dex )，即优化的 dex，主要是为了提高 DVM 的运行速度，在编译打包 APK 时，Java 类会被编译成一个或者多个字节码文件（ .class ），通过 dx 工具 CLASS 文件转换成一个 DEX（ Dalvik Executable ）文件。 通常情况下，我们看到的 Android 应用程序实际上是一个以 .apk 为后缀名的压缩文件。我们可以通过压缩工具对 apk 进行解压，解压出来的内容中有一个名为 classes.dex 的文件。那么我们首次开机的时候系统需要将其从 apk 中解压出来保存在 `data/app` 目录中。 
+
+**如果当前运行在 Dalvik 虚拟机下**，Dalvik 会对 classes.dex 进行一次验证和优化，验证优化的过程也就是守护进程 installd 的函数 dexopt 来对 dex 字节码进行优化，实际上也就是由 dex 文件生成 odex 文件，最终 odex 文件被保存在手机的 VM 缓存目录 `data/dalvik-cache` 下（**注意！这里所生成的 odex 文件依旧是以 dex 为后缀名，格式如：`system@priv-app@Settings@Settings.apk@classes.dex`**）。
+
+**Dalvik: .dex -> .odex(字节码)**
+
+**如果当前运行于 ART 模式下**，  ART 同样会在首次进入系统的时候调用 `/system/bin/dexopt` （此处应该是 dex2oat 工具吧）工具来将 dex 字节码翻译成本地机器码，保存在 `data/dalvik-cache` 下。 那么这里需要注意的是，无论是对 dex 字节码进行优化，还是将 dex 字节码翻译成本地机器码，最终得到的结果都是保存在相同名称的一个 odex 文件里面的，但是前者对应的是一个 .dex 文件（表示这是一个优化过的 dex），后者对应的是一个 **.oat ** 文件(有点混乱，API 29 以后Android 运行时 (ART) 不再从应用进程调用 `dex2oat`。这项变更意味着 ART 将仅接受系统生成的 OAT 文件)。通过这种方式，原来任何通过绝对路径引用了该 odex 文件的代码就都不需要修改了。 由于在系统首次启动时会对应用进行安装，那么在预置 APK 比较多的情况下，将会大大增加系统首次启动的时间。
+
+**ART: .dex -> .odex(机器码)**
 
 从前面的描述可知，既然无论是 DVM 还是 ART，对 DEX 的优化结果都是保存在一个相同名称的 odex 文件，那么如果我们把这两个过程在 ROM 编译的时候预处理提取 Odex 文件将会大大优化系统首次启动的时间。具体做法则是在 device 目录下的 **/[device](http://androidxref.com/7.1.1_r6/xref/device/)/[huawei](http://androidxref.com/7.1.1_r6/xref/device/huawei/)/[angler](http://androidxref.com/7.1.1_r6/xref/device/huawei/angler/)/[BoardConfig.mk](http://androidxref.com/7.1.1_r6/xref/device/huawei/angler/BoardConfig.mk)** 中定义 `WITH_DEXPREOPT := true`，打开这个宏之后，无论是有源码还是无源码的预置 apk 预编译时都会提取 odex 文件，不过这里需要注意的是打开WITH_DEXPREOPT 宏之后，预编译时提取 Odex 会增加一定的空间，预置太多 apk，会导致 system.img 过大，而编译不过。遇到这种情况可以通过删除 apk 中的 dex 文件、调大 system.img 的大小限制，或在预编译时跳过一些 apk 的 odex 提取。
 
@@ -87,7 +97,7 @@ JIT 在 2.2 版本提出的，目的是为了提高 android 的运行速度，�
 
 DVM 负责解释 dex 文件为机器码，如果我们不做处理的话，每次执行代码，都需要 Dalvik 将 java 代码由解释器(Interpreter)将每个 java 指令转译为微处理器指令，并根据转译后的指令先后次序依序执行，一条 java 指令可能对应多条微处理器指令，这样效率不高。为了解决这个问题，Google 在 2.2 版本添加了JIT编译器，当 App 运行时，每当遇到一个新类，JIT 编译器就会对这个类进行编译，经过编译后的代码，会被优化成相当精简的原生型指令码（即 native code），这样在下次执行到相同逻辑的时候，速度就会更快。但是使用 JIT 也不一定加快执行速度，如果大部分代码的执行次数很少，那么编译花费的时间不一定少于执行 dex 的时间。Google 当然也知道这一点，所以 JIT 不对所有 dex 代码进行编译，而是只编译执行次数较多的 dex 为本地机器码。
 
-
+https://source.android.com/devices/tech/dalvik/jit-compiler?hl=zh-cn
 
 ## 3.2 AOT
 
