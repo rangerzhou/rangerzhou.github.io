@@ -1,18 +1,30 @@
 const ap = new APlayer({
     container: document.getElementById('aplayer'),
     fixed: true,
-    autoplay: false,
+    autoplay: true,
     audio: [{
-        name: "Amy's Lullaby II",
-        artist: 'Mars Lasar',
-        url: "/dist/MusicList/Amy'sLullabyII.mp3",
-        cover: 'http://p1.music.126.net/LiRR__0pJHSivqBHZzbMUw==/109951163816225567.jpg?param=130y130',
-    },
-    {
         name: "Five Hundred Miles",
         artist: 'Justin Timberlake',
         url: '/dist/MusicList/FiveHundredMiles.mp3',
         cover: 'http://p2.music.126.net/ggnyubDdMxrhpqYvpZbhEQ==/3302932937412681.jpg?param=130y130',
+    },
+    {
+        name: "阿拉斯加海湾",
+        artist: '蓝心羽',
+        url: '/dist/MusicList/阿拉斯加海湾.mp3',
+        cover: 'http://p2.music.126.net/ggnyubDdMxrhpqYvpZbhEQ==/3302932937412681.jpg?param=130y130',
+    },
+    {
+        name: "听闻远方有你",
+        artist: '刘艺雯',
+        url: '/dist/MusicList/听闻远方有你.mp3',
+        cover: 'http://p2.music.126.net/ggnyubDdMxrhpqYvpZbhEQ==/3302932937412681.jpg?param=130y130',
+    },
+    {
+        name: "Amy's Lullaby II",
+        artist: 'Mars Lasar',
+        url: "/dist/MusicList/Amy'sLullabyII.mp3",
+        cover: 'http://p1.music.126.net/LiRR__0pJHSivqBHZzbMUw==/109951163816225567.jpg?param=130y130',
     },
     {
         name: "成都",
