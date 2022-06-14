@@ -34,7 +34,9 @@ Linux 进程间通信机制有：管道（匿名管道PIPE、命名管道FIFO）
 
 ### 2.1 传统 IPC 传输数据
 
-![TriditionalIPC](https://gitee.com/rangerzhou/ImageHosting/raw/master/blog_resource/2022//IPC_Triditional.png)
+[传统 IPC 机制](https://raw.githubusercontent.com/rangerzhou/ImageHosting/master/blog_resource/2022//IPC_Triditional.png)
+
+![TriditionalIPC](https://raw.githubusercontent.com/rangerzhou/ImageHosting/master/blog_resource/2022//IPC_Triditional.png "传统IPC机制")
 
 **数据传输流程**
 
@@ -45,7 +47,9 @@ Linux 进程间通信机制有：管道（匿名管道PIPE、命名管道FIFO）
 
 ### 2.2 Binder 传输数据
 
-![TriditionalIPC](https://gitee.com/rangerzhou/ImageHosting/raw/master/blog_resource/2022//IPC_Binder.png)
+[IPC_Binder](https://raw.githubusercontent.com/rangerzhou/ImageHosting/master/blog_resource/2022//IPC_Binder.png)
+
+![IPC_Binder](https://raw.githubusercontent.com/rangerzhou/ImageHosting/master/blog_resource/2022//IPC_Binder.png "Binder 进程间通信")
 
 **数据传输流程**
 
@@ -59,7 +63,9 @@ Linux 进程间通信机制有：管道（匿名管道PIPE、命名管道FIFO）
 
 内存被操作系统划分成两块：**用户空间**和**内核空间**，用户空间是用户程序代码运行的地方，内核空间是内核代码运行的地方，内核空间是所有进程共享的。为了安全，它们是隔离的，即使用户的程序崩溃了，内核也不受影响；
 
-![UserSpaceAndKernelSpace](https://gitee.com/rangerzhou/ImageHosting/raw/master/blog_resource/2022//UserSpaceAndKernelSpace.png)
+[用户空间和内核空间](https://raw.githubusercontent.com/rangerzhou/ImageHosting/master/blog_resource/2022//UserSpaceAndKernelSpace.png)
+
+![UserSpaceAndKernelSpace](https://raw.githubusercontent.com/rangerzhou/ImageHosting/master/blog_resource/2022//UserSpaceAndKernelSpace.png "用户空间和内核空间")
 
 32位系统，即2^32，即总共可访问地址为4G。内核空间为1G，用户空间为3G，在用户态下运行时，内核的1GB是不可见的，但是当进程陷入到内核时是可以访问的；
 
@@ -93,7 +99,9 @@ Linux 的设备，主要包括字符设备（如键盘，鼠标，触摸屏等�
 
 ## 4. Binder 架构设计
 
-![binder_driver](https://gitee.com/rangerzhou/ImageHosting/raw/master/blog_resource/2022//binder_arch.png)
+[Binder 驱动](https://raw.githubusercontent.com/rangerzhou/ImageHosting/master/blog_resource/2022//binder_arch.png)
+
+![binder_driver](https://raw.githubusercontent.com/rangerzhou/ImageHosting/master/blog_resource/2022//binder_arch.png "Binder 驱动")
 
 Binder主要由这几部分组成：
 
@@ -122,7 +130,9 @@ ServiceManager 是专门用来管理 Server 端的，Client 端想要和 Server 
 
 Binder 是一个驱动，是一个 misc 设备，没有具体的硬件，本质就是一块内存，对于 Linux 来说，驱动就是一个文件（对于 Linux 一切皆文件），mmap() 函数即是把虚拟内存和物理内存（文件也是物理内存）联系起来，所以可以通过 mmap() 函数把虚拟内存和 binder 驱动联系起来。
 
-![binder_driver](https://gitee.com/rangerzhou/ImageHosting/raw/master/blog_resource/2022//binder_driver.png)
+[Binder 驱动设备](https://raw.githubusercontent.com/rangerzhou/ImageHosting/master/blog_resource/2022//binder_driver.png)
+
+![binder_driver](https://raw.githubusercontent.com/rangerzhou/ImageHosting/master/blog_resource/2022//binder_driver.png "Binder 驱动")
 
 ### 5.1 binder_init()
 
@@ -753,18 +763,21 @@ Binder 实体和 Binder 引用都是内核（Binder 驱动）中的数据结构�
 
 ## 8. Binder 相关的类
 
-![Binder_涉及类](https://gitee.com/rangerzhou/ImageHosting/raw/master/blog_resource/2022/Binder_涉及类.png "Binder 涉及类")
+[Binder_涉及类](https://raw.githubusercontent.com/rangerzhou/ImageHosting/master/blog_resource/2022/Binder_涉及类.png)
+
+![Binder_涉及类](https://raw.githubusercontent.com/rangerzhou/ImageHosting/master/blog_resource/2022/Binder_涉及类.png "Binder 涉及类")
 
 
 
 ## 9. Binder 类图
 
-![Binder_类图](https://gitee.com/rangerzhou/ImageHosting/raw/master/blog_resource/2022/Binder_类图.png "Binder 类图")
+[Binder_类图](https://raw.githubusercontent.com/rangerzhou/ImageHosting/master/blog_resource/2022/Binder_类图.png)
+
+![Binder_类图](https://raw.githubusercontent.com/rangerzhou/ImageHosting/master/blog_resource/2022/Binder_类图.png "Binder 类图")
 
 - Binder(Java) 对象持有的 mObject 是 JavaBBinderHolder 的引用；
 - JavaBBinderHolder 对象持有一个 mBinder 弱引用，promote 为强引用后指向 JavaBBinder 对象；
 - JavaBBinder 对象持有的 mObject 是 Binder 对象的 GlobalRef（将 Binder 对象加入到 art::globals_ 列表中，这样 Binder 对象在每次 GC 时都会被标记为 GC Root，也便无法被回收，只有当 JavaBBinder 对象销毁时，Binder 对象才能从 art::globals_ 中清除，才能被销毁）；
-- 
 
 
 

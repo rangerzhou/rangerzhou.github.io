@@ -1829,11 +1829,15 @@ status_t IPCThreadState::waitForResponse(Parcel *reply, status_t *acquireResult)
 
 # 2. IPC 命令流程图
 
-![Binder_trancaction_command](https://gitee.com/rangerzhou/ImageHosting/raw/master/blog_resource/2022/Binder_trancaction_command.png "IPC 命令流程")
+[IPC 命令流程图](https://raw.githubusercontent.com/rangerzhou/ImageHosting/master/blog_resource/2022/Binder_trancaction_command.png)
+
+![Binder_trancaction_command](https://raw.githubusercontent.com/rangerzhou/ImageHosting/master/blog_resource/2022/Binder_trancaction_command.png "IPC 命令流程")
 
 # 3. AMS 注册时序图
 
-![Binder_AMS注册时序图](https://gitee.com/rangerzhou/ImageHosting/raw/master/blog_resource/2022/Binder_AMS注册时序图.png "AMS 注册时序图")
+[Binder_AMS注册时序图](https://raw.githubusercontent.com/rangerzhou/ImageHosting/master/blog_resource/2022/Binder_AMS注册时序图.png)
+
+![Binder_AMS注册时序图](https://raw.githubusercontent.com/rangerzhou/ImageHosting/master/blog_resource/2022/Binder_AMS注册时序图.png "AMS 注册时序图")
 
 
 

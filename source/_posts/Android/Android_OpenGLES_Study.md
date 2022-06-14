@@ -15,19 +15,23 @@ password:
 
 ## 1. OpenGL 渲染流程
 
+[OpenGL 渲染管线流程](https://raw.githubusercontent.com/rangerzhou/ImageHosting/master/blog_resource/2022/OpenGL_Render_Pipeline.png)
 
-
-![OpenGL_Render_Pipeline](https://gitee.com/rangerzhou/ImageHosting/raw/master/blog_resource/2022/OpenGL_Render_Pipeline.png "OpenGL渲染管线流程")
+![OpenGL_Render_Pipeline](https://raw.githubusercontent.com/rangerzhou/ImageHosting/master/blog_resource/2022/OpenGL_Render_Pipeline.png "OpenGL渲染管线流程")
 
 
 
 ### 1.1 顶点着色器原理
 
-![OpenGL_Principle_Vertex_Shader](https://gitee.com/rangerzhou/ImageHosting/raw/master/blog_resource/2022/OpenGL_Principle_Vertex_Shader.png "顶点着色器原理")
+[顶点着色器原理](https://raw.githubusercontent.com/rangerzhou/ImageHosting/master/blog_resource/2022/OpenGL_Principle_Vertex_Shader.png "顶点着色器原理")
+
+![OpenGL_Principle_Vertex_Shader](https://raw.githubusercontent.com/rangerzhou/ImageHosting/master/blog_resource/2022/OpenGL_Principle_Vertex_Shader.png "顶点着色器原理")
 
 ### 1.2 片元着色器原理
 
-![OpenGL_Principle_Fragment_Shader](https://gitee.com/rangerzhou/ImageHosting/raw/master/blog_resource/2022/OpenGL_Principle_Fragment_Shader.png "片元着色器原理")
+[片元着色器原理](https://raw.githubusercontent.com/rangerzhou/ImageHosting/master/blog_resource/2022/OpenGL_Principle_Fragment_Shader.png)
+
+![OpenGL_Principle_Fragment_Shader](https://raw.githubusercontent.com/rangerzhou/ImageHosting/master/blog_resource/2022/OpenGL_Principle_Fragment_Shader.png "片元着色器原理")
 
 
 
@@ -44,7 +48,9 @@ password:
 
 从一个空间到另一个空间的变换就是通过乘以各种变换矩阵以及进行一些必要的计算来完成的，具体过程如下图：
 
-![OpenGL_Principle_Fragment_Shader](https://gitee.com/rangerzhou/ImageHosting/raw/master/blog_resource/2022/OpenGL_Matrix_Transformation_Process.png "矩阵变换流程")
+[矩阵变换流程](https://raw.githubusercontent.com/rangerzhou/ImageHosting/master/blog_resource/2022/OpenGL_Matrix_Transformation_Process.png)
+
+![OpenGL_Principle_Fragment_Shader](https://raw.githubusercontent.com/rangerzhou/ImageHosting/master/blog_resource/2022/OpenGL_Matrix_Transformation_Process.png "矩阵变换流程")
 
 - 物体空间 ——> 世界空间：**乘以基本变换矩阵**实现，基本变换矩阵就是用于实现各种基本变换（缩放、平移、旋转）的矩阵；
 - 世界空间 —— > 摄像机空间：**乘以摄像机观察矩阵（相机视图矩阵）**；
@@ -57,11 +63,13 @@ password:
 
 上述每一步乘以不同矩阵以及进行响应计算产生的具体效果如下：
 
-![OpenGL_Matrix_Transformation_Effect](https://gitee.com/rangerzhou/ImageHosting/raw/master/blog_resource/2022/OpenGL_Matrix_Transformation_Effect.png "矩阵变换效果")
+[矩阵变换效果](https://raw.githubusercontent.com/rangerzhou/ImageHosting/master/blog_resource/2022/OpenGL_Matrix_Transformation_Effect.png)
 
-笛卡尔坐标系：
+![OpenGL_Matrix_Transformation_Effect](https://raw.githubusercontent.com/rangerzhou/ImageHosting/master/blog_resource/2022/OpenGL_Matrix_Transformation_Effect.png "矩阵变换效果")
 
-![Cartesian_coordinates](https://gitee.com/rangerzhou/ImageHosting/raw/master/blog_resource/2022/Cartesian_coordinates.png "笛卡尔坐标系")
+[笛卡尔坐标系](https://raw.githubusercontent.com/rangerzhou/ImageHosting/master/blog_resource/2022/Cartesian_coordinates.png)
+
+![Cartesian_coordinates](https://raw.githubusercontent.com/rangerzhou/ImageHosting/master/blog_resource/2022/Cartesian_coordinates.png "笛卡尔坐标系")
 
 齐次坐标：齐次坐标简而言之就是用 N+1 维来代表 N 维坐标，在原有2D/3D笛卡尔坐标末尾加上一个额外的变量 w，就形成了 2D/3D 齐次坐标；齐次坐标是用来表示一个点在无穷远处（∞,∞），比如一个点 (1,2) 移动到无穷远处，在笛卡尔坐标下变为 (∞,∞)，那么它的齐次坐标表示为 (1,2,0)，因为 (1/0,2/0) = (∞,∞)，这样就可以不用 ∞ 来表示一个无穷远处的点了，[点击查看齐次坐标参考讲解](https://zhuanlan.zhihu.com/p/373969867)。
 
@@ -130,13 +138,7 @@ GLES31.glEnableVertexAttribArray(maPositionHandle) // 启用顶点位置数据
 
 
 
-
-
-
-
-
-
-## 6. 常用函数接口
+## 5. 常用函数接口
 
 ### Matrix.setLookAtM()：摄像机的设置
 

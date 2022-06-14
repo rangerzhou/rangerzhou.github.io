@@ -35,7 +35,9 @@ Android 是一种基于 Linux 的开放源代码软件栈，为各类设备和�
 
 [下图](https://developer.android.com/guide/platform?hl=zh-cn) 所示为 Google 提供的 Android 平台的主要组件图：
 
-![Android 堆栈](https://raw.githubusercontent.com/rangerzhou/ImageHosting/master/blog_resource/2020/android_architecture.png)
+[Android堆栈](https://raw.githubusercontent.com/rangerzhou/ImageHosting/master/blog_resource/2020/android_architecture.png)
+
+![Android 堆栈](https://raw.githubusercontent.com/rangerzhou/ImageHosting/master/blog_resource/2020/android_architecture.png "Android 堆栈")
 
 在上图中，Google 把 Android 分成了5层架构：
 
@@ -49,7 +51,9 @@ Android 是一种基于 Linux 的开放源代码软件栈，为各类设备和�
 
 以进程的视角、分层的架构展示 Android 系统启动架构：
 
-![系统启动架构图](https://raw.githubusercontent.com/rangerzhou/ImageHosting/master/blog_resource/2020/android-boot.jpg)
+[系统架构图_进程角度](https://raw.githubusercontent.com/rangerzhou/ImageHosting/master/blog_resource/2020/android-boot.jpg)
+
+![系统启动架构图](https://raw.githubusercontent.com/rangerzhou/ImageHosting/master/blog_resource/2020/android-boot.jpg "系统架构图")
 
 对于 Android 整个启动过程来说，可以划分为三个阶段：BootLoader 引导（U-Boot）、Linux Kernel 启动、Android OS 启动。
 

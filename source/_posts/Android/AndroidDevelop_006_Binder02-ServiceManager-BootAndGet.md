@@ -394,9 +394,9 @@ ProcessState::self() 和小结 1.1 一样，都是调用 init() 创建一个 Pro
 
 ### 2.2 getContextObject()
 
-getContextObject() 函数调用：
+[getContextObject() 函数调用](https://raw.githubusercontent.com/rangerzhou/ImageHosting/master/blog_resource/2022/ProcessState_getContextObject.png)
 
-![](https://gitee.com/rangerzhou/ImageHosting/raw/master/blog_resource/2022/ProcessState_getContextObject.png)
+![getContextObject 调用](https://raw.githubusercontent.com/rangerzhou/ImageHosting/master/blog_resource/2022/ProcessState_getContextObject.png "getContextObject 调用")
 
 ``` cpp
 sp<IBinder> ProcessState::getContextObject(const sp<IBinder>& /*caller*/)
@@ -758,13 +758,17 @@ ServiceManagerShim::ServiceManagerShim(const sp<AidlServiceManager>& impl)
 - 这个 ServiceManagerShim 对象指针中，有一个指针参数 mTheRealServiceManager ，其实质是一个 aidl 对象android::os::IServiceManager 对象，此处是 BpServiceManager 对象指针；
 - BpServiceManager 对象指针初始化的时候，是以 new BpBinder(0) 为参数的，在 BpServiceManager 对象中表现为一个 mRemote 指针对象；
 
+
+
+
+
+
+
+
+
+
+
 https://blog.csdn.net/learnframework/article/details/121645259?spm=1001.2014.3001.5502
-
-## 3. AIDL
-
-
-
-
 
 [Android 12 系统源码分析](https://www.cnblogs.com/wanghongzhu/p/15551978.html#%E4%B8%89servicemanager-%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E5%88%86%E6%9E%90)
 
