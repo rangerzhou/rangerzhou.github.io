@@ -1,19 +1,22 @@
 ---
-title: Android - SystemServer启动
+title: Android - SystemServer 启动(1) forkSystemServer
 date: 2021-11-01 19:14:33
 tags:
 categories: Android
 copyright: true
-password: zr.
+password:
 ---
 
 > SystemServer 进程启动流程。
 
-## 1. ZygoteInit.main()
+# 1. zygote 启动 SystemServer
+
+## 1.1 ZygoteInit.main()
 
 [frameworks/base/core/java/com/android/internal/os/ZygoteInit.java]()
 
 ``` java
+// ZygoteInit.java
 public static void main(String argv[]) {
         ZygoteServer zygoteServer = null;
 ...
@@ -33,12 +36,13 @@ public static void main(String argv[]) {
 
 forkSystemServer 在 fork system_server 进程后，如果是父进程（Zygote 进程），则返回 null，如果是 system_server 进程，则返回一个 Runnable
 
-## 2. forkSystemServer()
+## 1.2 forkSystemServer()
 
 [frameworks/base/core/java/com/android/internal/os/ZygoteInit.java]()
 
 ``` java
-    private static Runnable forkSystemServer(String abiList, String socketName,
+// ZygoteInit.java
+	private static Runnable forkSystemServer(String abiList, String socketName,
             ZygoteServer zygoteServer) {
         ...
         /* Hardcoded command line to start the system server */
@@ -88,13 +92,15 @@ forkSystemServer 在 fork system_server 进程后，如果是父进程（Zygote 
 - 通过 `ZygoteArguments` 对 args[] 数组参数进行解析；
 - 通过 `Zygote.forkSystemServer()` 来 fork `system_server`进程，在 `system_server` 进程（返回的 pid == 0）中调用 `handleSystemServerProcess` 得到一个 runnable；
 
-## 3. handleSystemServerProcess()
+## 1.3 handleSystemServerProcess()
 
 [frameworks/base/core/java/com/android/internal/os/ZygoteInit.java]()
 
 ``` java
-    private static Runnable handleSystemServerProcess(ZygoteArguments parsedArgs) {
+// ZygoteInit.java
+	private static Runnable handleSystemServerProcess(ZygoteArguments parsedArgs) {
         ...
+            // 把剩余参数传递给 SystemServer
             return ZygoteInit.zygoteInit(parsedArgs.mTargetSdkVersion,
                     parsedArgs.mDisabledCompatChanges,
                     parsedArgs.mRemainingArgs, cl);
@@ -103,12 +109,13 @@ forkSystemServer 在 fork system_server 进程后，如果是父进程（Zygote 
 
 把第二步 `ZygoteArguments` 解析后的 `mRemainingArgs` 再传到 `ZygoteInit.zygoteInit()` 函数中；
 
-## 4. zygoteInit()
+## 1.4 zygoteInit()
 
 [frameworks/base/core/java/com/android/internal/os/ZygoteInit.java]()
 
 ``` java
-    public static final Runnable zygoteInit(int targetSdkVersion, long[] disabledCompatChanges,
+// ZygoteInit.java
+	public static final Runnable zygoteInit(int targetSdkVersion, long[] disabledCompatChanges,
             String[] argv, ClassLoader classLoader) {
         ...
         RuntimeInit.commonInit(); // 初始化运行环境
@@ -118,9 +125,30 @@ forkSystemServer 在 fork system_server 进程后，如果是父进程（Zygote 
     }
 ```
 
-调用到 `RuntimeInit.applicationInit()` 中；
+因为 app_main() 中 runtime.start() 的 runtime 是 AndroidRuntime 的子类 AppRuntime，runtime.start() -> ZygoteInit.main() -> forkSystemserver() -> 子进程 handleSystemServerProcess() -> zygoteInit()，com_android_internal_os_ZygoteInit_nativeZygoteInit 调用 AndroidRuntime.h.onZygoteInit()，AppRuntime 覆盖了父类 AndroidRuntime.onZygoteInit()，所以最后执行 AppRuntime.onZygoteInit()
 
-## 5. applicationInit()
+``` cpp
+// AndroidRuntime.cpp
+static void com_android_internal_os_ZygoteInit_nativeZygoteInit(JNIEnv* env, jobject clazz)
+{
+    gCurRuntime->onZygoteInit();
+}
+// AndroidRuntime.h
+    virtual void onZygoteInit() { }
+// app_main.cpp
+class AppRuntime : public AndroidRuntime
+{
+    virtual void onZygoteInit()
+    {
+        sp<ProcessState> proc = ProcessState::self(); // 打开驱动
+        ALOGV("App process: starting thread pool.\n");
+        proc->startThreadPool(); // 启动线程池
+    }
+```
+
+所以最终 system_server 打开驱动，进行 mmap() 映射，启动 binder 线程池。
+
+## 1.5 applicationInit()
 
 [frameworks/base/core/java/com/android/internal/os/RuntimeInit.java]()
 
@@ -150,7 +178,7 @@ forkSystemServer 在 fork system_server 进程后，如果是父进程（Zygote 
 - 通过 `Arguments()` 对第三步传入的 `parsedArgs.mRemainingArgs` 解析，得到 args.startClass，即`com.android.server.SystemServer` ；
 - 调用 `findStaticMain()` 函数；
 
-## 6. findStaticMain()
+## 1.6 findStaticMain()
 
 ``` java
     protected static Runnable findStaticMain(String className, String[] argv,
@@ -170,7 +198,7 @@ forkSystemServer 在 fork system_server 进程后，如果是父进程（Zygote 
 
 `findStaticMain()` 主要工作是通过反射机制找到对应 className(SystemServer) 的 main 方法，但是并未执行；
 
-## 7. MethodAndArgsCaller()
+## 1.7 MethodAndArgsCaller()
 
 ``` java
     static class MethodAndArgsCaller implements Runnable {
@@ -193,7 +221,30 @@ forkSystemServer 在 fork system_server 进程后，如果是父进程（Zygote 
 
 SystemServer 的 main 方法在 `MethodAndArgsCaller` 的 `run()` 中被 invoke ，在上一步中的 `findStaticMain` 函数返回了一个 `MethodAndArgsCaller` 对象，即是一个 runnable，`ZygoteInit.main()` 中的 `r.run()` 即调用了 `MethodAndArgsCaller.run()`，invoke 启动 SystemServer.java 的 main 函数；
 
-## 8. 总结
+## 1.9 总结
 
-`ZygoteInit.forkSystemServer()` 函数的作用就是 fork 出 `system_server` 进程，并在 `system_server` 进程中获取一个找到 *frameworks/base/services/java/com/android/server/SystemServer.java* main 方法的 runnable，然后通过 r.run() 去执行 *SystemServer.java* 的 main 方法；
+`ZygoteInit.forkSystemServer()` 函数的作用就是 fork 出 `system_server` 进程，并在 `system_server` 进程中获取一个找到 *frameworks/base/services/java/com/android/server/SystemServer.java* main 方法的 runnable，然后通过 r.run() 去执行 *SystemServer.java* 的 main 方法，启动 android 系统中大量的服务。
 
+
+
+# 2. SystemServer 启动
+
+## 2.1 SystemServer.main()
+
+``` java
+// SystemServer.java
+    public static void main(String[] args) {
+        new SystemServer().run();
+    }
+    private void run() {
+        ...
+        // Start services.
+        try { // 启动服务
+            t.traceBegin("StartServices");
+            startBootstrapServices(t); // 启动引导服务
+            startCoreServices(t); // 启动核心服务
+            startOtherServices(t); // 启动其他服务
+        }
+```
+
+在 SystemServer 的 run() 方法中，启动了三类服务：引导服务、核心服务、其他服务，比如 AMS/PMS/PKMS 等都在引导服务中启动，WMS 在其他服务中启动，这些服务都继承自 SystemServices，且都添加到 binder 的大管家 ServiceManager 进程中管理。
