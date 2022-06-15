@@ -1129,3 +1129,15 @@ git remote set-url origin https://<your_token>@github.com/<USERNAME>/<REPO>.git
 git remote set-url origin https://ghp_0kMUaJGbjAQ49KGpBNeOy2iCUvafabcdefgh@github.com/username/helloworld.git/
 ```
 
+#### 31. adb 无线连接手机
+
+``` shell
+$ adb connect 192.168.53.8
+# 如果出现错误 failed to connect to '192.168.53.8:5555': Connection refused
+# 进入开发者选项 - 无线调试 - 使用配对码配对设备，会显示配对码和 IP 地址和端口
+$ adb pair 192.168.53.8:AAAA
+$ adb connect 192.168.53.8:BBBB # BBBB 有可能和 AAAA 不同，因为无线调试中的 IP 地址和端口和使用配对码配对设备弹框中的 IP 地址和端口有可能不一样
+$ adb tcpip 5555 # 连上后配置 tcpip，以后连接的时候就不用加上端口号了
+$ adb connect 192.168.53.8
+```
+
