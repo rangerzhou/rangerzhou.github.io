@@ -9,6 +9,8 @@ password:
 
 > SystemServer 进程启动流程。
 
+<!--more-->
+
 # 1. zygote 启动 SystemServer
 
 ## 1.1 ZygoteInit.main()
