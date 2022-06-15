@@ -1871,35 +1871,3 @@ status_t IPCThreadState::waitForResponse(Parcel *reply, status_t *acquireResult)
 a 和 b 同时进行，c 和 d 同时进行，无先后顺序；
 
 
-
-参考：
-
-[描述了 mIn 的 needRead 值](https://wangkuiwu.github.io/2014/09/05/BinderCommunication-AddService01/?msclkid=26421c06cf7a11ec916fc4d38a1185eb)
-
-[kernel 4.19 代码 addService() 解析](https://zhuanlan.zhihu.com/p/162650982)
-
-[此文按照比较新的代码讲解的，第一参考选择](https://juejin.cn/post/6986839034232799240)
-
-[此文有说明 AIDL 生成了 IServiceManager.java，涉及了 Stub 和 Proxy，必须看完](https://juejin.cn/post/6963266399888211998#heading-27)
-
-[掌握 binder 机制？先搞懂这几个关键类！](https://zhuanlan.zhihu.com/p/347796301)
-
-[Binder 和 IBinder关系](https://blog.csdn.net/miao_dingxiao/article/details/53130581)
-
-[讲解 writeStrongBinder, Parcel 等，结尾也写到了 BBinder.transact 如何到 JavaBBinder.onTransact](https://juejin.cn/post/6963266399888211998#heading-30)
-
-[描述 Binder 框架，包含详细类图](https://blog.csdn.net/tfygg/article/details/51626632)
-
-类图箭头
-
-泛化关系：实线空心三角箭头，继承非抽象类
-
-实现关系：虚线空心三角箭头，继承抽象类
-
-聚合关系：实线空心菱形箭头，比如部门◇——员工，整体不在了，部分依然在
-
-组合关系：实线实心菱形箭头，比如公司◆——部门，整体不在了，部分也不在了
-
-关联关系：实线八字箭头，比如员工→电话，被关联者属于关联者的一部分，通常在程序中以类变量的方式表现
-
-依赖关系：虚线八字箭头，描述一个对象在运行期间会用到另一个对象的关系，通常在程序中通过构造函数、形参等体现	
