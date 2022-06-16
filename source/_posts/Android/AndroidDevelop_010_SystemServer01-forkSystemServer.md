@@ -11,7 +11,7 @@ password:
 
 <!--more-->
 
-# 1. zygote 启动 SystemServer
+# 1. zygote forkSystemServer
 
 ## 1.1 ZygoteInit.main()
 
