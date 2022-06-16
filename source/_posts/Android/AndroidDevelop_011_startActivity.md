@@ -303,6 +303,9 @@ resumeFocusedTasksTopActivities()：将所有聚焦的 Task 的所有 Activity �
 	final boolean resumeTopActivity(ActivityRecord prev, ActivityOptions options,
             boolean deferPause) {
         ...
+        // 将发起者置为 pause 状态，也就是 mainactivity 置为 onPause 状态
+        boolean pausing = !deferPause && taskDisplayArea.pauseBackTasks(next);
+        ...
         if (next.attachedToProcess()) { // Activity 已经附加到进程，恢复页面并更新栈
 			...
         } else {
@@ -558,7 +561,7 @@ mH 是 H 类，
 // Instrumentation.java
     public void callActivityOnCreate(Activity activity, Bundle icicle) {
         prePerformCreate(activity);
-        activity.performCreate(icicle);
+        activity.performCreate(icicle); // 进入 Activity 内部
         postPerformCreate(activity);
     }
 // Activity.java
@@ -576,7 +579,7 @@ mH 是 H 类，
         ...
 ```
 
-最终调用到 onCreate() 方法，开始执行 APP 的代码。
+最终调用到 onCreate() 方法，开始执行 APP 的代码，app 进程已启动的情况流程完结，startActivity() 成功，接下来看 app 进程未启动的情况。
 
 
 
@@ -599,8 +602,7 @@ mH 是 H 类，
                 Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "dispatchingStartProcess:"
                         + activity.processName);
             }
-            // Post message to start process to avoid possible deadlock of calling into AMS with the
-            // ATMS lock held.
+            // 发布消息以启动进程，以避免在持有 ATMS 锁的情况下调用 AMS 可能出现死锁
             final Message m = PooledLambda.obtainMessage(ActivityManagerInternal::startProcess,
                     mAmInternal, activity.processName, activity.info.applicationInfo, knownToBeDead,
                     isTop, hostingType, activity.intent.getComponent());
@@ -611,10 +613,290 @@ mH 是 H 类，
     }
 ```
 
+进入 ActivityManagerInternal::startProcess()
+
+``` java
+// ActivityManagerInternal.java
+public abstract class ActivityManagerInternal {
+    public abstract void startProcess(String processName, ApplicationInfo info,
+            boolean knownToBeDead, boolean isTop, String hostingType, ComponentName hostingName);
+```
+
+是个抽象类，AMS.LocalService 继承了它，
+
+``` java
+// ActivityManagerService.java
+	public final class LocalService extends ActivityManagerInternal
+            implements ActivityManagerLocal {
+        ...
+        public void startProcess(String processName, ApplicationInfo info, boolean knownToBeDead,
+                boolean isTop, String hostingType, ComponentName hostingName) {
+            ...
+                synchronized (ActivityManagerService.this) {
+                    // 如果该进程被称为 top app，则设置一个提示，以便在该进程启动时，可以立即申请最高优先级，
+                    // 以避免在附加 top app 的进程之前，cpu 被其他进程抢占
+                    startProcessLocked(processName, info, knownToBeDead, 0 /* intentFlags */,
+                            new HostingRecord(hostingType, hostingName, isTop),
+                            ZYGOTE_POLICY_FLAG_LATENCY_SENSITIVE, false /* allowWhileBooting */,
+                            false /* isolated */);
+                ...
+```
+
 
 
 ``` java
-startProcessAsync -> H.sendMessage
-H -> AMS.startProcess()
+// ActivityManagerService.java
+	final ProcessRecord startProcessLocked(String processName,
+            ApplicationInfo info, boolean knownToBeDead, int intentFlags,
+            HostingRecord hostingRecord, int zygotePolicyFlags, boolean allowWhileBooting,
+            boolean isolated) {
+        return mProcessList.startProcessLocked(processName, info, knownToBeDead, intentFlags,
+                hostingRecord, zygotePolicyFlags, allowWhileBooting, isolated, 0 /* isolatedUid */,
+                null /* ABI override */, null /* entryPoint */,
+                null /* entryPointArgs */, null /* crashHandler */);
+    }
 ```
 
+
+
+``` java
+// ProcessList.java
+	ProcessRecord startProcessLocked(String processName, ApplicationInfo info,
+            boolean knownToBeDead, int intentFlags, HostingRecord hostingRecord,
+            int zygotePolicyFlags, boolean allowWhileBooting, boolean isolated, int isolatedUid,
+            String abiOverride, String entryPoint, String[] entryPointArgs, Runnable crashHandler) {
+        long startTime = SystemClock.uptimeMillis();
+        ProcessRecord app;
+        ...
+        final boolean success =
+                startProcessLocked(app, hostingRecord, zygotePolicyFlags, abiOverride);
+        checkSlow(startTime, "startProcess: done starting proc!");
+        return success ? app : null;
+    }
+
+    boolean startProcessLocked(ProcessRecord app, HostingRecord hostingRecord,
+            int zygotePolicyFlags, String abiOverride) {
+        return startProcessLocked(app, hostingRecord, zygotePolicyFlags,
+                false /* disableHiddenApiChecks */, false /* disableTestApiChecks */,
+                abiOverride);
+    }
+
+    boolean startProcessLocked(ProcessRecord app, HostingRecord hostingRecord,
+            int zygotePolicyFlags, boolean disableHiddenApiChecks, boolean disableTestApiChecks,
+            String abiOverride) {
+        if (app.isPendingStart()) {
+            return true;
+        }
+        long startTime = SystemClock.uptimeMillis(); // 记录启动时间
+        ...
+            return startProcessLocked(hostingRecord, entryPoint, app, uid, gids,
+                    runtimeFlags, zygotePolicyFlags, mountExternal, seInfo, requiredAbi,
+                    instructionSet, invokeWith, startTime);
+        ...
+    }
+
+    boolean startProcessLocked(HostingRecord hostingRecord, String entryPoint, ProcessRecord app,
+            int uid, int[] gids, int runtimeFlags, int zygotePolicyFlags, int mountExternal,
+            String seInfo, String requiredAbi, String instructionSet, String invokeWith,
+            long startTime) {
+        ...
+            try {
+                final Process.ProcessStartResult startResult = startProcess(...);
+                handleProcessStartedLocked(app, startResult.pid, startResult.usingWrapper,
+                        startSeq, false);
+            ...
+```
+
+
+
+``` java
+    private Process.ProcessStartResult startProcess(HostingRecord hostingRecord, String entryPoint,
+            ProcessRecord app, int uid, int[] gids, int runtimeFlags, int zygotePolicyFlags,
+            int mountExternal, String seInfo, String requiredAbi, String instructionSet,
+            String invokeWith, long startTime) {
+        try {
+            ...
+            } else if (hostingRecord.usesAppZygote()) {
+                final AppZygote appZygote = createAppZygoteForProcessIfNeeded(app);
+
+                // We can't isolate app data and storage data as parent zygote already did that.
+                startResult = appZygote.getProcess().start(...);
+            } else {
+                regularZygote = true;
+                startResult = Process.start(...);
+            }
+            ...
+```
+
+最终都是调用到 Process.start() 方法
+
+``` java
+// Process.java
+    public static final ZygoteProcess ZYGOTE_PROCESS = new ZygoteProcess();
+    public static ProcessStartResult start(...) {
+        return ZYGOTE_PROCESS.start(processClass, niceName, uid, gid, gids,
+                    runtimeFlags, mountExternal, targetSdkVersion, seInfo,
+                    abi, instructionSet, appDataDir, invokeWith, packageName,
+                    zygotePolicyFlags, isTopApp, disabledCompatChanges,
+                    pkgDataInfoMap, whitelistedDataInfoMap, bindMountAppsData,
+                    bindMountAppStorageDirs, zygoteArgs);
+    }
+```
+
+调用 ZygoteProcess.start()
+
+``` java
+// ZygoteProcess.java
+	public final Process.ProcessStartResult start(...) {
+        ...
+            return startViaZygote(processClass, niceName, uid, gid, gids,
+                    runtimeFlags, mountExternal, targetSdkVersion, seInfo,
+                    abi, instructionSet, appDataDir, invokeWith, /*startChildZygote=*/ false,
+                    packageName, zygotePolicyFlags, isTopApp, disabledCompatChanges,
+                    pkgDataInfoMap, allowlistedDataInfoList, bindMountAppsData,
+                    bindMountAppStorageDirs, zygoteArgs);
+        ...
+```
+
+
+
+``` java
+// ZygoteProcess.java
+    private Process.ProcessStartResult startViaZygote(...)
+        ...
+        argsForZygote.add("--runtime-args");
+        argsForZygote.add("--setuid=" + uid);
+        argsForZygote.add("--setgid=" + gid);
+        argsForZygote.add("--runtime-flags=" + runtimeFlags);
+        if (mountExternal == Zygote.MOUNT_EXTERNAL_DEFAULT) {
+            argsForZygote.add("--mount-external-default");
+        } else if (mountExternal == Zygote.MOUNT_EXTERNAL_INSTALLER) {
+            argsForZygote.add("--mount-external-installer");
+        } else if (mountExternal == Zygote.MOUNT_EXTERNAL_PASS_THROUGH) {
+            argsForZygote.add("--mount-external-pass-through");
+        } else if (mountExternal == Zygote.MOUNT_EXTERNAL_ANDROID_WRITABLE) {
+            argsForZygote.add("--mount-external-android-writable");
+        }
+		...
+        argsForZygote.add("--target-sdk-version=" + targetSdkVersion);
+        synchronized(mLock) {
+            // The USAP pool can not be used if the application will not use the systems graphics
+            // driver.  If that driver is requested use the Zygote application start path.
+            return zygoteSendArgsAndGetResult(openZygoteSocketIfNeeded(abi)/*尝试打开 socket*/,
+                                              zygotePolicyFlags,
+                                              argsForZygote);
+        }
+    }
+```
+
+
+
+``` java
+// ZygoteProcess.java
+    private ZygoteState openZygoteSocketIfNeeded(String abi) throws ZygoteStartFailedEx {
+        try {
+            attemptConnectionToPrimaryZygote();
+
+            if (primaryZygoteState.matches(abi)) {
+                return primaryZygoteState;
+            }
+
+            if (mZygoteSecondarySocketAddress != null) {
+                // The primary zygote didn't match. Try the secondary.
+                attemptConnectionToSecondaryZygote();
+
+                if (secondaryZygoteState.matches(abi)) {
+                    return secondaryZygoteState;
+                }
+            }
+        } catch (IOException ioe) {
+            throw new ZygoteStartFailedEx("Error connecting to zygote", ioe);
+        }
+
+        throw new ZygoteStartFailedEx("Unsupported zygote ABI: " + abi);
+    }
+```
+
+
+
+
+
+``` java
+// ZygoteProcess.java
+	private Process.ProcessStartResult zygoteSendArgsAndGetResult(
+            ZygoteState zygoteState, int zygotePolicyFlags, @NonNull ArrayList<String> args)
+            throws ZygoteStartFailedEx {
+        ...
+        String msgStr = args.size() + "\n" + String.join("\n", args) + "\n";
+        ...
+        return attemptZygoteSendArgsAndGetResult(zygoteState, msgStr);
+    }
+```
+
+ZygoteState 是用于与 Zygote 通信的状态，
+
+``` java
+// ZygoteProcess.java 这是一个阻塞函数
+	private Process.ProcessStartResult attemptZygoteSendArgsAndGetResult(
+            ZygoteState zygoteState, String msgStr) throws ZygoteStartFailedEx {
+        try {
+            final BufferedWriter zygoteWriter = zygoteState.mZygoteOutputWriter;
+            final DataInputStream zygoteInputStream = zygoteState.mZygoteInputStream;
+			// socket 通信
+            zygoteWriter.write(msgStr); // 写
+            zygoteWriter.flush();
+
+            // Always read the entire result from the input stream to avoid leaving
+            // bytes in the stream for future process starts to accidentally stumble
+            // upon.
+            Process.ProcessStartResult result = new Process.ProcessStartResult();
+            result.pid = zygoteInputStream.readInt(); // 读
+            result.usingWrapper = zygoteInputStream.readBoolean();
+
+            if (result.pid < 0) {
+                throw new ZygoteStartFailedEx("fork() failed");
+            }
+
+            return result;
+        } catch (IOException ex) {
+            zygoteState.close();
+            Log.e(LOG_TAG, "IO Exception while communicating with Zygote - "
+                    + ex.toString());
+            throw new ZygoteStartFailedEx(ex);
+        }
+    }
+```
+
+
+
+接下来进入 zygote
+
+``` java
+
+    Runnable runSelectLoop(String abiList) {
+        ArrayList<FileDescriptor> socketFDs = new ArrayList<>();
+        ArrayList<ZygoteConnection> peers = new ArrayList<>();
+
+        socketFDs.add(mZygoteSocket.getFileDescriptor());
+        peers.add(null);
+        while (true) {
+            ...
+                        try {
+                            ZygoteConnection connection = peers.get(pollIndex);
+                            boolean multipleForksOK = !isUsapPoolEnabled()
+                                    && ZygoteHooks.isIndefiniteThreadSuspensionSafe();
+                            final Runnable command =
+                                    connection.processCommand(this, multipleForksOK);
+```
+
+
+
+
+
+
+
+
+
+
+
+https://juejin.cn/post/7018015055108702221#heading-46
