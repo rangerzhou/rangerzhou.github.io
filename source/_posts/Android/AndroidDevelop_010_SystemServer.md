@@ -1,5 +1,5 @@
 ---
-title: Android - SystemServer 启动(1) forkSystemServer
+title: Android - system_server 进程启动
 date: 2021-11-01 19:14:33
 tags:
 categories: Android
@@ -121,7 +121,7 @@ forkSystemServer 在 fork system_server 进程后，如果是父进程（Zygote 
             String[] argv, ClassLoader classLoader) {
         ...
         RuntimeInit.commonInit(); // 初始化运行环境
-        ZygoteInit.nativeZygoteInit(); // 启动 Binder，方法在 androidRuntime.cpp 中注册
+        ZygoteInit.nativeZygoteInit(); // 启动 Binder，方法在 AndroidRuntime.cpp 中注册
         return RuntimeInit.applicationInit(targetSdkVersion, disabledCompatChanges, argv,
                 classLoader);
     }
