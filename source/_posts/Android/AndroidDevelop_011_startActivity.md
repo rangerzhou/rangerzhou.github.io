@@ -48,7 +48,7 @@ password:
 |           | frameworks/base/core/jni/com_android_internal_os_Zygote.cpp  |
 
 
-## 2 Launcher 向 system_server 发起请求(Binder)
+## 2. Launcher 向 system_server 发起请求(Binder)
 
 ### 2.1 Activity
 
@@ -131,7 +131,7 @@ getService() 返回的是 `IActivityTaskManager.Stub.asInterface(b);`，这是�
 
 
 
-## 3 system_server 进程请求 Zygote 创建新进程(Socket)
+## 3. system_server 进程请求 Zygote 创建新进程(Socket)
 
 ### 3.1 ActivityTaskManagerService
 
@@ -347,7 +347,7 @@ resumeFocusedTasksTopActivities()：将所有聚焦的 Task 的所有 Activity �
 
 首先判断待启动的 activity 所在的 application 是否在运行，如果已经运行就直接启动，否则启动新进程
 
-## 4 App进程已存在
+## 4. App 进程已存在
 
 ### 4.1 ATS.realStartActivityLocked()
 
@@ -648,7 +648,7 @@ performLaunchActivity() 主要是负责创建 activity，最终是通过反射�
 
 
 
-## 5 App 进程不存在，请求 Zygote 创建新进程(Socket)
+## 5. App 进程不存在，请求 Zygote 创建新进程(Socket)
 
 ### 5.1 startProcessAsync()
 
@@ -896,7 +896,7 @@ ZygoteState 是用于与 Zygote 通信的状态，
 
 system_server 向 zygote 进程发送消息后就唤醒了 zygote 进程，来响应 socket 客户端的请求，接下来 zygote 开始创建进程。
 
-## 6 Zygote fork 新进程
+## 6. Zygote fork 新进程
 
 ### 6.1 Zygote fork 流程
 
@@ -1111,7 +1111,7 @@ fork 成功后 zygote 进程通过 socket 返回数据；
 
 
 
-## 7 APP 进程向 system_server 发起 attachApplication[Binder]
+## 7. APP 进程向 system_server 发起 attachApplication[Binder]
 
 ### attach() -> attachApplication()
 
@@ -1176,7 +1176,7 @@ fork 成功后 zygote 进程通过 socket 返回数据；
 
 通过 Binder 调用 AMS.attachApplication()，并传入 app 的 Binder 对象 mAppThread。
 
-## 8 system_server 请求 APP binderApplication[Binder]
+## 8. system_server 请求 APP binderApplication[Binder]
 
 ### 8.1 attachApplication()
 
@@ -1229,7 +1229,7 @@ thread 是 app 进程传过来的 binder 对象，所以会调用 ActivityThread
 - thread.bindApplication：初始化 app 进程并启动；
 - mAtmInternal.attachApplication：启动 Activity；
 
-## 9 启动 APP
+## 9. 启动 APP
 
 ### 9.1 初始化 APP 进程并启动 APP
 
@@ -1333,7 +1333,7 @@ thread 是 app 进程传过来的 binder 对象，所以会调用 ActivityThread
             ...
 ```
 
-最终又调用到了 `realStartActivityLocked()`，流程和前面 [第 4 小节](# 4 App进程已存在) 一样，app 的 looper 处理 `EXECUTE_TRANSACTION`命令，启动 Activity。
+最终又调用到了 `realStartActivityLocked()`，流程和前面 [第 4 小节](# 4. App 进程已存在) 一样，app 的 looper 处理 `EXECUTE_TRANSACTION`命令，启动 Activity。
 
 
 
