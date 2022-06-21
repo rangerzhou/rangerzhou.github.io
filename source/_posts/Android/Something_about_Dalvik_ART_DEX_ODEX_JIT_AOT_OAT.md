@@ -109,20 +109,20 @@ JIT 是运行时编译，这样可以对执行次数频繁的 dex 代码进行�
 
 总的来说：
 
-- JIT 代表运行时编译策略，也可以理解成一种运行时编译器，是为了加快 Dalvik 虚拟机解释 dex 速度提出的一种技术方案，来缓存频繁使用的本地机器码
-- AOT 可以理解运行前编译策略，ART 虚拟机的主要特征就是 AOT
+- JIT 代表运行时编译策略，也可以理解成一种运行时编译器，是为了加快 Dalvik 虚拟机解释 dex 速度提出的一种技术方案，来缓存频繁使用的本地机器码；
+- AOT 可以理解运行前编译策略，ART 虚拟机的主要特征就是 AOT；
 
 
 # 4. Android N上的改变
 
 ## 4.1 ART缺点
 
-- dex -> oat 生成时间太久,进而 apk 安装时间很久
-- dex2oat 耗用系统资源太多，特别 dex2oat 占用 cpu 和 memory
-- oat 文件过大，rom 小的设备 data 空间会吃紧
-- Powerconsumption 增加
-- ART 不太稳定，在 M 上 crash 问题太多，debug 不太容易
-- oat 文件是 elf 格式，所以加载 oat 文件时候相关依赖库也很多，间接导致 app 进程占用 Memory 的增加
+- dex -> oat 生成时间太久，进而 apk 安装时间很久；
+- dex2oat 耗用系统资源太多，特别 dex2oat 占用 cpu 和 memory；
+- oat 文件过大，rom 小的设备 data 空间会吃紧；
+- Powerconsumption 增加；
+- ART 不太稳定，在 M 上 crash 问题太多，debug 不太容易；
+- oat 文件是 elf 格式，所以加载 oat 文件时候相关依赖库也很多，间接导致 app 进程占用 Memory 的增加；
 
 ## 4.2 Android N的改变
 
