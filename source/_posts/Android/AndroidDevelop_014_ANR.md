@@ -375,3 +375,221 @@ remote()->transact(NOTIFY, data, &reply, IBinder::FLAG_ONEWAY);
 
 总之就是尽可能减少主线程的负载,让其空闲待命，以期可随时响应用户的操作；
 
+## 6. 监控 ANR
+
+### 6.1 FileObserver
+
+FileObserver 可以监控目录或文件的状态，继承 FileObserver，重写 onEvent()，当被监控的文件或者目录发生变更事件时，将回调FileObserver的onEvent()函数来处理文件或目录的变更事件；
+
+``` java
+import android.os.FileObserver;
+import android.util.Log;
+import androidx.annotation.Nullable;
+
+public class ANRFileObserver extends FileObserver {
+    public ANRFileObserver(String path) {//data/anr/
+        super(path);
+    }
+
+    public ANRFileObserver(String path, int mask) {
+        super(path, mask);
+    }
+
+    @Override
+        public void onEvent(int event, @Nullable String path) {
+            switch (event)
+        {
+            case FileObserver.ACCESS://文件被访问
+                Log.i("Test", "ACCESS: " + path);
+                break;
+            case FileObserver.ATTRIB://文件属性被修改，如 chmod、chown、touch 等
+                Log.i("Test", "ATTRIB: " + path);
+                break;
+            case FileObserver.CLOSE_NOWRITE://不可写文件被 close
+                Log.i("Test", "CLOSE_NOWRITE: " + path);
+                break;
+            case FileObserver.CLOSE_WRITE://可写文件被 close
+                Log.i("Test", "CLOSE_WRITE: " + path);
+                break;
+            case FileObserver.CREATE://创建新文件
+                Log.i("Test", "CREATE: " + path);
+                break;
+            case FileObserver.DELETE:// 文件被删除，如 rm
+                Log.i("Test", "DELETE: " + path);
+                break;
+            case FileObserver.DELETE_SELF:// 自删除，即一个可执行文件在执行时删除自己
+                Log.i("Test", "DELETE_SELF: " + path);
+                break;
+            case FileObserver.MODIFY://文件被修改
+                Log.i("Test", "MODIFY: " + path);
+                break;
+            case FileObserver.MOVE_SELF://自移动，即一个可执行文件在执行时移动自己
+                Log.i("Test", "MOVE_SELF: " + path);
+                break;
+            case FileObserver.MOVED_FROM://文件被移走，如 mv
+                Log.i("Test", "MOVED_FROM: " + path);
+                break;
+            case FileObserver.MOVED_TO://文件被移来，如 mv、cp
+                Log.i("Test", "MOVED_TO: " + path);
+                break;
+            case FileObserver.OPEN://文件被 open
+                Log.i("Test", "OPEN: " + path);
+                break;
+            default:
+                //CLOSE ： 文件被关闭，等同于(IN_CLOSE_WRITE | IN_CLOSE_NOWRITE)
+                //ALL_EVENTS ： 包括上面的所有事件
+                Log.i("Test", "DEFAULT(" + event + "): " + path);
+                break;
+        }
+    }
+}
+
+```
+
+### 6.2 WatchDog
+
+post 一个 anr 检测任务到主线程的消息队列，在 post 之前先记录 mStartTime，mComplete = false，Watchdog 线程等待，检测 anr 检测任务的执行情况（mComplete 是否等于 true），当异常发生时（mComplete 为 fasle）记录堆栈信息，上报数据；
+
+``` java
+import android.annotation.TargetApi;
+import android.os.Build;
+import android.os.Debug;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Process;
+import android.os.SystemClock;
+import android.util.Log;
+
+public class ANRWatchDog extends Thread {
+    private static final String TAG = "ANR";
+    private int timeout = 5000;
+    private boolean ignoreDebugger = true;
+    static ANRWatchDog sWatchdog;
+    private Handler mainHandler = new Handler(Looper.getMainLooper());
+
+    private class ANRChecker implements Runnable {
+
+        private boolean mCompleted;
+        private long mStartTime;
+        private long executeTime = SystemClock.uptimeMillis();
+
+        @Override
+        public void run() {
+            synchronized (ANRWatchDog.this) {
+                mCompleted = true;
+                executeTime = SystemClock.uptimeMillis();
+            }
+        }
+
+        void schedule() {
+            mCompleted = false;
+            mStartTime = SystemClock.uptimeMillis();
+            mainHandler.postAtFrontOfQueue(this);
+        }
+
+        boolean isBlocked() {
+            return !mCompleted || executeTime - mStartTime >= 5000;
+        }
+    }
+
+    public interface ANRListener {
+        void onAnrHappened(String stackTraceInfo);
+    }
+
+    private ANRChecker anrChecker = new ANRChecker();
+
+    private ANRListener anrListener;
+
+    public void addANRListener(ANRListener listener){
+        this.anrListener = listener;
+    }
+
+    public static ANRWatchDog getInstance(){
+        if(sWatchdog == null){
+            sWatchdog = new ANRWatchDog();
+        }
+        return sWatchdog;
+    }
+
+    private ANRWatchDog(){
+        super("ANR-WatchDog-Thread");
+    }
+
+    @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
+    @Override
+    public void run() {
+        Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND); // 设置为后台线程
+        while(true){
+            while (!isInterrupted()) {
+                synchronized (this) {
+                    anrChecker.schedule();
+                    long waitTime = timeout;
+                    long start = SystemClock.uptimeMillis();
+                    while (waitTime > 0) {
+                        try {
+                            wait(waitTime);
+                        } catch (InterruptedException e) {
+                            Log.w(TAG, e.toString());
+                        }
+                        waitTime = timeout - (SystemClock.uptimeMillis() - start);
+                    }
+                    if (!anrChecker.isBlocked()) {
+                        continue;
+                    }
+                }
+                if (!ignoreDebugger && Debug.isDebuggerConnected()) {
+                    continue;
+                }
+                String stackTraceInfo = getStackTraceInfo();
+                if (anrListener != null) {
+                    anrListener.onAnrHappened(stackTraceInfo);
+                }
+            }
+            anrListener = null;
+        }
+    }
+
+    private String getStackTraceInfo() {
+        StringBuilder stringBuilder = new StringBuilder();
+        for (StackTraceElement stackTraceElement : Looper.getMainLooper().getThread().getStackTrace()) {
+            stringBuilder
+                    .append(stackTraceElement.toString())
+                    .append("\r\n");
+        }
+        return stringBuilder.toString();
+    }
+}
+
+```
+
+使用：
+
+``` java
+Handler handler = null;
+void ANRTest(){
+    handler = new Handler();
+    ANRWatchDog.getInstance().addANRListener(new ANRWatchDog.ANRListener {
+        @Override
+        public void onAnrHappened(String stackTraceInfo){
+            Log.i(TAG, "anr: " + stackTraceInfo);
+        }
+    });
+    ANRWatchDog.getInstance.start();
+    handler.postDelayed(new Runnable() {
+        @Override
+        public void run() {
+            try{
+                Thread.sleep(10 * 1000);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }, 3000);
+        
+}
+// 找个地方把 ANRTest() 放进去
+private void onCreate(xxx) {
+    ANRTest();
+}
+```
+
