@@ -42,7 +42,7 @@ Java_com_aptiv_myjnidemo_MainActivity_getName(JNIEnv *env, jobject thiz) {
 
 JNI 线程
 
-JNIEnv *env：不能跨越线程，否则崩溃，可以跨越函数；
+JNIEnv *env：JNIEnv 是绑定线程的，不能跨越线程，否则崩溃，可以跨越函数；
 
 ``` cpp
 // 解决方式: 使用全局 JavaVM 附加当前异步线程得到全新 env
@@ -81,4 +81,10 @@ void *myThreadTaskAction(void *pVoid) {
 
 
 
-JavaVM：可以跨越线程、跨越函数；
+JavaVM：绑定进程，可以跨越线程、跨越函数；
+
+JNIEnv：绑定当前线程，可跨越函数；
+
+jObj：绑定调用对象；
+
+jClass：绑定调用类；
