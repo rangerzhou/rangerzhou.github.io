@@ -10,7 +10,7 @@ password:
 
 
 
-> 想要优化 APP 的启动时间，必须要了解 APP 的启动流程，本文从 startActivity() 开始分析 APP 的启动流程，代码基于 Android 12；
+> APP 启动流程涉及到进程的创建、进程间通信、Socket 通信、Handler 线程通信，作为系统工程师了解 APP 的启动流程很有必要，本文从 startActivity() 开始分析 APP 的启动流程，代码基于 android-12.1.0_r4；
 >
 
 <!--more-->
