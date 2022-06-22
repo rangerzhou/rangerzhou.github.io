@@ -912,6 +912,23 @@ system_server 向 zygote 进程发送消息后就唤醒了 zygote 进程，来�
         peers.add(null);
         while (true) {
             ...
+            try {
+                pollReturnValue = Os.poll(pollFDs, pollTimeoutMs); // 当 pollFDs 有事件到来就往下执行，否则阻塞在这里
+                ...
+                while (--pollIndex >= 0) { // 当接收到客户端发出连接请求 或者数据处理请求到来，则往下执行，否则 continue
+                    if ((pollFDs[pollIndex].revents & POLLIN) == 0) {
+                        continue;
+                    }
+
+                    if (pollIndex == 0) {
+                        // Zygote server socket 有客户端请求，创建 ZygoteConnection 对象，并添加到 socketFDs 中
+                        ZygoteConnection newPeer = acceptCommandPeer(abiList); // 创建 ZygoteConnection 对象
+                        peers.add(newPeer);
+                        socketFDs.add(newPeer.getFileDescriptor()); // 添加到 socketFDs
+                    } else if (pollIndex < usapPoolEventFDIndex) {
+                        // Session socket accepted from the Zygote server socket
+                        // 通过socket接收来自对端的数据，并执行相应操作
+
                         try {
                             ZygoteConnection connection = peers.get(pollIndex);
                             boolean multipleForksOK = !isUsapPoolEnabled()
@@ -920,12 +937,14 @@ system_server 向 zygote 进程发送消息后就唤醒了 zygote 进程，来�
                             final Runnable command = connection.processCommand(this, multipleForksOK);
 ```
 
+Zygote 服务端收到客户端请求，创建 ZygoteConnection 对象，调用其 `processCommand()` 处理收到的数据；
+
 #### 6.1.2 processCommand()
 
 ``` java
 // ZygoteConnection.java
     Runnable processCommand(ZygoteServer zygoteServer, boolean multipleOK) {
-                    pid = Zygote.forkAndSpecialize(...);
+                    pid = Zygote.forkAndSpecialize(...); // fork 子进程
                         if (pid == 0) { // 子进程操作
                             // in child
                             zygoteServer.setForkChild();
@@ -945,6 +964,8 @@ system_server 向 zygote 进程发送消息后就唤醒了 zygote 进程，来�
                             return null;
                         }
 ```
+
+调用 forkAndSpecialize() fork 出子进程，函数返回两次；
 
 #### 6.1.3 forkAndSpecialize()
 
