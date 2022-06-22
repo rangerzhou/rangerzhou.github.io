@@ -1141,3 +1141,16 @@ $ adb tcpip 5555 # 连上后配置 tcpip，以后连接的时候就不用加上�
 $ adb connect 192.168.53.8
 ```
 
+#### 32. 更新 Hexo 后执行 hexo s 出现异常
+
+- 无法执行 hexo s
+
+  ``` shell
+  $ sudo npm install hexo-server --save
+  ```
+
+  安装 hexo-server 即可；
+
+- hexo s 后打开 http://localhost:4000/ 出现 Cannot GET /
+
+  因为 public 目录没有生成 index.html，使用 `sudo npm audit fix` 检查需要升级的插件，执行 `sudo npm install` 即可；
