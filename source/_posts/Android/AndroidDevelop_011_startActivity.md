@@ -907,7 +907,7 @@ system_server 向 zygote 进程发送消息后就唤醒了 zygote 进程，来�
     Runnable runSelectLoop(String abiList) {
         ArrayList<FileDescriptor> socketFDs = new ArrayList<>();
         ArrayList<ZygoteConnection> peers = new ArrayList<>();
-		// mZygoteSocket 是 socket 通信的服务端，即 zygote 进程，把 fd 添加到 socketFDs
+        // mZygoteSocket 是 socket 通信的服务端，即 zygote 进程，把 fd 添加到 socketFDs
         socketFDs.add(mZygoteSocket.getFileDescriptor());
         peers.add(null);
         while (true) {
@@ -924,7 +924,7 @@ system_server 向 zygote 进程发送消息后就唤醒了 zygote 进程，来�
 
 ``` java
 // ZygoteConnection.java
-	Runnable processCommand(ZygoteServer zygoteServer, boolean multipleOK) {
+    Runnable processCommand(ZygoteServer zygoteServer, boolean multipleOK) {
                     pid = Zygote.forkAndSpecialize(...);
                         if (pid == 0) { // 子进程操作
                             // in child
@@ -933,7 +933,7 @@ system_server 向 zygote 进程发送消息后就唤醒了 zygote 进程，来�
                             zygoteServer.closeServerSocket();
                             IoUtils.closeQuietly(serverPipeFd);
                             serverPipeFd = null;
-							// 2.5.3 fork 后子进程工作
+                            // 6.3 fork 后子进程工作
                             return handleChildProc(parsedArgs, childPipeFd,
                                     parsedArgs.mStartChildZygote);
                         } else { // 父进程操作
@@ -941,7 +941,7 @@ system_server 向 zygote 进程发送消息后就唤醒了 zygote 进程，来�
                             // handleParentProc.
                             IoUtils.closeQuietly(childPipeFd);
                             childPipeFd = null;
-                            handleParentProc(pid, serverPipeFd); // 2.5.2 fork 后父进程工作
+                            handleParentProc(pid, serverPipeFd); // 6.2 fork 后父进程工作
                             return null;
                         }
 ```
