@@ -391,7 +391,7 @@ resumeFocusedTasksTopActivities()：将所有聚焦的 Task 的所有 Activity �
 
 最终 ClientLifecycleManager 把创建 activity 事务提交给了客户端的 ApplicationThread 类。
 
-### 4.3 CLientTransaction.schedule()[Binder]
+### 4.3 ClientTransaction.schedule()[Binder]
 
 ``` java
 // CLientTransaction.java
@@ -415,15 +415,6 @@ mCLient 是 IApplicationThread 对象，IApplicationThread 是一个 AIDL 接口
 ActivityThread 继承 ClientTransactionHandler，最后对应的实现在 ClientTransactionHandler 中；
 
 ``` java
-// ActivityThread.java
-        public void scheduleTransaction(ClientTransaction transaction) throws RemoteException {
-            ActivityThread.this.scheduleTransaction(transaction);
-        }
-```
-
-ActivityThread.java 继承了 ClientTransactionHandler，
-
-``` java
 // ClientTransactionHandler.java
 	void scheduleTransaction(ClientTransaction transaction) {
         transaction.preExecute(this);
@@ -432,7 +423,7 @@ ActivityThread.java 继承了 ClientTransactionHandler，
     abstract void sendMessage(int what, Object obj);
 ```
 
-
+通过 handler 发送 EXECUTE_TRANSACTION 消息
 
 ``` java
 // ActivityThread.java
@@ -1112,7 +1103,7 @@ fork 成功后 zygote 进程通过 socket 返回数据；
 
 #### 6.3.3 nativeZygoteInit()
 
-在 [forkSystemServer() 流程](http://rangerzhou.top/2021/11/01/Android/AndroidDevelop_010_SystemServer01-forkSystemServer/#1-4-zygoteInit) 中已经分析，就是调用 open() 打开 */dev/binder* 驱动设备，再使用 mmap() 映射内核地址空间，将 Binder 驱动的 fd 赋值给 ProcessState 对象中的变量 mDriveFD，创建一个新的 binder 线程池，通过 talkWithDriver() 与驱动通信；
+在 [forkSystemServer() 流程](http://rangerzhou.top/2021/11/01/Android/AndroidDevelop_010_SystemServer/#1-4-zygoteInit) 中已经分析，就是调用 open() 打开 */dev/binder* 驱动设备，再使用 mmap() 映射内核地址空间，将 Binder 驱动的 fd 赋值给 ProcessState 对象中的变量 mDriveFD，创建一个新的 binder 线程池，通过 talkWithDriver() 与驱动通信；
 
 #### 6.3.4 applicationInit
 
@@ -1142,12 +1133,12 @@ fork 成功后 zygote 进程通过 socket 返回数据；
         Environment.initForCurrentUser(); // 初始化环境
         Looper.prepareMainLooper(); // 初始化主线程 Looper
         ActivityThread thread = new ActivityThread();
-        thread.attach(false, startSeq); // 初始化 APP 进程
+        thread.attach(false, startSeq); // 初始化 APP 进程，attach 到系统进程
 
         if (sMainThreadHandler == null) {
             sMainThreadHandler = thread.getHandler();
         }
-        Looper.loop(); // 主线程 loop 循环
+        Looper.loop(); // 主线程进入循环状态
     }
 // ActivityThread.java
     final ApplicationThread mAppThread = new ApplicationThread();
@@ -1156,43 +1147,6 @@ fork 成功后 zygote 进程通过 socket 返回数据；
             final IActivityManager mgr = ActivityManager.getService();
             try {
                 mgr.attachApplication(mAppThread, startSeq);
-```
-
-通过 Binder 调用 AMS.attachApplication()，并传入 app 的 Binder 对象 mAppThread。
-
-``` java
-// ActivityThread.java
-    public static void main(String[] args) {
-        ...
-        Environment.initForCurrentUser();
-        Looper.prepareMainLooper(); // 创建主线程 Looper
-        ActivityThread thread = new ActivityThread();
-        thread.attach(false, startSeq); // attach 到系统进程
-        if (sMainThreadHandler == null) {
-            sMainThreadHandler = thread.getHandler();
-        }
-        Looper.loop(); // 主线程进入循环状态
-```
-
-
-
-``` java
-// ActivityThread.java
-    final ApplicationThread mAppThread = new ApplicationThread();
-    private void attach(boolean system, long startSeq) {
-        sCurrentActivityThread = this;
-        mConfigurationController = new ConfigurationController(this);
-        mSystemThread = system;
-        if (!system) {
-            android.ddm.DdmHandleAppName.setAppName("<pre-initialized>",
-                                                    UserHandle.myUserId());
-            RuntimeInit.setApplicationObject(mAppThread.asBinder());
-            final IActivityManager mgr = ActivityManager.getService();
-            try {
-                mgr.attachApplication(mAppThread, startSeq);
-            } catch (RemoteException ex) {
-                throw ex.rethrowFromSystemServer();
-            }
 ```
 
 通过 Binder 调用 AMS.attachApplication()，并传入 app 的 Binder 对象 mAppThread。
@@ -1210,14 +1164,20 @@ system_server 收到请求后向 app binder线程(ApplicationThread)请求 binde
             throw new SecurityException("Invalid application interface");
         }
         synchronized (this) {
-            int callingPid = Binder.getCallingPid();
-            final int callingUid = Binder.getCallingUid();
-            final long origId = Binder.clearCallingIdentity();
+            int callingPid = Binder.getCallingPid(); // 获取远程 Binder 调用端的 pid
+            final int callingUid = Binder.getCallingUid(); // 获取远程 Binder 调用端的 uid
+            final long origId = Binder.clearCallingIdentity(); // 清除远程 Binder 调用端的 uid 和 pid 信息，并保存到 origId 变量
             attachApplicationLocked(thread, callingPid, callingUid, startSeq);
-            Binder.restoreCallingIdentity(origId);
+            Binder.restoreCallingIdentity(origId); // 通过 origId 变量，还原远程 Binder 调用端的 uid 和 pid 信息
         }
     }
 ```
+
+在 binder 远程调用的时候，服务端在执行 binder_thread_read() 过程中会把客户端线程的 pid 和 uid 保存到 binder_transaction_data 对象中传递到用户空间，然后在处理 BR_TRANSACTION 的时候把内核传递过来的客户端的 pid 和 uid 赋值给到服务端的 IPCThreadState 的 mCallingPid 和 mCallingUid，所以此处 
+
+- Binder.getCallingPid() / Binder.getCallingUid()：返回 binder 调用端的 pid 和 uid；
+- Binder.clearCallingIdentity()：把 binder 调用端的 pid 和 uid 保存到一个 token(origId) 并返回，然后用当前线程（服务端）的 pid 和 uid 赋值给服务端 IPCThreadState 的 mCallingPid 和 mCallingUid 变量；
+- restoreCallingIdentity()：把 origId 中保存的调用端的 pid 和 uid 恢复到服务端 IPCThreadState 的 mCallingPid 和 mCallingUid 变量；
 
 ### 8.2 attachApplicationLocked
 
@@ -1225,19 +1185,11 @@ system_server 收到请求后向 app binder线程(ApplicationThread)请求 binde
 // ActivityManagerService.java
     private boolean attachApplicationLocked(@NonNull IApplicationThread thread,
             int pid, int callingUid, long startSeq) {
-                thread.bindApplication(processName, appInfo, providerList, null, profilerInfo,
-                        null, null, null, testMode,
-                        mBinderTransactionTrackingEnabled, enableTrackAllocation,
-                        isRestrictedBackupMode || !normalMode, app.isPersistent(),
-                        new Configuration(app.getWindowProcessController().getConfiguration()),
-                        app.getCompat(), getCommonServicesLocked(app.isolated),
-                        mCoreSettingsObserver.getCoreSettingsLocked(),
-                        buildSerial, autofillOptions, contentCaptureOptions,
-                        app.getDisabledCompatChanges(), serializedSystemFontMap);
+                thread.bindApplication(...); // 初始化 app 进程并启动
         ...
         if (normalMode) {
             try {
-                didSomething = mAtmInternal.attachApplication(app.getWindowProcessController());
+                didSomething = mAtmInternal.attachApplication(app.getWindowProcessController()); // 启动 activity
             } catch (Exception e) {
                 Slog.wtf(TAG, "Exception thrown launching activities in " + app, e);
                 badApp = true;
@@ -1245,7 +1197,7 @@ system_server 收到请求后向 app binder线程(ApplicationThread)请求 binde
         }
 ```
 
-thread 是 app 进程传过来的 binder 对象，所以会调用 ActivityThread.bindApplication() 初始化 app 进程，做了两件重要的事：
+thread 是 app 进程传过来的 binder 对象，所以会调用 ActivityThread.bindApplication() 初始化 app 进程，attachApplicationLocked 做了两件重要的事：
 
 - thread.bindApplication：初始化 app 进程并启动；
 - mAtmInternal.attachApplication：启动 Activity；
@@ -1277,7 +1229,7 @@ thread 是 app 进程传过来的 binder 对象，所以会调用 ActivityThread
                     break;
 ```
 
-
+调用 handleBindApplication()
 
 ``` java
 // ActivityThread.java
@@ -1289,12 +1241,12 @@ thread 是 app 进程传过来的 binder 对象，所以会调用 ActivityThread
         VMRuntime.setProcessPackageName(data.appInfo.packageName);
         final ContextImpl appContext = ContextImpl.createAppContext(this, data.info); // 创建 app 的上下文
         Application app;
-				// 启动应用
+                // 启动应用
                 mInstrumentation.onCreate(data.instrumentationArgs);
                 mInstrumentation.callApplicationOnCreate(app);
 ```
 
-通过 Instrumentation 启动 Activity；
+通过 Instrumentation 启动 APP；
 
 ``` java
 // Instrumentation.java
