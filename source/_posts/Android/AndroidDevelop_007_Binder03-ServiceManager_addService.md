@@ -319,7 +319,7 @@ class ServiceManagerProxy implements IServiceManager {
       }
 ```
 
-这里的 _data 是一个 Parcel 对象，`writeString(name)` 和 `writeStrongBinder(service)` 最终通过 JNI 调用到 frameworks/base/core/jni/android_os_Parcel.cpp 中的 `android_os_Parcel_writeString16()` 和 `android_os_Parcel_writeStrongBinder()`，最终结果就是 <font color=red>**data.mData**</font> 地址中保存了 “activity” 字符串， <font color=red>**data.mObjects**</font> 保存了 new ActivityManagerService() 的服务端（AMS 对应的 JavaBBinder 对象）。
+这里的 _data 是一个 Parcel 对象，`writeString(name)` 和 `writeStrongBinder(service)` 最终通过 JNI 调用到 frameworks/base/core/jni/android_os_Parcel.cpp 中的 `android_os_Parcel_writeString16()` 和 `android_os_Parcel_writeStrongBinder() -> Parcel.writeStrongBinder() -> flattenBinder() -> writeObject()`，最终结果就是 <font color=red>**data.mData**</font> 指向数据 buffer，调用 write 接口写入的数据都依次存放在这块 buffer 中， <font color=red>**data.mObjects**</font> 指向一个动态分配的一维数组，存放的是 mData 的下标值，当数据 buffer 中写入了 binder 对象，就好在 mObjects 中存放一条下标记录，表示 binder 对象在数据 buffer 中的存放位置；
 
 这里 mRemote 是 BinderProxy，就会调用服务端 BinderProxy 的 `transact()` 函数（注意：调用服务端的 transact 的时候，客户端会挂起等待），name, service 等参数会打包到 data 参数中：
 
@@ -391,7 +391,7 @@ BinderProxyNativeData* getBPNativeData(JNIEnv* env, jobject obj) {
 }
 ```
 
-上述 [1.1.1](#1.1.1 BinderInternal.getContextObject()) 小节中分析得知 gBinderProxyOffsets.mNativeData 存入的是 BinderProxy 的 mNativeData 属性 ID，所以此处 getBPNativeData 获取的就是指向 BinderProxyNativeData 结构体的指针，从 [1.1.1](#1.1.1 BinderInternal.getContextObject()) 小节的 javaObjectForIBinder() 函数得知，这个结构体的 `mObject`就是 BpBinder 对象，所以后面的 `target->transact()` 则是调用 BpBinder->transact()。
+上述 [1.1.1](# 1.1.1 BinderInternal.getContextObject()) 小节中分析得知 gBinderProxyOffsets.mNativeData 存入的是 BinderProxy 的 mNativeData 属性 ID，所以此处 getBPNativeData 获取的就是指向 BinderProxyNativeData 结构体的指针，从 [1.1.1](# 1.1.1 BinderInternal.getContextObject()) 小节的 javaObjectForIBinder() 函数得知，这个结构体的 `mObject`就是 BpBinder 对象，所以后面的 `target->transact()` 则是调用 BpBinder->transact()。
 
 **BpBinder->transact()**
 
@@ -482,10 +482,10 @@ status_t IPCThreadState::writeTransactionData(int32_t cmd, uint32_t binderFlags,
     const status_t err = data.errorCheck(); // 验证数据合理性
     // 将数据保存到 tr
     if (err == NO_ERROR) {
-        tr.data_size = data.ipcDataSize(); // 传输数据大小，Parcel data 里面存储非 IBinder 数据大小
-        tr.data.ptr.buffer = data.ipcData(); // 传输的数据，指向 data 里面存储的非 IBinder 数据
-        tr.offsets_size = data.ipcObjectsCount()*sizeof(binder_size_t); // data 里面传递 IBinder 对象数组的大小
-        tr.data.ptr.offsets = data.ipcObjects(); // data 存储 IBinder 对象的指针
+        tr.data_size = data.ipcDataSize(); // 传输数据大小
+        tr.data.ptr.buffer = data.ipcData(); // 传输的数据区 buffer 首地址
+        tr.offsets_size = data.ipcObjectsCount()*sizeof(binder_size_t); // 传递的 binder 对象个数 * 数据类型大小
+        tr.data.ptr.offsets = data.ipcObjects(); // 偏移数组，存储 binder 对象在 mData 中的下标值
     } ...
 
     mOut.writeInt32(cmd); // 把命令写入到 mOut，传入的 cmd 是 BC_TRANSACTION
@@ -496,15 +496,27 @@ status_t IPCThreadState::writeTransactionData(int32_t cmd, uint32_t binderFlags,
 // Parcel.cpp
 uintptr_t Parcel::ipcData() const
 {
-    return reinterpret_cast<uintptr_t>(mData); // mData 存储了服务的名称等数据
+    return reinterpret_cast<uintptr_t>(mData); // 数据区 buffer 首地址，存放传输的数据（包括 binder 对象）
 }
 uintptr_t Parcel::ipcObjects() const
 {
-    return reinterpret_cast<uintptr_t>(mObjects); // mObjects 存储了服务对应的 JavaBBinder 对象
+    return reinterpret_cast<uintptr_t>(mObjects); // 一维数组首地址，数组中存放 binder 对象在数据区 buffer 中的下标值
 }
+
+status_t Parcel::writeObject(const flat_binder_object& val, bool nullMetaData)
+{
+        *reinterpret_cast<flat_binder_object*>(mData+mDataPos) = val;
+        // Need to write meta-data?
+        if (nullMetaData || val.binder != 0) {
+            mObjects[mObjectsSize] = mDataPos; // mDataPos 是数据指针的当前位置，所以存放的是相对 mData 的偏移地址
+            acquire_object(ProcessState::self(), val, this, &mOpenAshmemSize);
+            mObjectsSize++;
+        }
 ```
 
-在 [1.2.1 小节](# 1.2 addService()) 得知 `data.mData` 保存的是服务名称字符串，`data.mObjects` 保存的是服务对应的 JavaBBinder 对象，这里的 `binder_transaction_data tr`，从名称上看就知道实际上就是要传递的数据，不过真正要传递的数据是 tr.data.ptr.buffer，传入的 cmd 参数是 BC_TRANSACTION，然后先后把这个 cmd 和传递的数据 tr 写入 mOut 中（这样当跳过 cmd 地址后就是数据 tr 的地址了），在后面 `talkWithDriver()` 中会把这个 mOut.data(指针值) 赋值给 binder_write_read.write_buffer 从而传递到驱动层。
+这里的 tr.data.ptr.buffer(就是 mData) 和 tr.data.ptr.offsets(就是mObjects) 存储的都是地址，buffer 指的是数据区的首地址，存放传输的数据（包括 binder 对象）；offsets 指的是偏移数组的首地址，用来描述数据区中每一个 IPC 对象（flat_binder_object）在数据区 buffer 中的位置，数组的每一项为一个 binder_size_t（其实就是 unsigned int 或者 unsigned long），这个值对应每一个 IPC 对象在 buffer 中相对于 mData 的偏移地址（理解为数组下标）；
+
+这里的 `binder_transaction_data tr`，从名称上看就知道实际上就是要传递的数据，不过真正要传递的数据是 tr.data.ptr.buffer，传入的 cmd 参数是 BC_TRANSACTION，然后先后把这个 cmd 和传递的数据 tr 写入 mOut 中（这样当跳过 cmd 地址后就是数据 tr 的地址了），在后面 `talkWithDriver()` 中会把这个 mOut.data(指针值) 赋值给 binder_write_read.write_buffer 从而传递到驱动层。
 
 BC 就是 Binder Command，是向驱动发送的命令，BR 就是 Binder Return，是从驱动返回的命令；
 
@@ -1268,7 +1280,7 @@ status_t IPCThreadState::executeCommand(int32_t cmd)
                 }
 
             } else {
-                // the_context_object 是一个 BBinder 对象
+                // 对于 sm 执行此分支，the_context_object 是一个 BBinder 对象
                 error = the_context_object->transact(tr.code, buffer, &reply, tr.flags);
             }
 ```
@@ -1277,7 +1289,7 @@ status_t IPCThreadState::executeCommand(int32_t cmd)
 
 ###### c.4 服务端处理 IPC 数据 - trancact->onTrancact-> TRANSACTION_addService
 
-the_context_object 是一个 BBinder 对象，在 sm 启动时（main.cpp）传入的是 sm 对象，sm 继承自 BnServiceManager，BnServiceManager 继承 BnInterface，而 BnInterface 又继承了 BBinder，
+the_context_object 是一个 BBinder 对象，在 sm 启动时（main.cpp）传入的是 sm 对象，sm 继承了 BnServiceManager，BnServiceManager 继承 BnInterface，而 BnInterface 又继承了 BBinder & IServiceManager；
 
 ``` h
 // frameworks/native/cmds/servicemanager/ServiceManager.cpp
@@ -1307,7 +1319,7 @@ status_t BBinder::transact(
 }
 ```
 
-进入 default 分支，这里的 onTransact() 调用的是 JavaBBinder 中额 onTransact()，
+进入 default 分支，这里的 onTransact() 调用的是 JavaBBinder 中的 onTransact()，
 
 ``` cpp
 // android_util_Binder.cpp
@@ -1356,7 +1368,7 @@ status_t BBinder::transact(
                     res = onTransact(code, data, reply, flags);
 ```
 
-然后这里的 onTransact() 就是调用 IServiceManager.java 中的 `BnServiceManager::onTransact()` ，在 AIDL 生成的 IServiceManager.cpp 文件中（<font color=red>**这部分调用流程还存在疑惑，**[此文解释了为什么会调用到 JavaBBinder.onTransact()，学习 java 层 Binder 对象的初始过程](https://juejin.cn/post/6990152454058803213)</font>。
+然后这里的 onTransact() 就是调用 IServiceManager.java 中的 `BnServiceManager::onTransact()` ，BnServiceManager 继承了 BBinder，重写了 BBinder 中 onTransact() 这个虚函数，在 AIDL 生成的 IServiceManager.cpp 文件中（<font color=red>**这部分调用流程还存在疑惑，**[此文解释了为什么会调用到 JavaBBinder.onTransact()，学习 java 层 Binder 对象的初始过程](https://juejin.cn/post/6990152454058803213)</font>。
 
 ``` cpp
 // out/.../gen/aidl/android/os/IServiceManager.cpp
@@ -1370,7 +1382,7 @@ Parcel* _aidl_reply, uint32_t _aidl_flags) {
     ...
     // 调用真正的 ServiceManager.cpp 中的实现
     ::android::binder::Status _aidl_status(addService(in_name, in_service, in_allowIsolated, in_dumpPriority));
-    // addService 返回一个 Status 对象，写到 Parcel 对象 _aidl_reply 中
+    // addService 返回一个 Status 对象状态值，写到 Parcel 对象 _aidl_reply 中
     _aidl_ret_status = _aidl_status.writeToParcel(_aidl_reply);
     if (((_aidl_ret_status) != (::android::OK))) {
       break;
@@ -1382,7 +1394,7 @@ Parcel* _aidl_reply, uint32_t _aidl_flags) {
   break;
 ```
 
-addService 返回一个 Status 对象，写到 Parcel 对象 _aidl_reply 中。
+addService 返回一个 Status 对象状态值，写到 Parcel 对象 _aidl_reply 中，上面说 ServiceManager 间接继承了 IServiceManager，同时也实现了 addService() 这个虚函数：
 
 ``` cpp
 // ServiceManager.h
@@ -1406,7 +1418,7 @@ Status ServiceManager::addService(const std::string& name, const sp<IBinder>& bi
 
 sm 通过 nNameToService 这个 map 保存服务及其对应的信息，服务名 name 为 key，value 是一个 Service 结构体；`Status::ok()` 返回 Status 的默认构造函数 `Status()`。
 
-<font color=red>**到这里什么就保存了服务和对应的 binder**</font>，现在返回 IPCThreadState.executeCommand() 中继续执行：
+<font color=red>**到这里 sm 就保存了服务和对应的 binder**</font>，现在返回 IPCThreadState.executeCommand() 中继续执行：
 
 ###### c.5 sendReply() - 服务端向驱动写入 BC_REPLY
 
@@ -1426,7 +1438,7 @@ status_t IPCThreadState::executeCommand(int32_t cmd)
             } else {
 ```
 
-这里的 tr.flags 还是 0，进入 if 分支，调用 `sendReply()`：
+这里的 tr.flags 还是 0，进入 if 分支，调用 `sendReply()` 将 reply 发送给请求方客户端：
 
 ``` cpp
 // IPCThreadState.cpp
@@ -1823,7 +1835,7 @@ status_t IPCThreadState::waitForResponse(Parcel *reply, status_t *acquireResult)
                     } ...
 ```
 
-非 ONEWAY 模式，BR_TRANSACTION_COMPLETE 分支什么也没做，BR_REPLY 分支调用了 Parcel.ipcSetDataReference()，主要作用就是根据参数的值重新初始化 Parcel 的数据和对象。
+非 ONEWAY 模式，BR_TRANSACTION_COMPLETE 分支什么也没做，BR_REPLY 分支调用了 Parcel.ipcSetDataReference()，主要作用就是根据参数的值重新初始化 Parcel 的数据和对象，客户端后续就可以使用 Parcel 提供的函数从中读取数据。
 
 到这里 AMS 注册到 SM 的过程就结束了。
 
@@ -1869,5 +1881,4 @@ status_t IPCThreadState::waitForResponse(Parcel *reply, status_t *acquireResult)
   - 客户端 waitForResponse()：处理 BR_TRANSACTION_COMPLETE 和 BR_REPLY 命令；
 
 a 和 b 同时进行，c 和 d 同时进行，无先后顺序；
-
 

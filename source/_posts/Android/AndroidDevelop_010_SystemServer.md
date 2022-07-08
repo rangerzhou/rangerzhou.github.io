@@ -235,10 +235,19 @@ SystemServer 的 main 方法在 `MethodAndArgsCaller` 的 `run()` 中被 invoke 
 
 ``` java
 // SystemServer.java
+    private static final int sMaxBinderThreads = 31;
     public static void main(String[] args) {
         new SystemServer().run();
     }
     private void run() {
+            BinderInternal.setMaxThreads(sMaxBinderThreads); // 设置 binder 线程池最大数量
+            Looper.prepareMainLooper(); // 以当前线程作为 MainLooper
+            Looper.getMainLooper().setSlowLogThresholdMs(
+                    SLOW_DISPATCH_THRESHOLD_MS, SLOW_DELIVERY_THRESHOLD_MS);
+            createSystemContext(); // 初始化 context
+            mSystemServiceManager = new SystemServiceManager(mSystemContext); // 创建 ssm，管理系统服务的启动
+            // 将 ssm 作为本地进程 Service 使用
+            LocalServices.addService(SystemServiceManager.class, mSystemServiceManager);
         ...
         // Start services.
         try { // 启动服务
@@ -247,6 +256,16 @@ SystemServer 的 main 方法在 `MethodAndArgsCaller` 的 `run()` 中被 invoke 
             startCoreServices(t); // 启动核心服务
             startOtherServices(t); // 启动其他服务
         }
+        Looper.loop(); // 进入 loop 循环
 ```
 
-在 SystemServer 的 run() 方法中，启动了三类服务：引导服务、核心服务、其他服务，比如 AMS/PMS/PKMS 等都在引导服务中启动，WMS 在其他服务中启动，这些服务都继承自 SystemServices，且都添加到 binder 的大管家 ServiceManager 进程中管理。
+在 SystemServer 的 run() 方法中，主要做了如下工作：
+
+- 设置 SystemServer 的 binder 线程池的数量为 31，默认是 15，这里的数量不包含 binder 主线程；
+- 准备 Looper；
+- 初始化 SystemContext；
+- 创建 SystemServiceManager，用来管理系统服务的启动；
+- 启动引导服务、核心服务以及其他服务；
+- 进入 Looper 循环；
+
+启动了三类服务：引导服务、核心服务、其他服务，比如 AMS/PMS/PKMS 等都在引导服务中启动，WMS 在其他服务中启动，这些服务都继承自 SystemServices，且都添加到 binder 的大管家 ServiceManager 进程中管理。

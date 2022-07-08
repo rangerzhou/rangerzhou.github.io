@@ -478,7 +478,6 @@ static long binder_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 	if (ret)
 		goto err_unlocked;
 
-	binder_lock(__func__);
 	// 根据当前进程的 pid，从 binder_proc 中查找 binder_thread, 
 	// 如果当前线程已经加入到 proc 的线程队列则直接返回，如果不存在则创建 binder_thread，并将当前线程添加到当前的 proc
 	thread = binder_get_thread(proc);
@@ -495,37 +494,53 @@ static long binder_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 		if (ret)
 			goto err;
 		break;
-	case BINDER_SET_MAX_THREADS:
-		if (copy_from_user(&proc->max_threads, ubuf, sizeof(proc->max_threads))) {
-			ret = -EINVAL;
-			goto err;
-		}
-		break;
-	case BINDER_SET_CONTEXT_MGR:
-		ret = binder_ioctl_set_ctx_mgr(filp);
-		if (ret)
-			goto err;
-		break;
+    case BINDER_SET_MAX_THREADS: {
+        int max_threads;
+        if (copy_from_user(&max_threads, ubuf,
+                   sizeof(max_threads))) {
+            ret = -EINVAL;
+            goto err;
+        }
+        binder_inner_proc_lock(proc);
+        proc->max_threads = max_threads;
+        binder_inner_proc_unlock(proc);
+        break;
+    }
+    case BINDER_SET_CONTEXT_MGR_EXT: {
+        struct flat_binder_object fbo;
+        if (copy_from_user(&fbo, ubuf, sizeof(fbo))) {
+            ret = -EINVAL;
+            goto err;
+        }
+        ret = binder_ioctl_set_ctx_mgr(filp, &fbo);
+        if (ret)
+            goto err;
+        break;
+    }
+    case BINDER_SET_CONTEXT_MGR:
+        ret = binder_ioctl_set_ctx_mgr(filp, NULL);
+        if (ret)
+            goto err;
+        break;
 	case BINDER_THREAD_EXIT:
 		binder_debug(BINDER_DEBUG_THREADS, "%d:%d exit\n",
 			     proc->pid, thread->pid);
 		binder_free_thread(proc, thread);
 		thread = NULL;
 		break;
-	case BINDER_VERSION: {
-		struct binder_version __user *ver = ubuf;
-
-		if (size != sizeof(struct binder_version)) {
-			ret = -EINVAL;
-			goto err;
-		}
-		if (put_user(BINDER_CURRENT_PROTOCOL_VERSION,
-			     &ver->protocol_version)) {
-			ret = -EINVAL;
-			goto err;
-		}
-		break;
-	}
+    case BINDER_VERSION: {
+        struct binder_version __user *ver = ubuf;
+        if (size != sizeof(struct binder_version)) {
+            ret = -EINVAL;
+            goto err;
+        }
+        if (put_user(BINDER_CURRENT_PROTOCOL_VERSION,
+                 &ver->protocol_version)) {
+            ret = -EINVAL;
+            goto err;
+        }
+        break;
+    }...
 	default:
 		ret = -EINVAL;
 		goto err;
@@ -533,6 +548,9 @@ static long binder_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 	...
 }
 ```
+
+- __user：`__user` 是一个宏，它告诉编译器不应该解除这个指针的引用（因为在当前地址空间中它是没有意义的），`(void __user *)arg` 表示 `arg` 是一个用户空间地址，不能直接进行拷贝，必须使用 `copy_from_user/copy_to_user` 等函数拷贝；
+- wait_event_interruptible：也是一个宏，它是用来挂起进程直到满足判断条件的，`binder_stop_on_user_error` 是一个全局变量，它的初始值为 0，`binder_user_error_wait` 是一个等待队列，在正常情况下，`binder_stop_on_user_error < 2` 这个条件是成立的，所以不会进入挂起状态，而当`binder` 因为错误而停止后，调用 `binder_ioctl`，则会挂起进程，直到其他进程通过 `wake_up_interruptible` 来唤醒 `binder_user_error_wait` 队列，并且满足 `binder_stop_on_user_error < 2` 这个条件，`binder_ioctl` 才会继续往后运行；
 
 BINDER_WRITE_READ 这个 case 比较重要，因为应用层使用时是通过 binder_ioctl(BINDER_WRITE_READ) 这样子调用，然后就调用到了 binder_ioctl 的 BINDER_WRITE_READ 这个 case；
 

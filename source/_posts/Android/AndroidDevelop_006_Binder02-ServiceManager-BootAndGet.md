@@ -277,7 +277,7 @@ public:
         sp<BinderCallback> cb = sp<BinderCallback>::make(); // 实例化 BinderCallback
 
         int binder_fd = -1;
-        // 获取 binder_fd，并在其中开启 sm 的循环，使其开始工作
+        // 获取 binder_fd，向 binder 驱动发送 BC_ENTER_LOOPER
         IPCThreadState::self()->setupPolling(&binder_fd);
         LOG_ALWAYS_FATAL_IF(binder_fd < 0, "Failed to setupPolling: %d", binder_fd);
         // 添加监听目标，通过 epoll 机制监听驱动的文件描述符 binder_fd，当 binder_fd
