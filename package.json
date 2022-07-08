@@ -20,9 +20,11 @@
     "hexo-renderer-marked": "^5.0.0",
     "hexo-renderer-stylus": "^2.1.0",
     "hexo-server": "^3.0.0",
+    "hexo-tag-aplayer": "^3.0.4",
     "hexo-wordcount": "^6.0.1",
     "leancloud-storage": "^4.12.3",
     "live2d-widget-model-wanko": "^1.0.5",
+    "pjax": "^0.2.8",
     "valine": "^1.5.0"
   }
 }

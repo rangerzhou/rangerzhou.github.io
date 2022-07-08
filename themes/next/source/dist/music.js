@@ -2,6 +2,8 @@ const ap = new APlayer({
     container: document.getElementById('aplayer'),
     fixed: true,
     autoplay: false,
+    order: 'random',
+    preload: 'auto',
     audio: [{
         name: "Five Hundred Miles",
         artist: 'Justin Timberlake',

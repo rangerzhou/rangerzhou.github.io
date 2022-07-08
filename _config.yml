@@ -7,7 +7,7 @@ title: RangerZhou
 subtitle: Read the fucking source code
 description: 我是一个小流氓我从来也不浪，有一天我心血来潮耍了个流氓，我嘴里吹着小口哨我心里好得意，不知怎么哗啦啦啦啦我摔了一身泥
 author: Ranger Zhou
-email: rangerzhou.life@gmail.com
+email: ranger.assist@gmail.com
 language: zh-CN
 timezone: Asia/Shanghai
 
@@ -152,3 +152,9 @@ live2d:
     height: 600
   mobile:
     show: false
+
+aplayer:
+#  cdn: https://cdn.jsdelivr.net/npm/aplayer/dist/APlayer.min.js  # 引用 APlayer.js 外部 CDN 地址 (默认不开启)
+#  style_cdn: https://cdn.jsdelivr.net/npm/aplayer/dist/APlayer.min.css
+  meting: true       # MetingJS 支持
+#  meting_cdn: https://cdn.jsdelivr.net/npm/meting/dist/Meting.min.js # 引用 Meting.js 外部 CDN 地址 (默认不开启)
