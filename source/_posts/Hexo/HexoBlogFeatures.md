@@ -148,9 +148,11 @@ livere_uid: data-uid-value
 
 ### 3. 添加音乐播放器
 
+#### 3.1 方法一
+
 [参考]( https://enfangzhong.github.io/2019/12/08/Hexo%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2%E6%B7%BB%E5%8A%A0APlayer%E9%9F%B3%E4%B9%90%E6%92%AD%E6%94%BE%E5%99%A8%E5%8A%9F%E8%83%BD/)
 
-#### 3.1 下载 APlayer 源码
+##### 3.1.1 下载 APlayer 源码
 
 ``` shell
 git clone https://github.com/DIYgod/APlayer.git
@@ -158,7 +160,7 @@ git clone https://github.com/DIYgod/APlayer.git
 
 把 *dist* 文件夹复制到 *\themes\next\source* 目录中。
 
-#### 3.2 编辑喜欢的音乐列表
+##### 3.1.2 编辑喜欢的音乐列表
 
 在 *dist* 目录里，新建 *music.js* 文件，并把如下代码粘贴进去：
 
@@ -166,7 +168,14 @@ git clone https://github.com/DIYgod/APlayer.git
 const ap = new APlayer({
     container: document.getElementById('aplayer'),
     fixed: true,
-    autoplay: false,
+    autoplay: true,
+    order: 'random', // 音频循环顺序, 可选值: 'list'列表循环, 'random'随机循环
+    preload: 'auto', // 预加载，可选值: 'none', 'metadata', 'auto'
+    theme: '#FADFA3', // 主题
+    volume: 0.7, // 默认音量
+    mutex: false, // 互斥，阻止多个播放器同时播放，当前播放器播放时暂停其他播放器
+    listFolded: false, // 列表默认折叠
+    //lrcType: 3, // 歌词传递方式
     audio: [{
         name: '麻雀',
         artist: '李荣浩',
@@ -208,27 +217,117 @@ const ap = new APlayer({
 
 可以使用网上链接，也可以使用本地音乐文件（比如麻雀.mp3）。
 
-#### 3.3 在 next 主题下的 layout 中引入 APlayer 音乐播放器源码
+##### 3.1.3 在 next 主题下的 layout 中引入 APlayer 音乐播放器源码
 
 在 *\themes\next\layout_layout.swig* 文件 *body* 标签体内中，里新增如下代码：
 
 ``` html
 <body itemscope itemtype="http://schema.org/WebPage">
 
-<!-- 加入APlayer音乐播放器 -->
+<!-- 加入APlayer音乐播放器 start-->
 <link rel="stylesheet" href="/dist/APlayer.min.css">
 <div id="aplayer"></div>
 <script type="text/javascript" src="/dist/APlayer.min.js"></script>
 <script type="text/javascript" src="/dist/music.js"></script>
-<!-- 加入APlayer音乐播放器 -->
+<!-- 加入APlayer音乐播放器 end-->
 
   <div class="container{%- if theme.motion.enable %} use-motion{%- endif %}">
     <div class="headband"></div>
 ```
 
-#### 3.4 重新部署
+其实也可以添加到这个  */themes/next/layout/_partials/head/head.swig_* 中，添加位置：
+
+``` html
+{%- if theme.favicon.apple_touch_icon %}
+  <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for(theme.favicon.apple_touch_icon) }}">
+  <!-- 加入APlayer音乐播放器 start-->
+  <link rel="stylesheet" href="/dist/APlayer.min.css">
+  <div id="aplayer"></div>
+  <script type="text/javascript" src="/dist/APlayer.min.js"></script>
+  <script type="text/javascript" src="/dist/music.js"></script>
+  <!-- 加入APlayer音乐播放器 end-->
+```
+
+##### 3.1.4 配置 pjax 防止页面切换时音乐暂停
+
+在 */themes/next/layout/_partials/head/head.swig_* 中 meta 标签下面添加如下代码：
+
+``` html
+<meta name="generator" content="Hexo {{ hexo_version }}">
+<!-- pjax：防止跳转页面音乐暂停 -->
+<script src="https://cdn.jsdelivr.net/npm/pjax@0.2.8/pjax.js"></script>
+```
+
+但是添加这行代码后会影响方法二，方法二歌单页面必须按 F5 刷新一下才显示播放器，蛋疼。。。
+
+##### 3.1.5 重新部署
 
 ``` shell
 hexo clean;hexo g;hexo d
 ```
 
+#### 3.2 方法二
+
+##### 3.2.1 安装插件
+
+``` shell
+npm install --save hexo-tag-aplayer
+```
+
+##### 3.2.2 _config.yml 部署
+
+根目录 *_config.yml* 文件添加如下：
+
+``` yml
+aplayer:
+  meting: true       # MetingJS 支持
+#  cdn: https://cdn.jsdelivr.net/npm/aplayer/dist/APlayer.min.js  # 引用 APlayer.js 外部 CDN 地址 (默认不开启)
+#  style_cdn: https://cdn.jsdelivr.net/npm/aplayer/dist/APlayer.min.css
+#  meting_cdn: https://cdn.jsdelivr.net/npm/meting/dist/Meting.min.js # 引用 Meting.js 外部 CDN 地址 (默认不开启)
+```
+
+##### 3.2.3 创建歌单页面
+
+**新建页面**
+
+``` shell
+hexo new page playlist
+```
+
+这时候在 /source 文件夹下会生成一个 playlist 文件夹，修改 index.md：
+
+``` markdown
+{% meting "3796675695" "tencent" "playlist" "autoplay" "order:random" "mutex:false" "listmaxheight:340px" "preload:none" "theme:#228B22"%}
+```
+
+**配置歌单 menu**
+
+修改主题 _config.yml 文件，menu 选项添加：
+
+``` yml
+playlist: /playlist/ || fa fa-music
+```
+
+图标选择：http://www.fontawesome.com.cn/faicons/
+
+**汉化 menu**
+
+修改 themes/next/languages/zh-CN.yml
+
+``` yml
+menu:
+  home: 首页
+  archives: 归档
+  categories: 分类
+  tags: 标签
+  about: 关于
+  playlist: 歌单
+  search: 搜索
+  schedule: 日程表
+  sitemap: 站点地图
+  commonweal: 公益 404
+```
+
+##### 3.2.4 配置 pjax 防止页面切换时音乐暂停
+
+方法同 3.1.4，不过配置此选项后，点击博客 menu 中的歌单页面不显示播放器，必须刷新一下页面才显示；

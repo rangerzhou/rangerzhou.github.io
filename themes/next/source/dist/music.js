@@ -1,9 +1,14 @@
 const ap = new APlayer({
-    container: document.getElementById('aplayer'),
+    container: document.getElementById('aplayer'), // 播放器 HTML 容器元素
     fixed: true,
-    autoplay: false,
-    order: 'random',
-    preload: 'auto',
+    autoplay: true,
+    order: 'random', // 音频循环顺序, 可选值: 'list'列表循环, 'random'随机循环
+    preload: 'auto', // 预加载，可选值: 'none', 'metadata', 'auto'
+    theme: '#FADFA3', // 主题
+    volume: 0.7, // 默认音量
+    mutex: true, // 互斥，阻止多个播放器同时播放，当前播放器播放时暂停其他播放器
+    listFolded: false, // 列表默认折叠
+    //lrcType: 3, // 歌词传递方式
     audio: [{
         name: "Five Hundred Miles",
         artist: 'Justin Timberlake',
