@@ -27,12 +27,12 @@ const ap = new APlayer({
         url: '/dist/MusicList/听闻远方有你.mp3',
         cover: 'http://p2.music.126.net/ggnyubDdMxrhpqYvpZbhEQ==/3302932937412681.jpg?param=130y130',
     },
-    {
+    /*{
         name: "Amy's Lullaby II",
         artist: 'Mars Lasar',
         url: "/dist/MusicList/Amy'sLullabyII.mp3",
         cover: 'http://p1.music.126.net/LiRR__0pJHSivqBHZzbMUw==/109951163816225567.jpg?param=130y130',
-    },
+    },*/
     {
         name: "成都",
         artist: '赵雷',

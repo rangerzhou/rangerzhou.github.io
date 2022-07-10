@@ -260,6 +260,14 @@ const ap = new APlayer({
 
 但是添加这行代码后会影响方法二，方法二歌单页面必须按 F5 刷新一下才显示播放器，蛋疼。。。
 
+修改主题 _config.yml 启动 pjax
+
+``` yml
+pjax: true
+```
+
+
+
 ##### 3.1.5 重新部署
 
 ``` shell

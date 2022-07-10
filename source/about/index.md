@@ -11,7 +11,7 @@ categories: "Freedom"
 - 小白程序员，Andriod Framework工程师
 - 专注于Android系统原理、架构分析学习
 - 当前学习目标：Framework, Performance, Stability
-- Email: ranger.zhouu@gmail.com
+- Email: rangero_o@qq.com
 
 ##### 打赏小哥哥
 
