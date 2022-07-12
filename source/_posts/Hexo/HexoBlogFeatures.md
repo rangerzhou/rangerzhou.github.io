@@ -339,3 +339,67 @@ menu:
 ##### 3.2.4 配置 pjax 防止页面切换时音乐暂停
 
 方法同 3.1.4，不过配置此选项后，点击博客 menu 中的歌单页面不显示播放器，必须刷新一下页面才显示；
+
+
+
+### 4. 添加动画
+
+``` shell
+# 安装hexo-helper-live2d 插件
+npm install --save hexo-helper-live2d
+# 下载live2d模型
+npm install --save live2d-widget-model-haru
+
+# 可安装的模型，预览：https://huaji8.top/post/live2d-plugin-2.0/
+live2d-widget-model-chitose
+live2d-widget-model-epsilon2_1
+live2d-widget-model-gf
+live2d-widget-model-haru/01 (use npm install --save live2d-widget-model-haru) # 白色衣服
+live2d-widget-model-haru/02 (use npm install --save live2d-widget-model-haru) # 咖色衣服
+live2d-widget-model-haruto
+live2d-widget-model-hibiki
+live2d-widget-model-hijiki
+live2d-widget-model-izumi
+live2d-widget-model-koharu
+live2d-widget-model-miku
+live2d-widget-model-ni-j
+live2d-widget-model-nico
+live2d-widget-model-nietzsche
+live2d-widget-model-nipsilon
+live2d-widget-model-nito
+live2d-widget-model-shizuku
+live2d-widget-model-tororo
+live2d-widget-model-tsumiki
+live2d-widget-model-unitychan
+live2d-widget-model-wanko
+live2d-widget-model-z16
+```
+
+配置 _config.yml
+
+``` yaml
+# Live2D 右下角动画
+## https://github.com/EYHN/hexo-helper-live2d
+live2d:
+  enable: true
+  scriptFrom: local
+  pluginRootPath: live2dw/
+  pluginJsPath: lib/
+  pluginModelPath: assets/
+  tagMode: false
+  debug: false
+  model:
+    use: live2d-widget-model-haru
+  display:
+    position: right
+    width: 300
+    height: 800
+  mobile:
+    show: false
+```
+
+如果是配置 haru 这个模型，有可能 hexo s 的时候有异常，提示缺少 assets，把 *node_modules/live2d-widget-model-haru* 下 01 或 02 目录的 assets 目录拷贝到 *node_modules/live2d-widget-model-haru* 目录下即可；
+
+github 参考
+
+https://github.com/xiazeyu/live2d-widget-models

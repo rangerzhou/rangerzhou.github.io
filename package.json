@@ -22,7 +22,9 @@
     "hexo-server": "^3.0.0",
     "hexo-tag-aplayer": "^3.0.4",
     "hexo-wordcount": "^6.0.1",
-    "leancloud-storage": "^4.12.3",
+    "leancloud-storage": "^4.13.0",
+    "live2d-widget-model-haru": "^1.0.5",
+    "live2d-widget-model-hibiki": "^1.0.5",
     "live2d-widget-model-wanko": "^1.0.5",
     "pjax": "^0.2.8",
     "valine": "^1.5.0"
