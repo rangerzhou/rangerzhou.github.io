@@ -69,7 +69,7 @@ Launcher 中点击 icon 后最终会执行到 Activity.startActivity()，以此�
         if (options != null) {
             startActivityForResult(intent, -1, options);
         } else {
-            startActivityForResult(intent, -1);
+            startActivityForResult(intent, -1); // -1 表示 Launcher 不需要知道 Activity 启动的结果
         }
     }
     public void startActivityForResult(@RequiresPermission Intent intent, int requestCode) {
@@ -85,7 +85,7 @@ Launcher 中点击 icon 后最终会执行到 Activity.startActivity()，以此�
     }
 ```
 
-有多种启动 activity 的方法，但是最终都是调用 mInstrumentation.execStartActivity()。
+有多种启动 activity 的方法，但是最终都是调用 mInstrumentation.execStartActivity()，Instrumentation 主要用来监控应用程序和系统的交互。
 
 ### 2.2 Instrumentation
 
@@ -867,7 +867,7 @@ ZygoteState 是用于与 Zygote 通信的状态，
         try {
             final BufferedWriter zygoteWriter = zygoteState.mZygoteOutputWriter;
             final DataInputStream zygoteInputStream = zygoteState.mZygoteInputStream;
-			// socket 通信
+            // socket 通信
             zygoteWriter.write(msgStr); // 向 zygote 进程发送参数列表
             zygoteWriter.flush();
 

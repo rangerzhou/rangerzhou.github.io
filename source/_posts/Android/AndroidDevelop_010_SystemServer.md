@@ -264,7 +264,7 @@ SystemServer 的 main 方法在 `MethodAndArgsCaller` 的 `run()` 中被 invoke 
 - 设置 SystemServer 的 binder 线程池的数量为 31，默认是 15，这里的数量不包含 binder 主线程；
 - 准备 Looper；
 - 初始化 SystemContext；
-- 创建 SystemServiceManager，用来管理系统服务的启动；
+- 创建 SystemServiceManager，用来管理系统服务的创建、启动和生命周期管理；
 - 启动引导服务、核心服务以及其他服务；
 - 进入 Looper 循环；
 
