@@ -26,12 +26,12 @@ password: zr.
 ``` java
 // Message.java
 public final class Message implements Parcelable {
-    public int what;
+    public int what; // 唯一标识
     public int arg1;
     public int arg2;
-    public Object obj;
-    public long when;
-    /*package*/ Handler target;
+    public Object obj; // 数据
+    public long when; // 时间戳
+    /*package*/ Handler target; // message 的发送者，也是最终处理者
     /*package*/ Message next;
 ```
 
