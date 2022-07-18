@@ -4,7 +4,7 @@ date: 2021-10-27 23:18:46
 tags:
 categories: Android
 copyright: true
-password: zr.
+password:
 ---
 
 
@@ -13,13 +13,16 @@ password: zr.
 
 <!--more-->
 
-# 相关代码路径
+# 代码路径
 
-| Layer        | Path |
-| ------------ | ---- |
-| framework 层 |      |
+| frameworks/base/core/java/android/os/Message.java      |
+| ------------------------------------------------------ |
+| frameworks/base/core/java/android/os/MessageQueue.java |
+| frameworks/base/core/java/android/os/Handler.java      |
+| frameworks/base/core/java/android/os/Looper.java       |
+| java/lang/ThreadLocal.java                             |
 
-# Handler 机制相关类
+# Handler 机制
 
 Handler 机制主要涉及如下几个类：
 
@@ -40,8 +43,8 @@ public final class Message implements Parcelable {
     public Object obj; // 消息内容
     public long when; // 消息触发时间戳
     /*package*/ Handler target; // 消息响应方
-    /*package*/ Runnable callback; // 回调方法
-    /*package*/ Message next;
+    /*package*/ Runnable callback; // Message 的回调方法
+    /*package*/ Message next; // 指向当前 Message 后面的节点
     private static final int MAX_POOL_SIZE = 50;
 ```
 
@@ -117,7 +120,7 @@ mQuitAllowed 决定消息队列是否可以销毁，主线程的队列是不可�
 
 MessageQueue 主要有两个操作，插入消息（MessageQueue.enqueueMessage）和读取消息(MessageQueue.next)；
 
-### enqueueMessage()
+### enqueueMessage() 插入消息
 
 ``` java
 // MessageQueue.java
@@ -170,9 +173,7 @@ MessageQueue 中有一个 `Message mMessages` 属性，代表消息队列头节�
 
 否则和消息队列中现有 Message 的 when 值进行比较，插入到适当位置；
 
-### next()
-
-
+### next() 取消息
 
 ``` java
 // MessageQueue.java
@@ -240,14 +241,264 @@ MessageQueue 中有一个 `Message mMessages` 属性，代表消息队列头节�
                 }
 ```
 
-首先判断 MessageQueue 的头结点 mMessages.target 是否等于 null，如果是 null，代表有消息屏障，则从消息队列中找到第一个异步消息，否则找出消息队列头结点消息；
+首先判断 MessageQueue 的头结点 mMessages.target 是否等于 null，如果是 null，代表有同步屏障，则从消息队列中找到第一个异步消息，否则找出消息队列头结点消息；
 
 如果有消息需要处理(msg != null)，首先判断消息执行时间是否到了，如果没到就阻塞差值时间，如果到了就取出消息并从消息队列中删除此节点，返回拿到的消息；
 
 如果没有消息要处理(msg == null)，则 `nextPollTimeoutMillis = -1`，通过 nativePollOnce() 一直阻塞；
 
+可以看到 `enqueueMessage()` 和 `next()` 函数执行时都有对 MessageQueue 加锁 `synchronized (this)`，这样就保证了插入消息和读取消息互斥；
+
 ## 3. Handler
 
+### Handler 创建
 
+``` java
+// Handler.java
+    public Handler(@NonNull Looper looper) { // 指定 Looper
+        this(looper, null, false);
+    }
+    public Handler(@NonNull Looper looper, @Nullable Callback callback) { // 指定 Looper 和 Callback
+        this(looper, callback, false);
+    }
+    public Handler(@NonNull Looper looper, @Nullable Callback callback, boolean async) {
+        mLooper = looper;
+        mQueue = looper.mQueue;
+        mCallback = callback;
+        mAsynchronous = async;
+    }
+```
+
+参数可指定 Looper、Callback 回调方法以及是否异步，之前的无参构造函数从 Android 11 开始被废弃，使用 `new Handler(Looper.myLooper())` 代替原来的无参构造方法；
+
+### 发送消息
+
+发送消息的函数有如下几种：
+
+- sendMessage()
+- sendMessageAtFrontOfQueue()
+- sendMessageAtTime()
+- sendMessageDelayed()
+- sendEmptyMessage()
+- sendEmptyMessageAtTime()
+- sendEmptyMessageDelayed()
+- postXXX()
+
+但是殊途同归，最终都是调用到 `Handler.enqueueMessage(queue, msg, uptimeMillis)`，然后再调用到 `MessageQueue.enqueueMessage(msg, uptimeMillis)`；
+
+### 分发消息
+
+``` java
+// Handler.java
+    public void dispatchMessage(@NonNull Message msg) {
+        if (msg.callback != null) { // Message 存在回调方法，则执行 message.callback.run()
+            handleCallback(msg);
+        } else {
+            if (mCallback != null) { // Handler 存在 CallBack 变量，则执行 mCallback.handleMessage(msg) 
+                if (mCallback.handleMessage(msg)) {
+                    return;
+                }
+            }
+            handleMessage(msg); // 否则执行 Handler 自身的回调方法
+        }
+    }
+    public void handleMessage(@NonNull Message msg) { // 默认空实现，Handler 子类需要重写以接收消息
+    }
+```
+
+一般使用子类重写 handleMessage 这种方法用的比较多；
 
 ## 4. Looper
+
+### prepare()
+
+``` java
+// Looper.java
+public final class Looper {
+    static final ThreadLocal<Looper> sThreadLocal = new ThreadLocal<Looper>(); // TLS 变量
+    private static Looper sMainLooper; // 主线程 Looper
+    final MessageQueue mQueue;
+
+    public static void prepare() {
+        prepare(true); // 无参方法，子线程中调用，传入参数 true，即 Looper 可退出
+    }
+    private static void prepare(boolean quitAllowed) { // 主线程中调用传入 false 参数
+        if (sThreadLocal.get() != null) {
+            throw new RuntimeException("Only one Looper may be created per thread");
+        }
+        sThreadLocal.set(new Looper(quitAllowed));
+    }
+```
+
+每个线程只能有一个 Looper，Looper 中有一个 ThreadLocal 对象 sThreadLocal，这个 sThreadLocal 是一个 TLS 变量，线程间互不影响；
+
+这里 sThreadLocal 把一个 Looper 对象 set 进去了，所以说每个线程都有自己的一个 Looper，且仅有一个；
+
+在 ActivityThread.main() 中调用了 `Looper.prepareMainLooper()`，在其中通过 `prepare(false)` **设置了主线程的 Looper**，在 Looper 的构造中又**初始化了 MessageQueue**；
+
+### loop()
+
+``` java
+// Looper.java
+    public static void loop() {
+        final Looper me = myLooper(); // 获取当前线程 Looper 对象
+        ...
+        me.mInLoop = true;
+        ...
+        for (;;) {
+            if (!loopOnce(me, ident, thresholdOverride)) {
+                return;
+            }
+        }
+    }
+```
+
+loop() 中有一个死循环 `for(;;)`，在其中调用了 `loopOnce()`；
+
+``` java
+// Looper.java
+    private static boolean loopOnce(final Looper me,
+            final long ident, final int thresholdOverride) {
+        // 从 MessageQueue 中取消息
+        Message msg = me.mQueue.next(); // might block
+        if (msg == null) { // msg 为 null，说明 Looper 退出
+            // No message indicates that the message queue is quitting.
+            return false;
+        }
+
+        // This must be in a local variable, in case a UI event sets the logger
+        final Printer logging = me.mLogging; // 可利用这里通过 setMessageLogging() 指定输出，用于 debug
+        if (logging != null) {
+            logging.println(">>>>> Dispatching to " + msg.target + " "
+                    + msg.callback + ": " + msg.what);
+        }
+        // Make sure the observer won't change while processing a transaction.
+        final Observer observer = sObserver;
+        ...
+        try {
+            msg.target.dispatchMessage(msg); // 调用 Handler.dispatchMessage 分发消息
+            if (observer != null) {
+                observer.messageDispatched(token, msg);
+            }
+            dispatchEnd = needEndTime ? SystemClock.uptimeMillis() : 0;
+        } ...
+        if (logging != null) {
+            logging.println("<<<<< Finished to " + msg.target + " " + msg.callback);
+        }
+        msg.recycleUnchecked(); // 把分发后的 Message 回收到消息池
+
+        return true;
+    }
+```
+
+loop() 函数中运行了一个死循环，不断的从 MessageQueue 中读取下一条 Message，并把 Message 分发给对应的 Handler，分发后回收 Message，这样需要 Message 时就可以直接通过 Message.obtain() 或者 Handler.obtainMessage() 获取了，可以优化内存和性能；
+
+如果 logging 不为 null，在分发消息的前后都使用 `logging.println()` 打印了log，mLogging 在 Looper 中没有初始化值，所以默认为空，在应用中可以通过 setMessageLogging() 指定输出用于调试，比如通过前后两条 log 的时间判断消息的执行时间，判断是否有卡顿；
+
+``` java
+// Looper.java
+    public void setMessageLogging(@Nullable Printer printer) {
+        mLogging = printer;
+    }
+```
+
+## 5. ThreadLocal
+
+ThreadLocal（Thread Local Storage，线程本地存储，简称 TLS）是一个在多线程中为每一个线程创建单独的变量副本的类；当使用 ThreadLocal 来维护变量时，ThreadLocal 会为每个线程创建单独的变量副本，每个线程的 TLS 变量之间互不影响，避免了多线程操作共享变量导致数据不一致的情况；
+
+ThreadLocal 中有 set() 和 get() 两个函数，作用分别是将 value 值添加到当前线程的 TLS 区域，获取当前线程 TLS 区域的数据；
+
+### ThreadLocal.set()
+
+``` java
+// ThreadLocal.java
+// ThreadLocal.set()
+    public void set(T value) {
+        Thread t = Thread.currentThread(); // 获取当前线程
+        ThreadLocal.ThreadLocalMap map = this.getMap(t); // 获取当前线程的 ThreadLocalMap 对象变量 threadLocals
+        if (map != null) {
+            map.set(this, value); // 更新 ThreadLocalMap 中的 Entry 数组中的 Entry 对象，或添加一个 Entry 到 ThreadLocalMap 中
+        } else {
+            this.createMap(t, value);
+        }
+
+    }
+```
+
+set() 对应 ThreadLocalMap 的 set()：
+
+``` java
+// ThreadLocal.java
+// ThreadLocalMap.set()
+        private void set(ThreadLocal<?> key, Object value) {
+            ThreadLocal.ThreadLocalMap.Entry[] tab = this.table;
+            int len = tab.length;
+            int i = key.threadLocalHashCode & len - 1;
+
+            for(ThreadLocal.ThreadLocalMap.Entry e = tab[i]; e != null; e = tab[i = nextIndex(i, len)]) {
+                ThreadLocal<?> k = (ThreadLocal)e.get();
+                if (k == key) {
+                    e.value = value;
+                    return;
+                }
+
+                if (k == null) {
+                    this.replaceStaleEntry(key, value, i);
+                    return;
+                }
+            }
+
+            tab[i] = new ThreadLocal.ThreadLocalMap.Entry(key, value);
+            int sz = ++this.size;
+            if (!this.cleanSomeSlots(i, sz) && sz >= this.threshold) {
+                this.rehash();
+            }
+
+        }
+```
+
+大致意思就是 ThreadLocalMap 中有一个 Entry 对象数组，每个 Entry 对象是以 ThreadLocal 变量和一个 Object 类型的 value 构造而成，当调用 set() 时，会先遍历这个数组，看有没有和当前要 set 的 key 相同的 Entry，如果有，则更新 Entry.value 为要 set 的 value，否则以 key 和 value 新建一个 Entry 对象，并添加到 ThreadLocalMap 的 Entry 数组中；
+
+### ThreadLocal.get()
+
+``` java
+// ThreadLocal.java
+// ThreadLocal.get()
+    public T get() {
+        Thread t = Thread.currentThread();
+        ThreadLocal.ThreadLocalMap map = this.getMap(t);
+        if (map != null) {
+            ThreadLocal.ThreadLocalMap.Entry e = map.getEntry(this);
+            if (e != null) {
+                T result = e.value;
+                return result;
+            }
+        }
+
+        return this.setInitialValue();
+    }
+```
+
+ThreadLocal.get() 则是获取 ThreadLocalMap.Entry 的 value 值；
+
+每一个 Thread 中都有一个 ThreadLocalMap 变量，getMap() 就是获取线程中的 ThreadLocalMap 变量；
+
+``` java
+// Thread.java
+ThreadLocalMap threadLocals;
+
+// ThreadLocal.java
+// getMap()
+    ThreadLocal.ThreadLocalMap getMap(Thread t) {
+        return t.threadLocals;
+    }
+```
+
+## 6. 同步屏障
+
+
+
+## 7. 总结
+
+
+
