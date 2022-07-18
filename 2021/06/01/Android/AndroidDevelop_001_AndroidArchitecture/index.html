@@ -1,0 +1,959 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.2.0">
+<!-- pjax：防止跳转页面音乐暂停 -->
+<script src="https://cdn.jsdelivr.net/npm/pjax@0.2.8/pjax.js"></script>
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/desert.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/desert.jpg">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <meta name="google-site-verification" content="OJnYjbr3wdT22qLrZSzyD9lAyBcXiXlEQ7-5wAnaWoQ">
+  <meta name="baidu-site-verification" content="vr4n4JeXgB">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-minimal.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"rangerzhou.top","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"manual"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":true,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":true,"nav":null,"activeClass":"gitalk"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="Android 平台架构概述。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android - 平台架构">
+<meta property="og:url" content="http://rangerzhou.top/2021/06/01/Android/AndroidDevelop_001_AndroidArchitecture/index.html">
+<meta property="og:site_name" content="RangerZhou">
+<meta property="og:description" content="Android 平台架构概述。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://raw.githubusercontent.com/rangerzhou/ImageHosting/master/blog_resource/2020/android_architecture.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/rangerzhou/ImageHosting/master/blog_resource/2020/android-boot.jpg">
+<meta property="article:published_time" content="2021-06-01T06:22:15.000Z">
+<meta property="article:modified_time" content="2022-07-18T14:46:21.580Z">
+<meta property="article:author" content="Ranger Zhou">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/rangerzhou/ImageHosting/master/blog_resource/2020/android_architecture.png">
+
+<link rel="canonical" href="http://rangerzhou.top/2021/06/01/Android/AndroidDevelop_001_AndroidArchitecture/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+<script src="//cdn.bootcss.com/pace/1.0.2/pace.min.js"></script>
+<link href="//cdn.bootcss.com/pace/1.0.2/themes/pink/pace-theme-flash.css" rel="stylesheet">
+
+  <title>Android - 平台架构 | RangerZhou</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-138158952-1"></script>
+    <script data-pjax>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-138158952-1');
+      }
+    </script>
+
+
+  <script data-pjax>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?24a6d3c4c0f292c5f682d26414c3994b";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+
+<!-- 加入APlayer音乐播放器 -->
+<link rel="stylesheet" href="/dist/APlayer.min.css">
+<div id="aplayer"></div>
+<script type="text/javascript" src="/dist/APlayer.min.js"></script>
+<script type="text/javascript" src="/dist/music.js"></script>
+
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">RangerZhou</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">Read the fucking source code</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-playlist">
+
+    <a href="/playlist/" rel="section"><i class="fa fa-music fa-fw"></i>歌单</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-commonweal">
+
+    <a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a>
+
+  </li>
+        <li class="menu-item menu-item-official">
+
+    <a href="/official" rel="section"><i class="fa fa-user fa-fw"></i>official</a>
+
+  </li>
+        <li class="menu-item menu-item-shop">
+
+    <a href="http://rangerzhou.taobao.com/" rel="noopener" target="_blank"><i class="fa fa-user fa-fw"></i>shop</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://rangerzhou.top/2021/06/01/Android/AndroidDevelop_001_AndroidArchitecture/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Ranger Zhou">
+      <meta itemprop="description" content="我是一个小流氓我从来也不浪，有一天我心血来潮耍了个流氓，我嘴里吹着小口哨我心里好得意，不知怎么哗啦啦啦啦我摔了一身泥">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="RangerZhou">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Android - 平台架构
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-06-01 14:22:15" itemprop="dateCreated datePublished" datetime="2021-06-01T14:22:15+08:00">2021-06-01</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-07-18 22:46:21" itemprop="dateModified" datetime="2022-07-18T22:46:21+08:00">2022-07-18</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Android/" itemprop="url" rel="index"><span itemprop="name">Android</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/2021/06/01/Android/AndroidDevelop_001_AndroidArchitecture/" class="post-meta-item leancloud_visitors" data-flag-title="Android - 平台架构" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <blockquote>
+<p>Android 平台架构概述。</p>
+</blockquote>
+<span id="more"></span>
+
+<h3 id="Android-平台架构"><a href="#Android-平台架构" class="headerlink" title="Android 平台架构"></a>Android 平台架构</h3><p>Android 是一种基于 Linux 的开放源代码软件栈，为各类设备和机型而创建。</p>
+<h4 id="嵌入式-Linux-系统软件架构"><a href="#嵌入式-Linux-系统软件架构" class="headerlink" title="嵌入式 Linux 系统软件架构"></a>嵌入式 Linux 系统软件架构</h4><p>一般情况下嵌入式 Linux 系统中的软件主要分为以下几部分：</p>
+<ul>
+<li><p>引导加载程序：包括固化在固件（firmware）中的 boot 代码(可选)，和 Boot Loader 两大部分。</p>
+<p>内部固化 ROM 是厂家在芯片生产时候固化的，作用基本上是引导Boot Loader</p>
+</li>
+<li><p>Linux kernel 和 drivers，特定于嵌入式板子的定制内核、内核的启动参数以及外围硬件设备驱动程序。</p>
+</li>
+<li><p>文件系统。包括根文件系统和建立于Flash内存设备之上的文件系统（EXT4、UBI、CRAMFS 等等）。它是提供管理系统的各种配置文件以及系统执行用户应用程序的良好运行环境的载体。</p>
+</li>
+<li><p>应用程序。特定于用户的应用程序。</p>
+</li>
+</ul>
+<h4 id="Android-软件堆栈"><a href="#Android-软件堆栈" class="headerlink" title="Android 软件堆栈"></a>Android 软件堆栈</h4><p><a target="_blank" rel="noopener" href="https://developer.android.com/guide/platform?hl=zh-cn">下图</a> 所示为 Google 提供的 Android 平台的主要组件图：</p>
+<p><a target="_blank" rel="noopener" href="https://raw.githubusercontent.com/rangerzhou/ImageHosting/master/blog_resource/2020/android_architecture.png">Android堆栈</a></p>
+<p><img src="https://raw.githubusercontent.com/rangerzhou/ImageHosting/master/blog_resource/2020/android_architecture.png" alt="Android 堆栈" title="Android 堆栈"></p>
+<p>在上图中，Google 把 Android 分成了5层架构：</p>
+<ul>
+<li>Linux 内核</li>
+<li>硬件抽象层（HAL）</li>
+<li>Android Runtime + 原生 C&#x2F;C++ 库</li>
+<li>Java API 框架</li>
+<li>系统应用层</li>
+</ul>
+<h4 id="系统启动架构"><a href="#系统启动架构" class="headerlink" title="系统启动架构"></a>系统启动架构</h4><p>以进程的视角、分层的架构展示 Android 系统启动架构：</p>
+<p><a target="_blank" rel="noopener" href="https://raw.githubusercontent.com/rangerzhou/ImageHosting/master/blog_resource/2020/android-boot.jpg">系统架构图_进程角度</a></p>
+<p><img src="https://raw.githubusercontent.com/rangerzhou/ImageHosting/master/blog_resource/2020/android-boot.jpg" alt="系统启动架构图" title="系统架构图"></p>
+<p>对于 Android 整个启动过程来说，可以划分为三个阶段：BootLoader 引导（U-Boot）、Linux Kernel 启动、Android OS 启动。</p>
+<p>U-Boot 主要作用，就是引导内核的启动，首先会把内核从 Flash 中放到内存中，然后引导内核启动；</p>
+<p>内核是整个系统的核心，它负责进程管理、内存管理、网络管理，可以直接对硬件进行控制，并且把硬件全部抽象成文件，对上层提供接口；</p>
+<p>内核启动完后，会根据所设置的启动方式去启动 Android 系统；</p>
+<h4 id="Loader-层"><a href="#Loader-层" class="headerlink" title="Loader 层"></a>Loader 层</h4><p>早期经常刷机的时候，通过某个组合键（一般是 power + volume down）就会进入 bootloader 页面，就是系统启动架构图中的最底层，BootLoader 并不是 Linux 才需要，而是几乎所有的运行操作系统的设备都具备，PC 中的 BIOS 就是 BootLoader 的一部分，对于 Linux PC 来说，BootLoader &#x3D; BIOS + GRUB&#x2F;LILO。</p>
+<p>常用的 BootLoader 有 Redboot、ARMBoot、Blob、<strong>U-Boot</strong> 等，U-Boot 是最常用的 BootLoader，可以引导多种操作系统，支持多种架构的 CPU。全称 Universal Boot Loader，是由开源项目 PPCBoot 发展起来的，ARMboot 并入了 PPCBoot，和其他一些 arch 的 Loader 合称 U-Boot。</p>
+<ul>
+<li><font color=red><strong>Boot ROM</strong></font>：固化在固件（firmware）中的 boot 代码；</li>
+<li><font color=red><strong>Boot Loader</strong></font> ：启动 Android OS 之前的引导程序，主要是<code>检查 RAM，初始化硬件参数</code>等功能，会把内核从 flash 中放到内存中，然后引导内核启动。</li>
+</ul>
+<p><strong>Bootloader 是如何被引导的？</strong></p>
+<p>由主 CPU 完成，CPU 内部也会有一段引导程序，并且有一段固化的 ROM，由芯片厂商完成。手机处于关机状态时，长按 Power 键开机，如上 <strong>嵌入式 Linux 系统软件架构</strong> 中所述，芯片从固化在 ROM 里的预设代码开始执行，然后加载引导程序（Bootloader）到 RAM。主芯片基本都会提供几种启动模式：USB 启动、SD 卡启动、Flash 启动等。</p>
+<h4 id="Linux-Kernel-层"><a href="#Linux-Kernel-层" class="headerlink" title="Linux Kernel 层"></a>Linux Kernel 层</h4><p>Android 平台的基础是 Linux 内核，也是整个系统的核心，内核负责进程管理、内存管理、网络管理，作为硬件和软件之间的抽象层，可以直接对硬件进行控制，并且<font color = red><strong>把硬件全部抽象成文件，对上层提供接口</strong></font>。例如，<a target="_blank" rel="noopener" href="https://developer.android.com/guide/platform?hl=zh-cn#art">Android Runtime (ART)</a> 依靠 Linux 内核来执行底层功能，例如线程和低层内存管理。</p>
+<p>使用 Linux 内核可让 Android 利用<a target="_blank" rel="noopener" href="https://source.android.com/security/overview/kernel-security.html?hl=zh-cn">主要安全功能</a>，并且允许设备制造商为著名的内核开发硬件驱动程序。</p>
+<ul>
+<li><font color=red><strong>swapper 进程（pid &#x3D; 0）</strong></font>：即 idle 进程，由系统自动创建，运行在内核态，系统初始化过程开创的第一个进程，也是唯一一个没有通过 fork 或者 kernel_thread 产生的进程。完成加载系统后，演变为进程调度、交换，用于<strong>初始化进程管理、内存管理，加载 Display, Camera Driver, Binder Driver</strong> 等相关工作；</li>
+<li><font color = red><strong>kthreadd（pid &#x3D; 2）</strong></font>：kthreadd  进程由 idle 通过 kernel_thread 创建，并始终运行在内核空间，负责所有内核线程的调度和管理。它的任务就是管理和调度其他内核线程 kernel_thread, 会循环执行一个 kthreadd 的函数，该函数的作用就是运行 kthread_create_list 全局链表中维护的 kthread, 当我们调用 kernel_thread 创建的内核线程会被加入到此链表中，因此<font color = red><strong>所有的内核线程都是直接或者间接的以 kthreadd 为父进程</strong></font>。</li>
+</ul>
+<h4 id="硬件抽象层（HAL）"><a href="#硬件抽象层（HAL）" class="headerlink" title="硬件抽象层（HAL）"></a>硬件抽象层（HAL）</h4><p><a target="_blank" rel="noopener" href="https://source.android.com/devices/architecture/hal-types?hl=zh-cn">硬件抽象层 (HAL)</a> 提供标准界面，向更高级别的 <a target="_blank" rel="noopener" href="https://developer.android.com/guide/platform?hl=zh-cn#api-framework">Java API 框架</a>显示设备硬件功能。HAL 包含多个库模块，其中每个模块都为特定类型的硬件组件实现一个界面，例如<a target="_blank" rel="noopener" href="https://source.android.com/devices/camera/index.html?hl=zh-cn">相机</a>或<a target="_blank" rel="noopener" href="https://source.android.com/devices/bluetooth.html?hl=zh-cn">蓝牙</a>模块。当框架 API 要求访问设备硬件时，Android 系统将为该硬件组件加载库模块。</p>
+<p><strong>作用</strong>：把一些主要外设抽象出一套标准的接口，供 C++ Framework 层调用。比如把 Camera 抽象出一套接口，如果底层换了 Camera，那么 Camera 号和 C++ Framework 层之间的接口是不会发生改变的，所要修改的就是从 HAL 层调用驱动的方式会发生一些改变，但是 Framework 层到 HAL 层之间的接口是不会改变的。</p>
+<p>同样 Sensor、Audio、WIFI 对 C++ Framework 层所提供的接口都是一套标准的，如果需要更换硬件、驱动、调用方式，这套标准接口是不会改变的。</p>
+<h4 id="Android-Runtime-amp-原生-C-x2F-C-库"><a href="#Android-Runtime-amp-原生-C-x2F-C-库" class="headerlink" title="Android Runtime &amp; 原生 C&#x2F;C++ 库"></a>Android Runtime &amp; 原生 C&#x2F;C++ 库</h4><h5 id="Android-Runtime"><a href="#Android-Runtime" class="headerlink" title="Android Runtime"></a>Android Runtime</h5><p>Android 运行时分为核心库和 ART（5.0 系统以后，Dalvik 虚拟机被 ART 取代），核心库提供了 Java 语言核心库的大多数功能。对于运行 Android 5.0（API 级别 21）或更高版本的设备，每个应用都在其自己的进程中运行，并且有其自己的 <a target="_blank" rel="noopener" href="https://source.android.com/devices/tech/dalvik/index.html?hl=zh-cn">Android Runtime (ART)</a> 实例。ART 编写为通过执行 DEX 文件在低内存设备上运行多个虚拟机，DEX 文件是一种专为 Android 设计的字节码格式，经过优化，使用的内存很少。编译工具链（例如 <a target="_blank" rel="noopener" href="https://source.android.com/source/jack.html?hl=zh-cn">Jack</a>）将 Java 源代码编译为 DEX 字节码，使其可在 Android 平台上运行。</p>
+<p>ART 的部分主要功能包括：</p>
+<ul>
+<li>预先 (AOT) 和即时 (JIT) 编译</li>
+<li>优化的垃圾回收 (GC)</li>
+<li>在 Android 9（API 级别 28）及更高版本的系统中，支持将应用软件包中的 <a target="_blank" rel="noopener" href="https://developer.android.com/about/versions/pie/android-9.0?hl=zh-cn#art-aot-dex">Dalvik Executable 格式 (DEX) 文件转换为更紧凑的机器代码</a>。</li>
+<li>更好的调试支持，包括专用采样分析器、详细的诊断异常和崩溃报告，并且能够设置观察点以监控特定字段</li>
+</ul>
+<p>在 Android 版本 5.0（API 级别 21）之前，Dalvik 是 Android Runtime。如果您的应用在 ART 上运行效果很好，那么它应该也可在 Dalvik 上运行，但<a target="_blank" rel="noopener" href="https://developer.android.com/guide/practices/verifying-apps-art?hl=zh-cn">反过来不一定</a>。</p>
+<p>Android 还包含一套核心运行时库，可提供 Java API 框架所使用的 Java 编程语言中的大部分功能，包括一些 <a target="_blank" rel="noopener" href="https://developer.android.com/guide/platform/j8-jack?hl=zh-cn">Java 8 语言功能</a>。</p>
+<h5 id="原生-C-x2F-C-库"><a href="#原生-C-x2F-C-库" class="headerlink" title="原生 C&#x2F;C++ 库"></a>原生 C&#x2F;C++ 库</h5><p>Android 包含一个 C&#x2F;C++ 库的集合，供 Android 系统的各个组件使用。这些功能通过 Android 的应用程序框架（application framework）暴露给开发者。下面列出一些核心库：</p>
+<ul>
+<li><strong>系统C库</strong>——标准 C 系统库（libc）的 BSD 衍生，调整为基于嵌入式 Linux 设备</li>
+<li><strong>媒体库</strong>——基于 PacketVideo 的 OpenCORE。这些库支持播放和录制许多流行的音频和视频格式，以及静态图像文件，包括 MPEG4、H.264、MP3、AAC、AMR、JPG、PNG</li>
+<li><strong>界面管理</strong>——管理访问显示子系统和无缝组合多个应用程序的二维和三维图形层</li>
+<li><strong>LibWebCore</strong>——新式的 Web 浏览器引擎,驱动 Android 浏览器和内嵌的 web 视图</li>
+<li><strong>SGL</strong>——基本的 2D 图形引擎</li>
+<li><strong>3D库</strong>——基于 OpenGL ES 1.0 APIs 的实现。库使用硬件 3D 加速或包含高度优化的 3D 软件光栅</li>
+<li><strong>FreeType</strong> ——位图和矢量字体渲染</li>
+<li><strong>SQLite</strong> ——所有应用程序都可以使用的强大而轻量级的关系数据库引擎</li>
+</ul>
+<p>C++ Framework 层作用：起一个承上启下的作用，对上（Java Framework 层）提供服务，对下能够挂接 HAL 层（比如 Camera、Sensor、Audio、WIFI 等外设），并且能够对外设提供保护。比如上层同时有两个程序同时对 Camera 进行访问，但是同一时刻只能有一个应用程序对 Camera 进行访问，C++ Framework 层就会有一种机制去管理这种访问，确保在同一时刻只有一个应用程序对 Camera 进行访问。</p>
+<p>许多核心 Android 系统组件和服务（例如 ART 和 HAL）构建自原生代码，需要以 C 和 C++ 编写的原生库。Android 平台提供 Java 框架 API 以向应用显示其中部分原生库的功能。例如，您可以通过 Android 框架的 <a target="_blank" rel="noopener" href="https://developer.android.com/reference/android/opengl/package-summary?hl=zh-cn">Java OpenGL API</a> 访问 <a target="_blank" rel="noopener" href="https://developer.android.com/guide/topics/graphics/opengl?hl=zh-cn">OpenGL ES</a>，以支持在应用中绘制和操作 2D 和 3D 图形。</p>
+<p>如果开发的是需要 C 或 C++ 代码的应用，可以使用 <a target="_blank" rel="noopener" href="https://developer.android.com/ndk?hl=zh-cn">Android NDK</a> 直接从原生代码访问某些<a target="_blank" rel="noopener" href="https://developer.android.com/ndk/guides/stable_apis?hl=zh-cn">原生平台库</a>。</p>
+<p>原生系统库主要包括 init 浮华来的用户空间的守护进程、HAL 层以及开机动画等。</p>
+<ul>
+<li><font color = red><strong>init 进程（pid &#x3D; 1）</strong></font>：Linux 系统的用户进程，负责的事情主要是对 <code>init.rc</code> 这个系统启动脚本文件进行解析；</li>
+<li>init 进程会孵化出 ueventd、logd、healthd、installd、adbd、lmkd 等用户守护进程；</li>
+<li>init 进程还启动 <code>servicemanager</code>(binder 服务管家)、<code>bootanim</code> (开机动画)等重要服务；</li>
+<li>init 进程孵化出 Zygote 进程，Zygote 进程是 Android 系统的第一个 Java 进程(即虚拟机进程)，<font color = red><strong>Zygote是所有Java进程的父进程</strong></font>，Zygote进程本身是由init进程孵化而来的。</li>
+</ul>
+<h4 id="Framework-层"><a href="#Framework-层" class="headerlink" title="Framework 层"></a>Framework 层</h4><p>您可通过以 Java 语言编写的 API 使用 Android OS 的整个功能集。这些 API 形成创建 Android 应用所需的构建块，它们可简化核心模块化系统组件和服务的重复使用，包括以下组件和服务：</p>
+<ul>
+<li>丰富、可扩展的<a target="_blank" rel="noopener" href="https://developer.android.com/guide/topics/ui/overview?hl=zh-cn">视图系统</a>，可用以构建应用的 UI，包括列表、网格、文本框、按钮甚至可嵌入的网络浏览器</li>
+<li><a target="_blank" rel="noopener" href="https://developer.android.com/guide/topics/resources/overview?hl=zh-cn">资源管理器</a>，用于访问非代码资源，例如本地化的字符串、图形和布局文件</li>
+<li><a target="_blank" rel="noopener" href="https://developer.android.com/guide/topics/ui/notifiers/notifications?hl=zh-cn">通知管理器</a>，可让所有应用在状态栏中显示自定义提醒</li>
+<li><a target="_blank" rel="noopener" href="https://developer.android.com/guide/components/activities?hl=zh-cn">Activity 管理器</a>，用于管理应用的生命周期，提供常见的<a target="_blank" rel="noopener" href="https://developer.android.com/guide/components/tasks-and-back-stack?hl=zh-cn">导航返回栈</a></li>
+<li><a target="_blank" rel="noopener" href="https://developer.android.com/guide/topics/providers/content-providers?hl=zh-cn">内容提供程序</a>，可让应用访问其他应用（例如“联系人”应用）中的数据或者共享其自己的数据</li>
+</ul>
+<p>开发者可以完全访问 Android 系统应用使用的<a target="_blank" rel="noopener" href="https://developer.android.com/reference/packages?hl=zh-cn">框架 API</a>。</p>
+<ul>
+<li><font color = red><strong>Zygote 进程</strong></font>：由 init 进程通过解析 init.rc 文件后 fork 生成的，Zygote 进程主要包含：<ul>
+<li>加载 ZygoteInit 类，注册 Zygote Socket 服务端套接字</li>
+<li>加载虚拟机</li>
+<li>提前加载类 preloadClasses</li>
+<li>提前加载资源 preloadResouces</li>
+</ul>
+</li>
+<li><font color = red><strong>System Server 进程</strong></font>：是由 Zygote 进程 fork 而来，<font color = red><strong>System Server 是 Zygote 孵化的第一个进程</strong></font>，System Server 负责启动和管理整个 Java framework，包含 ActivityManager，WindowManager，PackageManager，PowerManager 等服务。</li>
+<li><font color = red><strong>Media Server 进程</strong></font>：是由 init 进程 fork 而来，负责启动和管理整个 <strong>C++ framework</strong>，包含AudioFlinger，Camera Service 等服务。</li>
+</ul>
+<h4 id="APP-层"><a href="#APP-层" class="headerlink" title="APP 层"></a>APP 层</h4><p>APP 包含系统应用和第三方应用，Android 随附一套用于电子邮件、短信、日历、互联网浏览和联系人等的核心应用。平台随附的应用与用户可以选择安装的应用一样，没有特殊状态。因此第三方应用可成为用户的默认网络浏览器、短信 Messenger 甚至默认键盘（有一些例外，例如系统的“设置”应用）。</p>
+<p>系统应用可用作用户的应用，以及提供开发者可从其自己的应用访问的主要功能。例如，如果您的应用要发短信，您无需自己构建该功能，可以改为调用已安装的短信应用向您指定的接收者发送消息。</p>
+<ul>
+<li>Zygote 进程孵化出的第一个 App 进程是 Launcher，这是用户看到的桌面 App；</li>
+<li>Zygote 进程还会创建 Browser，Phone，Email 等 App 进程，每个 App 至少运行在一个进程上。</li>
+<li>所有的 App 进程都是由 Zygote 进程 fork 生成的。</li>
+</ul>
+<h4 id="Syscall-amp-amp-JNI"><a href="#Syscall-amp-amp-JNI" class="headerlink" title="Syscall &amp;&amp; JNI"></a>Syscall &amp;&amp; JNI</h4><ul>
+<li>Native与Kernel之间有一层系统调用(SysCall)层</li>
+<li>Java层与Native(C&#x2F;C++)层之间的纽带 JNI</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div>Donate comment here.</div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechatpay.jpg" alt="Ranger Zhou 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.jpg" alt="Ranger Zhou 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>Ranger Zhou
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://rangerzhou.top/2021/06/01/Android/AndroidDevelop_001_AndroidArchitecture/" title="Android - 平台架构">http://rangerzhou.top/2021/06/01/Android/AndroidDevelop_001_AndroidArchitecture/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/05/20/Python/NetworkAutoAuth/" rel="prev" title="自动认证公司网络">
+      <i class="fa fa-chevron-left"></i> 自动认证公司网络
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2021/06/15/Android/AndroidDevelop_002_kernel_idle_kthreadd/" rel="next" title="Android - idle/kthreadd 进程启动">
+      Android - idle/kthreadd 进程启动 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+      <div class="tabs tabs-comment">
+        <ul class="nav-tabs">
+            <li class="tab"><a href="#comment-disqus">disqus</a></li>
+            <li class="tab"><a href="#comment-gitalk">gitalk</a></li>
+            <li class="tab"><a href="#comment-livere">livere</a></li>
+        </ul>
+        <div class="tab-content">
+            <div class="tab-pane disqus" id="comment-disqus">
+              
+  <div class="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
+            </div>
+            <div class="tab-pane gitalk" id="comment-gitalk">
+              <div class="comments" id="gitalk-container"></div>
+            </div>
+            <div class="tab-pane livere" id="comment-livere">
+              
+  <div class="comments">
+    <div id="lv-container" data-id="city" data-uid="MTAyMC8yOTcyNS82Mjky"></div>
+  </div>
+  
+            </div>
+        </div>
+      </div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#Android-%E5%B9%B3%E5%8F%B0%E6%9E%B6%E6%9E%84"><span class="nav-text">Android 平台架构</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%B5%8C%E5%85%A5%E5%BC%8F-Linux-%E7%B3%BB%E7%BB%9F%E8%BD%AF%E4%BB%B6%E6%9E%B6%E6%9E%84"><span class="nav-text">嵌入式 Linux 系统软件架构</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Android-%E8%BD%AF%E4%BB%B6%E5%A0%86%E6%A0%88"><span class="nav-text">Android 软件堆栈</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%B3%BB%E7%BB%9F%E5%90%AF%E5%8A%A8%E6%9E%B6%E6%9E%84"><span class="nav-text">系统启动架构</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Loader-%E5%B1%82"><span class="nav-text">Loader 层</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Linux-Kernel-%E5%B1%82"><span class="nav-text">Linux Kernel 层</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%A1%AC%E4%BB%B6%E6%8A%BD%E8%B1%A1%E5%B1%82%EF%BC%88HAL%EF%BC%89"><span class="nav-text">硬件抽象层（HAL）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Android-Runtime-amp-%E5%8E%9F%E7%94%9F-C-x2F-C-%E5%BA%93"><span class="nav-text">Android Runtime &amp; 原生 C&#x2F;C++ 库</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#Android-Runtime"><span class="nav-text">Android Runtime</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%8E%9F%E7%94%9F-C-x2F-C-%E5%BA%93"><span class="nav-text">原生 C&#x2F;C++ 库</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Framework-%E5%B1%82"><span class="nav-text">Framework 层</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#APP-%E5%B1%82"><span class="nav-text">APP 层</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Syscall-amp-amp-JNI"><span class="nav-text">Syscall &amp;&amp; JNI</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Ranger Zhou</p>
+  <div class="site-description" itemprop="description">我是一个小流氓我从来也不浪，有一天我心血来潮耍了个流氓，我嘴里吹着小口哨我心里好得意，不知怎么哗啦啦啦啦我摔了一身泥</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">63</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">8</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">16</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/rangerzhou" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;rangerzhou" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:rangero_o@qq.com" title="E-Mail → mailto:rangero_o@qq.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://rangerzhou.taobao.com/" title="Taobao → http:&#x2F;&#x2F;rangerzhou.taobao.com&#x2F;" rel="noopener" target="_blank"><i class="fab fa-youtube fa-fw"></i>Taobao</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="/images/wechat.jpg" title="WeChat → &#x2F;images&#x2F;wechat.jpg"><i class="fab fa-youtube fa-fw"></i>WeChat</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://blog.csdn.net/ranger0220?viewmode=contents" title="CSDN → http:&#x2F;&#x2F;blog.csdn.net&#x2F;ranger0220?viewmode&#x3D;contents" rel="noopener" target="_blank"><i class="fab fa-youtube fa-fw"></i>CSDN</a>
+      </span>
+  </div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      墙裂推荐
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="http://rangerzhou.taobao.com/" title="http:&#x2F;&#x2F;rangerzhou.taobao.com" rel="noopener" target="_blank">Taobao</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2016 – 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Ranger Zhou</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+<script data-pjax>
+  (function() {
+    function leancloudSelector(url) {
+      url = encodeURI(url);
+      return document.getElementById(url).querySelector('.leancloud-visitors-count');
+    }
+
+    function addCount(Counter) {
+      var visitors = document.querySelector('.leancloud_visitors');
+      var url = decodeURI(visitors.id);
+      var title = visitors.dataset.flagTitle;
+
+      Counter('get', '/classes/Counter?where=' + encodeURIComponent(JSON.stringify({ url })))
+        .then(response => response.json())
+        .then(({ results }) => {
+          if (results.length > 0) {
+            var counter = results[0];
+            leancloudSelector(url).innerText = counter.time + 1;
+            Counter('put', '/classes/Counter/' + counter.objectId, { time: { '__op': 'Increment', 'amount': 1 } })
+              .catch(error => {
+                console.error('Failed to save visitor count', error);
+              });
+          } else {
+              Counter('post', '/classes/Counter', { title, url, time: 1 })
+                .then(response => response.json())
+                .then(() => {
+                  leancloudSelector(url).innerText = 1;
+                })
+                .catch(error => {
+                  console.error('Failed to create', error);
+                });
+          }
+        })
+        .catch(error => {
+          console.error('LeanCloud Counter Error', error);
+        });
+    }
+
+    function showTime(Counter) {
+      var visitors = document.querySelectorAll('.leancloud_visitors');
+      var entries = [...visitors].map(element => {
+        return decodeURI(element.id);
+      });
+
+      Counter('get', '/classes/Counter?where=' + encodeURIComponent(JSON.stringify({ url: { '$in': entries } })))
+        .then(response => response.json())
+        .then(({ results }) => {
+          for (let url of entries) {
+            let target = results.find(item => item.url === url);
+            leancloudSelector(url).innerText = target ? target.time : 0;
+          }
+        })
+        .catch(error => {
+          console.error('LeanCloud Counter Error', error);
+        });
+    }
+
+    let { app_id, app_key, server_url } = {"enable":true,"app_id":"U9g4mWmsQg8FjOE3xsqUy9Df-gzGzoHsz","app_key":"24cDno14OiDhAreVmoEjzqns","server_url":"https://u9g4mwms.lc-cn-n1-shared.com","security":false};
+    function fetchData(api_server) {
+      var Counter = (method, url, data) => {
+        return fetch(`${api_server}/1.1${url}`, {
+          method,
+          headers: {
+            'X-LC-Id'     : app_id,
+            'X-LC-Key'    : app_key,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(data)
+        });
+      };
+      if (CONFIG.page.isPost) {
+        if (CONFIG.hostname !== location.hostname) return;
+        addCount(Counter);
+      } else if (document.querySelectorAll('.post-title-link').length >= 1) {
+        showTime(Counter);
+      }
+    }
+
+    let api_server = app_id.slice(-9) !== '-MdYXbMMI' ? server_url : `https://${app_id.slice(0, 8).toLowerCase()}.api.lncldglobal.com`;
+
+    if (api_server) {
+      fetchData(api_server);
+    } else {
+      fetch('https://app-router.leancloud.cn/2/route?appId=' + app_id)
+        .then(response => response.json())
+        .then(({ api_server }) => {
+          fetchData('https://' + api_server);
+        });
+    }
+  })();
+</script>
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/pjax/pjax.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/pangu@4/dist/browser/pangu.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '#page-configurations',
+    '.content-wrap',
+    '.post-toc-wrap',
+    '.languages',
+    '#pjax'
+  ],
+  switches: {
+    '.post-toc-wrap': Pjax.switches.innerHTML
+  },
+  analytics: false,
+  cacheBust: false,
+  scrollTo : !CONFIG.bookmark.enable
+});
+
+window.addEventListener('pjax:success', () => {
+  document.querySelectorAll('script[data-pjax], script#page-configurations, #pjax script').forEach(element => {
+    var code = element.text || element.textContent || element.innerHTML || '';
+    var parent = element.parentNode;
+    parent.removeChild(element);
+    var script = document.createElement('script');
+    if (element.id) {
+      script.id = element.id;
+    }
+    if (element.className) {
+      script.className = element.className;
+    }
+    if (element.type) {
+      script.type = element.type;
+    }
+    if (element.src) {
+      script.src = element.src;
+      // Force synchronous loading of peripheral JS.
+      script.async = false;
+    }
+    if (element.dataset.pjax !== undefined) {
+      script.dataset.pjax = '';
+    }
+    if (code !== '') {
+      script.appendChild(document.createTextNode(code));
+    }
+    parent.appendChild(script);
+  });
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+
+
+  
+  <script data-pjax>
+    (function(){
+      var canonicalURL, curProtocol;
+      //Get the <link> tag
+      var x=document.getElementsByTagName("link");
+		//Find the last canonical URL
+		if(x.length > 0){
+			for (i=0;i<x.length;i++){
+				if(x[i].rel.toLowerCase() == 'canonical' && x[i].href){
+					canonicalURL=x[i].href;
+				}
+			}
+		}
+    //Get protocol
+	    if (!canonicalURL){
+	    	curProtocol = window.location.protocol.split(':')[0];
+	    }
+	    else{
+	    	curProtocol = canonicalURL.split(':')[0];
+	    }
+      //Get current URL if the canonical URL does not exist
+	    if (!canonicalURL) canonicalURL = window.location.href;
+	    //Assign script content. Replace current URL with the canonical URL
+      !function(){var e=/([http|https]:\/\/[a-zA-Z0-9\_\.]+\.baidu\.com)/gi,r=canonicalURL,t=document.referrer;if(!e.test(r)){var n=(String(curProtocol).toLowerCase() === 'https')?"https://sp0.baidu.com/9_Q4simg2RQJ8t7jm9iCKT-xh_/s.gif":"//api.share.baidu.com/s.gif";t?(n+="?r="+encodeURIComponent(document.referrer),r&&(n+="&l="+r)):r&&(n+="?l="+r);var i=new Image;i.src=n}}(window);})();
+  </script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <div id="pjax">
+  
+
+  
+
+<script>
+  var disqus_config = function() {
+    this.page.url = "http://rangerzhou.top/2021/06/01/Android/AndroidDevelop_001_AndroidArchitecture/";
+    this.page.identifier = "2021/06/01/Android/AndroidDevelop_001_AndroidArchitecture/";
+    this.page.title = "Android - 平台架构";
+    };
+  NexT.utils.loadComments(document.querySelector('#disqus_thread'), () => {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: disqus_config
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://rangerzhou.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  });
+</script>
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : 'b7bb504993135f5a2eab',
+      clientSecret: '6f83aec5c45d75e248e2914be90c4601e2e1dc44',
+      repo        : 'rangerzhou.github.io',
+      owner       : 'rangerzhou',
+      admin       : ['rangerzhou'],
+      id          : 'af65776f73a1bb47a4b67834621d21fb',
+        language: 'zh-CN',
+      distractionFreeMode: true
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
+
+<script>
+NexT.utils.loadComments(document.querySelector('#lv-container'), () => {
+  window.livereOptions = {
+    refer: location.pathname.replace(CONFIG.root, '').replace('index.html', '')
+  };
+  (function(d, s) {
+    var j, e = d.getElementsByTagName(s)[0];
+    if (typeof LivereTower === 'function') { return; }
+    j = d.createElement(s);
+    j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+    j.async = true;
+    e.parentNode.insertBefore(j, e);
+  })(document, 'script');
+});
+</script>
+
+    </div>
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/haru01.model.json"},"display":{"position":"left","width":300,"height":800},"mobile":{"show":false},"log":false});</script></body>
+</html>

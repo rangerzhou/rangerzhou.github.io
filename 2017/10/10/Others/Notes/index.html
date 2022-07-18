@@ -1,0 +1,1198 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.2.0">
+<!-- pjax：防止跳转页面音乐暂停 -->
+<script src="https://cdn.jsdelivr.net/npm/pjax@0.2.8/pjax.js"></script>
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/desert.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/desert.jpg">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <meta name="google-site-verification" content="OJnYjbr3wdT22qLrZSzyD9lAyBcXiXlEQ7-5wAnaWoQ">
+  <meta name="baidu-site-verification" content="vr4n4JeXgB">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-minimal.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"rangerzhou.top","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"manual"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":true,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":true,"nav":null,"activeClass":"gitalk"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="Ubuntu 常见问题解决">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Notes">
+<meta property="og:url" content="http://rangerzhou.top/2017/10/10/Others/Notes/index.html">
+<meta property="og:site_name" content="RangerZhou">
+<meta property="og:description" content="Ubuntu 常见问题解决">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2017-10-10T05:19:50.000Z">
+<meta property="article:modified_time" content="2022-07-18T14:57:22.269Z">
+<meta property="article:author" content="Ranger Zhou">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://rangerzhou.top/2017/10/10/Others/Notes/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+<script src="//cdn.bootcss.com/pace/1.0.2/pace.min.js"></script>
+<link href="//cdn.bootcss.com/pace/1.0.2/themes/pink/pace-theme-flash.css" rel="stylesheet">
+
+  <title>Notes | RangerZhou</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-138158952-1"></script>
+    <script data-pjax>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-138158952-1');
+      }
+    </script>
+
+
+  <script data-pjax>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?24a6d3c4c0f292c5f682d26414c3994b";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+
+<!-- 加入APlayer音乐播放器 -->
+<link rel="stylesheet" href="/dist/APlayer.min.css">
+<div id="aplayer"></div>
+<script type="text/javascript" src="/dist/APlayer.min.js"></script>
+<script type="text/javascript" src="/dist/music.js"></script>
+
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">RangerZhou</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">Read the fucking source code</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-playlist">
+
+    <a href="/playlist/" rel="section"><i class="fa fa-music fa-fw"></i>歌单</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-commonweal">
+
+    <a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a>
+
+  </li>
+        <li class="menu-item menu-item-official">
+
+    <a href="/official" rel="section"><i class="fa fa-user fa-fw"></i>official</a>
+
+  </li>
+        <li class="menu-item menu-item-shop">
+
+    <a href="http://rangerzhou.taobao.com/" rel="noopener" target="_blank"><i class="fa fa-user fa-fw"></i>shop</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://rangerzhou.top/2017/10/10/Others/Notes/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Ranger Zhou">
+      <meta itemprop="description" content="我是一个小流氓我从来也不浪，有一天我心血来潮耍了个流氓，我嘴里吹着小口哨我心里好得意，不知怎么哗啦啦啦啦我摔了一身泥">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="RangerZhou">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Notes
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2017-10-10 13:19:50" itemprop="dateCreated datePublished" datetime="2017-10-10T13:19:50+08:00">2017-10-10</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-07-18 22:57:22" itemprop="dateModified" datetime="2022-07-18T22:57:22+08:00">2022-07-18</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Others/" itemprop="url" rel="index"><span itemprop="name">Others</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/2017/10/10/Others/Notes/" class="post-meta-item leancloud_visitors" data-flag-title="Notes" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <blockquote>
+<p>Ubuntu 常见问题解决</p>
+</blockquote>
+<span id="more"></span>
+
+<h4 id="1-Ubuntu添加代理"><a href="#1-Ubuntu添加代理" class="headerlink" title="1. Ubuntu添加代理"></a>1. Ubuntu添加代理</h4><ol>
+<li><p>安装squid；</p>
+</li>
+<li><p>在&#x2F;etc&#x2F;squid&#x2F;squid.conf末尾添加</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">acl all src 0.0.0.0/0.0.0.0</span><br><span class="line">http_access allow all</span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash">cache_peer 10.201.220.168 parent 8081 0 login=wjl0n2:zr123456 default</span></span><br><span class="line">cache_peer 10.201.249.71 parent 8081 0 login=asia/xxxxxx:zr123456 default</span><br><span class="line">never_direct allow all</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>在&#x2F;etc&#x2F;apt&#x2F;apt.conf末尾添加（一般会自动生成）：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Acquire::http::Proxy &quot;http://localhost:3128&quot;;</span><br><span class="line">Acquire::ftp::proxy &quot;ftp://localhost:3128&quot;;</span><br><span class="line">Acquire::https::proxy &quot;https://localhost:3128&quot;;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><code>sudo service squid restart</code></p>
+</li>
+<li><p>配置Network</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">HTTP Proxy | localhost | 3128</span><br><span class="line">HTTPS Proxy | localhost | 3128</span><br><span class="line">FTP Proxy | localhost | 3128</span><br><span class="line">Socks Host | localhost | 3128</span><br><span class="line">Ignore Hosts | localhost, 127.0.0.0/8, ::1</span><br></pre></td></tr></table></figure></li>
+</ol>
+<h4 id="2-Google服务器配置SS"><a href="#2-Google服务器配置SS" class="headerlink" title="2. Google服务器配置SS"></a>2. Google服务器配置SS</h4><ol>
+<li><p>升级vps内核开启BBR</p>
+<p>sudo apt update<br>sudo apt upgrade<br>查看内核版本:uname –a,如果版本过低就升级：apt install linux-image-4.xx<br>卸载旧版本:sudo apt autoremove<br>启用新内核:update-grub<br>重启:reboot<br>验证内核版本:uname -r<br>写入配置:</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">sudo -i</span><br><span class="line">echo &quot;net.core.default_qdisc=fq&quot; &gt;&gt; /etc/sysctl.conf</span><br><span class="line">echo &quot;net.ipv4.tcp_congestion_control=bbr&quot; &gt;&gt; /etc/sysctl.conf</span><br></pre></td></tr></table></figure>
+
+<p>配置生效:sysctl -p<br>检验: lsmod | grep bbr<br>看到回显tcp_bbr 20480 0说明已经成功开启 BBR</p>
+</li>
+<li><p>配置Shadowsocks</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-get update</span><br><span class="line">sudo apt-get install python-pip</span><br><span class="line">sudo pip install --upgrade pip</span><br><span class="line">sudo pip install shadowsocks</span><br><span class="line">sudo vim /etc/shadowsocks.json</span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash">如下为添加单用户</span></span><br><span class="line">&#123;</span><br><span class="line">&quot;server&quot;:&quot;0.0.0.0&quot;,</span><br><span class="line">&quot;server_port&quot;:12018,</span><br><span class="line">&quot;local_address&quot;:&quot;127.0.0.1&quot;,</span><br><span class="line">&quot;local_port&quot;:1080,</span><br><span class="line">&quot;password&quot;:&quot;123456&quot;,</span><br><span class="line">&quot;timeout&quot;:600,</span><br><span class="line">&quot;method&quot;:&quot;aes-256-cfb&quot;</span><br><span class="line">&#125;</span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash">如下为添加多用户</span></span><br><span class="line">&#123;</span><br><span class="line">    &quot;server&quot;:&quot;0.0.0.0&quot;,</span><br><span class="line">    &quot;local_address&quot;:&quot;127.0.0.1&quot;,</span><br><span class="line">    &quot;local_port&quot;:1080,</span><br><span class="line">    &quot;port_password&quot;:&#123;</span><br><span class="line">         &quot;12xxx&quot;:&quot;123456&quot;,</span><br><span class="line">         &quot;12xxx&quot;:&quot;123456&quot;,</span><br><span class="line">         &quot;12xxx&quot;:&quot;123456&quot;</span><br><span class="line"></span><br><span class="line">    &#125;,</span><br><span class="line">    &quot;timeout&quot;:300,</span><br><span class="line">    &quot;method&quot;:&quot;aes-256-cfb&quot;,</span><br><span class="line">    &quot;fast_open&quot;: false</span><br><span class="line">&#125;</span><br><span class="line">sudo /usr/local/bin/ssserver -c /etc/shadowsocks.json -d start</span><br><span class="line">sudo vim /etc/rc.local</span><br><span class="line">在exit 0前添加:/usr/local/bin/ssserver -c /etc/shadowsocks.json -d start</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>控制台配置</p>
+<p>VPC网络-防火墙规则-创建防火墙规则(来源IP地址范围：0.0.0.0&#x2F;0，协议端口：tcp:12018)<br>VPC网络-外部IP地址-设置静态IP</p>
+</li>
+<li><p>Python版一键安装脚本</p>
+<p><a target="_blank" rel="noopener" href="https://teddysun.com/342.htmlShadowsocks">https://teddysun.com/342.htmlShadowsocks</a> </p>
+</li>
+<li><p>SSH 连接服务器</p>
+<p><strong>通过 SSH 密码验证登录</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">添加密码</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">sudo passwd <span class="variable">$&#123;whoami&#125;</span> // 下面以 user 代替 <span class="variable">$&#123;whoami&#125;</span></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">切换到 root</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">sudo -i</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">编辑 ssh 配置文件</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">vi /etc/ssh/sshd_config</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">修改以下内容</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">PermitRootLogin <span class="built_in">yes</span></span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">PasswordAuthentication <span class="built_in">yes</span></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">重启 ssh</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">service sshd restart</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>通过本地私钥登录</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">生成 ssh key</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">ssh-keygen</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash"><span class="built_in">cat</span> c:\Users\RangerZhou\.ssh\id_rsa.pub</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">进入谷歌云平台页面 -&gt; 计算引擎 -&gt; 元数据 -&gt; SSH 密钥，粘贴保存</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">谷歌就会把上面这段 public key 写入到 ~/.ssh/authorized_keys</span></span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">本地通过私钥登录</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">ssh -i id_rsa.pub user@35.189.175.199</span></span><br><span class="line"></span><br></pre></td></tr></table></figure></li>
+</ol>
+<h4 id="3-JDK"><a href="#3-JDK" class="headerlink" title="3. JDK"></a>3. JDK</h4><h5 id="3-1-安装JDK"><a href="#3-1-安装JDK" class="headerlink" title="3.1 安装JDK"></a>3.1 安装JDK</h5><ol>
+<li><p>ubuntu使用的是openjdk，所以我们需要先找到合适的jdk版本。在命令行中输入命令：$apt-cache search openjdk</p>
+</li>
+<li><p>从搜索的列表里找到我们需要安装的jdk版本</p>
+<p>openjdk-11-jdk - OpenJDK Development Kit (JDK)</p>
+</li>
+<li><p>输入安装命令，进行安装：$sudo apt-get install openjdk-11-jdk</p>
+<p>等待命令行显示“done”，即安装成功过。</p>
+</li>
+<li><p>查看安装结果。输入命令：$java -version</p>
+</li>
+<li><p>安装成功后，还需要配置java_home变量：</p>
+<p>1)输入命令：echo $java_home </p>
+<p>返回空行；</p>
+<p>2）which javac </p>
+<p>返回：&#x2F;usr&#x2F;bin&#x2F;javac</p>
+<p>3）file &#x2F;usr&#x2F;bin&#x2F;javac </p>
+<p>返回：&#x2F;usr&#x2F;bin&#x2F;javac: symbolic link to &#x2F;etc&#x2F;alternatives&#x2F;javac</p>
+<p>4）file &#x2F;etc&#x2F;alternatives&#x2F;javac </p>
+<p>返回：&#x2F;etc&#x2F;alternatives&#x2F;javac: symbolic link to &#x2F;usr&#x2F;lib&#x2F;jvm&#x2F;java-11-openjdk-amd64&#x2F;bin&#x2F;javac</p>
+<p>5）file &#x2F;usr&#x2F;lib&#x2F;jvm&#x2F;java-11-openjdk&#x2F;bin&#x2F;javac </p>
+<p>返回：&#x2F;usr&#x2F;lib&#x2F;jvm&#x2F;java-11-openjdk&#x2F;bin&#x2F;javac: cannot open &#96;&#x2F;usr&#x2F;lib&#x2F;jvm&#x2F;java-11-openjdk-amd64&#x2F;bin&#x2F;javac’ (No such file or directory)</p>
+<p>6）sudo echo export JAVA_HOME&#x3D;”&#x2F;usr&#x2F;lib&#x2F;jvm&#x2F;java-11-openjdk-amd64”&gt;&gt;~&#x2F;.bashrc   （只添加到bin目录之前，不然编译代码可能会有问题）</p>
+<p>输入密码；</p>
+<p>7）source ~&#x2F;.bashrc</p>
+<p>8）测试命令：gedit ~&#x2F;.bashrc </p>
+<p>查看打开的文件末尾是否成功加入java_home</p>
+<p><strong>Ubuntu18.04 安装 jdk7</strong></p>
+<p>据说Ubuntu18.04已经去除了openJdk-7的源，所以本次进行了下载后手动安装：</p>
+<p><a target="_blank" rel="noopener" href="https://packages.debian.org/experimental/openjdk-7-jdk">openjdk-7-jdk</a></p>
+<p><a target="_blank" rel="noopener" href="https://packages.debian.org/experimental/openjdk-7-jre">openjdk-7-jre</a></p>
+<p><a target="_blank" rel="noopener" href="https://packages.debian.org/experimental/openjdk-7-jre-headless">openjdk-7-jre-headless</a></p>
+<p><a target="_blank" rel="noopener" href="https://packages.debian.org/sid/libjpeg62-turbo">libjpeg62-turbo</a></p>
+<p><a target="_blank" rel="noopener" href="https://packages.debian.org/sid/libfontconfig1">libfontconfig1</a></p>
+<p><a target="_blank" rel="noopener" href="https://packages.debian.org/sid/fontconfig-config">fontconfig-config</a></p>
+<p>下载以上安装包，然后执行命令：</p>
+</li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo dpkg -i openjdk-7-* libjpeg62-turbo* libfontconfig1* fontconfig-config*</span><br></pre></td></tr></table></figure>
+
+<p>​      如果在安装过程中报错，则执行以下命令：</p>
+<p>   sudo apt –fix-broken install</p>
+<p>   下面看一下openJDK-7的安装路径，执行一下命令：</p>
+<p>   dpkg -L openjdk-7-jdk</p>
+<h5 id="3-2-切换JDK"><a href="#3-2-切换JDK" class="headerlink" title="3.2 切换JDK"></a>3.2 切换JDK</h5><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">sudo apt update</span><br><span class="line">sudo apt install openjdk-7-jdk</span><br><span class="line">sudo update-alternatives --list java</span><br><span class="line">sudo update-alternatives --config java #选择默认JDK</span><br><span class="line">java -version</span><br></pre></td></tr></table></figure>
+
+
+
+<h4 id="4-完整卸载JDK"><a href="#4-完整卸载JDK" class="headerlink" title="4. 完整卸载JDK"></a>4. 完整卸载JDK</h4><ol>
+<li><p>移除所有 Java相关包 (Sun, Oracle, OpenJDK, IcedTea plugins, GIJ):</p>
+<p>(1) apt-get update</p>
+<p>(2) apt-cache search java | awk ‘{print($1)}’ | grep -E -e ‘^(ia32-)?(sun|oracle)-java’ -e ‘^openjdk-‘ -e ‘^icedtea’ -e ‘^(default|gcj)-j(re|dk)’ -e ‘^gcj-(.*)-j(re|dk)’ -e ‘java-common’ | xargs sudo apt-get -y remove</p>
+<p>(3) apt-get -y autoremove</p>
+</li>
+<li><p>清除配置信息:  dpkg -l | grep ^rc | awk ‘{print($2)}’ | xargs sudo apt-get -y purge</p>
+</li>
+<li><p>清除java配置及缓存:  bash -c ‘ls -d &#x2F;home&#x2F;*&#x2F;.java’ | xargs sudo rm -rf</p>
+</li>
+<li><p>手动清除JVMs:  rm -rf &#x2F;usr&#x2F;lib&#x2F;jvm&#x2F;*</p>
+</li>
+</ol>
+<h4 id="5-切换Python版本"><a href="#5-切换Python版本" class="headerlink" title="5. 切换Python版本"></a>5. 切换Python版本</h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">rangerzhou@zr:~ $ update-alternatives --list python</span><br><span class="line">update-alternatives: error: no alternatives for python</span><br><span class="line"></span><br><span class="line">rangerzhou@zr:~ $ sudo update-alternatives --install /usr/bin/python python /usr/bin/python2.7 1</span><br><span class="line">rangerzhou@zr:~ $ sudo update-alternatives --install /usr/bin/python python /usr/bin/python3.6 2</span><br><span class="line">rangerzhou@zr:~ $ update-alternatives --list python</span><br><span class="line">/usr/bin/python2.7</span><br><span class="line">/usr/bin/python3.6</span><br><span class="line">rangerzhou@zr:~ $ sudo update-alternatives --config python </span><br><span class="line">There are 2 choices for the alternative python (providing /usr/bin/python).</span><br><span class="line"></span><br><span class="line">  Selection    Path                Priority   Status</span><br><span class="line">------------------------------------------------------------</span><br><span class="line">  0            /usr/bin/python3.6   2         auto mode</span><br><span class="line">  1            /usr/bin/python2.7   1         manual mode</span><br><span class="line">* 2            /usr/bin/python3.6   2         manual mode</span><br><span class="line"></span><br><span class="line">Press &lt;enter&gt; to keep the current choice[*], or type selection number: 2</span><br></pre></td></tr></table></figure>
+
+<p><strong>Python 升级</strong></p>
+<p><a target="_blank" rel="noopener" href="https://www.python.org/">https://www.python.org/</a></p>
+<p>下载最新版本 Python ，或者 <code>wget https://www.python.org/ftp/python/3.8.0/Python-3.8.0.tgz</code> </p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">配置配置文件</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">./configure --with-ssl</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">安装依赖</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">sudo apt update</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">sudo apt upgrade</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">sudo apt dist-upgrade</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">sudo apt-get install build-essential python-dev python-setuptools python-pip python-smbus libncursesw5-dev libgdbm-dev libc6-dev zlib1g-dev libsqlite3-dev tk-dev libssl-dev openssl libffi-dev</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">编译</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">make</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">安装</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">sudo make install</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">删除软链接</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">sudo <span class="built_in">rm</span> -rf /usr/bin/python3</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">sudo <span class="built_in">rm</span> -rf /usr/bin/pip3</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">添加python3的符号链接</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">sudo <span class="built_in">ln</span> -s /usr/local/bin/python3.8 /usr/bin/python3</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">添加pip3的符号链接</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">sudo <span class="built_in">ln</span> -s /usr/local/bin/pip3.8 /usr/bin/pip3</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">查看版本</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">python3</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">pip3 -V</span></span><br><span class="line">pip 19.1.1 from /usr/local/python3/lib/python3.7/site-packages/pip (python 3.7)</span><br></pre></td></tr></table></figure>
+
+<p><strong>卸载 python</strong> </p>
+<p><a target="_blank" rel="noopener" href="https://www.howtoinstall.co/en/ubuntu/xenial/python3.5?action=remove">https://www.howtoinstall.co/en/ubuntu/xenial/python3.5?action=remove</a></p>
+<h4 id="6-JACK介绍"><a href="#6-JACK介绍" class="headerlink" title="6. JACK介绍"></a>6. JACK介绍</h4><p><a target="_blank" rel="noopener" href="http://taobaofed.org/blog/2016/05/05/new-compiler-for-android/">http://taobaofed.org/blog/2016/05/05/new-compiler-for-android/</a></p>
+<h4 id="7-Ubuntu登录远程服务器"><a href="#7-Ubuntu登录远程服务器" class="headerlink" title="7. Ubuntu登录远程服务器"></a>7. Ubuntu登录远程服务器</h4><p>a. 通过ssh连接</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">sudo apt install openssh-server</span><br><span class="line">/etc/init.d/ssh restart</span><br><span class="line">ssh -l user 10.241.9.102</span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash">接下来会提示输入密码，输入按回车即可</span></span><br></pre></td></tr></table></figure>
+
+<p>b. 通过sshpass，可在命令行中直接输入密码</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sudo apt install sshpass</span><br><span class="line">sshpass -p user000 ssh user@10.241.9.102</span><br></pre></td></tr></table></figure>
+
+
+
+<h4 id="8-samba配置共享目录-MintOS-20-04"><a href="#8-samba配置共享目录-MintOS-20-04" class="headerlink" title="8. samba配置共享目录(MintOS 20.04)"></a>8. samba配置共享目录(MintOS 20.04)</h4><p>Mintos 20.04 共享，Windows 10 访问</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">#</span><span class="language-bash">1. 安装</span></span><br><span class="line">sudo apt install samba</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash">2. 配置</span></span><br><span class="line">sudo vim /etc/samba/smb.conf</span><br><span class="line">末尾添加如下：</span><br><span class="line">[share]</span><br><span class="line">    comment = MyShare</span><br><span class="line">    path = /home/range/MyShare/</span><br><span class="line">    browseable = yes</span><br><span class="line">    writable = yes</span><br><span class="line">    create mask = 0644</span><br><span class="line">    directory mask = 0755</span><br><span class="line">    valid users = ranger # 第 4 步创建访问密码</span><br><span class="line">    #available = yes</span><br><span class="line">    #public = yes</span><br><span class="line">    #force user = nobody</span><br><span class="line">    #force group = nogroup</span><br><span class="line">在 global 块中添加如下</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">Enable ntlm auth to fix the login issue from Windows 10</span></span><br><span class="line">   ntlm auth = true</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash">3. 创建共享目录</span></span><br><span class="line">mkdir ~/share</span><br><span class="line">chmod 777 ~/share</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash">4. 创建Samba用户</span></span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash">sudo <span class="built_in">touch</span> /etc/samba/smbpasswd</span></span><br><span class="line">sudo smbpasswd -a ranger # 设置 Windows 访问时需要的密码，ranger 为访问时的用户名，最好是当前电脑已存在的用户</span><br><span class="line">sudo /etc/init.d/smbd restart</span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash">sudo samba restart</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">https://www.cnblogs.com/phinecos/archive/2009/06/06/1497717.html</span></span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash">https://blog.csdn.net/qiqzhang/article/details/78148682</span></span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash">5. windows 配置</span></span><br><span class="line">Control Panel - Credential Manager - Windows Credentials - Add a Window credential</span><br><span class="line">输入上面配置的用户名和密码，至此 windows10 已可访问</span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash">6. samba 重新安装</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">卸载</span></span><br><span class="line">sudo apt remove samba</span><br><span class="line">sudo apt purge samba</span><br><span class="line">sudo apt purge samba-common</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">卸载后 /etc/samba 目录也不存在了</span></span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash">重装</span></span><br><span class="line">sudo apt install samba</span><br></pre></td></tr></table></figure>
+
+<h4 id="9-apk签名"><a href="#9-apk签名" class="headerlink" title="9. apk签名"></a>9. apk签名</h4><p><a target="_blank" rel="noopener" href="https://developer.android.com/studio/publish/app-signing?hl=zh-cn">https://developer.android.com/studio/publish/app-signing?hl=zh-cn</a></p>
+<p>Key store path: &#x2F;home&#x2F;rangerzhou&#x2F;Android&#x2F;keystores&#x2F;android.jks<br>Key store password: 123456<br>Key alias: ZrAndroidKey<br>Key password: 654321</p>
+<h4 id="10-AndroidStudio-导入调整-jar-包优先级"><a href="#10-AndroidStudio-导入调整-jar-包优先级" class="headerlink" title="10 AndroidStudio 导入调整 jar 包优先级"></a>10 AndroidStudio 导入调整 jar 包优先级</h4><ol>
+<li><p>把 jar 包放到 <code>app/libs/</code> 目录下，点击 jar 包右键 add as library ，在 <code>Project Structure-app-Dependencies</code> 修改导入 jar包的 Scope 为 <strong>Compile only</strong> </p>
+</li>
+<li><p>在 Project 下的 <code>build.gradle</code> 文件中添加</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">gradle.projectsEvaluated &#123;</span><br><span class="line">    tasks.withType(JavaCompile) &#123;</span><br><span class="line">        options.compilerArgs.add(<span class="string">&#x27;-Xbootclasspath/p:app/libs/framework_APEV_DEMO_v20181009.jar&#x27;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><em>注意：<code>gradle.projectsEvaluated</code> 是放在 <code>allprojects</code> 标签内</em></p>
+</li>
+<li><p>在 <code>app.iml</code> 中把导入的 jar 包放在 sdk 之前，这样Androidstudio 编译时优先使用导入的 jar 包</p>
+</li>
+<li><p>每次重新打开Android stuio或者sync gradle，都会使得jdk的顺序发生变动，type&#x3D;”jdk”所在的行会跑到前面去，为了方便起见，可使用下面的代码自动将type&#x3D;’jdk’的行移动到最后，把这段代码加到 app 下的 build.gradle 中即可：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">preBuild &#123;</span><br><span class="line">    doLast &#123;</span><br><span class="line">        <span class="type">def</span> <span class="variable">imlFile</span> <span class="operator">=</span> file(<span class="string">&quot;app.iml&quot;</span>)</span><br><span class="line">        println <span class="string">&#x27;Change app.iml order&#x27;</span></span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="type">def</span> <span class="variable">parsedXml</span> <span class="operator">=</span> (<span class="keyword">new</span> <span class="title class_">XmlParser</span>()).parse(imlFile)</span><br><span class="line">            <span class="type">def</span> <span class="variable">jdkNode</span> <span class="operator">=</span> parsedXml.component[<span class="number">1</span>].orderEntry.find &#123; it.<span class="string">&#x27;@type&#x27;</span> == <span class="string">&#x27;jdk&#x27;</span> &#125;</span><br><span class="line">            parsedXml.component[<span class="number">1</span>].remove(jdkNode)</span><br><span class="line">            <span class="type">def</span> <span class="variable">sdkString</span> <span class="operator">=</span> <span class="string">&quot;Android API &quot;</span> + android.compileSdkVersion.substring(<span class="string">&quot;android-&quot;</span>.length()) + <span class="string">&quot; Platform&quot;</span></span><br><span class="line">            <span class="keyword">new</span> <span class="title class_">Node</span>(parsedXml.component[<span class="number">1</span>], <span class="string">&#x27;orderEntry&#x27;</span>, [<span class="string">&#x27;type&#x27;</span>: <span class="string">&#x27;jdk&#x27;</span>, <span class="string">&#x27;jdkName&#x27;</span>: sdkString, <span class="string">&#x27;jdkType&#x27;</span>: <span class="string">&#x27;Android SDK&#x27;</span>])</span><br><span class="line">            <span class="type">def</span> <span class="variable">writer</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">StringWriter</span>()</span><br><span class="line">            <span class="keyword">new</span> <span class="title class_">XmlNodePrinter</span>(<span class="keyword">new</span> <span class="title class_">PrintWriter</span>(writer)).print(parsedXml)</span><br><span class="line">            imlFile.text = writer.toString()</span><br><span class="line">            groovy.xml.XmlUtil.serialize(parsedXml, <span class="keyword">new</span> <span class="title class_">FileOutputStream</span>(imlFile))</span><br><span class="line">        &#125; <span class="keyword">catch</span> (FileNotFoundException e) &#123;</span><br><span class="line">            <span class="comment">// nop, iml not found</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+</ol>
+<p>参考：</p>
+<p><a target="_blank" rel="noopener" href="https://www.jianshu.com/p/82cce7f91d5e">https://www.jianshu.com/p/82cce7f91d5e</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/li_huai_dong/article/details/81137355">https://blog.csdn.net/li_huai_dong/article/details/81137355</a></p>
+<h4 id="11-Ubuntu-18-04美化"><a href="#11-Ubuntu-18-04美化" class="headerlink" title="11 . Ubuntu 18.04美化"></a>11 . Ubuntu 18.04美化</h4><p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/36200924">https://zhuanlan.zhihu.com/p/36200924</a></p>
+<p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/36265103">https://zhuanlan.zhihu.com/p/36265103</a></p>
+<h4 id="12-Ubuntu-18-04-过滤CSDN广告"><a href="#12-Ubuntu-18-04-过滤CSDN广告" class="headerlink" title="12. Ubuntu 18.04 过滤CSDN广告"></a>12. Ubuntu 18.04 过滤CSDN广告</h4><p>1.安装Adblock Plus，进入“选项”设置 </p>
+<p>2.在过滤规则选择: Adblock Warning Removal List 模式 </p>
+<p>3.”在自定义过滤（My filter list）“添加一行：blog.csdn.net###layerd </p>
+<p>4.刷新网页，Enjoy it….</p>
+<h4 id="13-Repo-切换所有分支"><a href="#13-Repo-切换所有分支" class="headerlink" title="13. Repo 切换所有分支"></a>13. Repo 切换所有分支</h4><p><strong>创建分支</strong></p>
+<p><strong>方式一</strong></p>
+<p>repo init -b branch-name</p>
+<p>repo sync</p>
+<p>repo start branch-name –all</p>
+<p><strong>方式二</strong></p>
+<p>repo forall -c git checkout -b branch-name</p>
+<p>区别及原理后面补充。</p>
+<p><strong>删除分支</strong></p>
+<p>repo abandon branch-name</p>
+<p>repo abandon branch-name</p>
+<h4 id="14-访问删除-x2F-root-目录"><a href="#14-访问删除-x2F-root-目录" class="headerlink" title="14. 访问删除 &#x2F;root 目录"></a>14. 访问删除 &#x2F;root 目录</h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">cd /</span><br><span class="line">sudo passwd root</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">按照提示输入密码</span></span><br><span class="line">su root</span><br><span class="line">cd root</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">即可操作 /root 目录</span></span><br></pre></td></tr></table></figure>
+
+
+
+<h4 id="15-crontab-定时任务"><a href="#15-crontab-定时任务" class="headerlink" title="15. crontab 定时任务"></a>15. crontab 定时任务</h4><p><strong>方法一</strong></p>
+<p>执行 <code>crontab -e</code> 后，任务会被写入到 <em>&#x2F;var&#x2F;spool&#x2F;cron&#x2F;crontabs&#x2F;</em> 目录下，生成一个和用户名一致的文件，文件内容就是我们编辑的定时脚本。</p>
+<p>直接用 crontab 命令编辑</p>
+<p>cron服务提供 crontab 命令来设定 cron 服务的，以下是这个命令的一些参数与说明：</p>
+<ul>
+<li>crontab -u &#x2F;&#x2F;设定某个用户的cron服务，一般 root 用户在执行这个命令的时候需要此参数</li>
+<li>crontab -l &#x2F;&#x2F;列出某个用户cron服务的详细内容</li>
+<li>crontab -r &#x2F;&#x2F;删除某个用户的cron服务</li>
+<li>crontab -e &#x2F;&#x2F;编辑某个用户的cron服务</li>
+</ul>
+<p>比如说 root 查看自己的 cron 设置：crontab -u root -l</p>
+<p>再例如，root 想删除 fred 的 cron 设置：crontab -u fred -r </p>
+<p>基本格式 :<br>分　 时　 日　 月　 周　 命令<br>第1列表示分钟1～59 每分钟用*或者 *&#x2F;1表示<br>第2列表示小时1～23（0表示0点）<br>第3列表示日期1～31<br>第4列表示月份1～12<br>第5列标识号星期0～6（0表示星期天）</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">crontab -e</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">末尾添加， 分，时，天，月，周</span></span><br><span class="line">59 23 * * * /home/xxx/xxx.sh</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">重启 service</span></span><br><span class="line">sudo service cron restart</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">也可以用 sudo /etc/init.d/cron restart</span></span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">其他命令</span></span><br><span class="line">sudo service cron status // 查看 crontab 服务状态</span><br><span class="line">sudo service cron start // 启动服务</span><br><span class="line">sudo service cron stop // 关闭服务</span><br><span class="line">sudo service cron restart // 重启服务</span><br><span class="line">sudo service cron reload // 重新载入配置</span><br><span class="line">vim /var/mail/xxx // 失败会发送邮件？</span><br><span class="line"></span><br><span class="line">sudo vim /var/spool/cron/crontabs/root // </span><br></pre></td></tr></table></figure>
+
+<p><strong>方法2</strong></p>
+<p>使用命令 vi &#x2F;etc&#x2F;crontab 编辑定时脚本。</p>
+<p>它包括下面几行：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">SHELL=/bin/bash</span><br><span class="line">PATH=/sbin:/bin:/usr/sbin:/usr/bin</span><br><span class="line">MAILTO=root</span><br><span class="line">HOME=/</span><br><span class="line"></span><br><span class="line">\# run-parts</span><br><span class="line">01 * * * * root run-parts /etc/cron.hourly</span><br><span class="line">02 4 * * * root run-parts /etc/cron.daily</span><br><span class="line">22 4 * * 0 root run-parts /etc/cron.weekly</span><br><span class="line">42 4 1 * * root run-parts /etc/cron.monthly</span><br></pre></td></tr></table></figure>
+
+<p>前四行是用来配置 cron 任务运行环境的变量。<br>SHELL 变量的值告诉系统要使用哪个 shell 环境（在这个例子里是 bash shell）；<br>PATH 变量定义用来执行命令的路径。<br>cron 任务的输出被邮寄给 MAILTO 变量定义的用户名。<br>如果 MAILTO 变量被定义为空白字符串（MAILTO&#x3D;””），电子邮件就不会被寄出。<br>HOME 变量可以用来设置在执行命令或脚本时使用的主目录。<br>如果不加run-parts参数，可是直接写任务文件，而不是文件夹。</p>
+<p>（系统级的）做系统级配置我们会直接配置 &#x2F;etc&#x2F;crontab<br>（用户级的）一般还是建议大家使用 crontab -e ，这样系统也会帮着检查我们配置的脚本语法。</p>
+<h4 id="16-systemd-配置-service-开机启动"><a href="#16-systemd-配置-service-开机启动" class="headerlink" title="16. systemd 配置 service 开机启动"></a>16. systemd 配置 service 开机启动</h4><p>以启动 HomeAssistant 为例：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">配置启动脚本</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">sudo vim /etc/systemd/system/home-assistant.service</span></span><br><span class="line">[Unit]</span><br><span class="line">Description=Home Assistant</span><br><span class="line">After=network.target</span><br><span class="line"></span><br><span class="line">[Service]</span><br><span class="line">Type=simple</span><br><span class="line">User=ranger   # hass 所属user</span><br><span class="line">Group=ranger  # hass 所属group</span><br><span class="line">ExecStart=/usr/bin/python3 /usr/local/bin/hass</span><br><span class="line"></span><br><span class="line">[Install]</span><br><span class="line">WantedBy=multi-user.target</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">其他配置</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">sudo systemctl <span class="built_in">enable</span> home-assistant.service</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">sudo systemctl is-enabled home-assistant.service</span></span><br><span class="line">enabled</span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">sudo systemctl daemon-reload</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">sudo systemctl start home-assistant.service</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">sudo systemctl status home-assistant.service</span></span><br><span class="line">* home-assistant.service - Home Assistant</span><br><span class="line">   Loaded: loaded (/etc/systemd/system/home-assistant.service; enabled; vendor preset: enabled)</span><br><span class="line">   Active: active (running) since Wed 2019-07-03 13:04:45 CST; 22min ago</span><br><span class="line"> Main PID: 17003 (python3)</span><br><span class="line">    Tasks: 34 (limit: 4915)</span><br><span class="line">   CGroup: /system.slice/home-assistant.service</span><br><span class="line">           |-17003 /usr/bin/python3 /usr/local/bin/hass</span><br><span class="line">           `-17048 /usr/bin/pulseaudio --start --log-target=syslog</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">ll /etc/systemd/system/home-assistant.service</span></span><br><span class="line">-rw-r--r-- 1 root root 188 Jul  3 13:04 /etc/systemd/system/home-assistant.service</span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">ll /usr/local/bin/hass</span></span><br><span class="line">-rwxr-xr-x 1 ranger ranger 224 Jul  1 13:05 /usr/local/bin/hass*</span><br></pre></td></tr></table></figure>
+
+<p>其他命令（参考：<a target="_blank" rel="noopener" href="https://linux.cn/article-5926-1.html%EF%BC%89">https://linux.cn/article-5926-1.html）</a></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">sudo systemctl start apache.service						<span class="comment"># 立即启动一个服务</span></span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">sudo systemctl stop apache.service						<span class="comment"># 立即停止一个服务</span></span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">sudo systemctl restart apache.service						<span class="comment"># 重启一个服务</span></span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">sudo systemctl <span class="built_in">kill</span> apache.service						<span class="comment"># 杀死一个服务的所有子进程</span></span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">sudo systemctl reload apache.service						<span class="comment"># 重新加载一个服务的配置文件</span></span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">sudo systemctl daemon-reload								<span class="comment"># 重载所有修改过的配置文件</span></span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">systemctl show httpd.service								<span class="comment"># 显示某个 Unit 的所有底层参数</span></span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">systemctl show -p CPUShares httpd.service					<span class="comment"># 显示某个 Unit 的指定属性的值</span></span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">sudo systemctl set-property httpd.service CPUShares=500	<span class="comment"># 设置某个 Unit 的指定属性</span></span></span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">sudo systemctl reboot 		<span class="comment"># 重启系统</span></span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">sudo systemctl poweroff 		<span class="comment"># 关闭系统，切断电源</span></span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">sudo systemctl halt 			<span class="comment"># CPU停止工作</span></span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">sudo systemctl <span class="built_in">suspend</span> 		<span class="comment"># 暂停系统</span></span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">sudo systemctl hibernate 		<span class="comment"># 让系统进入冬眠状态</span></span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">sudo systemctl hybrid-sleep	<span class="comment"># 让系统进入交互式休眠状态</span></span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">sudo systemctl rescue 		<span class="comment"># 启动进入救援状态（单用户状态）</span></span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">systemctl list-units			<span class="comment"># 列出正在运行的 Unit</span></span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">systemctl list-units --all	<span class="comment"># 列出所有Unit，包括没有找到配置文件的或者启动失败的</span></span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">systemctl list-units --all --state=inactive	<span class="comment"># 列出所有没有运行的 Unit</span></span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">systemctl list-units --failed					<span class="comment"># 列出所有加载失败的 Unit</span></span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">systemctl list-units --<span class="built_in">type</span>=service			<span class="comment"># 列出所有正在运行的、类型为 service 的 Unit</span></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">Unit 的状态</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">systemctl status 								<span class="comment"># 显示系统状态</span></span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">sysystemctl status bluetooth.service			<span class="comment"># 显示单个 Unit 的状态</span></span></span><br></pre></td></tr></table></figure>
+
+<h4 id="17-使用-AndroidStudio-调试源码"><a href="#17-使用-AndroidStudio-调试源码" class="headerlink" title="17. 使用 AndroidStudio 调试源码"></a>17. 使用 AndroidStudio 调试源码</h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">生成 idegen.jar</span></span><br><span class="line">source build/envsetup.sh</span><br><span class="line">lunch xxx</span><br><span class="line">make idegen -j8 # 或者 ./development/tools/idegen/idegen.sh</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">执行脚本</span></span><br><span class="line">./development/tools/idegen/idegen.sh</span><br></pre></td></tr></table></figure>
+
+<p>执行脚本后在源码根目录生成 android.iml 和 android.ipr ，编辑 android.iml，添加 <excludeFolder> 过滤不需要调试的目录，随后用 AndroidStudio <code>Open an existing Android Studio project</code> 打开 android.ipr 文件，第一次打开，AndroidStudio下方的状态栏会提示Scanning files to index… ，耐心等待即可。</p>
+<p><strong>配置 Project SDK</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">主要是配置一个空的JDK，使代码在AOSP源码目录中跳转，不会跳到JDK中去</span><br><span class="line"></span><br><span class="line">打开AndroidStudio菜单 File ---&gt; Project Structure，</span><br><span class="line"></span><br><span class="line">选择Platform Settings选项下的SDKs，紧接着点右侧上方的＋号，选择＋JDK，这里让选择JDK路径时直接默认的即可，点击OK；</span><br><span class="line">然后将Name改为AOSP_nojar,然后将Classpath下的所有.jar文件全部选中删除，</span><br><span class="line">再将Sourcepath,Annotations,Documentation Paths 下的文件全部删除，（当前AOSP源码是 android-9.0.0_r52, Project SDK 应为 Android API 28 Platform），</span><br><span class="line">紧接着点击Android API 28 Platform,右侧选择 Java SDK 为刚创建的 AOSP_nojar，</span><br><span class="line">然后选择Project Settings选项下的Project，将右侧的Project SDK 设置为与当前AOSP源码版本一致，如Android API 28 Platform</span><br><span class="line"></span><br><span class="line">然后选择Project Settings选项下的Modules,点击右侧的Dependencies,保留最下面的 Module source 和Android API 27 Platform，其他的.jar文件全部删除</span><br><span class="line"></span><br><span class="line">现在代码可以正确的跳转了</span><br></pre></td></tr></table></figure>
+
+
+
+<p><a target="_blank" rel="noopener" href="https://yourzeromax.top/2018/08/13/Android-%E5%90%8C%E4%B8%80%E4%B8%AATextView%E4%B8%AD%E5%A4%9A%E5%BD%A9%E6%98%BE%E7%A4%BA%E6%96%87%E5%AD%97/">Android 同一个TextView中多彩显示文字</a> </p>
+<h4 id="18-批量查找并替换字符串"><a href="#18-批量查找并替换字符串" class="headerlink" title="18. 批量查找并替换字符串"></a>18. 批量查找并替换字符串</h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">grep oldStr -rl ./source | xargs sed -i &#x27;s/oldStr/newStr/g&#x27;</span><br></pre></td></tr></table></figure>
+
+
+
+<h4 id="19-项目迁移（包含提交记录）"><a href="#19-项目迁移（包含提交记录）" class="headerlink" title="19. 项目迁移（包含提交记录）"></a>19. 项目迁移（包含提交记录）</h4><p><strong>方法一：</strong></p>
+<p>从原地址克隆一份裸版本库，比如原本托管于 GitHub，或者是本地的私有仓库：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git <span class="built_in">clone</span> --bare git://192.168.10.XX/git_repo/project_name.git</span><br></pre></td></tr></table></figure>
+
+<p>以镜像推送的方式上传代码到 新服务器上：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cd</span> project_name.git</span><br><span class="line">git push --mirror git@192.168.20.XX/path/to/path/new_project_name.git</span><br></pre></td></tr></table></figure>
+
+<p><strong>方法二：</strong></p>
+<p>假设你的remote是origin，用git remote set_url 更换地址：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git remote set-url origin remote_git_address</span><br></pre></td></tr></table></figure>
+
+<p>然后用 git push 进行提交：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git push</span><br></pre></td></tr></table></figure>
+
+<p>不过这种只会迁移当前分支到新的git上。</p>
+<h4 id="20-VirtualBox-共享文件夹"><a href="#20-VirtualBox-共享文件夹" class="headerlink" title="20. VirtualBox 共享文件夹"></a>20. VirtualBox 共享文件夹</h4><ol>
+<li><p>设置 - 共享文件夹 - + - 选择 PC 上的一个目录 Share - 点击 OK</p>
+</li>
+<li><p>虚拟机中输入：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">sudo mkdir pcshare</span><br><span class="line">sudo chmod 777 pcshare</span><br><span class="line">sudo mount -t vboxsf Share pcshare/</span><br></pre></td></tr></table></figure></li>
+</ol>
+<h4 id="21-Linux-jar-包运行常用命令"><a href="#21-Linux-jar-包运行常用命令" class="headerlink" title="21. Linux jar 包运行常用命令"></a>21. Linux jar 包运行常用命令</h4><h5 id="1-运行方式1"><a href="#1-运行方式1" class="headerlink" title="1. 运行方式1"></a>1. 运行方式1</h5><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">java -jar test.jar</span><br></pre></td></tr></table></figure>
+
+<p>当前 ssh 窗口被锁定，可按 CTRL+C 打断程序运行，或直接关闭窗口，程序退出。</p>
+<p>如何让窗口不锁定呢？</p>
+<h5 id="2-运行方式2"><a href="#2-运行方式2" class="headerlink" title="2. 运行方式2"></a>2. 运行方式2</h5><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">java -jar test.jar &amp;</span><br></pre></td></tr></table></figure>
+
+<p>&amp; 代表在后台运行。</p>
+<p>当前 ssh 窗口不被锁定，但是当窗口关闭时，程序终止运行。</p>
+<p>如何让窗口关闭时，程序仍然运行？</p>
+<h5 id="3-运行方式3"><a href="#3-运行方式3" class="headerlink" title="3. 运行方式3"></a>3. 运行方式3</h5><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nohup java -jar test.jar &amp;</span><br></pre></td></tr></table></figure>
+
+<p>nohup 的意思是不挂断运行命令，当账户退出或终端关闭时，程序仍然运行。</p>
+<p>当用 nohup 命令执行作业时，缺省情况下该作业的所有输出被重定向到 nohup.out 的文件中，除非另外指定输出文件。</p>
+<h5 id="4-运行方式4"><a href="#4-运行方式4" class="headerlink" title="4. 运行方式4"></a>4. 运行方式4</h5><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nohup jar -jar test.jar &gt; temp.txt &amp;</span><br></pre></td></tr></table></figure>
+
+<p>command &gt; out.file: 将 command 的输出重定向到 out.file 文件，即输出内容不打印到屏幕上，而是输出到 out.file 文件中。</p>
+<h5 id="5-查看后台运行任务"><a href="#5-查看后台运行任务" class="headerlink" title="5. 查看后台运行任务"></a>5. 查看后台运行任务</h5><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">jobs</span><br></pre></td></tr></table></figure>
+
+<p>jobs 命令会列出所有后台执行的作业，并且每个作业前面会有个编号。</p>
+<p>如果想将某个作业调到前台控制，使用 fg 命令：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">fg 23</span><br></pre></td></tr></table></figure>
+
+<h5 id="6-查看某端口占用的线程的-pid"><a href="#6-查看某端口占用的线程的-pid" class="headerlink" title="6. 查看某端口占用的线程的 pid"></a>6. 查看某端口占用的线程的 pid</h5><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">netstat -nlp | grep :1234</span><br></pre></td></tr></table></figure>
+
+<p>如果忘记进程号，通过如下命令查看当前运行 jar 包程序进程号：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">ps -ef | grep test.jar</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">或者</span></span><br><span class="line">ps -aux | grep java</span><br></pre></td></tr></table></figure>
+
+<h5 id="7-关闭进程"><a href="#7-关闭进程" class="headerlink" title="7. 关闭进程"></a>7. 关闭进程</h5><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kill -s 9 12345</span><br></pre></td></tr></table></figure>
+
+
+
+<h4 id="22-Ubuntu-18-04-修改-mysql-数据库存放位置"><a href="#22-Ubuntu-18-04-修改-mysql-数据库存放位置" class="headerlink" title="22. Ubuntu 18.04 修改 mysql 数据库存放位置"></a>22. Ubuntu 18.04 修改 mysql 数据库存放位置</h4><p>停止 mysql</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo /etc/init.d/mysql stop</span><br></pre></td></tr></table></figure>
+
+<p>确认mysql 数据存放位置</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">mysql -u root -p</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">输入密码后进入命令操作</span></span><br><span class="line"><span class="meta prompt_">mysql&gt; </span><span class="language-bash">show variables like <span class="string">&#x27;%dir%&#x27;</span>;</span></span><br><span class="line">+-----------------------------------------+------------------------------+</span><br><span class="line">| Variable_name                           | Value                        |</span><br><span class="line">+-----------------------------------------+------------------------------+</span><br><span class="line">| basedir                                 | /usr/                        |</span><br><span class="line">| binlog_direct_non_transactional_updates | OFF                          |</span><br><span class="line">| character_sets_dir                      | /usr/share/mysql/charsets/   |</span><br><span class="line">| datadir                                 | /var/lib/mysql/              | # datadir 即为数据存储位置</span><br><span class="line">| ignore_db_dirs                          |                              |</span><br><span class="line">| innodb_data_home_dir                    |                              |</span><br><span class="line">| innodb_log_group_home_dir               | ./                           |</span><br><span class="line">| innodb_max_dirty_pages_pct              | 75.000000                    |</span><br><span class="line">| innodb_max_dirty_pages_pct_lwm          | 0.000000                     |</span><br><span class="line">| innodb_tmpdir                           |                              |</span><br><span class="line">| innodb_undo_directory                   | ./                           |</span><br><span class="line">| lc_messages_dir                         | /usr/share/mysql/            |</span><br><span class="line">| plugin_dir                              | /usr/lib/mysql/plugin/       |</span><br><span class="line">| slave_load_tmpdir                       | /tmp                         |</span><br><span class="line">| tmpdir                                  | /tmp                         |</span><br><span class="line">+-----------------------------------------+------------------------------+</span><br><span class="line">15 rows in set (0.00 sec)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>关闭 mysql 服务</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">service mysql stop</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">或者</span></span><br><span class="line">sudo /etc/init.d/mysql stop</span><br></pre></td></tr></table></figure>
+
+<p>创建新的数据库路径</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mkdir /home/ranger/database/mysql</span><br></pre></td></tr></table></figure>
+
+<p>复制 mysql 原有的数据</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mv /var/lib/mysql /home/ranger/database/mysql</span><br></pre></td></tr></table></figure>
+
+<p>修改配置文件</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">修改mysqld.cnf 中的 datadir</span></span><br><span class="line">sudo vim /etc/mysql/mysql.conf.d/mysqld.cnf</span><br><span class="line">datadir = /home/ranger/database/mysql</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">修改启动文件</span></span><br><span class="line">vim /etc/apparmor.d/usr.sbin.mysqld</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">Allow data <span class="built_in">dir</span> access</span></span><br><span class="line">  /var/lib/mysql/ r,</span><br><span class="line">  /var/lib/mysql/** rwk,</span><br><span class="line"><span class="meta prompt_">  # </span><span class="language-bash">添加如下两行</span></span><br><span class="line">  /home/ranger/database/mysql/ r,</span><br><span class="line">  /home/ranger/database/mysql/** rwk,</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">配置 AppArmor 访问控制规则</span></span><br><span class="line">sudo vim /etc/apparmor.d/tunables/alias</span><br><span class="line">alias /var/lib/mysql/ -&gt; /home/ranger/database/mysql/,</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">修改 socket 地址</span></span><br><span class="line">sudo vim /etc/apparmor.d/abstractions/mysql</span><br><span class="line">/home/ranger/database/mysql&#123;,d&#125;/mysql&#123;,d&#125;.sock rw,</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">修改文件权限</span></span><br><span class="line">sudo chown -R ranger:ranger /home/ranger/database/mysql</span><br><span class="line">sudo chmod 755 /home/ranger/database/mysql</span><br></pre></td></tr></table></figure>
+
+<p>reload apparmor 配置并重启</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sudo service apparmor reload</span><br><span class="line">sudo service apparmor restart</span><br></pre></td></tr></table></figure>
+
+<p>重启 mysql</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo service mysql restart</span><br></pre></td></tr></table></figure>
+
+<p>如果启动异常，</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">sudo /etc/init.d/mysql restart</span></span><br><span class="line">[....] Restarting mysql (via systemctl): mysql.serviceJob for mysql.service failed because the control process exited with error code.</span><br><span class="line">See &quot;systemctl status mysql.service&quot; and &quot;journalctl -xe&quot; for details.</span><br><span class="line"> failed!</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>输入 <code>journalctl -xe</code> 查看详细信息</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">journalctl -xe</span></span><br><span class="line">-- Unit mysql.service has finished shutting down.</span><br><span class="line">Sep 17 14:01:08 Tricia systemd[1]: Starting MySQL Community Server...</span><br><span class="line">-- Subject: Unit mysql.service has begun start-up</span><br><span class="line">-- Defined-By: systemd</span><br><span class="line">-- Support: http://www.ubuntu.com/support</span><br><span class="line">--</span><br><span class="line">-- Unit mysql.service has begun starting up.</span><br><span class="line">Sep 17 14:01:08 Tricia mysql-systemd-start[32692]: my_print_defaults: [ERROR] Found option without preceding group in config file /etc/mysql/my.cnf at line 22!</span><br><span class="line">Sep 17 14:01:08 Tricia mysql-systemd-start[32692]: my_print_defaults: [ERROR] Fatal error in defaults handling. Program aborted!</span><br><span class="line">Sep 17 14:01:08 Tricia mysql-systemd-start[32692]: MySQL data dir not found at /var/lib/mysql. Please create one.</span><br><span class="line">... ...</span><br></pre></td></tr></table></figure>
+
+<p>找到问题修改。</p>
+<h4 id="23-Ubuntu-系统时间同步"><a href="#23-Ubuntu-系统时间同步" class="headerlink" title="23. Ubuntu 系统时间同步"></a>23. Ubuntu 系统时间同步</h4><p>直接输入如下命令即可同步最新时间</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo date -s &quot;$(wget -qSO- --max-redirect=0 google.com 2&gt;&amp;1 | grep Date: | cut -d&#x27; &#x27; -f5-8)Z&quot;</span><br></pre></td></tr></table></figure>
+
+<p>定时执行：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">sudo vim /etc/crontab</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">m h dom mon dow user <span class="built_in">command</span></span></span><br><span class="line">30 8  * * * /home/ranger/bin/SyncTime.sh</span><br></pre></td></tr></table></figure>
+
+
+
+<h4 id="24-Ubuntu-安装-微信-x2F-QQ"><a href="#24-Ubuntu-安装-微信-x2F-QQ" class="headerlink" title="24. Ubuntu 安装 微信&#x2F;QQ"></a>24. Ubuntu 安装 微信&#x2F;QQ</h4><h5 id="24-1-LinuxMint19-3（Ubuntu-18-04）版本安装"><a href="#24-1-LinuxMint19-3（Ubuntu-18-04）版本安装" class="headerlink" title="24.1 LinuxMint19.3（Ubuntu 18.04）版本安装"></a>24.1 LinuxMint19.3（Ubuntu 18.04）版本安装</h5><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">wget -O- https://deepin-wine.i-m.dev/setup.sh | sh</span><br><span class="line">sudo apt install deepin.com.wechat</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>安装后可能会出现界面中文字体显示方块的问题，解决方案如下：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">sudo apt-cache search wqy</span></span><br><span class="line">fonts-wqy-microhei - Sans-serif style CJK font derived from Droid</span><br><span class="line">fonts-wqy-zenhei - &quot;WenQuanYi Zen Hei&quot; A Hei-Ti Style (sans-serif) Chinese font</span><br><span class="line">xfonts-wqy - WenQuanYi Bitmap Song CJK font for X</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">安装上面三个字体</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">sudo apt install fonts-wqy-microhei fonts-wqy-zenhei xfonts-wqy</span></span><br></pre></td></tr></table></figure>
+
+<p>其他异常：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">The following packages have unmet dependencies:</span><br><span class="line"> com.qq.weixin.deepin:i386 : Depends: libc6:i386 (&gt;= 2.28) but 2.27-3ubuntu1.4 is to be installed</span><br><span class="line">E: Unable to correct problems, you have held broken packages.</span><br></pre></td></tr></table></figure>
+
+
+
+<p>同样可以替换安装包（deepin.com.wechat）为其他需要的软件，输入 sudo apt install install deepin. 按 tab 就显示了：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">sudo apt install deepin.com.qq.im</span></span><br><span class="line">deepin.cn.360.yasuo                  deepin.com.baidu.pan                 deepin.com.qq.b.crm                  deepin.com.qq.office                 deepin.com.thunderspeed              deepin.org.7-zip                   </span><br><span class="line">deepin.cn.com.winrar                 deepin.com.cmbchina                  deepin.com.qq.b.eim                  deepin.com.qq.rtx2015                deepin.com.wechat                    deepin.org.foobar2000              </span><br><span class="line">deepin.com.95579.cjsc                deepin.com.foxmail                   deepin.com.qq.im                     deepin.com.taobao.aliclient.qianniu  deepin.com.weixin.work                                                  </span><br><span class="line">deepin.com.aaa-logo                  deepin.com.gtja.fuyi                 deepin.com.qq.im.light               deepin.com.taobao.wangwang           deepin.net.263.em</span><br></pre></td></tr></table></figure>
+
+<h5 id="24-2-LinuxMint20（Ubuntu-20-04）-版本安装"><a href="#24-2-LinuxMint20（Ubuntu-20-04）-版本安装" class="headerlink" title="24.2 LinuxMint20（Ubuntu 20.04） 版本安装"></a>24.2 LinuxMint20（Ubuntu 20.04） 版本安装</h5><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">wget -O- https://deepin-wine.i-m.dev/setup.sh | sh</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">sudo apt install com.qq.weixin.deepin com.qq.im.deepin</span></span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash"><span class="comment">## 如无法发送照片</span></span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">sudo apt install libjpeg62:i386</span></span><br></pre></td></tr></table></figure>
+
+<p>官网最新版本依赖高版本 libc6 库，而 Ubuntu 18.04 最高只支持 libc6-2.27 版本，所以 Ubuntu 18.04 无法安装 deepin-wine github 中的新版本，<strong>千万不要尝试升级 libc6</strong>，不要问我是怎么知道的，除非你想重装系统……</p>
+<h4 id="25-git-status-中文显示为-ascii-码"><a href="#25-git-status-中文显示为-ascii-码" class="headerlink" title="25. git status 中文显示为 ascii 码"></a>25. git status 中文显示为 ascii 码</h4><ul>
+<li>原因<br>在默认设置下，中文文件名在工作区状态输出，中文名不能正确显示，而是显示为八进制的字符编码。</li>
+<li>解决办法<br>将git 配置文件 <code>core.quotepath</code>项设置为false。<br>quotepath表示引用路径<br>加上<code>--global</code>表示全局配置</li>
+</ul>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git config --global core.quotepath false</span><br></pre></td></tr></table></figure>
+
+<h4 id="26-更新-fork-而来的仓库代码"><a href="#26-更新-fork-而来的仓库代码" class="headerlink" title="26. 更新 fork 而来的仓库代码"></a>26. 更新 fork 而来的仓库代码</h4><p>有两种方法</p>
+<h5 id="26-1-git-命令操作"><a href="#26-1-git-命令操作" class="headerlink" title="26.1 git 命令操作"></a>26.1 git 命令操作</h5><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">查看远程分支列表</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">git remote -v</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">增加源分支地址到你项目远程分支列表中(此处是关键)，先得将原来的仓库指定为 upstream，命令为</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">git remote add upstream git@github.com:xxx/xxx.git</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">fetch 源分支的新版本到本地</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">git fetch upstream</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">合并两个版本的代码</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">git merge upstream/master</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">将合并后的代码 push 到 github 上去</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">git push origin master</span></span><br></pre></td></tr></table></figure>
+
+<h5 id="26-2-github-方式"><a href="#26-2-github-方式" class="headerlink" title="26.2 github 方式"></a>26.2 github 方式</h5><p><a target="_blank" rel="noopener" href="https://blog.csdn.net/qq1332479771/article/details/56087333">https://blog.csdn.net/qq1332479771/article/details/56087333</a></p>
+<h4 id="27-Linux-Mint20-添加打印机"><a href="#27-Linux-Mint20-添加打印机" class="headerlink" title="27. Linux Mint20 添加打印机"></a>27. Linux Mint20 添加打印机</h4><p>Settings - Printers - Add - Find Network Print - 右侧输入打印机 IP - Find - 左侧 JetDirect(xxx.xxx.xxx.xxx) - 右侧 Forward</p>
+<h4 id="28-AndroidStudio-虚拟机无法启动-x2F-dev-x2F-kvm-is-not-found"><a href="#28-AndroidStudio-虚拟机无法启动-x2F-dev-x2F-kvm-is-not-found" class="headerlink" title="28. AndroidStudio 虚拟机无法启动 &#x2F;dev&#x2F;kvm is not found"></a>28. AndroidStudio 虚拟机无法启动 &#x2F;dev&#x2F;kvm is not found</h4><p>提示 <code>/dev/kvm is not found</code></p>
+<p>解决方法</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">sudo apt install qemu-kvm</span><br><span class="line">sudo kvm-ok</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">重启电脑，F10(惠普) 进入 BIOS - Security(或者Advanced) - SystemSecurity - Virtualization Thchnology, 启动即可</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="29-Ubuntu-中-AndroidStudio-只识别文件传输模式"><a href="#29-Ubuntu-中-AndroidStudio-只识别文件传输模式" class="headerlink" title="29. Ubuntu 中 AndroidStudio 只识别文件传输模式"></a>29. Ubuntu 中 AndroidStudio 只识别文件传输模式</h4><p>智能识别文件传输模式，仅充电模式无法识别调试，根据如下链接配置 51-android</p>
+<p><a target="_blank" rel="noopener" href="https://github.com/snowdream/51-android">https://github.com/snowdream/51-android</a></p>
+<h4 id="30-Github-不再支持密码验证"><a href="#30-Github-不再支持密码验证" class="headerlink" title="30. Github 不再支持密码验证"></a>30. Github 不再支持密码验证</h4><p>从 2021 年 8 月13 日开始，github 不再支持密码验证</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">remote: Support for password authentication was removed on August 13, 2021. Please use a personal access token instead</span><br></pre></td></tr></table></figure>
+
+<p><strong>解决办法</strong></p>
+<p>进入 github，右上角 Settings - Developer settings - Personal access tokens - Generate new token, 设置 token 有效期，访问权限等，</p>
+<ul>
+<li>使用 token 从命令行访问仓库，勾选 repo</li>
+<li>使用 token 从命令行删除仓库，勾选 delete_repo</li>
+<li>其他按需勾选</li>
+</ul>
+<p>点击 Generate token 生成令牌，保存好生成的 token，因为只会出现一次。</p>
+<p>随后 push 代码的时候把 token 粘贴到 密码的位置，也可以把 token 直接添加到远程仓库链接中，这样就不会每次提交代码都需要输入 token 了：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">git remote set-url origin https://&lt;your_token&gt;@github.com/&lt;USERNAME&gt;/&lt;REPO&gt;.git</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">例</span></span><br><span class="line">git remote set-url origin https://ghp_0kMUaJGbjAQ49KGpBNeOy2iCUvafabcdefgh@github.com/username/helloworld.git/</span><br></pre></td></tr></table></figure>
+
+<h4 id="31-adb-无线连接手机"><a href="#31-adb-无线连接手机" class="headerlink" title="31. adb 无线连接手机"></a>31. adb 无线连接手机</h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">adb connect 192.168.53.8</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">如果出现错误 failed to connect to <span class="string">&#x27;192.168.53.8:5555&#x27;</span>: Connection refused</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">进入开发者选项 - 无线调试 - 使用配对码配对设备，会显示配对码和 IP 地址和端口</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">adb pair 192.168.53.8:AAAA</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">adb connect 192.168.53.8:BBBB <span class="comment"># BBBB 有可能和 AAAA 不同，因为无线调试中的 IP 地址和端口和使用配对码配对设备弹框中的 IP 地址和端口有可能不一样</span></span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">adb tcpip 5555 <span class="comment"># 连上后配置 tcpip，以后连接的时候就不用加上端口号了</span></span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">adb connect 192.168.53.8</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="32-更新-Hexo-后执行-hexo-s-出现异常"><a href="#32-更新-Hexo-后执行-hexo-s-出现异常" class="headerlink" title="32. 更新 Hexo 后执行 hexo s 出现异常"></a>32. 更新 Hexo 后执行 hexo s 出现异常</h4><ul>
+<li><p>无法执行 hexo s</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">sudo npm install hexo-server --save</span></span><br></pre></td></tr></table></figure>
+
+<p>安装 hexo-server 即可；</p>
+</li>
+<li><p>hexo s 后打开 <a target="_blank" rel="noopener" href="http://localhost:4000/">http://localhost:4000/</a> 出现 Cannot GET &#x2F;</p>
+<p>因为 public 目录没有生成 index.html，使用 <code>sudo npm audit fix</code> 检查需要升级的插件，执行 <code>sudo npm install</code> 即可；</p>
+</li>
+</ul>
+<h4 id="33-Git-换行符问题"><a href="#33-Git-换行符问题" class="headerlink" title="33. Git 换行符问题"></a>33. Git 换行符问题</h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">提交时转换为 LF，检出时转换为 CRLF（Windows 默认为 <span class="literal">true</span>）</span></span><br><span class="line">git config --global core.autocrlf true</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">提交时转换为 LF，检出时不转换</span></span><br><span class="line">git config --global core.autocrlf input</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">提交检出均不转换</span></span><br><span class="line">git config --global core.autocrlf false</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">拒绝提交包含混合换行符的文件</span></span><br><span class="line">git config --global core.safecrlf true</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">允许提交包含混合换行符的文件</span></span><br><span class="line">git config --global core.safecrlf false</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">提交包含混合换行符的文件时给出警告</span></span><br><span class="line">git config --global core.safecrlf warn</span><br></pre></td></tr></table></figure>
+
+<p>如果不想 git 干涉我们的文件换行符格式，则配置 core.autocrlf 为 false；</p>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div>Donate comment here.</div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechatpay.jpg" alt="Ranger Zhou 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.jpg" alt="Ranger Zhou 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>Ranger Zhou
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://rangerzhou.top/2017/10/10/Others/Notes/" title="Notes">http://rangerzhou.top/2017/10/10/Others/Notes/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2017/09/06/Android/TaoBao_HOMEKey_to_Background_Policy/" rel="prev" title="淘宝进入后台后网络策略分析(Android进程调度ADJ算法部分内容分析)">
+      <i class="fa fa-chevron-left"></i> 淘宝进入后台后网络策略分析(Android进程调度ADJ算法部分内容分析)
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2017/10/11/Hexo/AboutHexo/" rel="next" title="AboutHexo">
+      AboutHexo <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+      <div class="tabs tabs-comment">
+        <ul class="nav-tabs">
+            <li class="tab"><a href="#comment-disqus">disqus</a></li>
+            <li class="tab"><a href="#comment-gitalk">gitalk</a></li>
+            <li class="tab"><a href="#comment-livere">livere</a></li>
+        </ul>
+        <div class="tab-content">
+            <div class="tab-pane disqus" id="comment-disqus">
+              
+  <div class="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
+            </div>
+            <div class="tab-pane gitalk" id="comment-gitalk">
+              <div class="comments" id="gitalk-container"></div>
+            </div>
+            <div class="tab-pane livere" id="comment-livere">
+              
+  <div class="comments">
+    <div id="lv-container" data-id="city" data-uid="MTAyMC8yOTcyNS82Mjky"></div>
+  </div>
+  
+            </div>
+        </div>
+      </div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-Ubuntu%E6%B7%BB%E5%8A%A0%E4%BB%A3%E7%90%86"><span class="nav-text">1. Ubuntu添加代理</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-Google%E6%9C%8D%E5%8A%A1%E5%99%A8%E9%85%8D%E7%BD%AESS"><span class="nav-text">2. Google服务器配置SS</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-JDK"><span class="nav-text">3. JDK</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#3-1-%E5%AE%89%E8%A3%85JDK"><span class="nav-text">3.1 安装JDK</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#3-2-%E5%88%87%E6%8D%A2JDK"><span class="nav-text">3.2 切换JDK</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#4-%E5%AE%8C%E6%95%B4%E5%8D%B8%E8%BD%BDJDK"><span class="nav-text">4. 完整卸载JDK</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#5-%E5%88%87%E6%8D%A2Python%E7%89%88%E6%9C%AC"><span class="nav-text">5. 切换Python版本</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#6-JACK%E4%BB%8B%E7%BB%8D"><span class="nav-text">6. JACK介绍</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#7-Ubuntu%E7%99%BB%E5%BD%95%E8%BF%9C%E7%A8%8B%E6%9C%8D%E5%8A%A1%E5%99%A8"><span class="nav-text">7. Ubuntu登录远程服务器</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#8-samba%E9%85%8D%E7%BD%AE%E5%85%B1%E4%BA%AB%E7%9B%AE%E5%BD%95-MintOS-20-04"><span class="nav-text">8. samba配置共享目录(MintOS 20.04)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#9-apk%E7%AD%BE%E5%90%8D"><span class="nav-text">9. apk签名</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#10-AndroidStudio-%E5%AF%BC%E5%85%A5%E8%B0%83%E6%95%B4-jar-%E5%8C%85%E4%BC%98%E5%85%88%E7%BA%A7"><span class="nav-text">10 AndroidStudio 导入调整 jar 包优先级</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#11-Ubuntu-18-04%E7%BE%8E%E5%8C%96"><span class="nav-text">11 . Ubuntu 18.04美化</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#12-Ubuntu-18-04-%E8%BF%87%E6%BB%A4CSDN%E5%B9%BF%E5%91%8A"><span class="nav-text">12. Ubuntu 18.04 过滤CSDN广告</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#13-Repo-%E5%88%87%E6%8D%A2%E6%89%80%E6%9C%89%E5%88%86%E6%94%AF"><span class="nav-text">13. Repo 切换所有分支</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#14-%E8%AE%BF%E9%97%AE%E5%88%A0%E9%99%A4-x2F-root-%E7%9B%AE%E5%BD%95"><span class="nav-text">14. 访问删除 &#x2F;root 目录</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#15-crontab-%E5%AE%9A%E6%97%B6%E4%BB%BB%E5%8A%A1"><span class="nav-text">15. crontab 定时任务</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#16-systemd-%E9%85%8D%E7%BD%AE-service-%E5%BC%80%E6%9C%BA%E5%90%AF%E5%8A%A8"><span class="nav-text">16. systemd 配置 service 开机启动</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#17-%E4%BD%BF%E7%94%A8-AndroidStudio-%E8%B0%83%E8%AF%95%E6%BA%90%E7%A0%81"><span class="nav-text">17. 使用 AndroidStudio 调试源码</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#18-%E6%89%B9%E9%87%8F%E6%9F%A5%E6%89%BE%E5%B9%B6%E6%9B%BF%E6%8D%A2%E5%AD%97%E7%AC%A6%E4%B8%B2"><span class="nav-text">18. 批量查找并替换字符串</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#19-%E9%A1%B9%E7%9B%AE%E8%BF%81%E7%A7%BB%EF%BC%88%E5%8C%85%E5%90%AB%E6%8F%90%E4%BA%A4%E8%AE%B0%E5%BD%95%EF%BC%89"><span class="nav-text">19. 项目迁移（包含提交记录）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#20-VirtualBox-%E5%85%B1%E4%BA%AB%E6%96%87%E4%BB%B6%E5%A4%B9"><span class="nav-text">20. VirtualBox 共享文件夹</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#21-Linux-jar-%E5%8C%85%E8%BF%90%E8%A1%8C%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4"><span class="nav-text">21. Linux jar 包运行常用命令</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#1-%E8%BF%90%E8%A1%8C%E6%96%B9%E5%BC%8F1"><span class="nav-text">1. 运行方式1</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#2-%E8%BF%90%E8%A1%8C%E6%96%B9%E5%BC%8F2"><span class="nav-text">2. 运行方式2</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#3-%E8%BF%90%E8%A1%8C%E6%96%B9%E5%BC%8F3"><span class="nav-text">3. 运行方式3</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#4-%E8%BF%90%E8%A1%8C%E6%96%B9%E5%BC%8F4"><span class="nav-text">4. 运行方式4</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#5-%E6%9F%A5%E7%9C%8B%E5%90%8E%E5%8F%B0%E8%BF%90%E8%A1%8C%E4%BB%BB%E5%8A%A1"><span class="nav-text">5. 查看后台运行任务</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#6-%E6%9F%A5%E7%9C%8B%E6%9F%90%E7%AB%AF%E5%8F%A3%E5%8D%A0%E7%94%A8%E7%9A%84%E7%BA%BF%E7%A8%8B%E7%9A%84-pid"><span class="nav-text">6. 查看某端口占用的线程的 pid</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#7-%E5%85%B3%E9%97%AD%E8%BF%9B%E7%A8%8B"><span class="nav-text">7. 关闭进程</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#22-Ubuntu-18-04-%E4%BF%AE%E6%94%B9-mysql-%E6%95%B0%E6%8D%AE%E5%BA%93%E5%AD%98%E6%94%BE%E4%BD%8D%E7%BD%AE"><span class="nav-text">22. Ubuntu 18.04 修改 mysql 数据库存放位置</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#23-Ubuntu-%E7%B3%BB%E7%BB%9F%E6%97%B6%E9%97%B4%E5%90%8C%E6%AD%A5"><span class="nav-text">23. Ubuntu 系统时间同步</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#24-Ubuntu-%E5%AE%89%E8%A3%85-%E5%BE%AE%E4%BF%A1-x2F-QQ"><span class="nav-text">24. Ubuntu 安装 微信&#x2F;QQ</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#24-1-LinuxMint19-3%EF%BC%88Ubuntu-18-04%EF%BC%89%E7%89%88%E6%9C%AC%E5%AE%89%E8%A3%85"><span class="nav-text">24.1 LinuxMint19.3（Ubuntu 18.04）版本安装</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#24-2-LinuxMint20%EF%BC%88Ubuntu-20-04%EF%BC%89-%E7%89%88%E6%9C%AC%E5%AE%89%E8%A3%85"><span class="nav-text">24.2 LinuxMint20（Ubuntu 20.04） 版本安装</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#25-git-status-%E4%B8%AD%E6%96%87%E6%98%BE%E7%A4%BA%E4%B8%BA-ascii-%E7%A0%81"><span class="nav-text">25. git status 中文显示为 ascii 码</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#26-%E6%9B%B4%E6%96%B0-fork-%E8%80%8C%E6%9D%A5%E7%9A%84%E4%BB%93%E5%BA%93%E4%BB%A3%E7%A0%81"><span class="nav-text">26. 更新 fork 而来的仓库代码</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#26-1-git-%E5%91%BD%E4%BB%A4%E6%93%8D%E4%BD%9C"><span class="nav-text">26.1 git 命令操作</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#26-2-github-%E6%96%B9%E5%BC%8F"><span class="nav-text">26.2 github 方式</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#27-Linux-Mint20-%E6%B7%BB%E5%8A%A0%E6%89%93%E5%8D%B0%E6%9C%BA"><span class="nav-text">27. Linux Mint20 添加打印机</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#28-AndroidStudio-%E8%99%9A%E6%8B%9F%E6%9C%BA%E6%97%A0%E6%B3%95%E5%90%AF%E5%8A%A8-x2F-dev-x2F-kvm-is-not-found"><span class="nav-text">28. AndroidStudio 虚拟机无法启动 &#x2F;dev&#x2F;kvm is not found</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#29-Ubuntu-%E4%B8%AD-AndroidStudio-%E5%8F%AA%E8%AF%86%E5%88%AB%E6%96%87%E4%BB%B6%E4%BC%A0%E8%BE%93%E6%A8%A1%E5%BC%8F"><span class="nav-text">29. Ubuntu 中 AndroidStudio 只识别文件传输模式</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#30-Github-%E4%B8%8D%E5%86%8D%E6%94%AF%E6%8C%81%E5%AF%86%E7%A0%81%E9%AA%8C%E8%AF%81"><span class="nav-text">30. Github 不再支持密码验证</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#31-adb-%E6%97%A0%E7%BA%BF%E8%BF%9E%E6%8E%A5%E6%89%8B%E6%9C%BA"><span class="nav-text">31. adb 无线连接手机</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#32-%E6%9B%B4%E6%96%B0-Hexo-%E5%90%8E%E6%89%A7%E8%A1%8C-hexo-s-%E5%87%BA%E7%8E%B0%E5%BC%82%E5%B8%B8"><span class="nav-text">32. 更新 Hexo 后执行 hexo s 出现异常</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#33-Git-%E6%8D%A2%E8%A1%8C%E7%AC%A6%E9%97%AE%E9%A2%98"><span class="nav-text">33. Git 换行符问题</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Ranger Zhou</p>
+  <div class="site-description" itemprop="description">我是一个小流氓我从来也不浪，有一天我心血来潮耍了个流氓，我嘴里吹着小口哨我心里好得意，不知怎么哗啦啦啦啦我摔了一身泥</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">63</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">8</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">16</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/rangerzhou" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;rangerzhou" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:rangero_o@qq.com" title="E-Mail → mailto:rangero_o@qq.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://rangerzhou.taobao.com/" title="Taobao → http:&#x2F;&#x2F;rangerzhou.taobao.com&#x2F;" rel="noopener" target="_blank"><i class="fab fa-youtube fa-fw"></i>Taobao</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="/images/wechat.jpg" title="WeChat → &#x2F;images&#x2F;wechat.jpg"><i class="fab fa-youtube fa-fw"></i>WeChat</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://blog.csdn.net/ranger0220?viewmode=contents" title="CSDN → http:&#x2F;&#x2F;blog.csdn.net&#x2F;ranger0220?viewmode&#x3D;contents" rel="noopener" target="_blank"><i class="fab fa-youtube fa-fw"></i>CSDN</a>
+      </span>
+  </div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      墙裂推荐
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="http://rangerzhou.taobao.com/" title="http:&#x2F;&#x2F;rangerzhou.taobao.com" rel="noopener" target="_blank">Taobao</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2016 – 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Ranger Zhou</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+<script data-pjax>
+  (function() {
+    function leancloudSelector(url) {
+      url = encodeURI(url);
+      return document.getElementById(url).querySelector('.leancloud-visitors-count');
+    }
+
+    function addCount(Counter) {
+      var visitors = document.querySelector('.leancloud_visitors');
+      var url = decodeURI(visitors.id);
+      var title = visitors.dataset.flagTitle;
+
+      Counter('get', '/classes/Counter?where=' + encodeURIComponent(JSON.stringify({ url })))
+        .then(response => response.json())
+        .then(({ results }) => {
+          if (results.length > 0) {
+            var counter = results[0];
+            leancloudSelector(url).innerText = counter.time + 1;
+            Counter('put', '/classes/Counter/' + counter.objectId, { time: { '__op': 'Increment', 'amount': 1 } })
+              .catch(error => {
+                console.error('Failed to save visitor count', error);
+              });
+          } else {
+              Counter('post', '/classes/Counter', { title, url, time: 1 })
+                .then(response => response.json())
+                .then(() => {
+                  leancloudSelector(url).innerText = 1;
+                })
+                .catch(error => {
+                  console.error('Failed to create', error);
+                });
+          }
+        })
+        .catch(error => {
+          console.error('LeanCloud Counter Error', error);
+        });
+    }
+
+    function showTime(Counter) {
+      var visitors = document.querySelectorAll('.leancloud_visitors');
+      var entries = [...visitors].map(element => {
+        return decodeURI(element.id);
+      });
+
+      Counter('get', '/classes/Counter?where=' + encodeURIComponent(JSON.stringify({ url: { '$in': entries } })))
+        .then(response => response.json())
+        .then(({ results }) => {
+          for (let url of entries) {
+            let target = results.find(item => item.url === url);
+            leancloudSelector(url).innerText = target ? target.time : 0;
+          }
+        })
+        .catch(error => {
+          console.error('LeanCloud Counter Error', error);
+        });
+    }
+
+    let { app_id, app_key, server_url } = {"enable":true,"app_id":"U9g4mWmsQg8FjOE3xsqUy9Df-gzGzoHsz","app_key":"24cDno14OiDhAreVmoEjzqns","server_url":"https://u9g4mwms.lc-cn-n1-shared.com","security":false};
+    function fetchData(api_server) {
+      var Counter = (method, url, data) => {
+        return fetch(`${api_server}/1.1${url}`, {
+          method,
+          headers: {
+            'X-LC-Id'     : app_id,
+            'X-LC-Key'    : app_key,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(data)
+        });
+      };
+      if (CONFIG.page.isPost) {
+        if (CONFIG.hostname !== location.hostname) return;
+        addCount(Counter);
+      } else if (document.querySelectorAll('.post-title-link').length >= 1) {
+        showTime(Counter);
+      }
+    }
+
+    let api_server = app_id.slice(-9) !== '-MdYXbMMI' ? server_url : `https://${app_id.slice(0, 8).toLowerCase()}.api.lncldglobal.com`;
+
+    if (api_server) {
+      fetchData(api_server);
+    } else {
+      fetch('https://app-router.leancloud.cn/2/route?appId=' + app_id)
+        .then(response => response.json())
+        .then(({ api_server }) => {
+          fetchData('https://' + api_server);
+        });
+    }
+  })();
+</script>
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/pjax/pjax.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/pangu@4/dist/browser/pangu.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '#page-configurations',
+    '.content-wrap',
+    '.post-toc-wrap',
+    '.languages',
+    '#pjax'
+  ],
+  switches: {
+    '.post-toc-wrap': Pjax.switches.innerHTML
+  },
+  analytics: false,
+  cacheBust: false,
+  scrollTo : !CONFIG.bookmark.enable
+});
+
+window.addEventListener('pjax:success', () => {
+  document.querySelectorAll('script[data-pjax], script#page-configurations, #pjax script').forEach(element => {
+    var code = element.text || element.textContent || element.innerHTML || '';
+    var parent = element.parentNode;
+    parent.removeChild(element);
+    var script = document.createElement('script');
+    if (element.id) {
+      script.id = element.id;
+    }
+    if (element.className) {
+      script.className = element.className;
+    }
+    if (element.type) {
+      script.type = element.type;
+    }
+    if (element.src) {
+      script.src = element.src;
+      // Force synchronous loading of peripheral JS.
+      script.async = false;
+    }
+    if (element.dataset.pjax !== undefined) {
+      script.dataset.pjax = '';
+    }
+    if (code !== '') {
+      script.appendChild(document.createTextNode(code));
+    }
+    parent.appendChild(script);
+  });
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+
+
+  
+  <script data-pjax>
+    (function(){
+      var canonicalURL, curProtocol;
+      //Get the <link> tag
+      var x=document.getElementsByTagName("link");
+		//Find the last canonical URL
+		if(x.length > 0){
+			for (i=0;i<x.length;i++){
+				if(x[i].rel.toLowerCase() == 'canonical' && x[i].href){
+					canonicalURL=x[i].href;
+				}
+			}
+		}
+    //Get protocol
+	    if (!canonicalURL){
+	    	curProtocol = window.location.protocol.split(':')[0];
+	    }
+	    else{
+	    	curProtocol = canonicalURL.split(':')[0];
+	    }
+      //Get current URL if the canonical URL does not exist
+	    if (!canonicalURL) canonicalURL = window.location.href;
+	    //Assign script content. Replace current URL with the canonical URL
+      !function(){var e=/([http|https]:\/\/[a-zA-Z0-9\_\.]+\.baidu\.com)/gi,r=canonicalURL,t=document.referrer;if(!e.test(r)){var n=(String(curProtocol).toLowerCase() === 'https')?"https://sp0.baidu.com/9_Q4simg2RQJ8t7jm9iCKT-xh_/s.gif":"//api.share.baidu.com/s.gif";t?(n+="?r="+encodeURIComponent(document.referrer),r&&(n+="&l="+r)):r&&(n+="?l="+r);var i=new Image;i.src=n}}(window);})();
+  </script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <div id="pjax">
+  
+
+  
+
+<script>
+  var disqus_config = function() {
+    this.page.url = "http://rangerzhou.top/2017/10/10/Others/Notes/";
+    this.page.identifier = "2017/10/10/Others/Notes/";
+    this.page.title = "Notes";
+    };
+  NexT.utils.loadComments(document.querySelector('#disqus_thread'), () => {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: disqus_config
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://rangerzhou.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  });
+</script>
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : 'b7bb504993135f5a2eab',
+      clientSecret: '6f83aec5c45d75e248e2914be90c4601e2e1dc44',
+      repo        : 'rangerzhou.github.io',
+      owner       : 'rangerzhou',
+      admin       : ['rangerzhou'],
+      id          : 'b317acf02b692caedf3a56eda4e6f1b5',
+        language: 'zh-CN',
+      distractionFreeMode: true
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
+
+<script>
+NexT.utils.loadComments(document.querySelector('#lv-container'), () => {
+  window.livereOptions = {
+    refer: location.pathname.replace(CONFIG.root, '').replace('index.html', '')
+  };
+  (function(d, s) {
+    var j, e = d.getElementsByTagName(s)[0];
+    if (typeof LivereTower === 'function') { return; }
+    j = d.createElement(s);
+    j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+    j.async = true;
+    e.parentNode.insertBefore(j, e);
+  })(document, 'script');
+});
+</script>
+
+    </div>
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/haru01.model.json"},"display":{"position":"left","width":300,"height":800},"mobile":{"show":false},"log":false});</script></body>
+</html>

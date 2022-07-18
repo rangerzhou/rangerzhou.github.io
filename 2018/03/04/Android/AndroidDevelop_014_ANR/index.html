@@ -1,0 +1,1027 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.2.0">
+<!-- pjax：防止跳转页面音乐暂停 -->
+<script src="https://cdn.jsdelivr.net/npm/pjax@0.2.8/pjax.js"></script>
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/desert.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/desert.jpg">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <meta name="google-site-verification" content="OJnYjbr3wdT22qLrZSzyD9lAyBcXiXlEQ7-5wAnaWoQ">
+  <meta name="baidu-site-verification" content="vr4n4JeXgB">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-minimal.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"rangerzhou.top","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"manual"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":true,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":true,"nav":null,"activeClass":"gitalk"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="1. 简介 ANR(Application Not Responding) 是一个很常见的问题，通俗的说，就是应用程序与外界的交互不灵敏了。Android 应用与外界的交互有多种，但其中一些特别重要的交互，需要在一定时间范围内完成，如果超过预定时间没有得到应用的及时处理，就会造成 ANR。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android - ANR分析">
+<meta property="og:url" content="http://rangerzhou.top/2018/03/04/Android/AndroidDevelop_014_ANR/index.html">
+<meta property="og:site_name" content="RangerZhou">
+<meta property="og:description" content="1. 简介 ANR(Application Not Responding) 是一个很常见的问题，通俗的说，就是应用程序与外界的交互不灵敏了。Android 应用与外界的交互有多种，但其中一些特别重要的交互，需要在一定时间范围内完成，如果超过预定时间没有得到应用的及时处理，就会造成 ANR。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2018-03-04T11:13:19.000Z">
+<meta property="article:modified_time" content="2022-07-18T14:46:21.586Z">
+<meta property="article:author" content="Ranger Zhou">
+<meta property="article:tag" content="ANR">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://rangerzhou.top/2018/03/04/Android/AndroidDevelop_014_ANR/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+<script src="//cdn.bootcss.com/pace/1.0.2/pace.min.js"></script>
+<link href="//cdn.bootcss.com/pace/1.0.2/themes/pink/pace-theme-flash.css" rel="stylesheet">
+
+  <title>Android - ANR分析 | RangerZhou</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-138158952-1"></script>
+    <script data-pjax>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-138158952-1');
+      }
+    </script>
+
+
+  <script data-pjax>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?24a6d3c4c0f292c5f682d26414c3994b";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+
+<!-- 加入APlayer音乐播放器 -->
+<link rel="stylesheet" href="/dist/APlayer.min.css">
+<div id="aplayer"></div>
+<script type="text/javascript" src="/dist/APlayer.min.js"></script>
+<script type="text/javascript" src="/dist/music.js"></script>
+
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">RangerZhou</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">Read the fucking source code</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-playlist">
+
+    <a href="/playlist/" rel="section"><i class="fa fa-music fa-fw"></i>歌单</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-commonweal">
+
+    <a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a>
+
+  </li>
+        <li class="menu-item menu-item-official">
+
+    <a href="/official" rel="section"><i class="fa fa-user fa-fw"></i>official</a>
+
+  </li>
+        <li class="menu-item menu-item-shop">
+
+    <a href="http://rangerzhou.taobao.com/" rel="noopener" target="_blank"><i class="fa fa-user fa-fw"></i>shop</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://rangerzhou.top/2018/03/04/Android/AndroidDevelop_014_ANR/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Ranger Zhou">
+      <meta itemprop="description" content="我是一个小流氓我从来也不浪，有一天我心血来潮耍了个流氓，我嘴里吹着小口哨我心里好得意，不知怎么哗啦啦啦啦我摔了一身泥">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="RangerZhou">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Android - ANR分析
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2018-03-04 19:13:19" itemprop="dateCreated datePublished" datetime="2018-03-04T19:13:19+08:00">2018-03-04</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-07-18 22:46:21" itemprop="dateModified" datetime="2022-07-18T22:46:21+08:00">2022-07-18</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Android/" itemprop="url" rel="index"><span itemprop="name">Android</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/2018/03/04/Android/AndroidDevelop_014_ANR/" class="post-meta-item leancloud_visitors" data-flag-title="Android - ANR分析" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="1-简介"><a href="#1-简介" class="headerlink" title="1. 简介"></a>1. 简介</h2><blockquote>
+<p>ANR(Application Not Responding) 是一个很常见的问题，通俗的说，就是应用程序与外界的交互不灵敏了。Android 应用与外界的交互有多种，但其中一些特别重要的交互，需要在一定时间范围内完成，如果超过预定时间没有得到应用的及时处理，就会造成 ANR。</p>
+</blockquote>
+<span id="more"></span>
+
+<p>从用户的角度来说，通常就会觉得在这段时间内，无论点击手机按键或滑动屏幕都没有反应。有的时候ANR会向用户显示一个对话框，用户可以选择继续等待或者关闭这个应用程序文件。</p>
+<h2 id="2-ANR分类"><a href="#2-ANR分类" class="headerlink" title="2. ANR分类"></a>2. ANR分类</h2><h3 id="2-1-inputDispatching-Timeout（最常见的-ANR）"><a href="#2-1-inputDispatching-Timeout（最常见的-ANR）" class="headerlink" title="2.1 inputDispatching Timeout（最常见的 ANR）"></a>2.1 inputDispatching Timeout（最常见的 ANR）</h3><p>输入事件超时（包括屏幕点击、滑动或按键事件），在一定时间内没有得到应用的处理；</p>
+<p>Timeout：5 秒，<strong>超过 5 秒并不是一定会报 ANR，对于 input 来说即便某次事件执行时间超过 timeout 时长，只要用户后续没有再生成事件，就不会触发 ANR</strong>；</p>
+<h3 id="2-2-BroadcastQueue-Timeout（比较常见）"><a href="#2-2-BroadcastQueue-Timeout（比较常见）" class="headerlink" title="2.2 BroadcastQueue Timeout（比较常见）"></a>2.2 BroadcastQueue Timeout（比较常见）</h3><p>广播事件处理超时，指 BroadcastReceiver 在一定时间内（通常是10秒）没有处理完成；</p>
+<p>Timeout：前台广播，超时为 <code>BROADCAST_FG_TIMEOUT = 10s</code>，后台广播，超时为 <code>BROADCAST_BG_TIMEOUT = 60s</code>；</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// ActivityManagerService.java</span></span><br><span class="line"><span class="comment">// How long we allow a receiver to run before giving up on it.</span></span><br><span class="line"><span class="keyword">static</span> <span class="keyword">final</span> <span class="type">int</span> <span class="variable">BROADCAST_FG_TIMEOUT</span> <span class="operator">=</span> <span class="number">10</span> * <span class="number">1000</span> * Build.HW_TIMEOUT_MULTIPLIER;</span><br><span class="line"><span class="keyword">static</span> <span class="keyword">final</span> <span class="type">int</span> <span class="variable">BROADCAST_BG_TIMEOUT</span> <span class="operator">=</span> <span class="number">60</span> * <span class="number">1000</span> * Build.HW_TIMEOUT_MULTIPLIER;</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-3-Service-Timeout（很少见）"><a href="#2-3-Service-Timeout（很少见）" class="headerlink" title="2.3 Service Timeout（很少见）"></a>2.3 Service Timeout（很少见）</h3><p>服务超时，应用提供的服务，在一定的时间内（通常是20秒）没法处理完成。</p>
+<p>Timeout：前台服务,超时为 <code>SERVICE_TIMEOUT = 20s</code>，后台服务,超时为 <code>SERVICE_BACKGROUND_TIMEOUT = 200s</code>；</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// ActiveServices.java</span></span><br><span class="line"><span class="comment">// How long we wait for a service to finish executing.</span></span><br><span class="line"><span class="keyword">static</span> <span class="keyword">final</span> <span class="type">int</span> <span class="variable">SERVICE_TIMEOUT</span> <span class="operator">=</span> <span class="number">20</span> * <span class="number">1000</span> * Build.HW_TIMEOUT_MULTIPLIER;</span><br><span class="line"></span><br><span class="line"><span class="comment">// How long we wait for a service to finish executing.</span></span><br><span class="line"><span class="keyword">static</span> <span class="keyword">final</span> <span class="type">int</span> <span class="variable">SERVICE_BACKGROUND_TIMEOUT</span> <span class="operator">=</span> SERVICE_TIMEOUT * <span class="number">10</span>;</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-4-ContentProvider-Timeout"><a href="#2-4-ContentProvider-Timeout" class="headerlink" title="2.4 ContentProvider Timeout"></a>2.4 ContentProvider Timeout</h3><p>内容提供者,在 publish 超时10s；</p>
+<p>Timeout：超时为 <code>CONTENT_PROVIDER_PUBLISH_TIMEOUT_MILLIS = 10s</code>；</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// ContentResolver.java</span></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * How long we wait for an attached process to publish its content providers</span></span><br><span class="line"><span class="comment">     * before we decide it must be hung.</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@hide</span></span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">int</span> <span class="variable">CONTENT_PROVIDER_PUBLISH_TIMEOUT_MILLIS</span> <span class="operator">=</span></span><br><span class="line">            <span class="number">10</span> * <span class="number">1000</span> * Build.HW_TIMEOUT_MULTIPLIER;</span><br></pre></td></tr></table></figure>
+
+
+
+<p><strong>注：以上超时的时间阈值，在一些特殊的情况下，也可以通过修改阈值来避免ANR。</strong></p>
+<h2 id="3-ANR产生原因"><a href="#3-ANR产生原因" class="headerlink" title="3. ANR产生原因"></a>3. ANR产生原因</h2><p>ANR产生的原因，总的来说，通常有六种：</p>
+<ul>
+<li>主线程 IO</li>
+<li>多线程等锁</li>
+<li>System_server watchdog</li>
+<li>等待 Binder 对端返回数据</li>
+<li>Binder 无空闲线程</li>
+<li>系统资源紧张</li>
+</ul>
+<h3 id="3-1-主线程中有耗时-x2F-等待操作"><a href="#3-1-主线程中有耗时-x2F-等待操作" class="headerlink" title="3.1 主线程中有耗时&#x2F;等待操作"></a>3.1 主线程中有耗时&#x2F;等待操作</h3><p>android 应用程序都有一个主线程，这个主线程主要负责控制 UI 界面的显示、更新和控件交互（因此主线程通常又叫做UI线程），在 android 应用程序中，对于输入事件、broadcast 以及 service 的处理都是在这个主线程中。任何一个线程，简单点来说，其实都是一个 while 循环，在这个循环中，依次去做各种事，因此线程的工作流程显然是串行的，而非并行的。从另一个角度来说，这就意味着，在线程中，如果有一件事情没有完成，其它事情是决不可能被执行的。主线程也不例外，主线程要处理的各项事务（包括输入事件，广播，服务等）也必须按序一样一样来完成的。因此，如果主线程一直在做某件耗时的事情，或者在等待某些条件，就必然导致其它事务得不到及时处理，这就为 ANR 产生创造了条件。</p>
+<p>具体来说，在主线程中发生的耗时&#x2F;等待操作，可能有如下这些情况：</p>
+<ul>
+<li>主线程在做网络访问</li>
+<li>主线程在做大量的数据库访问</li>
+<li>主线程在做硬件操作</li>
+<li>主线程中调用了新建线程的 thread.join 方法，或调用了 sleep 方法</li>
+<li>Service 忙导致超时</li>
+<li>其它线程占有 lock，导致主线程在等待 lock</li>
+<li>主线程在等待其它线程的返回结果，而其它线程迟迟没有返回</li>
+</ul>
+<p>总而言之，在主线程的任何地方，任何代码，只要它消耗的时间超过前面所说的时间阀值，就有可能会造成ANR，那么应用中，哪些地方属于主线程呢？常见的有如下这些：</p>
+<ul>
+<li>Activity:onCreate(), onResume(), onDestroy(), onKeyDown(), onClick() 等</li>
+<li>AsyncTask: onPreExecute(), onProgressUpdate(), onPostExecute(), onCancel,等</li>
+<li>Mainthread handler: handleMessage(), post*(runnable r)等</li>
+</ul>
+<h3 id="3-2-系统性能问题"><a href="#3-2-系统性能问题" class="headerlink" title="3.2 系统性能问题"></a>3.2 系统性能问题</h3><p>在手机系统中，同一时间内有好多程序在运行，不可能只有当前的应用程序在跑，而系统 CPU 资源是有限的，因此，如果其它程序在进行繁忙的操作，占用了大量的 CPU 资源的话，就有可能导致当前应用无法及时运行（所谓的 CPU 饥饿），这也就意味着应用程序可能无法及时处理各种输入事件，从而导致 ANR。</p>
+<h3 id="3-3-应用程序没有收到输入事件"><a href="#3-3-应用程序没有收到输入事件" class="headerlink" title="3.3 应用程序没有收到输入事件"></a>3.3 应用程序没有收到输入事件</h3><p>如果系统向当前应用分发了一个输入事件，但应用程序却由于某种原因（比如说因为事件分发的管道坏了），没有接到这个输入事件，当然也就无法处理这个事件，因此，过了一定时间后，仍然会出现 ANR，典型的 log 如下：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">03-01 17:34:02.641  5391  8174 W InputDispatcher: channel &#x27;fb9318f PopupWindow:53fe386 (server)&#x27; ~ Consumer closed input channel or an error occurred.  events=0x9</span><br><span class="line">03-01 17:34:02.641  5391  8174 E InputDispatcher: channel &#x27;fb9318f PopupWindow:53fe386 (server)&#x27; ~ Channel is unrecoverably broken and will be disposed!</span><br><span class="line">... ...</span><br><span class="line">03-01 17:34:10.387  5391  8174 I WindowManager: Input event dispatching timed out sending to PopupWindow:53fe386.  Reason: Waiting because the focused window&#x27;s input channel is not registered with the input dispatcher.  The window may be in the process of being removed.</span><br></pre></td></tr></table></figure>
+
+<h2 id="4-如何分析ANR"><a href="#4-如何分析ANR" class="headerlink" title="4. 如何分析ANR"></a>4. 如何分析ANR</h2><p>  ANR 分为前台 ANR（用户能感知到的，对用户体验影响大，需要弹框让用户决定退出还是等待）和后台 ANR（只抓取发生 ANR 进程的 trace，不会收集 CPU 信息，并且会在后台直接杀掉该无响应的进程，不会弹框提示用户）；</p>
+<p> 前台 ANR 发生后，系统会马上去抓取现场信息用于调试分析，主要信息有：</p>
+<ul>
+<li>am_anr 信息（Eventlog），这条 log 的时间最接近 ANR 发生的时间；</li>
+<li>trace 信息，保存在 data&#x2F;anr&#x2F; 目录下；</li>
+<li>main log 中发生 ANR 的原因和 CPU 使用情况信息；</li>
+<li>将 trace 文件和 CPU 使用情况保存到 data&#x2F;system&#x2F;dropbox 目录；</li>
+<li>对用户感知的进程弹出 ANR 对话框，对用户不感知的发生 ANR 的进程直接杀掉；</li>
+</ul>
+<p>分析步骤：</p>
+<ul>
+<li>定位 ANR 发生的时间点；</li>
+<li>查看 trace 信息；</li>
+<li>分析是否有耗时的 message, binder 调用，锁的竞争，CPU 资源的抢占；</li>
+<li>结合具体的业务场景的上下文来分析；</li>
+</ul>
+<h3 id="4-1-在log中搜索”am-anr”"><a href="#4-1-在log中搜索”am-anr”" class="headerlink" title="4.1 在log中搜索”am_anr”"></a>4.1 在log中搜索”am_anr”</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">01-29 15:12:47.938  1720  1798 I am_anr  : [0,3108,com.miui.home,953794117,Input dispatching timed out (com.miui.home/com.miui.home.launcher.Launcher, Waiting to send non-key event because the touched window has not finished processing certain input events that were delivered to it over 500.0ms ago.  Wait queue length: 5.  Wait queue head age: 5799.1ms.)]</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>从 log 中可以看到发生 ANR 的进程 ID(3108)，进程名(com.miui.home)，ANR 的类型(Input dispatching timed out)等信息；</li>
+<li>要注意这条 log 的时间(01-29 15:12:47.938)，即 ANR 发生的时间点，向前平移相应类型超时的时间，就可以找到输入事件&#x2F;广播&#x2F;服务 开始的时间点，比如这里是输入事件超时，发生在 15:12:47 ，则向前平移 5 秒，15:12:42 就是事件输入的时间；</li>
+<li>知道这个时间很重要，因为应用程序就是在这个时间段内，无法对外界的交互作出响应的。因此，我们应当重点查看这个时间段内主线程的所有 log（就是那些 pid 与 tid 相同，且都等于应用程序的进程 ID 的 log），从这些 log 我们也许可以看到在 ANR 期间，主线程在做些什么，这对于我们判断 ANR 的成因有一定的帮助。比如说，如果我们看到在这个时间段内，主线程打印了大量的与数据库相关的操作，那么就不难推测，很可能就是这些数据库操作，导致了阻塞；</li>
+</ul>
+<h3 id="4-2-在log中搜索”ANR-in”"><a href="#4-2-在log中搜索”ANR-in”" class="headerlink" title="4.2 在log中搜索”ANR in”"></a>4.2 在log中搜索”ANR in”</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">01-29 15:12:47.953  3042  3164 I WtEventController: ANR com.miui.home 3108</span><br><span class="line">01-29 15:12:52.810  1720  1798 E ActivityManager: ANR in com.miui.home (com.miui.home/.launcher.Launcher)</span><br><span class="line">01-29 15:12:52.810  1720  1798 E ActivityManager: PID: 3108</span><br><span class="line">01-29 15:12:52.810  1720  1798 E ActivityManager: Reason: Input dispatching timed out (com.miui.home/com.miui.home.launcher.Launcher, Waiting to send non-key event because the touched window has not finished processing certain input events that were delivered to it over 500.0ms ago.  Wait queue length: 5.  Wait queue head age: 5799.1ms.)</span><br><span class="line">01-29 15:12:52.810  1720  1798 E ActivityManager: Load: 0.92 / 0.52 / 0.31</span><br><span class="line">01-29 15:12:52.810  1720  1798 E ActivityManager: CPU usage from 37298ms to 0ms ago (2018-01-29 15:12:10.574 to 2018-01-29 15:12:47.872):</span><br><span class="line">01-29 15:12:52.810  1720  1798 E ActivityManager:   13% 663/surfaceflinger: 6.3% user + 7.5% kernel / faults: 218 minor 2 major</span><br><span class="line">01-29 15:12:52.810  1720  1798 E ActivityManager:   10% 1720/system_server: 6.4% user + 3.6% kernel / faults: 3751 minor 3 major</span><br><span class="line">01-29 15:12:52.810  1720  1798 E ActivityManager:   8.9% 12029/com.tencent.mm: 7.2% user + 1.6% kernel / faults: 12889 minor 26 major</span><br><span class="line">01-29 15:12:52.810  1720  1798 E ActivityManager:   6.2% 20598/ctrip.android.view:pushsdk.v1: 2.3% user + 3.8% kernel / faults: 12738 minor 1 major</span><br><span class="line">01-29 15:12:52.810  1720  1798 E ActivityManager:   6.1% 29744/com.tencent.mm:tools: 4.3% user + 1.8% kernel / faults: 293 minor</span><br><span class="line">01-29 15:12:52.810  1720  1798 E ActivityManager:   5.2% 3970/com.hxwj.wjjf: 4% user + 1.1% kernel / faults: 194 minor</span><br><span class="line">01-29 15:12:52.810  1720  1798 E ActivityManager:   5.1% 7498/com.talk51.dasheng: 3.2% user + 1.8% kernel / faults: 568 minor</span><br><span class="line">01-29 15:12:52.810  1720  1798 E ActivityManager:   4.7% 29530/com.tencent.mm:appbrand0: 3.4% user + 1.3% kernel / faults: 270 minor</span><br><span class="line">01-29 15:12:52.810  1720  1798 E ActivityManager:   2.7% 22516/com.ss.android.ugc.live:push: 0% user + 2.7% kernel / faults: 9 minor</span><br></pre></td></tr></table></figure>
+
+<p>从上面这些信息，同样可以看到 ANR 的类型，进程名，进程 ID 等信息，而最重要的是还可以看到 ANR 发生之前与之后，各进程占用 CPU 的情况，以及 io 访问的情况，通过这些信息，我们可以作出一些判断：</p>
+<ul>
+<li>如果 ANR 进程的 cpu 占用比别的进程都高得多，则显然应当关注该进程本身是否做了什么，是不是有大量耗时的操作；</li>
+<li>如果是其它进程占用了很高的 CPU，比如说达到了百分之一百多，则有可能是 CPU 饥饿导致了 ANR；</li>
+<li>如果 iowait 很高，则很可能是主线程在进行 io 操作导致的 ANR；</li>
+</ul>
+<h3 id="4-3-查看-trace-文件"><a href="#4-3-查看-trace-文件" class="headerlink" title="4.3 查看 trace 文件"></a>4.3 查看 trace 文件</h3><h4 id="4-3-1-trace-信息"><a href="#4-3-1-trace-信息" class="headerlink" title="4.3.1 trace 信息"></a>4.3.1 trace 信息</h4><p>人为收集 trace 命令：<code>adb shell kill -3 pid</code>，执行完该命令后 trace 信息会保存在 <em>&#x2F;data&#x2F;anr&#x2F;trace_xx</em> 中；</p>
+<p>Trace 文件是 ANR 最重要的分析依据，它是在 ANR 发生时，系统自动生成的，放在手机目录 <em>&#x2F;data&#x2F;anr&#x2F;</em> 下面，发生 ANR 时，系统会将各主要进程的所有线程的当前堆栈，以及其它很多与进程、线程、内存相关的信息，都打印在 trace 文件中；</p>
+<p>trace 文件中的信息种类很多，但我们在解决 ANR 时，主要关注的还是线程的堆栈。因为这些堆栈是在系统监测到 ANR 发生时打印的，所以其中很可能就包含了与 ANR 相关的函数调用的信息；</p>
+<p>需要注意的一点是，trace 中的堆栈并不必然包含与 ANR 相关的函数堆栈信息，因此，<strong>不能看到主线程的堆栈顶是什么操作，就以为主线程一定是卡在这个操作里</strong>，这个必须综合考量；</p>
+<p>trace 文件中一个典型的线程堆栈大致如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">----- pid <span class="number">3108</span> at <span class="number">2018</span>-<span class="number">01</span>-<span class="number">29</span> <span class="number">15</span>:<span class="number">12</span>:<span class="number">47</span> ----- <span class="comment">//进程ID</span></span><br><span class="line">Cmd line: com.miui.home <span class="comment">// 进程名</span></span><br><span class="line">Build fingerprint: <span class="string">&#x27;xiaomi/whyred/whyred:7.1.1/NGI77B/V9.2.2.0.NEIMIEK:user/release-keys&#x27;</span></span><br><span class="line">ABI: <span class="string">&#x27;arm64&#x27;</span></span><br><span class="line">Build type: optimized</span><br><span class="line">... ...</span><br><span class="line">DALVIK <span class="title function_">THREADS</span> <span class="params">(<span class="number">43</span>)</span>: <span class="comment">// 该进程中线程数目</span></span><br><span class="line">... ...</span><br><span class="line"><span class="string">&quot;main&quot;</span> prio=<span class="number">5</span> tid=<span class="number">1</span> Native <span class="comment">// &quot;main&quot;是本线程的名称，即主线程，tid 是该线程在本进程中所有线程中的序号</span></span><br><span class="line">  | group=<span class="string">&quot;main&quot;</span> sCount=<span class="number">1</span> dsCount=<span class="number">0</span> obj=<span class="number">0x76205000</span> self=<span class="number">0x7fb1496a00</span></span><br><span class="line">  | sysTid=<span class="number">3108</span> nice=-<span class="number">10</span> cgrp=<span class="keyword">default</span> sched=<span class="number">0</span>/<span class="number">0</span> handle=<span class="number">0x7fb5a1da98</span> <span class="comment">// &quot;sysTid&quot;即该线程在 linux 系统中的线程号</span></span><br><span class="line">  | state=S schedstat=( <span class="number">142450779402</span> <span class="number">106025895288</span> <span class="number">282748</span> ) utm=<span class="number">11713</span> stm=<span class="number">2532</span> core=<span class="number">1</span> HZ=<span class="number">100</span></span><br><span class="line">  | stack=<span class="number">0x7fe8140000</span>-<span class="number">0x7fe8142000</span> stackSize=8MB</span><br><span class="line">  | held mutexes=</span><br><span class="line">  kernel: __switch_to+<span class="number">0x88</span>/<span class="number">0x94</span>    <span class="comment">// 从这里开始以下是主线程堆栈</span></span><br><span class="line">  kernel: binder_thread_read+<span class="number">0x324</span>/<span class="number">0xea4</span></span><br><span class="line">  kernel: binder_ioctl_write_read+<span class="number">0x18c</span>/<span class="number">0x2d0</span></span><br><span class="line">  kernel: binder_ioctl+<span class="number">0x1c0</span>/<span class="number">0x5fc</span></span><br><span class="line">  kernel: do_vfs_ioctl+<span class="number">0x48c</span>/<span class="number">0x564</span></span><br><span class="line">  ... ...</span><br><span class="line">  at android.os.Looper.loop(Looper.java:<span class="number">163</span>)</span><br><span class="line">  at android.app.ActivityThread.main(ActivityThread.java:<span class="number">6210</span>)</span><br><span class="line">  at java.lang.reflect.Method.invoke!(Native method)</span><br><span class="line">  at com.android.internal.os.ZygoteInit$MethodAndArgsCaller.run(ZygoteInit.java:<span class="number">901</span>)</span><br><span class="line">  at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:<span class="number">791</span>)</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>第 1 行：<ul>
+<li>线程名：main，如果有 daemon 则是守护线程；</li>
+<li>prio：线程优先级；</li>
+<li>tid：该线程在本进程所有线程中的序号；</li>
+<li>Native：线程状态；</li>
+</ul>
+</li>
+<li>第 2 行：<ul>
+<li>group：线程所属的线程组；</li>
+<li>sCount：线程挂起次数；</li>
+<li>dsCount：用于调试的线程挂起次数；</li>
+<li>obj：当前线程关联的 java 线程对象；</li>
+<li>self：当前线程地址；</li>
+</ul>
+</li>
+<li>第 3 行：<ul>
+<li>sysTid：线程真正意义上的 tid；</li>
+<li>nice：调度有优先级，值越小优先级越高；</li>
+<li>cgrp：进程所属的进程调度组；</li>
+<li>sched：调度策略；</li>
+<li>handle：函数处理地址；</li>
+</ul>
+</li>
+<li>第 4 行：<ul>
+<li>state：线程状态；</li>
+<li>schedstat：CPU 调度时间统计，括号中的 3 数字依次是 Running（CPU 运行时间，单位 ns）、Runnable（RQ 队列的等待时间，单位 ns）、Switch（CPU 调度切换次数）；</li>
+<li>utm&#x2F;stm：该线程在用户态 &#x2F; 内核态的所执行的时间，单位是 jiffies，jiffies 定义为 sysconf（_SC_CLK_TCK），默认等于 10ms，utm + stm &#x3D; schedstat 第一个参数值；</li>
+<li>core：该线程的最后运行所在核；</li>
+<li>HZ：时钟频率；</li>
+</ul>
+</li>
+<li>第 5 行：<ul>
+<li>stack：线程栈的地址区间；</li>
+<li>stackSize：栈的大小；</li>
+</ul>
+</li>
+<li>第 6 行：<ul>
+<li>held mutexes：所持有mutex类型，有独占锁 exclusive 和共享锁 shared 两类；</li>
+</ul>
+</li>
+</ul>
+<p>拿到一份 trace 文件后，我们首先要看的是 ANR 进程主线程的堆栈，看主线程正在做什么，值得注意的情况大概有如下几点：</p>
+<h4 id="4-3-1-主线程是否正在执行网络-x2F-IO-x2F-数据库等操作"><a href="#4-3-1-主线程是否正在执行网络-x2F-IO-x2F-数据库等操作" class="headerlink" title="4.3.1 主线程是否正在执行网络 &#x2F; IO &#x2F; 数据库等操作?"></a>4.3.1 主线程是否正在执行网络 &#x2F; IO &#x2F; 数据库等操作?</h4><p>这些情况都是发生 ANR 的高危操作，如果有的话，那么这些操作很可能就是导致 ANR 的原因了(当然一般还需要调试确认)，这种问题的解决方法一般就是把这些耗时操作放到其它线程中去完成，待完成后，再通过 handler 通知主线程就可以了;</p>
+<p><strong>解决办法：</strong></p>
+<ul>
+<li>在建立网络连接时设置 timeout 超时时间；</li>
+<li>可以把这任务放到独立的线程中去完成；</li>
+</ul>
+<h4 id="4-3-2-主线程的栈顶是否有-Thread-sleep-x2F-Thread-join-函数调用"><a href="#4-3-2-主线程的栈顶是否有-Thread-sleep-x2F-Thread-join-函数调用" class="headerlink" title="4.3.2 主线程的栈顶是否有 Thread.sleep&#x2F;Thread.join 函数调用"></a>4.3.2 主线程的栈顶是否有 Thread.sleep&#x2F;Thread.join 函数调用</h4><p><strong>解决办法：</strong></p>
+<ul>
+<li>对于 sleep，可以尝试去掉这个 sleep，如果不能去的话，那还是把这这个任务放到其它线程中去执行</li>
+<li>对于 join（等待子线程执行完再继续执行），可以去掉 join，把 join 后面的工作放到 handler 的相关消息处理中，当新线程任务完成时，使用 handler 消息来通知主线程即可</li>
+</ul>
+<h4 id="4-3-3-主线程的函数栈中，特别是栈顶的那些函数中，是否存在大的-for-x2F-while-循环"><a href="#4-3-3-主线程的函数栈中，特别是栈顶的那些函数中，是否存在大的-for-x2F-while-循环" class="headerlink" title="4.3.3 主线程的函数栈中，特别是栈顶的那些函数中，是否存在大的 for&#x2F;while 循环"></a>4.3.3 主线程的函数栈中，特别是栈顶的那些函数中，是否存在大的 for&#x2F;while 循环</h4><p><strong>解决办法：</strong></p>
+<ul>
+<li>优化函数代码，使用其他方法代替；</li>
+</ul>
+<h4 id="4-3-4-主线程的栈顶是否有锁等待（waitting-on-a-lock）"><a href="#4-3-4-主线程的栈顶是否有锁等待（waitting-on-a-lock）" class="headerlink" title="4.3.4 主线程的栈顶是否有锁等待（waitting on a lock）"></a>4.3.4 主线程的栈顶是否有锁等待（waitting on a lock）</h4><p>栈顶有 waiting on &lt;0x********&gt;字样的话，说明主线程在等待锁，如下:</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">at com.android.server.wm.WindowManagerService$H.handleMessage(WindowManagerService.java:8315)</span><br><span class="line">  - waiting to lock &lt;0x084ffe56&gt; (a java.util.HashMap) held by thread 76</span><br><span class="line">  at android.os.Handler.dispatchMessage(Handler.java:102)</span><br><span class="line">  at android.os.Looper.loop(Looper.java:148)</span><br><span class="line">... ...</span><br></pre></td></tr></table></figure>
+
+<p>当然这并不能说明 ANR 就一定是因为卡在这个锁上，但如果多次抓取的 trace 文件中，都是卡在这个锁上，有可能一直在等待其它线程释放该锁，另外，还可以通过查找该锁是被哪个线程锁住的，然后去看那个线程中是否有什么可疑的阻塞操作？或者是否存在互相等待的死锁？如果那个线程中发现有可疑操作或死锁的话，这个锁应该就是 ANR 的原因了，如果没发现，那么该锁可能就是正常现象；</p>
+<p>如何查找一个锁是被哪个线程锁住的？在 <code>waiting to lock</code> 的后面通常会有关键字 <code>held by thread 76</code>，根据这个线程序号，可以直接找到锁定的线程。也可以在 trace 文件中查找锁的数值关键字（如上面的&lt;0x084ffe56&gt; ），如果发现有 locked &lt;0x084ffe56&gt;，那么它就是在这个线程序中被锁定的，查找结果如下：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">&quot;Binder_A&quot; prio=5 tid=76 Native</span><br><span class="line">  | group=&quot;main&quot; sCount=1 dsCount=0 obj=0x134490a0 self=0x55b18611f0</span><br><span class="line">  | sysTid=4276 nice=-3 cgrp=default sched=0/0 handle=0x7f7b6f6450</span><br><span class="line">  | state=S schedstat=( 155534146538 91307372331 509087 ) utm=8036 stm=7517 core=4 HZ=100</span><br><span class="line">  | stack=0x7f7b5fa000-0x7f7b5fc000 stackSize=1013KB</span><br><span class="line">  | held mutexes=</span><br><span class="line">... ...</span><br><span class="line">  native: #02 pc 000000000002d584  /system/lib64/libbinder.so (_ZN7android14IPCThreadState14talkWithDriverEb+164)</span><br><span class="line">  native: #03 pc 000000000002e050  /system/lib64/libbinder.so (_ZN7android14IPCThreadState15waitForResponseEPNS_6ParcelEPi+104)</span><br><span class="line">... ...</span><br><span class="line">  at com.android.server.wm.WindowStateAnimator.createSurfaceLocked(WindowStateAnimator.java:875)</span><br><span class="line">  at com.android.server.wm.WindowManagerService.relayoutWindow(WindowManagerService.java:3264)</span><br><span class="line">  - locked &lt;0x084ffe56&gt; (a java.util.HashMap)</span><br><span class="line">  at com.android.server.wm.Session.relayout(Session.java:198)</span><br><span class="line">  at android.view.IWindowSession$Stub.onTransact(IWindowSession.java:284)</span><br><span class="line">  at com.android.server.wm.Session.onTransact(Session.java:130)</span><br><span class="line">  at android.os.Binder.execTransact(Binder.java:453)</span><br></pre></td></tr></table></figure>
+
+<p>从上面的堆栈可以看出， &lt;0x084ffe56&gt; 锁是在 Binder_A 线程中被锁定的，之所以一直没释放锁，是由于该线程卡在了 createSurface 这个 inder 调用中；另外，还需要说明的是，如果在同一个堆栈中出现这样的现象，一个锁先是被锁定，然后后面立刻又等待该锁，像下面这样：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">&quot;main&quot; prio=5 tid=1 TimedWaiting</span><br><span class="line">| group=&quot;main&quot; sCount=1 dsCount=0 obj=0x752ccfb8 self=0x559e6b26a0</span><br><span class="line">| sysTid=3078 nice=0 cgrp=apps/bg_non_interactive sched=0/0 handle=0x7f81cd4150</span><br><span class="line">| state=S schedstat=( 521831915 7324195292 1199 ) utm=46 stm=6 core=3 HZ=100</span><br><span class="line">| stack=0x7fec70d000-0x7fec70f000 stackSize=8MB</span><br><span class="line">| held mutexes=</span><br><span class="line">at java.lang.Object.wait!(Native method)</span><br><span class="line">- waiting on &lt;0x2f38fd73&gt; (a java.lang.Object)</span><br><span class="line">at java.lang.Thread.parkFor(Thread.java:1220)</span><br><span class="line">- locked &lt;0x2f38fd73&gt;  (a java.lang.Object)</span><br><span class="line">at sun.misc.Unsafe.park(Unsafe.java:299)</span><br><span class="line">at java.util.concurrent.locks.LockSupport.parkNanos(LockSupport.java:197)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>有人可能会认为这是死锁，其实是不一定的。这种情况下，要看这个锁是不是 <strong>可重入锁</strong>，意思就是在同一个线程中，外层函数获得锁之后 ,内层函数仍然可以获取该锁，如果是可重入锁，上面的情况就不构成死锁，如果不是可重入锁，就会造成死锁。至于在堆栈出现的到底是哪种锁，这个需要具体看代码来分析，一般来说，java下使用 synchronized，ReentrantLock 来实现的锁都是<strong>可重入锁</strong>；</p>
+<h4 id="4-3-5-主线程的栈顶是否正在执行-binder-请求"><a href="#4-3-5-主线程的栈顶是否正在执行-binder-请求" class="headerlink" title="4.3.5 主线程的栈顶是否正在执行 binder 请求"></a>4.3.5 主线程的栈顶是否正在执行 binder 请求</h4><p>Binder 通信默认是同步的，所以有可能在 Binder 请求时对端阻塞了，如果主线程的栈顶正在请求某个binder调用，它的形式通常如下：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">&quot;main&quot; prio=5 tid=1 Native</span><br><span class="line">  | group=&quot;main&quot; sCount=1 dsCount=0 obj=0x74baafa0 self=0x55637f22b0</span><br><span class="line">  | sysTid=1347 nice=-2 cgrp=default sched=0/0 handle=0x7f8d762ff0</span><br><span class="line">  | state=S schedstat=( 19576409545 8006176352 39658 ) utm=1155 stm=802 core=5 HZ=100</span><br><span class="line">  | stack=0x7fcb8ef000-0x7fcb8f1000 stackSize=8MB</span><br><span class="line">  | held mutexes=</span><br><span class="line">... ...</span><br><span class="line">  native: #02 pc 000000000002d584  /system/lib64/libbinder.so (_ZN7android14IPCThreadState14talkWithDriverEb+164)</span><br><span class="line">  native: #03 pc 000000000002e050  /system/lib64/libbinder.so (_ZN7android14IPCThreadState15waitForResponse)</span><br><span class="line">... ...</span><br><span class="line">  at android.os.BinderProxy.transact(Binder.java:503)</span><br><span class="line">  at android.content.ContentProviderProxy.query(ContentProviderNative.java:419)</span><br><span class="line">... ...</span><br><span class="line">  at com.android.server.telecom.Call$3.run(Call.java:226)</span><br><span class="line">  - locked &lt;0x048a55bc&gt; (a com.android.server.telecom.TelecomSystem$1)</span><br><span class="line">  at android.os.Handler.handleCallback(Handler.java:739)</span><br><span class="line">  at android.os.Handler.dispatchMessage(Handler.java:95)</span><br><span class="line">  at android.os.Looper.loop(Looper.java:148)</span><br></pre></td></tr></table></figure>
+
+<p>并非出现这种情况，就一定阻塞，但如果多次抓取的 trace 文件中，都可以发现主线程在进行同一个特殊的 binder 请求的话，那么基本就可以确定，主线程是卡在了这个请求中了。为什么 binder 请求也会阻塞呢？这个要先从 binder 本身说起；</p>
+<p>Binder 是进程间的通信机制，是 C&#x2F;S 结构，客户端向服务端发起请求，服务端完成这个请求，并可将结果返给客户端，客户端与服务端分别属于不同的线程；而 binder 请求又分为<strong>同步与异步</strong>，同步意味着客户端的请求必须等服务端的工作完成并返回结果后才可以结束，异步则意味着客户端发出请求后就可以立即返回，不必等待服务端的完成；看到这儿，大家就会想到，如果是同步调用，而服务端又长时间没有返回的话，那么客户端线程不就是会一直卡在那儿，等待返回吗？而如果客户端恰好是主线程的话，不就是会因此造成ANR吗？因此，如果主线程的栈顶正在进行某个 binder 调用，我们有必要看一下该调用是同步的还是异步的，如果是同步调用，我们就有理由怀疑该请求的服务端是不是长时间没有返回；</p>
+<p>那么如何知道服务端在做什么呢？由于服务端是在一个独立的线程中完成请求的，因此，如果此时这个请求还没有完成的话，这个线程的堆栈通常也会在trace 文件中打印出来，有一个简单的办法就是，先找到服务端中完成该请求的函数名及其所在文件名，然后在 trace 文件中搜索该函数名，并结合函数所在的文件名，一般就可以找到这个服务端的线程堆栈了，然后再去分析这个堆栈，看具体是什么原因导致它没有尽快返回的；</p>
+<p>如何判断一个 binder 调用是同步还是异步，这个可以从代码来看，如下是一个 binder 请求语句：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">remote()-&gt;transact(NOTIFY, data, &amp;reply, IBinder::FLAG_ONEWAY);</span><br></pre></td></tr></table></figure>
+
+<p>注意看最后一个参数，如果最后一个参数是 FLAG_ONEWAY，就说明它是异步 binder，如果为 0 或者缺省的话，就是同步 binder；</p>
+<h2 id="5-如何避免-ANR"><a href="#5-如何避免-ANR" class="headerlink" title="5. 如何避免 ANR"></a>5. 如何避免 ANR</h2><p>主线程尽量只做 UI 相关的操作，避免耗时操作，比如过度复杂的 UI 绘制,网络操作，文件 IO 操作;</p>
+<p>避免主线程跟工作线程发生锁的竞争，减少系统耗时 binder 的调用，谨慎使用 sharePreference，注意主线程执行 provider query 操作；</p>
+<p>总之就是尽可能减少主线程的负载,让其空闲待命，以期可随时响应用户的操作；</p>
+<h2 id="6-监控-ANR"><a href="#6-监控-ANR" class="headerlink" title="6. 监控 ANR"></a>6. 监控 ANR</h2><h3 id="6-1-FileObserver"><a href="#6-1-FileObserver" class="headerlink" title="6.1 FileObserver"></a>6.1 FileObserver</h3><p>FileObserver 可以监控目录或文件的状态，继承 FileObserver，重写 onEvent()，当被监控的文件或者目录发生变更事件时，将回调FileObserver的onEvent()函数来处理文件或目录的变更事件；</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> android.os.FileObserver;</span><br><span class="line"><span class="keyword">import</span> android.util.Log;</span><br><span class="line"><span class="keyword">import</span> androidx.annotation.Nullable;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">ANRFileObserver</span> <span class="keyword">extends</span> <span class="title class_">FileObserver</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="title function_">ANRFileObserver</span><span class="params">(String path)</span> &#123;<span class="comment">//data/anr/</span></span><br><span class="line">        <span class="built_in">super</span>(path);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="title function_">ANRFileObserver</span><span class="params">(String path, <span class="type">int</span> mask)</span> &#123;</span><br><span class="line">        <span class="built_in">super</span>(path, mask);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">        <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">onEvent</span><span class="params">(<span class="type">int</span> event, <span class="meta">@Nullable</span> String path)</span> &#123;</span><br><span class="line">            <span class="keyword">switch</span> (event)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="keyword">case</span> FileObserver.ACCESS:<span class="comment">//文件被访问</span></span><br><span class="line">                Log.i(<span class="string">&quot;Test&quot;</span>, <span class="string">&quot;ACCESS: &quot;</span> + path);</span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">            <span class="keyword">case</span> FileObserver.ATTRIB:<span class="comment">//文件属性被修改，如 chmod、chown、touch 等</span></span><br><span class="line">                Log.i(<span class="string">&quot;Test&quot;</span>, <span class="string">&quot;ATTRIB: &quot;</span> + path);</span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">            <span class="keyword">case</span> FileObserver.CLOSE_NOWRITE:<span class="comment">//不可写文件被 close</span></span><br><span class="line">                Log.i(<span class="string">&quot;Test&quot;</span>, <span class="string">&quot;CLOSE_NOWRITE: &quot;</span> + path);</span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">            <span class="keyword">case</span> FileObserver.CLOSE_WRITE:<span class="comment">//可写文件被 close</span></span><br><span class="line">                Log.i(<span class="string">&quot;Test&quot;</span>, <span class="string">&quot;CLOSE_WRITE: &quot;</span> + path);</span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">            <span class="keyword">case</span> FileObserver.CREATE:<span class="comment">//创建新文件</span></span><br><span class="line">                Log.i(<span class="string">&quot;Test&quot;</span>, <span class="string">&quot;CREATE: &quot;</span> + path);</span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">            <span class="keyword">case</span> FileObserver.DELETE:<span class="comment">// 文件被删除，如 rm</span></span><br><span class="line">                Log.i(<span class="string">&quot;Test&quot;</span>, <span class="string">&quot;DELETE: &quot;</span> + path);</span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">            <span class="keyword">case</span> FileObserver.DELETE_SELF:<span class="comment">// 自删除，即一个可执行文件在执行时删除自己</span></span><br><span class="line">                Log.i(<span class="string">&quot;Test&quot;</span>, <span class="string">&quot;DELETE_SELF: &quot;</span> + path);</span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">            <span class="keyword">case</span> FileObserver.MODIFY:<span class="comment">//文件被修改</span></span><br><span class="line">                Log.i(<span class="string">&quot;Test&quot;</span>, <span class="string">&quot;MODIFY: &quot;</span> + path);</span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">            <span class="keyword">case</span> FileObserver.MOVE_SELF:<span class="comment">//自移动，即一个可执行文件在执行时移动自己</span></span><br><span class="line">                Log.i(<span class="string">&quot;Test&quot;</span>, <span class="string">&quot;MOVE_SELF: &quot;</span> + path);</span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">            <span class="keyword">case</span> FileObserver.MOVED_FROM:<span class="comment">//文件被移走，如 mv</span></span><br><span class="line">                Log.i(<span class="string">&quot;Test&quot;</span>, <span class="string">&quot;MOVED_FROM: &quot;</span> + path);</span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">            <span class="keyword">case</span> FileObserver.MOVED_TO:<span class="comment">//文件被移来，如 mv、cp</span></span><br><span class="line">                Log.i(<span class="string">&quot;Test&quot;</span>, <span class="string">&quot;MOVED_TO: &quot;</span> + path);</span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">            <span class="keyword">case</span> FileObserver.OPEN:<span class="comment">//文件被 open</span></span><br><span class="line">                Log.i(<span class="string">&quot;Test&quot;</span>, <span class="string">&quot;OPEN: &quot;</span> + path);</span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">            <span class="keyword">default</span>:</span><br><span class="line">                <span class="comment">//CLOSE ： 文件被关闭，等同于(IN_CLOSE_WRITE | IN_CLOSE_NOWRITE)</span></span><br><span class="line">                <span class="comment">//ALL_EVENTS ： 包括上面的所有事件</span></span><br><span class="line">                Log.i(<span class="string">&quot;Test&quot;</span>, <span class="string">&quot;DEFAULT(&quot;</span> + event + <span class="string">&quot;): &quot;</span> + path);</span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h3 id="6-2-WatchDog"><a href="#6-2-WatchDog" class="headerlink" title="6.2 WatchDog"></a>6.2 WatchDog</h3><p>post 一个 anr 检测任务到主线程的消息队列，在 post 之前先记录 mStartTime，mComplete &#x3D; false，Watchdog 线程等待，检测 anr 检测任务的执行情况（mComplete 是否等于 true），当异常发生时（mComplete 为 fasle）记录堆栈信息，上报数据；</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> android.annotation.TargetApi;</span><br><span class="line"><span class="keyword">import</span> android.os.Build;</span><br><span class="line"><span class="keyword">import</span> android.os.Debug;</span><br><span class="line"><span class="keyword">import</span> android.os.Handler;</span><br><span class="line"><span class="keyword">import</span> android.os.Looper;</span><br><span class="line"><span class="keyword">import</span> android.os.Process;</span><br><span class="line"><span class="keyword">import</span> android.os.SystemClock;</span><br><span class="line"><span class="keyword">import</span> android.util.Log;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">ANRWatchDog</span> <span class="keyword">extends</span> <span class="title class_">Thread</span> &#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">String</span> <span class="variable">TAG</span> <span class="operator">=</span> <span class="string">&quot;ANR&quot;</span>;</span><br><span class="line">    <span class="keyword">private</span> <span class="type">int</span> <span class="variable">timeout</span> <span class="operator">=</span> <span class="number">5000</span>;</span><br><span class="line">    <span class="keyword">private</span> <span class="type">boolean</span> <span class="variable">ignoreDebugger</span> <span class="operator">=</span> <span class="literal">true</span>;</span><br><span class="line">    <span class="keyword">static</span> ANRWatchDog sWatchdog;</span><br><span class="line">    <span class="keyword">private</span> <span class="type">Handler</span> <span class="variable">mainHandler</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Handler</span>(Looper.getMainLooper());</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">class</span> <span class="title class_">ANRChecker</span> <span class="keyword">implements</span> <span class="title class_">Runnable</span> &#123;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">private</span> <span class="type">boolean</span> mCompleted;</span><br><span class="line">        <span class="keyword">private</span> <span class="type">long</span> mStartTime;</span><br><span class="line">        <span class="keyword">private</span> <span class="type">long</span> <span class="variable">executeTime</span> <span class="operator">=</span> SystemClock.uptimeMillis();</span><br><span class="line"></span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">run</span><span class="params">()</span> &#123;</span><br><span class="line">            <span class="keyword">synchronized</span> (ANRWatchDog.<span class="built_in">this</span>) &#123;</span><br><span class="line">                mCompleted = <span class="literal">true</span>;</span><br><span class="line">                executeTime = SystemClock.uptimeMillis();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">void</span> <span class="title function_">schedule</span><span class="params">()</span> &#123;</span><br><span class="line">            mCompleted = <span class="literal">false</span>;</span><br><span class="line">            mStartTime = SystemClock.uptimeMillis();</span><br><span class="line">            mainHandler.postAtFrontOfQueue(<span class="built_in">this</span>);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="type">boolean</span> <span class="title function_">isBlocked</span><span class="params">()</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> !mCompleted || executeTime - mStartTime &gt;= <span class="number">5000</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">interface</span> <span class="title class_">ANRListener</span> &#123;</span><br><span class="line">        <span class="keyword">void</span> <span class="title function_">onAnrHappened</span><span class="params">(String stackTraceInfo)</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="type">ANRChecker</span> <span class="variable">anrChecker</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ANRChecker</span>();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> ANRListener anrListener;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">addANRListener</span><span class="params">(ANRListener listener)</span>&#123;</span><br><span class="line">        <span class="built_in">this</span>.anrListener = listener;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> ANRWatchDog <span class="title function_">getInstance</span><span class="params">()</span>&#123;</span><br><span class="line">        <span class="keyword">if</span>(sWatchdog == <span class="literal">null</span>)&#123;</span><br><span class="line">            sWatchdog = <span class="keyword">new</span> <span class="title class_">ANRWatchDog</span>();</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> sWatchdog;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="title function_">ANRWatchDog</span><span class="params">()</span>&#123;</span><br><span class="line">        <span class="built_in">super</span>(<span class="string">&quot;ANR-WatchDog-Thread&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@TargetApi(Build.VERSION_CODES.JELLY_BEAN)</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">run</span><span class="params">()</span> &#123;</span><br><span class="line">        Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND); <span class="comment">// 设置为后台线程</span></span><br><span class="line">        <span class="keyword">while</span>(<span class="literal">true</span>)&#123;</span><br><span class="line">            <span class="keyword">while</span> (!isInterrupted()) &#123;</span><br><span class="line">                <span class="keyword">synchronized</span> (<span class="built_in">this</span>) &#123;</span><br><span class="line">                    anrChecker.schedule();</span><br><span class="line">                    <span class="type">long</span> <span class="variable">waitTime</span> <span class="operator">=</span> timeout;</span><br><span class="line">                    <span class="type">long</span> <span class="variable">start</span> <span class="operator">=</span> SystemClock.uptimeMillis();</span><br><span class="line">                    <span class="keyword">while</span> (waitTime &gt; <span class="number">0</span>) &#123;</span><br><span class="line">                        <span class="keyword">try</span> &#123;</span><br><span class="line">                            wait(waitTime);</span><br><span class="line">                        &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">                            Log.w(TAG, e.toString());</span><br><span class="line">                        &#125;</span><br><span class="line">                        waitTime = timeout - (SystemClock.uptimeMillis() - start);</span><br><span class="line">                    &#125;</span><br><span class="line">                    <span class="keyword">if</span> (!anrChecker.isBlocked()) &#123;</span><br><span class="line">                        <span class="keyword">continue</span>;</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="keyword">if</span> (!ignoreDebugger &amp;&amp; Debug.isDebuggerConnected()) &#123;</span><br><span class="line">                    <span class="keyword">continue</span>;</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="type">String</span> <span class="variable">stackTraceInfo</span> <span class="operator">=</span> getStackTraceInfo();</span><br><span class="line">                <span class="keyword">if</span> (anrListener != <span class="literal">null</span>) &#123;</span><br><span class="line">                    anrListener.onAnrHappened(stackTraceInfo);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            anrListener = <span class="literal">null</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> String <span class="title function_">getStackTraceInfo</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="type">StringBuilder</span> <span class="variable">stringBuilder</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">StringBuilder</span>();</span><br><span class="line">        <span class="keyword">for</span> (StackTraceElement stackTraceElement : Looper.getMainLooper().getThread().getStackTrace()) &#123;</span><br><span class="line">            stringBuilder</span><br><span class="line">                    .append(stackTraceElement.toString())</span><br><span class="line">                    .append(<span class="string">&quot;\r\n&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> stringBuilder.toString();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>使用：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">Handler</span> <span class="variable">handler</span> <span class="operator">=</span> <span class="literal">null</span>;</span><br><span class="line"><span class="keyword">void</span> <span class="title function_">ANRTest</span><span class="params">()</span>&#123;</span><br><span class="line">    handler = <span class="keyword">new</span> <span class="title class_">Handler</span>();</span><br><span class="line">    ANRWatchDog.getInstance().addANRListener(<span class="keyword">new</span> <span class="title class_">ANRWatchDog</span>.ANRListener &#123;</span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">onAnrHappened</span><span class="params">(String stackTraceInfo)</span>&#123;</span><br><span class="line">            Log.i(TAG, <span class="string">&quot;anr: &quot;</span> + stackTraceInfo);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;);</span><br><span class="line">    ANRWatchDog.getInstance.start();</span><br><span class="line">    handler.postDelayed(<span class="keyword">new</span> <span class="title class_">Runnable</span>() &#123;</span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">run</span><span class="params">()</span> &#123;</span><br><span class="line">            <span class="keyword">try</span>&#123;</span><br><span class="line">                Thread.sleep(<span class="number">10</span> * <span class="number">1000</span>);</span><br><span class="line">            &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">                e.printStackTrace();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;, <span class="number">3000</span>);</span><br><span class="line">        </span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 找个地方把 ANRTest() 放进去</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title function_">onCreate</span><span class="params">(xxx)</span> &#123;</span><br><span class="line">    ANRTest();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div>Donate comment here.</div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechatpay.jpg" alt="Ranger Zhou 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.jpg" alt="Ranger Zhou 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>Ranger Zhou
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://rangerzhou.top/2018/03/04/Android/AndroidDevelop_014_ANR/" title="Android - ANR分析">http://rangerzhou.top/2018/03/04/Android/AndroidDevelop_014_ANR/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/ANR/" rel="tag"># ANR</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2018/02/12/Android/Android_8.0_App_install_time_Optimize/" rel="prev" title="Android8.0-App安装时间优化">
+      <i class="fa fa-chevron-left"></i> Android8.0-App安装时间优化
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2018/03/13/Android/Android_bootchart_tools/" rel="next" title="Android开机启动时间优化及bootchart工具使用">
+      Android开机启动时间优化及bootchart工具使用 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+      <div class="tabs tabs-comment">
+        <ul class="nav-tabs">
+            <li class="tab"><a href="#comment-disqus">disqus</a></li>
+            <li class="tab"><a href="#comment-gitalk">gitalk</a></li>
+            <li class="tab"><a href="#comment-livere">livere</a></li>
+        </ul>
+        <div class="tab-content">
+            <div class="tab-pane disqus" id="comment-disqus">
+              
+  <div class="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
+            </div>
+            <div class="tab-pane gitalk" id="comment-gitalk">
+              <div class="comments" id="gitalk-container"></div>
+            </div>
+            <div class="tab-pane livere" id="comment-livere">
+              
+  <div class="comments">
+    <div id="lv-container" data-id="city" data-uid="MTAyMC8yOTcyNS82Mjky"></div>
+  </div>
+  
+            </div>
+        </div>
+      </div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-%E7%AE%80%E4%BB%8B"><span class="nav-text">1. 简介</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-ANR%E5%88%86%E7%B1%BB"><span class="nav-text">2. ANR分类</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-1-inputDispatching-Timeout%EF%BC%88%E6%9C%80%E5%B8%B8%E8%A7%81%E7%9A%84-ANR%EF%BC%89"><span class="nav-text">2.1 inputDispatching Timeout（最常见的 ANR）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2-BroadcastQueue-Timeout%EF%BC%88%E6%AF%94%E8%BE%83%E5%B8%B8%E8%A7%81%EF%BC%89"><span class="nav-text">2.2 BroadcastQueue Timeout（比较常见）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-3-Service-Timeout%EF%BC%88%E5%BE%88%E5%B0%91%E8%A7%81%EF%BC%89"><span class="nav-text">2.3 Service Timeout（很少见）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-4-ContentProvider-Timeout"><span class="nav-text">2.4 ContentProvider Timeout</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-ANR%E4%BA%A7%E7%94%9F%E5%8E%9F%E5%9B%A0"><span class="nav-text">3. ANR产生原因</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#3-1-%E4%B8%BB%E7%BA%BF%E7%A8%8B%E4%B8%AD%E6%9C%89%E8%80%97%E6%97%B6-x2F-%E7%AD%89%E5%BE%85%E6%93%8D%E4%BD%9C"><span class="nav-text">3.1 主线程中有耗时&#x2F;等待操作</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-2-%E7%B3%BB%E7%BB%9F%E6%80%A7%E8%83%BD%E9%97%AE%E9%A2%98"><span class="nav-text">3.2 系统性能问题</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-3-%E5%BA%94%E7%94%A8%E7%A8%8B%E5%BA%8F%E6%B2%A1%E6%9C%89%E6%94%B6%E5%88%B0%E8%BE%93%E5%85%A5%E4%BA%8B%E4%BB%B6"><span class="nav-text">3.3 应用程序没有收到输入事件</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-%E5%A6%82%E4%BD%95%E5%88%86%E6%9E%90ANR"><span class="nav-text">4. 如何分析ANR</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#4-1-%E5%9C%A8log%E4%B8%AD%E6%90%9C%E7%B4%A2%E2%80%9Dam-anr%E2%80%9D"><span class="nav-text">4.1 在log中搜索”am_anr”</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-2-%E5%9C%A8log%E4%B8%AD%E6%90%9C%E7%B4%A2%E2%80%9DANR-in%E2%80%9D"><span class="nav-text">4.2 在log中搜索”ANR in”</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-3-%E6%9F%A5%E7%9C%8B-trace-%E6%96%87%E4%BB%B6"><span class="nav-text">4.3 查看 trace 文件</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#4-3-1-trace-%E4%BF%A1%E6%81%AF"><span class="nav-text">4.3.1 trace 信息</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#4-3-1-%E4%B8%BB%E7%BA%BF%E7%A8%8B%E6%98%AF%E5%90%A6%E6%AD%A3%E5%9C%A8%E6%89%A7%E8%A1%8C%E7%BD%91%E7%BB%9C-x2F-IO-x2F-%E6%95%B0%E6%8D%AE%E5%BA%93%E7%AD%89%E6%93%8D%E4%BD%9C"><span class="nav-text">4.3.1 主线程是否正在执行网络 &#x2F; IO &#x2F; 数据库等操作?</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#4-3-2-%E4%B8%BB%E7%BA%BF%E7%A8%8B%E7%9A%84%E6%A0%88%E9%A1%B6%E6%98%AF%E5%90%A6%E6%9C%89-Thread-sleep-x2F-Thread-join-%E5%87%BD%E6%95%B0%E8%B0%83%E7%94%A8"><span class="nav-text">4.3.2 主线程的栈顶是否有 Thread.sleep&#x2F;Thread.join 函数调用</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#4-3-3-%E4%B8%BB%E7%BA%BF%E7%A8%8B%E7%9A%84%E5%87%BD%E6%95%B0%E6%A0%88%E4%B8%AD%EF%BC%8C%E7%89%B9%E5%88%AB%E6%98%AF%E6%A0%88%E9%A1%B6%E7%9A%84%E9%82%A3%E4%BA%9B%E5%87%BD%E6%95%B0%E4%B8%AD%EF%BC%8C%E6%98%AF%E5%90%A6%E5%AD%98%E5%9C%A8%E5%A4%A7%E7%9A%84-for-x2F-while-%E5%BE%AA%E7%8E%AF"><span class="nav-text">4.3.3 主线程的函数栈中，特别是栈顶的那些函数中，是否存在大的 for&#x2F;while 循环</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#4-3-4-%E4%B8%BB%E7%BA%BF%E7%A8%8B%E7%9A%84%E6%A0%88%E9%A1%B6%E6%98%AF%E5%90%A6%E6%9C%89%E9%94%81%E7%AD%89%E5%BE%85%EF%BC%88waitting-on-a-lock%EF%BC%89"><span class="nav-text">4.3.4 主线程的栈顶是否有锁等待（waitting on a lock）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#4-3-5-%E4%B8%BB%E7%BA%BF%E7%A8%8B%E7%9A%84%E6%A0%88%E9%A1%B6%E6%98%AF%E5%90%A6%E6%AD%A3%E5%9C%A8%E6%89%A7%E8%A1%8C-binder-%E8%AF%B7%E6%B1%82"><span class="nav-text">4.3.5 主线程的栈顶是否正在执行 binder 请求</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-%E5%A6%82%E4%BD%95%E9%81%BF%E5%85%8D-ANR"><span class="nav-text">5. 如何避免 ANR</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#6-%E7%9B%91%E6%8E%A7-ANR"><span class="nav-text">6. 监控 ANR</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#6-1-FileObserver"><span class="nav-text">6.1 FileObserver</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-2-WatchDog"><span class="nav-text">6.2 WatchDog</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Ranger Zhou</p>
+  <div class="site-description" itemprop="description">我是一个小流氓我从来也不浪，有一天我心血来潮耍了个流氓，我嘴里吹着小口哨我心里好得意，不知怎么哗啦啦啦啦我摔了一身泥</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">63</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">8</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">16</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/rangerzhou" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;rangerzhou" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:rangero_o@qq.com" title="E-Mail → mailto:rangero_o@qq.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://rangerzhou.taobao.com/" title="Taobao → http:&#x2F;&#x2F;rangerzhou.taobao.com&#x2F;" rel="noopener" target="_blank"><i class="fab fa-youtube fa-fw"></i>Taobao</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="/images/wechat.jpg" title="WeChat → &#x2F;images&#x2F;wechat.jpg"><i class="fab fa-youtube fa-fw"></i>WeChat</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://blog.csdn.net/ranger0220?viewmode=contents" title="CSDN → http:&#x2F;&#x2F;blog.csdn.net&#x2F;ranger0220?viewmode&#x3D;contents" rel="noopener" target="_blank"><i class="fab fa-youtube fa-fw"></i>CSDN</a>
+      </span>
+  </div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      墙裂推荐
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="http://rangerzhou.taobao.com/" title="http:&#x2F;&#x2F;rangerzhou.taobao.com" rel="noopener" target="_blank">Taobao</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2016 – 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Ranger Zhou</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+<script data-pjax>
+  (function() {
+    function leancloudSelector(url) {
+      url = encodeURI(url);
+      return document.getElementById(url).querySelector('.leancloud-visitors-count');
+    }
+
+    function addCount(Counter) {
+      var visitors = document.querySelector('.leancloud_visitors');
+      var url = decodeURI(visitors.id);
+      var title = visitors.dataset.flagTitle;
+
+      Counter('get', '/classes/Counter?where=' + encodeURIComponent(JSON.stringify({ url })))
+        .then(response => response.json())
+        .then(({ results }) => {
+          if (results.length > 0) {
+            var counter = results[0];
+            leancloudSelector(url).innerText = counter.time + 1;
+            Counter('put', '/classes/Counter/' + counter.objectId, { time: { '__op': 'Increment', 'amount': 1 } })
+              .catch(error => {
+                console.error('Failed to save visitor count', error);
+              });
+          } else {
+              Counter('post', '/classes/Counter', { title, url, time: 1 })
+                .then(response => response.json())
+                .then(() => {
+                  leancloudSelector(url).innerText = 1;
+                })
+                .catch(error => {
+                  console.error('Failed to create', error);
+                });
+          }
+        })
+        .catch(error => {
+          console.error('LeanCloud Counter Error', error);
+        });
+    }
+
+    function showTime(Counter) {
+      var visitors = document.querySelectorAll('.leancloud_visitors');
+      var entries = [...visitors].map(element => {
+        return decodeURI(element.id);
+      });
+
+      Counter('get', '/classes/Counter?where=' + encodeURIComponent(JSON.stringify({ url: { '$in': entries } })))
+        .then(response => response.json())
+        .then(({ results }) => {
+          for (let url of entries) {
+            let target = results.find(item => item.url === url);
+            leancloudSelector(url).innerText = target ? target.time : 0;
+          }
+        })
+        .catch(error => {
+          console.error('LeanCloud Counter Error', error);
+        });
+    }
+
+    let { app_id, app_key, server_url } = {"enable":true,"app_id":"U9g4mWmsQg8FjOE3xsqUy9Df-gzGzoHsz","app_key":"24cDno14OiDhAreVmoEjzqns","server_url":"https://u9g4mwms.lc-cn-n1-shared.com","security":false};
+    function fetchData(api_server) {
+      var Counter = (method, url, data) => {
+        return fetch(`${api_server}/1.1${url}`, {
+          method,
+          headers: {
+            'X-LC-Id'     : app_id,
+            'X-LC-Key'    : app_key,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(data)
+        });
+      };
+      if (CONFIG.page.isPost) {
+        if (CONFIG.hostname !== location.hostname) return;
+        addCount(Counter);
+      } else if (document.querySelectorAll('.post-title-link').length >= 1) {
+        showTime(Counter);
+      }
+    }
+
+    let api_server = app_id.slice(-9) !== '-MdYXbMMI' ? server_url : `https://${app_id.slice(0, 8).toLowerCase()}.api.lncldglobal.com`;
+
+    if (api_server) {
+      fetchData(api_server);
+    } else {
+      fetch('https://app-router.leancloud.cn/2/route?appId=' + app_id)
+        .then(response => response.json())
+        .then(({ api_server }) => {
+          fetchData('https://' + api_server);
+        });
+    }
+  })();
+</script>
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/pjax/pjax.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/pangu@4/dist/browser/pangu.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '#page-configurations',
+    '.content-wrap',
+    '.post-toc-wrap',
+    '.languages',
+    '#pjax'
+  ],
+  switches: {
+    '.post-toc-wrap': Pjax.switches.innerHTML
+  },
+  analytics: false,
+  cacheBust: false,
+  scrollTo : !CONFIG.bookmark.enable
+});
+
+window.addEventListener('pjax:success', () => {
+  document.querySelectorAll('script[data-pjax], script#page-configurations, #pjax script').forEach(element => {
+    var code = element.text || element.textContent || element.innerHTML || '';
+    var parent = element.parentNode;
+    parent.removeChild(element);
+    var script = document.createElement('script');
+    if (element.id) {
+      script.id = element.id;
+    }
+    if (element.className) {
+      script.className = element.className;
+    }
+    if (element.type) {
+      script.type = element.type;
+    }
+    if (element.src) {
+      script.src = element.src;
+      // Force synchronous loading of peripheral JS.
+      script.async = false;
+    }
+    if (element.dataset.pjax !== undefined) {
+      script.dataset.pjax = '';
+    }
+    if (code !== '') {
+      script.appendChild(document.createTextNode(code));
+    }
+    parent.appendChild(script);
+  });
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+
+
+  
+  <script data-pjax>
+    (function(){
+      var canonicalURL, curProtocol;
+      //Get the <link> tag
+      var x=document.getElementsByTagName("link");
+		//Find the last canonical URL
+		if(x.length > 0){
+			for (i=0;i<x.length;i++){
+				if(x[i].rel.toLowerCase() == 'canonical' && x[i].href){
+					canonicalURL=x[i].href;
+				}
+			}
+		}
+    //Get protocol
+	    if (!canonicalURL){
+	    	curProtocol = window.location.protocol.split(':')[0];
+	    }
+	    else{
+	    	curProtocol = canonicalURL.split(':')[0];
+	    }
+      //Get current URL if the canonical URL does not exist
+	    if (!canonicalURL) canonicalURL = window.location.href;
+	    //Assign script content. Replace current URL with the canonical URL
+      !function(){var e=/([http|https]:\/\/[a-zA-Z0-9\_\.]+\.baidu\.com)/gi,r=canonicalURL,t=document.referrer;if(!e.test(r)){var n=(String(curProtocol).toLowerCase() === 'https')?"https://sp0.baidu.com/9_Q4simg2RQJ8t7jm9iCKT-xh_/s.gif":"//api.share.baidu.com/s.gif";t?(n+="?r="+encodeURIComponent(document.referrer),r&&(n+="&l="+r)):r&&(n+="?l="+r);var i=new Image;i.src=n}}(window);})();
+  </script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <div id="pjax">
+  
+
+  
+
+<script>
+  var disqus_config = function() {
+    this.page.url = "http://rangerzhou.top/2018/03/04/Android/AndroidDevelop_014_ANR/";
+    this.page.identifier = "2018/03/04/Android/AndroidDevelop_014_ANR/";
+    this.page.title = "Android - ANR分析";
+    };
+  NexT.utils.loadComments(document.querySelector('#disqus_thread'), () => {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: disqus_config
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://rangerzhou.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  });
+</script>
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : 'b7bb504993135f5a2eab',
+      clientSecret: '6f83aec5c45d75e248e2914be90c4601e2e1dc44',
+      repo        : 'rangerzhou.github.io',
+      owner       : 'rangerzhou',
+      admin       : ['rangerzhou'],
+      id          : 'a4e3a8010f55886ca3b2bfc9688ee177',
+        language: 'zh-CN',
+      distractionFreeMode: true
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
+
+<script>
+NexT.utils.loadComments(document.querySelector('#lv-container'), () => {
+  window.livereOptions = {
+    refer: location.pathname.replace(CONFIG.root, '').replace('index.html', '')
+  };
+  (function(d, s) {
+    var j, e = d.getElementsByTagName(s)[0];
+    if (typeof LivereTower === 'function') { return; }
+    j = d.createElement(s);
+    j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+    j.async = true;
+    e.parentNode.insertBefore(j, e);
+  })(document, 'script');
+});
+</script>
+
+    </div>
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/haru01.model.json"},"display":{"position":"left","width":300,"height":800},"mobile":{"show":false},"log":false});</script></body>
+</html>

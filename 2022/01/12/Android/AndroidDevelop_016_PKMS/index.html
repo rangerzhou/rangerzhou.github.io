@@ -1,0 +1,1012 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.2.0">
+<!-- pjax：防止跳转页面音乐暂停 -->
+<script src="https://cdn.jsdelivr.net/npm/pjax@0.2.8/pjax.js"></script>
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/desert.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/desert.jpg">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <meta name="google-site-verification" content="OJnYjbr3wdT22qLrZSzyD9lAyBcXiXlEQ7-5wAnaWoQ">
+  <meta name="baidu-site-verification" content="vr4n4JeXgB">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-minimal.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"rangerzhou.top","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"manual"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":true,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":true,"nav":null,"activeClass":"gitalk"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="PackageManagerService（PKMS）是 Android 系统中的核心服务之一，负责应用程序的安装、卸载、信息查询等工作，本文简要分析 PKMS 的启动和安装应用过程，源码基于 android-12.1.0_r4；">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android - PackageManagerService 简析">
+<meta property="og:url" content="http://rangerzhou.top/2022/01/12/Android/AndroidDevelop_016_PKMS/index.html">
+<meta property="og:site_name" content="RangerZhou">
+<meta property="og:description" content="PackageManagerService（PKMS）是 Android 系统中的核心服务之一，负责应用程序的安装、卸载、信息查询等工作，本文简要分析 PKMS 的启动和安装应用过程，源码基于 android-12.1.0_r4；">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2022-01-12T04:33:17.000Z">
+<meta property="article:modified_time" content="2022-07-18T14:46:21.586Z">
+<meta property="article:author" content="Ranger Zhou">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://rangerzhou.top/2022/01/12/Android/AndroidDevelop_016_PKMS/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+<script src="//cdn.bootcss.com/pace/1.0.2/pace.min.js"></script>
+<link href="//cdn.bootcss.com/pace/1.0.2/themes/pink/pace-theme-flash.css" rel="stylesheet">
+
+  <title>Android - PackageManagerService 简析 | RangerZhou</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-138158952-1"></script>
+    <script data-pjax>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-138158952-1');
+      }
+    </script>
+
+
+  <script data-pjax>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?24a6d3c4c0f292c5f682d26414c3994b";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+
+<!-- 加入APlayer音乐播放器 -->
+<link rel="stylesheet" href="/dist/APlayer.min.css">
+<div id="aplayer"></div>
+<script type="text/javascript" src="/dist/APlayer.min.js"></script>
+<script type="text/javascript" src="/dist/music.js"></script>
+
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">RangerZhou</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">Read the fucking source code</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-playlist">
+
+    <a href="/playlist/" rel="section"><i class="fa fa-music fa-fw"></i>歌单</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-commonweal">
+
+    <a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a>
+
+  </li>
+        <li class="menu-item menu-item-official">
+
+    <a href="/official" rel="section"><i class="fa fa-user fa-fw"></i>official</a>
+
+  </li>
+        <li class="menu-item menu-item-shop">
+
+    <a href="http://rangerzhou.taobao.com/" rel="noopener" target="_blank"><i class="fa fa-user fa-fw"></i>shop</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://rangerzhou.top/2022/01/12/Android/AndroidDevelop_016_PKMS/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Ranger Zhou">
+      <meta itemprop="description" content="我是一个小流氓我从来也不浪，有一天我心血来潮耍了个流氓，我嘴里吹着小口哨我心里好得意，不知怎么哗啦啦啦啦我摔了一身泥">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="RangerZhou">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Android - PackageManagerService 简析
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2022-01-12 12:33:17" itemprop="dateCreated datePublished" datetime="2022-01-12T12:33:17+08:00">2022-01-12</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-07-18 22:46:21" itemprop="dateModified" datetime="2022-07-18T22:46:21+08:00">2022-07-18</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Android/" itemprop="url" rel="index"><span itemprop="name">Android</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/2022/01/12/Android/AndroidDevelop_016_PKMS/" class="post-meta-item leancloud_visitors" data-flag-title="Android - PackageManagerService 简析" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <blockquote>
+<p>PackageManagerService（PKMS）是 Android 系统中的核心服务之一，负责应用程序的安装、卸载、信息查询等工作，本文简要分析 PKMS 的启动和安装应用过程，源码基于 android-12.1.0_r4；</p>
+</blockquote>
+<span id="more"></span>
+
+<h2 id="1-概述"><a href="#1-概述" class="headerlink" title="1 概述"></a>1 概述</h2><p>Android 系统启动时，会启动 PKMS，此服务负责扫描系统中特定的目录，寻找里面的 APK 格式文件，并对这些文件进行解析，然后得到应用程序相关信息，会全面解析应用程序的 AndroidManifest.xml，得到 Activity &#x2F; Service &#x2F; BroadcastReceiver &#x2F; ContentProvider 等信息，最后完成应用程序的安装。</p>
+<h2 id="2-PKMS-启动"><a href="#2-PKMS-启动" class="headerlink" title="2 PKMS 启动"></a>2 PKMS 启动</h2><p>PKMS 属于 system_server 进程，在 Zygote 启动 system_server 的时候在 SystemServer.main() 中启动了近百个系统服务；</p>
+<h3 id="2-1-SystemServer-main"><a href="#2-1-SystemServer-main" class="headerlink" title="2.1 SystemServer.main()"></a>2.1 SystemServer.main()</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// SystemServer.java</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">        <span class="keyword">new</span> <span class="title class_">SystemServer</span>().run();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">void</span> <span class="title function_">run</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="comment">// Start services.</span></span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            t.traceBegin(<span class="string">&quot;StartServices&quot;</span>);</span><br><span class="line">            startBootstrapServices(t); <span class="comment">// 启动引导服务</span></span><br><span class="line">            startCoreServices(t); <span class="comment">// 启动核心服务</span></span><br><span class="line">            startOtherServices(t); <span class="comment">// 启动其他服务</span></span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">void</span> <span class="title function_">startBootstrapServices</span><span class="params">(<span class="meta">@NonNull</span> TimingsTraceAndSlog t)</span> &#123;</span><br><span class="line">        ...</span><br><span class="line">        <span class="type">Installer</span> <span class="variable">installer</span> <span class="operator">=</span> mSystemServiceManager.startService(Installer.class); <span class="comment">// 1.启动 installer</span></span><br><span class="line">        <span class="comment">// Only run &quot;core&quot; apps if we&#x27;re encrypting the device.</span></span><br><span class="line">        <span class="comment">// 2.如果设备加密，只运行核心 app</span></span><br><span class="line">        <span class="type">String</span> <span class="variable">cryptState</span> <span class="operator">=</span> VoldProperties.decrypt().orElse(<span class="string">&quot;&quot;</span>);</span><br><span class="line">        <span class="keyword">if</span> (ENCRYPTING_STATE.equals(cryptState)) &#123;</span><br><span class="line">            Slog.w(TAG, <span class="string">&quot;Detected encryption in progress - only parsing core apps&quot;</span>);</span><br><span class="line">            mOnlyCore = <span class="literal">true</span>;</span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> (ENCRYPTED_STATE.equals(cryptState)) &#123;</span><br><span class="line">            Slog.w(TAG, <span class="string">&quot;Device encrypted - only parsing core apps&quot;</span>);</span><br><span class="line">            mOnlyCore = <span class="literal">true</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        t.traceBegin(<span class="string">&quot;StartPackageManagerService&quot;</span>);</span><br><span class="line">        <span class="keyword">try</span> &#123; <span class="comment">// 3.启动 PKMS</span></span><br><span class="line">            Watchdog.getInstance().pauseWatchingCurrentThread(<span class="string">&quot;packagemanagermain&quot;</span>);</span><br><span class="line">            mPackageManagerService = PackageManagerService.main(mSystemContext, installer,</span><br><span class="line">                    domainVerificationService, mFactoryTestMode != FactoryTest.FACTORY_TEST_OFF,</span><br><span class="line">                    mOnlyCore);</span><br><span class="line">        &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">            Watchdog.getInstance().resumeWatchingCurrentThread(<span class="string">&quot;packagemanagermain&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        mFirstBoot = mPackageManagerService.isFirstBoot();</span><br><span class="line">        <span class="comment">// 4.如果设备没有加密，启动 OtaDexOptService 服务</span></span><br><span class="line">        <span class="keyword">if</span> (!mOnlyCore) &#123;</span><br><span class="line">            <span class="type">boolean</span> <span class="variable">disableOtaDexopt</span> <span class="operator">=</span> SystemProperties.getBoolean(<span class="string">&quot;config.disable_otadexopt&quot;</span>,</span><br><span class="line">                    <span class="literal">false</span>);</span><br><span class="line">            <span class="keyword">if</span> (!disableOtaDexopt) &#123;</span><br><span class="line">                t.traceBegin(<span class="string">&quot;StartOtaDexOptService&quot;</span>);</span><br><span class="line">                <span class="keyword">try</span> &#123;</span><br><span class="line">                    Watchdog.getInstance().pauseWatchingCurrentThread(<span class="string">&quot;moveab&quot;</span>);</span><br><span class="line">                    OtaDexoptService.main(mSystemContext, mPackageManagerService);</span><br><span class="line">                &#125; <span class="keyword">catch</span> (Throwable e) &#123;</span><br><span class="line">                    ...</span><br></pre></td></tr></table></figure>
+
+<p>上述代码主要做了四件事：</p>
+<ul>
+<li>启动 installer：阻塞等待 installer 启动完成，以便有机会创建具有适当权限的关键目录，比如 <em>&#x2F;data&#x2F;user</em>；</li>
+<li>检查设备是否加密：如果加密了，则只解析 core 应用，并配置 <code>mOnlyCore = true</code>，后续会多次使用该变量进行条件判断；</li>
+<li>初始化 PKMS：调用 PKMS.main() 初始化 PKMS；</li>
+<li>启动 OtaDexOptService 服务：如果设备没有加密则启动 dex 服务；</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// SystemServer.java</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">void</span> <span class="title function_">startOtherServices</span><span class="params">(<span class="meta">@NonNull</span> TimingsTraceAndSlog t)</span> &#123;</span><br><span class="line">        ...</span><br><span class="line">        <span class="keyword">if</span> (!mOnlyCore) &#123;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                <span class="comment">// 5.如果设备没有加密，执行 performDexOptUpgrade，完成 dex 优化</span></span><br><span class="line">                mPackageManagerService.updatePackagesIfNeeded();</span><br><span class="line">            &#125;</span><br><span class="line">        <span class="keyword">try</span> &#123; <span class="comment">// 6.执行 performFstrimIfNeeded，完成磁盘维护</span></span><br><span class="line">            mPackageManagerService.performFstrimIfNeeded();</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// 7.PKMS 准备就绪</span></span><br><span class="line">        t.traceBegin(<span class="string">&quot;MakePackageManagerServiceReady&quot;</span>);</span><br><span class="line">        mPackageManagerService.systemReady();</span><br><span class="line">        t.traceEnd();</span><br></pre></td></tr></table></figure>
+
+<p>在 <code>startOtherServices()</code> 中继续有 PKMS 的相关操作：</p>
+<ul>
+<li>执行 dex 优化；</li>
+<li>完成磁盘维护；</li>
+<li>PKMS 准备就绪；</li>
+</ul>
+<h3 id="2-2-PKMS-main"><a href="#2-2-PKMS-main" class="headerlink" title="2.2 PKMS.main()"></a>2.2 PKMS.main()</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> PackageManagerService <span class="title function_">main</span><span class="params">(Context context, Installer installer,</span></span><br><span class="line"><span class="params">        <span class="meta">@NonNull</span> DomainVerificationService domainVerificationService, <span class="type">boolean</span> factoryTest,</span></span><br><span class="line"><span class="params">        <span class="type">boolean</span> onlyCore)</span> &#123;</span><br><span class="line">    PackageManagerServiceCompilerMapping.checkProperties(); <span class="comment">// 1.检查 package 编译相关属性</span></span><br><span class="line">    <span class="type">Injector</span> <span class="variable">injector</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Injector</span>(</span><br><span class="line">            ...</span><br><span class="line">            (i, pm) -&gt; PermissionManagerService.create(context,</span><br><span class="line">                    i.getSystemConfig().getAvailableFeatures()),</span><br><span class="line">            (i, pm) -&gt; <span class="keyword">new</span> <span class="title class_">UserManagerService</span>(context, pm,</span><br><span class="line">                    <span class="keyword">new</span> <span class="title class_">UserDataPreparer</span>(installer, installLock, context, onlyCore),</span><br><span class="line">                    lock),</span><br><span class="line">            (i, pm) -&gt; <span class="keyword">new</span> <span class="title class_">Settings</span>(Environment.getDataDirectory(),</span><br><span class="line">                    RuntimePermissionsPersistence.createInstance(),</span><br><span class="line">                    i.getPermissionManagerServiceInternal(),</span><br><span class="line">                    domainVerificationService, lock),</span><br><span class="line">            ...</span><br><span class="line">            (i, pm) -&gt; <span class="keyword">new</span> <span class="title class_">PackageInstallerService</span>(</span><br><span class="line">                    i.getContext(), pm, i::getScanningPackageParser),</span><br><span class="line">            ...</span><br><span class="line">    <span class="type">PackageManagerService</span> <span class="variable">m</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">PackageManagerService</span>(injector, onlyCore, factoryTest,</span><br><span class="line">            Build.FINGERPRINT, Build.IS_ENG, Build.IS_USERDEBUG, Build.VERSION.SDK_INT,</span><br><span class="line">            Build.VERSION.INCREMENTAL);<span class="comment">// 2.调用 PKMS 构造函数</span></span><br><span class="line">    <span class="comment">// 3.注册 PMS/PMN 到 servicemanager</span></span><br><span class="line">    ServiceManager.addService(<span class="string">&quot;package&quot;</span>, m);</span><br><span class="line">    <span class="keyword">final</span> <span class="type">PackageManagerNative</span> <span class="variable">pmn</span> <span class="operator">=</span> m.<span class="keyword">new</span> <span class="title class_">PackageManagerNative</span>();</span><br><span class="line">    ServiceManager.addService(<span class="string">&quot;package_native&quot;</span>, pmn);</span><br></pre></td></tr></table></figure>
+
+<p>创建了一个 Injector 对象，其中使用 Singleton 的模式初始化了很多变量，传递到 PKMS 的构造函数中；</p>
+<h3 id="2-3-PKMS-构造函数"><a href="#2-3-PKMS-构造函数" class="headerlink" title="2.3 PKMS 构造函数"></a>2.3 PKMS 构造函数</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// PackageManagerService.java</span></span><br><span class="line">    <span class="keyword">public</span> <span class="title function_">PackageManagerService</span><span class="params">(Injector injector, <span class="type">boolean</span> onlyCore, <span class="type">boolean</span> factoryTest,</span></span><br><span class="line"><span class="params">            <span class="keyword">final</span> String buildFingerprint, <span class="keyword">final</span> <span class="type">boolean</span> isEngBuild,</span></span><br><span class="line"><span class="params">            <span class="keyword">final</span> <span class="type">boolean</span> isUserDebugBuild, <span class="keyword">final</span> <span class="type">int</span> sdkVersion, <span class="keyword">final</span> String incrementalVersion)</span> &#123;</span><br><span class="line">        mLock = injector.getLock();</span><br><span class="line">        <span class="comment">// mInstallLock 用来保护所有安装 APK 的访问权限，此操作通常涉及繁重的磁盘数据读写等操作，并且是单线程操作，故有时候会处理很慢</span></span><br><span class="line">        <span class="comment">// 此锁不会在已经持有 mLock 锁的情况下获得，反之，在已经持有 mInstallLock 锁的情况下，立即获取 mLock 是安全的</span></span><br><span class="line">        mInstallLock = injector.getInstallLock();</span><br><span class="line">        LockGuard.installLock(mLock, LockGuard.INDEX_PACKAGES);</span><br><span class="line">        <span class="comment">// 阶段1：BOOT_PROGRESS_PMS_START</span></span><br><span class="line">        EventLog.writeEvent(EventLogTags.BOOT_PROGRESS_PMS_START, SystemClock.uptimeMillis());</span><br><span class="line">            <span class="comment">// 阶段2：BOOT_PROGRESS_PMS_SYSTEM_SCAN_START</span></span><br><span class="line">            EventLog.writeEvent(EventLogTags.BOOT_PROGRESS_PMS_SYSTEM_SCAN_START,</span><br><span class="line">                    startTime);</span><br><span class="line">            <span class="comment">// 阶段3:BOOT_PROGRESS_PMS_DATA_SCAN_START</span></span><br><span class="line">            <span class="keyword">if</span> (!mOnlyCore) &#123;</span><br><span class="line">                EventLog.writeEvent(EventLogTags.BOOT_PROGRESS_PMS_DATA_SCAN_START, SystemClock.uptimeMillis());</span><br><span class="line">            <span class="comment">// 阶段4：BOOT_PROGRESS_PMS_SCAN_END</span></span><br><span class="line">            EventLog.writeEvent(EventLogTags.BOOT_PROGRESS_PMS_SCAN_END, SystemClock.uptimeMillis());</span><br><span class="line">            <span class="comment">// 阶段5：BOOT_PROGRESS_PMS_READY</span></span><br><span class="line">            EventLog.writeEvent(EventLogTags.BOOT_PROGRESS_PMS_READY, SystemClock.uptimeMillis());</span><br></pre></td></tr></table></figure>
+
+<p>PKMS 构造函数分为了 5 个阶段：</p>
+<ul>
+<li>BOOT_PROGRESS_PMS_START：构造 DisplayMetrics 保存分辨率信息，创建 mPermissionManager 进行管理权限，创建 mSettings 来保存安装包信息；</li>
+<li>BOOT_PROGRESS_PMS_SYSTEM_SCAN_START：扫描系统 apk（system&#x2F;vendor&#x2F;product 等目录），清除安装时的临时文件和其他不需要的信息；</li>
+<li>BOOT_PROGRESS_PMS_DATA_SCAN_START：扫描 data 目录 apk，</li>
+<li>BOOT_PROGRESS_PMS_SCAN_END：OTA 升级后首次启动要清除不必要的缓存数据，</li>
+<li>BOOT_PROGRESS_PMS_READY</li>
+</ul>
+<h4 id="2-3-1-第一阶段-BOOT-PROGRESS-PMS-START"><a href="#2-3-1-第一阶段-BOOT-PROGRESS-PMS-START" class="headerlink" title="2.3.1 第一阶段 BOOT_PROGRESS_PMS_START"></a>2.3.1 第一阶段 BOOT_PROGRESS_PMS_START</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// PackageManagerService.java</span></span><br><span class="line">    <span class="keyword">public</span> <span class="title function_">PackageManagerService</span><span class="params">(...)</span> &#123;</span><br><span class="line">        <span class="comment">// 阶段1：BOOT_PROGRESS_PMS_START</span></span><br><span class="line">        EventLog.writeEvent(EventLogTags.BOOT_PROGRESS_PMS_START, SystemClock.uptimeMillis());</span><br><span class="line">        mOnlyCore = onlyCore; <span class="comment">// 标注是否只加载</span></span><br><span class="line">        mMetrics = injector.getDisplayMetrics(); <span class="comment">// 保存分辨率等信息</span></span><br><span class="line">        mInstaller = injector.getInstaller();</span><br><span class="line">        mPermissionManager = injector.getPermissionManagerServiceInternal(); <span class="comment">// 用来进行权限管理</span></span><br><span class="line">        mSettings = injector.getSettings(); <span class="comment">// mSettings 保存安装包信息</span></span><br><span class="line">        <span class="comment">// </span></span><br><span class="line">        mSettings.addSharedUserLPw(<span class="string">&quot;android.uid.system&quot;</span>, Process.SYSTEM_UID,</span><br><span class="line">                ApplicationInfo.FLAG_SYSTEM, ApplicationInfo.PRIVATE_FLAG_PRIVILEGED);</span><br><span class="line">        mSettings.addSharedUserLPw(<span class="string">&quot;android.uid.phone&quot;</span>, RADIO_UID,...);</span><br><span class="line">        mSettings.addSharedUserLPw(<span class="string">&quot;android.uid.log&quot;</span>, LOG_UID,...);</span><br><span class="line">        mSettings.addSharedUserLPw(<span class="string">&quot;android.uid.nfc&quot;</span>, NFC_UID,...);</span><br><span class="line">        mSettings.addSharedUserLPw(<span class="string">&quot;android.uid.bluetooth&quot;</span>, BLUETOOTH_UID,...);</span><br><span class="line">        mSettings.addSharedUserLPw(<span class="string">&quot;android.uid.shell&quot;</span>, SHELL_UID,...);</span><br><span class="line">        mSettings.addSharedUserLPw(<span class="string">&quot;android.uid.se&quot;</span>, SE_UID,...);</span><br><span class="line">        mSettings.addSharedUserLPw(<span class="string">&quot;android.uid.networkstack&quot;</span>, NETWORKSTACK_UID,...);</span><br><span class="line">        mSettings.addSharedUserLPw(<span class="string">&quot;android.uid.uwb&quot;</span>, UWB_UID,...);</span><br><span class="line">        <span class="comment">// 用于处理 dex 优化</span></span><br><span class="line">        mPackageDexOptimizer = injector.getPackageDexOptimizer();</span><br><span class="line">        mDexManager = injector.getDexManager();</span><br></pre></td></tr></table></figure>
+
+<p>利用 Injector 初始化一些实例，构造 DisplayMetrics，用于保存分辨率；创建 Installer 用于与 installd 交互；创建 mPermissionManager 进行权限管理；构造 Settings 类，保存安装包信息，清除路径不存在的孤立应用，给 mSettings 添加 system&#x2F;phone&#x2F;log&#x2F;nfc&#x2F;bluetooth&#x2F;shell&#x2F;se&#x2F;networkstack&#x2F;uwb 9 种 shareUserId 到 mSettings（<strong>sharedUserId 属性相同的 package 可以运行在同一个进程中，或者相互读取资源</strong>），Settings 可以看做是一个数据动态管理类，它主要会管理 packages.xml 文件中的信息；构造 PackageDexOptimizer 及 DexManager 类，处理 dex 优化；重点看一下 Settings 类：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// frameworks/base/services/core/java/com/android/server/pm/Settings.java</span></span><br><span class="line">    Settings(File dataDir, RuntimePermissionsPersistence runtimePermissionsPersistence,</span><br><span class="line">            LegacyPermissionDataProvider permissionDataProvider,</span><br><span class="line">            <span class="meta">@NonNull</span> DomainVerificationManagerInternal domainVerificationManager,</span><br><span class="line">            <span class="meta">@NonNull</span> PackageManagerTracedLock lock)  &#123;</span><br><span class="line">        mPackages = <span class="keyword">new</span> <span class="title class_">WatchedArrayMap</span>&lt;&gt;();</span><br><span class="line">        ...</span><br><span class="line">        mSettingsFilename = <span class="keyword">new</span> <span class="title class_">File</span>(mSystemDir, <span class="string">&quot;packages.xml&quot;</span>);</span><br><span class="line">        mBackupSettingsFilename = <span class="keyword">new</span> <span class="title class_">File</span>(mSystemDir, <span class="string">&quot;packages-backup.xml&quot;</span>);</span><br><span class="line">        mPackageListFilename = <span class="keyword">new</span> <span class="title class_">File</span>(mSystemDir, <span class="string">&quot;packages.list&quot;</span>);</span><br><span class="line">        FileUtils.setPermissions(mPackageListFilename, <span class="number">0640</span>, SYSTEM_UID, PACKAGE_INFO_GID);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">final</span> <span class="type">File</span> <span class="variable">kernelDir</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">File</span>(<span class="string">&quot;/config/sdcardfs&quot;</span>);</span><br><span class="line">        mKernelMappingFilename = kernelDir.exists() ? kernelDir : <span class="literal">null</span>;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// Deprecated: Needed for migration</span></span><br><span class="line">        mStoppedPackagesFilename = <span class="keyword">new</span> <span class="title class_">File</span>(mSystemDir, <span class="string">&quot;packages-stopped.xml&quot;</span>);</span><br><span class="line">        mBackupStoppedPackagesFilename = <span class="keyword">new</span> <span class="title class_">File</span>(mSystemDir, <span class="string">&quot;packages-stopped-backup.xml&quot;</span>);</span><br></pre></td></tr></table></figure>
+
+<p>初始化一些变量指向的路径：</p>
+<ul>
+<li>mSettingsFilename：指向 <em>&#x2F;data&#x2F;system&#x2F;packages.xml</em>，记录了系统中所有安装应用的基本信息；</li>
+<li>mBackupSettingsFilename：指向 <em>&#x2F;data&#x2F;system&#x2F;packages-backup.xml</em>，是 packages.xml 的备份；</li>
+<li>mPackageListFilename：指向 <em>&#x2F;data&#x2F;system&#x2F;packages.list</em>，保存了应用的数据目录和 UID 等信息；</li>
+<li>mStoppedPackagesFilename：指向 <em>&#x2F;data&#x2F;system&#x2F;packages-stopped.xml</em>，记录系统中所有被强制停止运行的应用的信息；</li>
+<li>mBackupStoppedPackagesFilename：指向 <em>&#x2F;data&#x2F;system&#x2F;packages-stopped-backup.xml</em>，是 packages-stopped.xml 的备份；</li>
+</ul>
+<p>随后在 PKMS 中调用 Settings.readLPw() 对 packages.xml 进行解析</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// PackageManagerService.java </span></span><br><span class="line">            mFirstBoot = !mSettings.readLPw(mInjector.getUserManagerInternal().getUsers(<span class="literal">true</span>, <span class="literal">false</span>, <span class="literal">false</span>));</span><br><span class="line"><span class="comment">// Settings.java</span></span><br><span class="line">    <span class="type">boolean</span> <span class="title function_">readLPw</span><span class="params">(<span class="meta">@NonNull</span> List&lt;UserInfo&gt; users)</span> &#123;</span><br><span class="line">        ...</span><br><span class="line">                    <span class="comment">// packages-backup.xml两个目录同时存在，则删除 packages.xml</span></span><br><span class="line">                    mSettingsFilename.delete();</span><br><span class="line">                <span class="comment">// 如果 packages-backup.xml 没数据，则读取 packages.xml 中的数据</span></span><br><span class="line">                str = <span class="keyword">new</span> <span class="title class_">FileInputStream</span>(mSettingsFilename);</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">final</span> <span class="type">TypedXmlPullParser</span> <span class="variable">parser</span> <span class="operator">=</span> Xml.resolvePullParser(str); <span class="comment">// xml 解析器，解析 packages.xml</span></span><br><span class="line"></span><br><span class="line">            ...</span><br><span class="line">            <span class="keyword">while</span> ((type = parser.next()) != XmlPullParser.END_DOCUMENT</span><br><span class="line">                    &amp;&amp; (type != XmlPullParser.END_TAG || parser.getDepth() &gt; outerDepth)) &#123;</span><br><span class="line">                <span class="keyword">if</span> (type == XmlPullParser.END_TAG || type == XmlPullParser.TEXT) &#123;</span><br><span class="line">                    <span class="keyword">continue</span>;</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="comment">// 根据 XML 的各个节点进行各种操作，例如读取权限、shared-user等</span></span><br><span class="line">                <span class="type">String</span> <span class="variable">tagName</span> <span class="operator">=</span> parser.getName();</span><br><span class="line">                <span class="keyword">if</span> (tagName.equals(<span class="string">&quot;package&quot;</span>)) &#123;</span><br><span class="line">                    readPackageLPw(parser, users);</span><br><span class="line">                &#125; <span class="keyword">else</span> <span class="keyword">if</span> (tagName.equals(<span class="string">&quot;permissions&quot;</span>)) &#123;</span><br><span class="line">                    mPermissions.readPermissions(parser);</span><br><span class="line">                &#125; <span class="keyword">else</span> <span class="keyword">if</span> (tagName.equals(<span class="string">&quot;permission-trees&quot;</span>)) &#123;</span><br><span class="line">                    mPermissions.readPermissionTrees(parser);</span><br><span class="line">                &#125; <span class="keyword">else</span> <span class="keyword">if</span> (tagName.equals(<span class="string">&quot;shared-user&quot;</span>)) &#123;</span><br><span class="line">                    readSharedUserLPw(parser, users);</span><br><span class="line">                ...</span><br></pre></td></tr></table></figure>
+
+
+
+<h4 id="2-3-2-第二阶段-BOOT-PROGRESS-PMS-SYSTEM-SCAN-START"><a href="#2-3-2-第二阶段-BOOT-PROGRESS-PMS-SYSTEM-SCAN-START" class="headerlink" title="2.3.2 第二阶段 BOOT_PROGRESS_PMS_SYSTEM_SCAN_START"></a>2.3.2 第二阶段 BOOT_PROGRESS_PMS_SYSTEM_SCAN_START</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// PackageManagerService.java</span></span><br><span class="line">    <span class="keyword">public</span> <span class="title function_">PackageManagerService</span><span class="params">(...)</span> &#123;</span><br><span class="line">            <span class="type">long</span> <span class="variable">startTime</span> <span class="operator">=</span> SystemClock.uptimeMillis(); <span class="comment">// 记录扫描开始时间</span></span><br><span class="line"></span><br><span class="line">            EventLog.writeEvent(EventLogTags.BOOT_PROGRESS_PMS_SYSTEM_SCAN_START, startTime); <span class="comment">// 进入第二阶段</span></span><br><span class="line">            ...</span><br><span class="line">                scanDirTracedLI(partition.getOverlayFolder(), ...); <span class="comment">// vender/product/system_ext 下的 overlay 目录</span></span><br><span class="line">            scanDirTracedLI(frameworkDir, ...); <span class="comment">// system/framework</span></span><br><span class="line">                    scanDirTracedLI(partition.getPrivAppFolder(), ...); <span class="comment">// /xxx/priv-app 目录</span></span><br><span class="line">                scanDirTracedLI(partition.getAppFolder(), ...); <span class="comment">// /xxx/app 目录</span></span><br><span class="line">            mSettings.pruneSharedUsersLPw();</span><br><span class="line">            <span class="keyword">final</span> <span class="type">long</span> <span class="variable">systemScanTime</span> <span class="operator">=</span> SystemClock.uptimeMillis() - startTime; <span class="comment">// 计算 system app 扫描时间</span></span><br><span class="line">            <span class="keyword">final</span> <span class="type">int</span> <span class="variable">systemPackagesCount</span> <span class="operator">=</span> mPackages.size(); <span class="comment">// system app 数量</span></span><br></pre></td></tr></table></figure>
+
+<p>调用 scanDirTracedLI() 扫描 system&#x2F;vendor&#x2F;product 等等目录下的 overlay&#x2F;priv-app&#x2F;app 目录；</p>
+<h4 id="2-3-3-第三阶段-BOOT-PROGRESS-PMS-DATA-SCAN-START"><a href="#2-3-3-第三阶段-BOOT-PROGRESS-PMS-DATA-SCAN-START" class="headerlink" title="2.3.3 第三阶段 BOOT_PROGRESS_PMS_DATA_SCAN_START"></a>2.3.3 第三阶段 BOOT_PROGRESS_PMS_DATA_SCAN_START</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"> </span><br><span class="line"><span class="keyword">if</span> (!mOnlyCore) &#123;</span><br><span class="line">    EventLog.writeEvent(EventLogTags.BOOT_PROGRESS_PMS_DATA_SCAN_START,</span><br><span class="line">            SystemClock.uptimeMillis()); <span class="comment">// 进入第三阶段</span></span><br><span class="line">    scanDirTracedLI(mAppInstallDir, <span class="number">0</span>, scanFlags | SCAN_REQUIRE_KNOWN, <span class="number">0</span>,</span><br><span class="line">            packageParser, executorService);</span><br><span class="line">&#125;</span><br><span class="line">    <span class="comment">// 确保 userdata 分区上的系统应用都实际出现</span></span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; mExpectingBetter.size(); i++) &#123;</span><br><span class="line">                <span class="keyword">final</span> <span class="type">AndroidPackage</span> <span class="variable">newPkg</span> <span class="operator">=</span> scanPackageTracedLI(</span><br><span class="line">                        scanFile, reparseFlags, rescanFlags, <span class="number">0</span>, <span class="literal">null</span>);</span><br><span class="line">    <span class="keyword">final</span> <span class="type">long</span> <span class="variable">dataScanTime</span> <span class="operator">=</span> SystemClock.uptimeMillis() - systemScanTime - startTime;</span><br><span class="line">    <span class="keyword">final</span> <span class="type">int</span> <span class="variable">dataPackagesCount</span> <span class="operator">=</span> mPackages.size() - systemPackagesCount;</span><br></pre></td></tr></table></figure>
+
+<p>第三阶段主要工作就是处理 data 目录的应用信息，及时更新，去除不必要的数据；</p>
+<h4 id="2-3-4-第四阶段-BOOT-PROGRESS-PMS-SCAN-END"><a href="#2-3-4-第四阶段-BOOT-PROGRESS-PMS-SCAN-END" class="headerlink" title="2.3.4 第四阶段 BOOT_PROGRESS_PMS_SCAN_END"></a>2.3.4 第四阶段 BOOT_PROGRESS_PMS_SCAN_END</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// PKMS.java</span></span><br><span class="line">            EventLog.writeEvent(EventLogTags.BOOT_PROGRESS_PMS_SCAN_END,</span><br><span class="line">                    SystemClock.uptimeMillis());</span><br></pre></td></tr></table></figure>
+
+<p>OTA 升级后首次启动要清除不必要的缓存数据、权限等默认项，更新后要清理相关数据，更新 packages.xml；</p>
+<h4 id="2-3-5-第五阶段-BOOT-PROGRESS-PMS-READY"><a href="#2-3-5-第五阶段-BOOT-PROGRESS-PMS-READY" class="headerlink" title="2.3.5 第五阶段 BOOT_PROGRESS_PMS_READY"></a>2.3.5 第五阶段 BOOT_PROGRESS_PMS_READY</h4><p>GC 回收内存；</p>
+<h4 id="2-3-6-总结"><a href="#2-3-6-总结" class="headerlink" title="2.3.6 总结"></a>2.3.6 总结</h4><ul>
+<li><p>第一阶段：创建 Settings 对象，读取 <em>&#x2F;data&#x2F;system&#x2F;packages.xml</em> 和 <em>&#x2F;data&#x2F;system&#x2F;packages-backup.xml</em>，并把解析结果存储到 Settings 对象；</p>
+</li>
+<li><p>第二阶段：扫描 system&#x2F;vendor&#x2F;product 等目录下的 overlay&#x2F;priv-app&#x2F;app 目录；</p>
+</li>
+<li><p>第三阶段：扫描 <em>&#x2F;data&#x2F;</em> 目录；</p>
+</li>
+<li><p>第四阶段：把第二阶段、第三阶段扫描的结果写入 packages.xml，更新 packages.xml；</p>
+</li>
+<li><p>第五阶段：GC 回收内存；</p>
+</li>
+</ul>
+<h3 id="2-4-APK-扫描"><a href="#2-4-APK-扫描" class="headerlink" title="2.4 APK 扫描"></a>2.4 APK 扫描</h3><p>扫描 apk 总结下来分为两步，</p>
+<ul>
+<li>扫描 APK，解析 AndroidManifest.xml 文件，得到清单文件各个标签内容；</li>
+<li>解析清单文件的信息由 Package 保存，从该类的成员变量可看出，和 Android 四大组件相关的信息分别由 activites、receivers、providers、services 保存，由于一个 APK 可声明多个组件，因此 activites 和 receivers 等均声明为 ArrayList；</li>
+</ul>
+<h3 id="2-5-APK-安装"><a href="#2-5-APK-安装" class="headerlink" title="2.5 APK 安装"></a>2.5 APK 安装</h3><p>调用流程（从点击 apk 文件开始）：</p>
+<ul>
+<li><strong>PackageInstallerActivity</strong>.bindUi()：弹出一个 Alert，点击安装调用到 startInstall()；</li>
+<li>startInstall()：使用 startActivity() 启动 <strong>InstallInstalling</strong>，随后执行 onCreate()，onResume()，</li>
+<li>InstallInstalling.onResume()：调用 <strong>InstallingAsyncTask</strong>.execute()，执行到 InstallingAsyncTask.onPostExecute()，又调用了 PackageInstaller.Session.commit()；</li>
+<li><strong>PackageInstaller</strong>.Session.commit()：在其中又通过 <strong>IPC 跨进程</strong>调用到 system_server 进程的 <strong>PackageInstallerSession</strong> 服务的 commit()；</li>
+<li><strong>PackageInstallerSession</strong>.dispatchSessionSealed()：发送 handle 消息 <font color=blue><strong>MSG_ON_SESSION_SEALED</strong></font>；</li>
+<li><strong>PackageInstallerSession</strong>.handleMessage()：收到消息调用 handleSessionSealed() 发送 <font color=blue><strong>MSG_STREAM_VALIDATE_AND_COMMIT</strong></font> 消息，再调用 handleStreamValidateAndCommit() 发送 <font color=blue><strong>MSG_INSTALL</strong></font> 消息，然后调用 handleInstall()；</li>
+<li><strong>PackageInstallerSession</strong>.verify() -&gt; verifyNonStaged() -&gt; prepareForVerification() -&gt; makeVerificationParamsLocked() -&gt; install() -&gt; installNonStaged() -&gt; PKMS.installStage()；</li>
+<li><strong>PackageManagerService</strong>.installStage()：发送 Handle 消息 INIT_COPY；</li>
+<li>PKMS.PackageHandler.handlerMessage() -&gt; doHandleMessage()；</li>
+<li>PKMS.HandlerParams.startCopy() -&gt; handleStartCopy()，handleReturnCode()；</li>
+<li>PKMS.InstallParams.handleReturnCode()；</li>
+<li>processPendingInstall()；<ul>
+<li>PKMS.FileInstallArgs.copyApk() -&gt; doCopyApk()；</li>
+<li><strong>PackageManagerServiceUtils</strong>.copyPackage()：先 copy apk 到 <em>&#x2F;data&#x2F;app&#x2F;base.apk</em> 下，再 copy so 文件，然后回到 processPendingInstall() 继续往下执行；</li>
+</ul>
+</li>
+<li><strong>PackageManagerService</strong>.processInstallRequestsAsync()：调用 installPackagesTracedLI()；</li>
+<li>installPackagesTracedLI()：调用 installPackagesLI() 安装解析 apk；</li>
+<li>installPackagesLI()<ul>
+<li>preparePackageLI()：准备，分析当前安装状态，解析包并初始验证；</li>
+<li>scanPackageTracedLI()：根据准备阶段解析的包信息上下文，进一步解析；<ul>
+<li>scanPackageLI -&gt; <strong>PackageParser2</strong>.parsePackage()：到这里又到了扫描 apk 的环节，后续步骤参考扫描总结；</li>
+</ul>
+</li>
+<li>reconcilePackagesLocked()：验证扫描后的包信息和系统状态，确保安装成功；</li>
+<li>CommitRequest()：提交扫描的包、更新系统状态；</li>
+</ul>
+</li>
+<li><strong>PackageManagerService</strong>.executePostCommitSteps()：安装完成后，准备 app 数据、执行 dex 优化；<ul>
+<li>prepareAppDataAfterInstallLIF() -&gt; prepareAppData() -&gt; prepareAppDataLeaf() -&gt; Installer.createAppData() -&gt; <strong>Installd</strong>.createAppData()：最终通过 IPC 操作跨进程调用到 init 进程启动的守护进程 Installd 中，后续不再分析；</li>
+<li>performDexOpt()：执行 dex 优化；</li>
+</ul>
+</li>
+<li>回到 <strong>PackageManagerService</strong>.processInstallRequestsAsync()，继续往下调用 restoreAndPostInstall()；</li>
+<li>restoreAndPostInstall()：使用 handler 发送 POST_INSTALL 消息；</li>
+<li>handlePackagePostInstall()：处理 POST_INSTALL 消息，发送 ACTION_PACKAGE_ADDED 等广播，调用 notifyInstallObserver() -&gt; PackageInstallObserver2.onPackageInstalled()，发送安装成功的通知；</li>
+</ul>
+<p>apk 的安装原理其实就是把 apk 文件 copy 到对应的目录：</p>
+<ul>
+<li><p>把 apk 拷贝到 *&#x2F;data&#x2F;app&#x2F;packagename&#x2F;*，可以直接把 apk 拷贝出来点击安装，比如查看微信的 apk 文件：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">adb shell pm list packages -f com.tencent.mm</span></span><br><span class="line">package:/data/app/~~upY4pffUA2R84QfD_Ce7UA==/com.tencent.mm-RrcnDRXvQ_Luk8HcYou__g==/base.apk=com.tencent.mm</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>开辟存放应用程序文件数据的目录 *&#x2F;data&#x2F;data&#x2F;packagename&#x2F;(db, cache)*，包括应用的 so 库，缓存文件等待；</p>
+</li>
+<li><p>将 apk 中的 dex 文件安装到 <em>&#x2F;data&#x2F;dalvik-cache</em> 目录下；</p>
+</li>
+</ul>
+<p><font color=red><strong>待补充时序图</strong></font></p>
+<h3 id="2-6-权限扫描"><a href="#2-6-权限扫描" class="headerlink" title="2.6 权限扫描"></a>2.6 权限扫描</h3><p>PKMS 的构造函数中会获取 SystemConfig 对象，在 SystemConfig 的构造函数中会调用 readAllPermissions() 从 <em>&#x2F;system&#x2F;etc&#x2F;permissions&#x2F;<em>、</em>&#x2F;system&#x2F;etc&#x2F;sysconfig</em> 中的各种 xml 文件进行扫描，把 xml 中的标签转换成对应的数据结构，供之后权限管理使用；</p>
+<h2 id="3-总结"><a href="#3-总结" class="headerlink" title="3 总结"></a>3 总结</h2><h3 id="3-1-构造函数总结"><a href="#3-1-构造函数总结" class="headerlink" title="3.1 构造函数总结"></a>3.1 构造函数总结</h3><ul>
+<li><p>第一阶段：创建 mSettings 对象，读取 <em>&#x2F;data&#x2F;system&#x2F;packages.xml</em> 和 <em>&#x2F;data&#x2F;system&#x2F;packages-backup.xml</em>，并把解析结果存储到 mSettings 对象，代表上次启动时的应用包信息；</p>
+</li>
+<li><p>第二阶段：扫描 system&#x2F;vendor&#x2F;product 等目录下的 overlay&#x2F;priv-app&#x2F;app 目录的 apk（系统 app）；</p>
+</li>
+<li><p>第三阶段：扫描 <em>&#x2F;data&#x2F;</em> 目录 apk（用户安装的 app）；</p>
+</li>
+<li><p>第四阶段：根据第二阶段、第三阶段扫描的结果更新 packages.xml；</p>
+</li>
+<li><p>第五阶段：GC 回收内存；</p>
+</li>
+</ul>
+<p>开机时间有很大一部分是耗费在这五个阶段，还有一大部分是耗费在随后的 dex 优化上；</p>
+<h3 id="3-2-APK-扫描总结"><a href="#3-2-APK-扫描总结" class="headerlink" title="3.2 APK 扫描总结"></a>3.2 APK 扫描总结</h3><ul>
+<li>调用路径：<ul>
+<li><strong>PKMS</strong>.scanDirTracedLI() -&gt; ：被 PKMS 构造函数调用，<font color=blue><strong>开启扫描 apk</strong></font>起点；</li>
+<li>scanDirLI() -&gt; ：收集 apk，提交文件并行解析；</li>
+<li><strong>ParallelPackageParser</strong>.submit() -&gt; ：提交文件并行解析</li>
+<li>parsePackage() -&gt; PackageParser2.parsePackage() -&gt; ParsingPackageUtils.parsePackage() -&gt; ：进行 apk 解析，区分传入的是目录还是 apk，最终都是调用到 ParsingPackageUtils.parseMonolithicPackage()；</li>
+<li><strong>ParsingPackageUtils</strong>.parseMonolithicPackage() -&gt; ：解析给定的 apk 文件，具体调用 parseBaseApk() 去解析；</li>
+<li>parseBaseApk()：</li>
+<li>parseBaseApkTags()：<font color=blue><strong>解析 Manifest.xml</strong></font>；<ul>
+<li>parseBaseApkTag()：解析非 application 标签，比如 permission &#x2F; uses-feature &#x2F; attribution 等；</li>
+<li>parseBaseApplication()：<font color=blue><strong>针对 application 标签进行全面解析</strong></font>，例如 activity &#x2F; receiver &#x2F; service &#x2F; provider；</li>
+</ul>
+</li>
+<li>返回最终解析结果给 ParsedPackage 对象，然后又回到 PKMS.scanDirLI()，调用 addForInitLI()；</li>
+<li>commitReconciledScanResultLocked()：内部调用 commitPackageSettings()</li>
+<li>commitPackageSettings()：<font color=blue><strong>包信息记录在了 PKMS 的属性中</strong></font>；</li>
+</ul>
+</li>
+<li>小结：对所有存在 apk 的目录进行扫描，解析所有 apk 的 AndroidManifest.xml，最后把包扫描结果提交到 PKMS 的各个属性中；</li>
+</ul>
+<h3 id="3-3-apk-安装总结"><a href="#3-3-apk-安装总结" class="headerlink" title="3.3 apk 安装总结"></a>3.3 apk 安装总结</h3><ul>
+<li>PackageInstallerActivity 点击安装</li>
+<li>APK 用写入 Session 把包信息和 APK 安装操作都提交到了 PKMS；</li>
+<li>IPC 跨进程让 PKMS 执行 copy、扫描、解析；</li>
+<li>system_server 进程的 Installer IPC 跨进程到 Installd 进程（具有 root 权限，8.0 以前好像用的 socket 通信）准备用户目录 <em>&#x2F;data&#x2F;user&#x2F;</em> ，执行 dex 优化；</li>
+<li>最后发送安装结果通知 UI 层；</li>
+</ul>
+<p><a target="_blank" rel="noopener" href="https://cloud.tencent.com/developer/article/1900466">reference</a></p>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div>Donate comment here.</div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechatpay.jpg" alt="Ranger Zhou 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.jpg" alt="Ranger Zhou 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>Ranger Zhou
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://rangerzhou.top/2022/01/12/Android/AndroidDevelop_016_PKMS/" title="Android - PackageManagerService 简析">http://rangerzhou.top/2022/01/12/Android/AndroidDevelop_016_PKMS/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/12/01/Android/Android_OpenGLES_Study/" rel="prev" title="Android OpenGL 开发学习">
+      <i class="fa fa-chevron-left"></i> Android OpenGL 开发学习
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+      <div class="tabs tabs-comment">
+        <ul class="nav-tabs">
+            <li class="tab"><a href="#comment-disqus">disqus</a></li>
+            <li class="tab"><a href="#comment-gitalk">gitalk</a></li>
+            <li class="tab"><a href="#comment-livere">livere</a></li>
+        </ul>
+        <div class="tab-content">
+            <div class="tab-pane disqus" id="comment-disqus">
+              
+  <div class="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
+            </div>
+            <div class="tab-pane gitalk" id="comment-gitalk">
+              <div class="comments" id="gitalk-container"></div>
+            </div>
+            <div class="tab-pane livere" id="comment-livere">
+              
+  <div class="comments">
+    <div id="lv-container" data-id="city" data-uid="MTAyMC8yOTcyNS82Mjky"></div>
+  </div>
+  
+            </div>
+        </div>
+      </div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-%E6%A6%82%E8%BF%B0"><span class="nav-text">1 概述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-PKMS-%E5%90%AF%E5%8A%A8"><span class="nav-text">2 PKMS 启动</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-1-SystemServer-main"><span class="nav-text">2.1 SystemServer.main()</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2-PKMS-main"><span class="nav-text">2.2 PKMS.main()</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-3-PKMS-%E6%9E%84%E9%80%A0%E5%87%BD%E6%95%B0"><span class="nav-text">2.3 PKMS 构造函数</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#2-3-1-%E7%AC%AC%E4%B8%80%E9%98%B6%E6%AE%B5-BOOT-PROGRESS-PMS-START"><span class="nav-text">2.3.1 第一阶段 BOOT_PROGRESS_PMS_START</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-3-2-%E7%AC%AC%E4%BA%8C%E9%98%B6%E6%AE%B5-BOOT-PROGRESS-PMS-SYSTEM-SCAN-START"><span class="nav-text">2.3.2 第二阶段 BOOT_PROGRESS_PMS_SYSTEM_SCAN_START</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-3-3-%E7%AC%AC%E4%B8%89%E9%98%B6%E6%AE%B5-BOOT-PROGRESS-PMS-DATA-SCAN-START"><span class="nav-text">2.3.3 第三阶段 BOOT_PROGRESS_PMS_DATA_SCAN_START</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-3-4-%E7%AC%AC%E5%9B%9B%E9%98%B6%E6%AE%B5-BOOT-PROGRESS-PMS-SCAN-END"><span class="nav-text">2.3.4 第四阶段 BOOT_PROGRESS_PMS_SCAN_END</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-3-5-%E7%AC%AC%E4%BA%94%E9%98%B6%E6%AE%B5-BOOT-PROGRESS-PMS-READY"><span class="nav-text">2.3.5 第五阶段 BOOT_PROGRESS_PMS_READY</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-3-6-%E6%80%BB%E7%BB%93"><span class="nav-text">2.3.6 总结</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-4-APK-%E6%89%AB%E6%8F%8F"><span class="nav-text">2.4 APK 扫描</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-5-APK-%E5%AE%89%E8%A3%85"><span class="nav-text">2.5 APK 安装</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-6-%E6%9D%83%E9%99%90%E6%89%AB%E6%8F%8F"><span class="nav-text">2.6 权限扫描</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-%E6%80%BB%E7%BB%93"><span class="nav-text">3 总结</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#3-1-%E6%9E%84%E9%80%A0%E5%87%BD%E6%95%B0%E6%80%BB%E7%BB%93"><span class="nav-text">3.1 构造函数总结</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-2-APK-%E6%89%AB%E6%8F%8F%E6%80%BB%E7%BB%93"><span class="nav-text">3.2 APK 扫描总结</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-3-apk-%E5%AE%89%E8%A3%85%E6%80%BB%E7%BB%93"><span class="nav-text">3.3 apk 安装总结</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Ranger Zhou</p>
+  <div class="site-description" itemprop="description">我是一个小流氓我从来也不浪，有一天我心血来潮耍了个流氓，我嘴里吹着小口哨我心里好得意，不知怎么哗啦啦啦啦我摔了一身泥</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">63</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">8</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">16</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/rangerzhou" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;rangerzhou" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:rangero_o@qq.com" title="E-Mail → mailto:rangero_o@qq.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://rangerzhou.taobao.com/" title="Taobao → http:&#x2F;&#x2F;rangerzhou.taobao.com&#x2F;" rel="noopener" target="_blank"><i class="fab fa-youtube fa-fw"></i>Taobao</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="/images/wechat.jpg" title="WeChat → &#x2F;images&#x2F;wechat.jpg"><i class="fab fa-youtube fa-fw"></i>WeChat</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://blog.csdn.net/ranger0220?viewmode=contents" title="CSDN → http:&#x2F;&#x2F;blog.csdn.net&#x2F;ranger0220?viewmode&#x3D;contents" rel="noopener" target="_blank"><i class="fab fa-youtube fa-fw"></i>CSDN</a>
+      </span>
+  </div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      墙裂推荐
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="http://rangerzhou.taobao.com/" title="http:&#x2F;&#x2F;rangerzhou.taobao.com" rel="noopener" target="_blank">Taobao</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2016 – 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Ranger Zhou</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+<script data-pjax>
+  (function() {
+    function leancloudSelector(url) {
+      url = encodeURI(url);
+      return document.getElementById(url).querySelector('.leancloud-visitors-count');
+    }
+
+    function addCount(Counter) {
+      var visitors = document.querySelector('.leancloud_visitors');
+      var url = decodeURI(visitors.id);
+      var title = visitors.dataset.flagTitle;
+
+      Counter('get', '/classes/Counter?where=' + encodeURIComponent(JSON.stringify({ url })))
+        .then(response => response.json())
+        .then(({ results }) => {
+          if (results.length > 0) {
+            var counter = results[0];
+            leancloudSelector(url).innerText = counter.time + 1;
+            Counter('put', '/classes/Counter/' + counter.objectId, { time: { '__op': 'Increment', 'amount': 1 } })
+              .catch(error => {
+                console.error('Failed to save visitor count', error);
+              });
+          } else {
+              Counter('post', '/classes/Counter', { title, url, time: 1 })
+                .then(response => response.json())
+                .then(() => {
+                  leancloudSelector(url).innerText = 1;
+                })
+                .catch(error => {
+                  console.error('Failed to create', error);
+                });
+          }
+        })
+        .catch(error => {
+          console.error('LeanCloud Counter Error', error);
+        });
+    }
+
+    function showTime(Counter) {
+      var visitors = document.querySelectorAll('.leancloud_visitors');
+      var entries = [...visitors].map(element => {
+        return decodeURI(element.id);
+      });
+
+      Counter('get', '/classes/Counter?where=' + encodeURIComponent(JSON.stringify({ url: { '$in': entries } })))
+        .then(response => response.json())
+        .then(({ results }) => {
+          for (let url of entries) {
+            let target = results.find(item => item.url === url);
+            leancloudSelector(url).innerText = target ? target.time : 0;
+          }
+        })
+        .catch(error => {
+          console.error('LeanCloud Counter Error', error);
+        });
+    }
+
+    let { app_id, app_key, server_url } = {"enable":true,"app_id":"U9g4mWmsQg8FjOE3xsqUy9Df-gzGzoHsz","app_key":"24cDno14OiDhAreVmoEjzqns","server_url":"https://u9g4mwms.lc-cn-n1-shared.com","security":false};
+    function fetchData(api_server) {
+      var Counter = (method, url, data) => {
+        return fetch(`${api_server}/1.1${url}`, {
+          method,
+          headers: {
+            'X-LC-Id'     : app_id,
+            'X-LC-Key'    : app_key,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(data)
+        });
+      };
+      if (CONFIG.page.isPost) {
+        if (CONFIG.hostname !== location.hostname) return;
+        addCount(Counter);
+      } else if (document.querySelectorAll('.post-title-link').length >= 1) {
+        showTime(Counter);
+      }
+    }
+
+    let api_server = app_id.slice(-9) !== '-MdYXbMMI' ? server_url : `https://${app_id.slice(0, 8).toLowerCase()}.api.lncldglobal.com`;
+
+    if (api_server) {
+      fetchData(api_server);
+    } else {
+      fetch('https://app-router.leancloud.cn/2/route?appId=' + app_id)
+        .then(response => response.json())
+        .then(({ api_server }) => {
+          fetchData('https://' + api_server);
+        });
+    }
+  })();
+</script>
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/pjax/pjax.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/pangu@4/dist/browser/pangu.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '#page-configurations',
+    '.content-wrap',
+    '.post-toc-wrap',
+    '.languages',
+    '#pjax'
+  ],
+  switches: {
+    '.post-toc-wrap': Pjax.switches.innerHTML
+  },
+  analytics: false,
+  cacheBust: false,
+  scrollTo : !CONFIG.bookmark.enable
+});
+
+window.addEventListener('pjax:success', () => {
+  document.querySelectorAll('script[data-pjax], script#page-configurations, #pjax script').forEach(element => {
+    var code = element.text || element.textContent || element.innerHTML || '';
+    var parent = element.parentNode;
+    parent.removeChild(element);
+    var script = document.createElement('script');
+    if (element.id) {
+      script.id = element.id;
+    }
+    if (element.className) {
+      script.className = element.className;
+    }
+    if (element.type) {
+      script.type = element.type;
+    }
+    if (element.src) {
+      script.src = element.src;
+      // Force synchronous loading of peripheral JS.
+      script.async = false;
+    }
+    if (element.dataset.pjax !== undefined) {
+      script.dataset.pjax = '';
+    }
+    if (code !== '') {
+      script.appendChild(document.createTextNode(code));
+    }
+    parent.appendChild(script);
+  });
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+
+
+  
+  <script data-pjax>
+    (function(){
+      var canonicalURL, curProtocol;
+      //Get the <link> tag
+      var x=document.getElementsByTagName("link");
+		//Find the last canonical URL
+		if(x.length > 0){
+			for (i=0;i<x.length;i++){
+				if(x[i].rel.toLowerCase() == 'canonical' && x[i].href){
+					canonicalURL=x[i].href;
+				}
+			}
+		}
+    //Get protocol
+	    if (!canonicalURL){
+	    	curProtocol = window.location.protocol.split(':')[0];
+	    }
+	    else{
+	    	curProtocol = canonicalURL.split(':')[0];
+	    }
+      //Get current URL if the canonical URL does not exist
+	    if (!canonicalURL) canonicalURL = window.location.href;
+	    //Assign script content. Replace current URL with the canonical URL
+      !function(){var e=/([http|https]:\/\/[a-zA-Z0-9\_\.]+\.baidu\.com)/gi,r=canonicalURL,t=document.referrer;if(!e.test(r)){var n=(String(curProtocol).toLowerCase() === 'https')?"https://sp0.baidu.com/9_Q4simg2RQJ8t7jm9iCKT-xh_/s.gif":"//api.share.baidu.com/s.gif";t?(n+="?r="+encodeURIComponent(document.referrer),r&&(n+="&l="+r)):r&&(n+="?l="+r);var i=new Image;i.src=n}}(window);})();
+  </script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <div id="pjax">
+  
+
+  
+
+<script>
+  var disqus_config = function() {
+    this.page.url = "http://rangerzhou.top/2022/01/12/Android/AndroidDevelop_016_PKMS/";
+    this.page.identifier = "2022/01/12/Android/AndroidDevelop_016_PKMS/";
+    this.page.title = "Android - PackageManagerService 简析";
+    };
+  NexT.utils.loadComments(document.querySelector('#disqus_thread'), () => {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: disqus_config
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://rangerzhou.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  });
+</script>
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : 'b7bb504993135f5a2eab',
+      clientSecret: '6f83aec5c45d75e248e2914be90c4601e2e1dc44',
+      repo        : 'rangerzhou.github.io',
+      owner       : 'rangerzhou',
+      admin       : ['rangerzhou'],
+      id          : '20f844bc7046e61f68bce45f93f62a56',
+        language: 'zh-CN',
+      distractionFreeMode: true
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
+
+<script>
+NexT.utils.loadComments(document.querySelector('#lv-container'), () => {
+  window.livereOptions = {
+    refer: location.pathname.replace(CONFIG.root, '').replace('index.html', '')
+  };
+  (function(d, s) {
+    var j, e = d.getElementsByTagName(s)[0];
+    if (typeof LivereTower === 'function') { return; }
+    j = d.createElement(s);
+    j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+    j.async = true;
+    e.parentNode.insertBefore(j, e);
+  })(document, 'script');
+});
+</script>
+
+    </div>
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/haru01.model.json"},"display":{"position":"left","width":300,"height":800},"mobile":{"show":false},"log":false});</script></body>
+</html>

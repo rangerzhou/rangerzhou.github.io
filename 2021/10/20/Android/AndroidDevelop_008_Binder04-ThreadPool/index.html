@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.2.0">
+<!-- pjax：防止跳转页面音乐暂停 -->
+<script src="https://cdn.jsdelivr.net/npm/pjax@0.2.8/pjax.js"></script>
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/desert.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/desert.jpg">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <meta name="google-site-verification" content="OJnYjbr3wdT22qLrZSzyD9lAyBcXiXlEQ7-5wAnaWoQ">
+  <meta name="baidu-site-verification" content="vr4n4JeXgB">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-minimal.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"rangerzhou.top","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"manual"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":true,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":true,"nav":null,"activeClass":"gitalk"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="Binder 线程池启动分析">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android - Binder机制(4)-线程池启动">
+<meta property="og:url" content="http://rangerzhou.top/2021/10/20/Android/AndroidDevelop_008_Binder04-ThreadPool/index.html">
+<meta property="og:site_name" content="RangerZhou">
+<meta property="og:description" content="Binder 线程池启动分析">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-10-20T14:34:11.000Z">
+<meta property="article:modified_time" content="2022-07-18T14:46:21.584Z">
+<meta property="article:author" content="Ranger Zhou">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://rangerzhou.top/2021/10/20/Android/AndroidDevelop_008_Binder04-ThreadPool/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+<script src="//cdn.bootcss.com/pace/1.0.2/pace.min.js"></script>
+<link href="//cdn.bootcss.com/pace/1.0.2/themes/pink/pace-theme-flash.css" rel="stylesheet">
+
+  <title>Android - Binder机制(4)-线程池启动 | RangerZhou</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-138158952-1"></script>
+    <script data-pjax>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-138158952-1');
+      }
+    </script>
+
+
+  <script data-pjax>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?24a6d3c4c0f292c5f682d26414c3994b";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+
+<!-- 加入APlayer音乐播放器 -->
+<link rel="stylesheet" href="/dist/APlayer.min.css">
+<div id="aplayer"></div>
+<script type="text/javascript" src="/dist/APlayer.min.js"></script>
+<script type="text/javascript" src="/dist/music.js"></script>
+
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">RangerZhou</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">Read the fucking source code</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-playlist">
+
+    <a href="/playlist/" rel="section"><i class="fa fa-music fa-fw"></i>歌单</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-commonweal">
+
+    <a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a>
+
+  </li>
+        <li class="menu-item menu-item-official">
+
+    <a href="/official" rel="section"><i class="fa fa-user fa-fw"></i>official</a>
+
+  </li>
+        <li class="menu-item menu-item-shop">
+
+    <a href="http://rangerzhou.taobao.com/" rel="noopener" target="_blank"><i class="fa fa-user fa-fw"></i>shop</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://rangerzhou.top/2021/10/20/Android/AndroidDevelop_008_Binder04-ThreadPool/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Ranger Zhou">
+      <meta itemprop="description" content="我是一个小流氓我从来也不浪，有一天我心血来潮耍了个流氓，我嘴里吹着小口哨我心里好得意，不知怎么哗啦啦啦啦我摔了一身泥">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="RangerZhou">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Android - Binder机制(4)-线程池启动
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-10-20 22:34:11" itemprop="dateCreated datePublished" datetime="2021-10-20T22:34:11+08:00">2021-10-20</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-07-18 22:46:21" itemprop="dateModified" datetime="2022-07-18T22:46:21+08:00">2022-07-18</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Android/" itemprop="url" rel="index"><span itemprop="name">Android</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/2021/10/20/Android/AndroidDevelop_008_Binder04-ThreadPool/" class="post-meta-item leancloud_visitors" data-flag-title="Android - Binder机制(4)-线程池启动" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <blockquote>
+<p>Binder 线程池启动分析</p>
+</blockquote>
+<span id="more"></span>
+
+<h1 id="相关代码路径"><a href="#相关代码路径" class="headerlink" title="相关代码路径"></a>相关代码路径</h1><table>
+<thead>
+<tr>
+<th>Layer</th>
+<th>Path</th>
+</tr>
+</thead>
+<tbody><tr>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+</tr>
+</tbody></table>
+<h1 id="zygoteInit"><a href="#zygoteInit" class="headerlink" title="zygoteInit()"></a>zygoteInit()</h1><p>不管是 fork system_server，还是 fork 普通 app，最后都会调用  Zygote.zygoteInit() 函数，我们来看一下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// ZygoteInit.java</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> Runnable <span class="title function_">zygoteInit</span><span class="params">(<span class="type">int</span> targetSdkVersion, <span class="type">long</span>[] disabledCompatChanges,</span></span><br><span class="line"><span class="params">            String[] argv, ClassLoader classLoader)</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> (RuntimeInit.DEBUG) &#123;</span><br><span class="line">            Slog.d(RuntimeInit.TAG, <span class="string">&quot;RuntimeInit: Starting application from zygote&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, <span class="string">&quot;ZygoteInit&quot;</span>);</span><br><span class="line">        RuntimeInit.redirectLogStreams();</span><br><span class="line"></span><br><span class="line">        RuntimeInit.commonInit();</span><br><span class="line">        ZygoteInit.nativeZygoteInit();</span><br><span class="line">        <span class="keyword">return</span> RuntimeInit.applicationInit(targetSdkVersion, disabledCompatChanges, argv,</span><br><span class="line">                classLoader);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">native</span> <span class="keyword">void</span> <span class="title function_">nativeZygoteInit</span><span class="params">()</span>;</span><br></pre></td></tr></table></figure>
+
+<p>调用了 nativeZygoteInit() 这个 native 方法，在 <a href="https://rangerzhou.top/2021/11/01/Android/AndroidDevelop_010_SystemServer/#1-4-zygoteInit">SystemServer 启动流程 1.4 小节</a> 已经分析过，最终是调用 AppRuntime.onZygoteInit() 中，</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// app_main.cpp</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">AppRuntime</span> : <span class="keyword">public</span> AndroidRuntime</span><br><span class="line">&#123;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> <span class="type">void</span> <span class="title">onZygoteInit</span><span class="params">()</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        sp&lt;ProcessState&gt; proc = ProcessState::<span class="built_in">self</span>(); <span class="comment">// 打开驱动</span></span><br><span class="line">        <span class="built_in">ALOGV</span>(<span class="string">&quot;App process: starting thread pool.\n&quot;</span>);</span><br><span class="line">        proc-&gt;<span class="built_in">startThreadPool</span>(); <span class="comment">// 启动线程池</span></span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>ProcessState::self() 主要工作是打开 <em>&#x2F;dev&#x2F;binder</em> 驱动，再使用 mmap() 对把内核空间和用户空间映射到同一块物理内存，最后把 binder 驱动的文件描述符赋值给 ProcessState 的 mDriverFD 变量，ProcessState.startThreadPool() 从函数名可以看出是要启动一个线程池；</p>
+<h1 id="startThreadPool"><a href="#startThreadPool" class="headerlink" title="startThreadPool()"></a>startThreadPool()</h1><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// ProcessState.cpp</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">ProcessState::startThreadPool</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    AutoMutex _l(mLock);</span><br><span class="line">    <span class="keyword">if</span> (!mThreadPoolStarted) &#123;</span><br><span class="line">        mThreadPoolStarted = <span class="literal">true</span>;</span><br><span class="line">        <span class="built_in">spawnPooledThread</span>(<span class="literal">true</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这里调用 spawnPooledThread() 函数，传入的参数 <code>mThreadPoolStarted = true</code>，这个参数代表此次创建的是主线程，以及通过此变量值保证每个 app 进程只允许启动一个 binder 线程池，也就是说每次 fork 新进程都会启动一个 binder 线程池，且只允许启动一个 binder 线程池；</p>
+<h1 id="spawnPooledThread"><a href="#spawnPooledThread" class="headerlink" title="spawnPooledThread()"></a>spawnPooledThread()</h1><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// ProcessState.cpp</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">ProcessState::spawnPooledThread</span><span class="params">(<span class="type">bool</span> isMain)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (mThreadPoolStarted) &#123;</span><br><span class="line">        String8 name = <span class="built_in">makeBinderThreadName</span>(); <span class="comment">// binder 线程名</span></span><br><span class="line">        <span class="built_in">ALOGV</span>(<span class="string">&quot;Spawning new pooled thread, name=%s\n&quot;</span>, name.<span class="built_in">string</span>());</span><br><span class="line">        sp&lt;Thread&gt; t = sp&lt;PoolThread&gt;::<span class="built_in">make</span>(isMain);</span><br><span class="line">        t-&gt;<span class="built_in">run</span>(name.<span class="built_in">string</span>());</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>makeBinderThreadName() 创建了一个线程名称，格式是 <code>Binder:pid_X</code>，X 为整数，每个进程中都是从 1 开始递增，只有通过 spawnPooledThread() 创建的线程才符合这个格式，直接通过 joinThreadPool() 加入线程池的线程不符合这个命名规则，然后创建了一个 PoolThread 线程对象，并执行 run() 启动线程，PoolThread 名字看起来是线程池，其实继承自 Thread，只是创建一个线程；</p>
+<h1 id="PoolThread-threadLoop"><a href="#PoolThread-threadLoop" class="headerlink" title="PoolThread.threadLoop()"></a>PoolThread.threadLoop()</h1><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// ProcessState.cpp</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">PoolThread</span> : <span class="keyword">public</span> Thread</span><br><span class="line">&#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function"><span class="keyword">explicit</span> <span class="title">PoolThread</span><span class="params">(<span class="type">bool</span> isMain)</span></span></span><br><span class="line"><span class="function">        : mIsMain(isMain)</span></span><br><span class="line"><span class="function">    &#123;</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">protected</span>:</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> <span class="type">bool</span> <span class="title">threadLoop</span><span class="params">()</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        IPCThreadState::<span class="built_in">self</span>()-&gt;<span class="built_in">joinThreadPool</span>(mIsMain);</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="type">const</span> <span class="type">bool</span> mIsMain;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>run() 方法最终会调用 threadLoop()，这里的 mIsMain 就是前面传入的 mThreadPoolStarted 值，为 true，接着进入 IPCThreadState.joinThreadPool()；</p>
+<h1 id="joinThreadPool"><a href="#joinThreadPool" class="headerlink" title="joinThreadPool()"></a>joinThreadPool()</h1><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// IPCThreadState.cpp</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">IPCThreadState::joinThreadPool</span><span class="params">(<span class="type">bool</span> isMain)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="built_in">LOG_THREADPOOL</span>(<span class="string">&quot;**** THREAD %p (PID %d) IS JOINING THE THREAD POOL\n&quot;</span>, (<span class="type">void</span>*)<span class="built_in">pthread_self</span>(), <span class="built_in">getpid</span>());</span><br><span class="line"></span><br><span class="line">    mOut.<span class="built_in">writeInt32</span>(isMain ? BC_ENTER_LOOPER : BC_REGISTER_LOOPER);</span><br><span class="line"></span><br><span class="line">    mIsLooper = <span class="literal">true</span>;</span><br><span class="line">    <span class="type">status_t</span> result;</span><br><span class="line">    <span class="keyword">do</span> &#123;</span><br><span class="line">        <span class="built_in">processPendingDerefs</span>(); <span class="comment">// 清除队列的引用</span></span><br><span class="line">        <span class="comment">// now get the next command to be processed, waiting if necessary</span></span><br><span class="line">        result = <span class="built_in">getAndExecuteCommand</span>();</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (result &lt; NO_ERROR &amp;&amp; result != TIMED_OUT &amp;&amp; result != -ECONNREFUSED &amp;&amp; result != -EBADF) &#123;</span><br><span class="line">            <span class="built_in">LOG_ALWAYS_FATAL</span>(<span class="string">&quot;getAndExecuteCommand(fd=%d) returned unexpected error %d, aborting&quot;</span>,</span><br><span class="line">                  mProcess-&gt;mDriverFD, result);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// Let this thread exit the thread pool if it is no longer</span></span><br><span class="line">        <span class="comment">// needed and it is not the main process thread.</span></span><br><span class="line">        <span class="keyword">if</span>(result == TIMED_OUT &amp;&amp; !isMain) &#123; <span class="comment">// 非主线程出现 TIMED_OUT 则线程退出</span></span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125; <span class="keyword">while</span> (result != -ECONNREFUSED &amp;&amp; result != -EBADF);</span><br><span class="line"></span><br><span class="line">    <span class="built_in">LOG_THREADPOOL</span>(<span class="string">&quot;**** THREAD %p (PID %d) IS LEAVING THE THREAD POOL err=%d\n&quot;</span>,</span><br><span class="line">        (<span class="type">void</span>*)<span class="built_in">pthread_self</span>(), <span class="built_in">getpid</span>(), result);</span><br><span class="line"></span><br><span class="line">    mOut.<span class="built_in">writeInt32</span>(BC_EXIT_LOOPER); <span class="comment">// 线程退出循环</span></span><br><span class="line">    mIsLooper = <span class="literal">false</span>;</span><br><span class="line">    <span class="built_in">talkWithDriver</span>(<span class="literal">false</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>对于主线程，cmd 为 BC_ENTER_LOOPER，isMain 为 false 时 cmd 则为 BC_REGISTER_LOOPER，表示是由 Binder 驱动创建的线程；接下来调用 <code>getAndExecuteCommand() -&gt; talkWithDriver() -&gt; ioctl() -&gt; binder_ioctl() -&gt; binder_ioctl_write_read()</code>，先执行 binder_thread_write()：</p>
+<h1 id="binder-thread-write"><a href="#binder-thread-write" class="headerlink" title="binder_thread_write()"></a>binder_thread_write()</h1><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// binder.c</span></span><br><span class="line"><span class="type">static</span> <span class="type">int</span> <span class="title function_">binder_thread_write</span><span class="params">(<span class="keyword">struct</span> binder_proc *proc,</span></span><br><span class="line"><span class="params">            <span class="keyword">struct</span> binder_thread *thread,</span></span><br><span class="line"><span class="params">            <span class="type">binder_uintptr_t</span> binder_buffer, <span class="type">size_t</span> size,</span></span><br><span class="line"><span class="params">            <span class="type">binder_size_t</span> *consumed)</span></span><br><span class="line">&#123;</span><br><span class="line">        <span class="keyword">case</span> BC_ENTER_LOOPER:</span><br><span class="line">            binder_debug(BINDER_DEBUG_THREADS,</span><br><span class="line">                     <span class="string">&quot;%d:%d BC_ENTER_LOOPER\n&quot;</span>,</span><br><span class="line">                     proc-&gt;pid, thread-&gt;pid);</span><br><span class="line">            <span class="keyword">if</span> (thread-&gt;looper &amp; BINDER_LOOPER_STATE_REGISTERED) &#123; <span class="comment">// 0x01</span></span><br><span class="line">                thread-&gt;looper |= BINDER_LOOPER_STATE_INVALID; <span class="comment">// 0x08</span></span><br><span class="line">                binder_user_error(<span class="string">&quot;%d:%d ERROR: BC_ENTER_LOOPER called after BC_REGISTER_LOOPER\n&quot;</span>,</span><br><span class="line">                    proc-&gt;pid, thread-&gt;pid);</span><br><span class="line">            &#125;</span><br><span class="line">            thread-&gt;looper |= BINDER_LOOPER_STATE_ENTERED; <span class="comment">// 重设 looper 标志位</span></span><br><span class="line">            <span class="keyword">break</span>;</span><br></pre></td></tr></table></figure>
+
+<p>处理 BC_ENTER_LOOPER 命令，设置 <code>thread-&gt;looper |= BINDER_LOOPER_STATE_ENTERED</code>，继续执行 binder_thread_read()：</p>
+<h1 id="binder-thread-read"><a href="#binder-thread-read" class="headerlink" title="binder_thread_read()"></a>binder_thread_read()</h1><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// binder.c</span></span><br><span class="line"><span class="type">static</span> <span class="type">int</span> <span class="title function_">binder_thread_read</span><span class="params">(<span class="keyword">struct</span> binder_proc *proc,</span></span><br><span class="line"><span class="params">                  <span class="keyword">struct</span> binder_thread *thread,</span></span><br><span class="line"><span class="params">                  <span class="type">binder_uintptr_t</span> binder_buffer, <span class="type">size_t</span> size,</span></span><br><span class="line"><span class="params">                  <span class="type">binder_size_t</span> *consumed, <span class="type">int</span> non_block)</span></span><br><span class="line">&#123;</span><br><span class="line">    wait_for_proc_work = binder_available_for_proc_work_ilocked(thread);</span><br><span class="line">    <span class="keyword">if</span> (wait_for_proc_work) &#123;</span><br><span class="line">        <span class="keyword">if</span> (!(thread-&gt;looper &amp; (BINDER_LOOPER_STATE_REGISTERED |</span><br><span class="line">                    BINDER_LOOPER_STATE_ENTERED))) &#123; <span class="comment">// 0x01 | 0x02 = 0x03，0x10 &amp; 0x03 = 0x00</span></span><br><span class="line">            binder_user_error(<span class="string">&quot;%d:%d ERROR: Thread waiting for process work before calling BC_REGISTER_LOOPER or BC_ENTER_LOOPER (state %x)\n&quot;</span>,</span><br><span class="line">                proc-&gt;pid, thread-&gt;pid, thread-&gt;looper);</span><br><span class="line">            wait_event_interruptible(binder_user_error_wait,</span><br><span class="line">                         binder_stop_on_user_error &lt; <span class="number">2</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        trace_android_vh_binder_restore_priority(<span class="literal">NULL</span>, current);</span><br><span class="line">        binder_restore_priority(current, proc-&gt;default_priority);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// non_block == filp-&gt;f_flags &amp; O_NONBLOCK，filp-&gt;f_flags 在 sm 打开 binder</span></span><br><span class="line">    <span class="comment">// 设备节点时(ProcessState.open_driver()) 传入的是 O_RDWR | OCLOEXEC，所以 non_block 为 false</span></span><br><span class="line">    <span class="keyword">if</span> (non_block) &#123;</span><br><span class="line">        <span class="keyword">if</span> (!binder_has_work(thread, wait_for_proc_work))</span><br><span class="line">            ret = -EAGAIN;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        ret = binder_wait_for_work(thread, wait_for_proc_work); <span class="comment">// 进程睡眠的地方</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"><span class="type">static</span> <span class="type">bool</span> <span class="title function_">binder_available_for_proc_work_ilocked</span><span class="params">(<span class="keyword">struct</span> binder_thread *thread)</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">return</span> !thread-&gt;transaction_stack &amp;&amp;</span><br><span class="line">        binder_worklist_empty_ilocked(&amp;thread-&gt;todo) &amp;&amp;</span><br><span class="line">        (thread-&gt;looper &amp; (BINDER_LOOPER_STATE_ENTERED |</span><br><span class="line">                   BINDER_LOOPER_STATE_REGISTERED));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>binder_available_for_proc_work_ilocked() 返回 true，进入 binder_wait_for_work()：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// binder.c</span></span><br><span class="line"><span class="type">static</span> <span class="type">int</span> <span class="title function_">binder_wait_for_work</span><span class="params">(<span class="keyword">struct</span> binder_thread *thread,</span></span><br><span class="line"><span class="params">                <span class="type">bool</span> do_proc_work)</span></span><br><span class="line">&#123;</span><br><span class="line">    DEFINE_WAIT(wait); <span class="comment">// 建立并初始化一个等待队列项 wait</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">binder_proc</span> *<span class="title">proc</span> =</span> thread-&gt;proc;</span><br><span class="line">    <span class="type">int</span> ret = <span class="number">0</span>;</span><br><span class="line">    freezer_do_not_count();</span><br><span class="line">    binder_inner_proc_lock(proc);</span><br><span class="line">    <span class="keyword">for</span> (;;) &#123; <span class="comment">// 循环的作用是让线程被唤醒后再一次去检查一下condition是否满足</span></span><br><span class="line">        <span class="comment">// 将 wait 添加到等待队列头中，并设置进程的状态为 TASK_INTERRUPTIBLE，此时进程还没有睡眠</span></span><br><span class="line">        prepare_to_wait(&amp;thread-&gt;wait, &amp;wait, TASK_INTERRUPTIBLE);</span><br><span class="line">        <span class="comment">// 唤醒条件 condition,如果满足则跳出循环，否则一直循环等待</span></span><br><span class="line">        <span class="keyword">if</span> (binder_has_work_ilocked(thread, do_proc_work))</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        <span class="comment">// 如果是在等待处理本进程的todo队列的任务</span></span><br><span class="line">        <span class="keyword">if</span> (do_proc_work)</span><br><span class="line">            <span class="comment">// 把本线程的 waiting_thread_node 添加到所属进程的 waiting_threads 中</span></span><br><span class="line">            list_add(&amp;thread-&gt;waiting_thread_node,</span><br><span class="line">                 &amp;proc-&gt;waiting_threads);</span><br><span class="line">        trace_android_vh_binder_wait_for_work(do_proc_work, thread, proc);</span><br><span class="line">        binder_inner_proc_unlock(proc);</span><br><span class="line">        schedule(); <span class="comment">// 调用schedule()，让出cpu资源，开始休眠，进程真正睡眠的地方</span></span><br><span class="line">        binder_inner_proc_lock(proc);</span><br><span class="line">        list_del_init(&amp;thread-&gt;waiting_thread_node);</span><br><span class="line">        <span class="keyword">if</span> (signal_pending(current)) &#123;</span><br><span class="line">            ret = -EINTR;</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 会有一个和队列 wait 相关的线程来唤醒队列 wait 中的线程</span></span><br><span class="line">    <span class="comment">// 进程被唤醒后，就把自己从队列 wait 中移出来，重新恢复状态为 TASK_RUNNING</span></span><br><span class="line">    finish_wait(&amp;thread-&gt;wait, &amp;wait); <span class="comment">// 执行清理工作</span></span><br><span class="line">    binder_inner_proc_unlock(proc);</span><br><span class="line">    freezer_count();</span><br><span class="line">    <span class="keyword">return</span> ret;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// binder_has_work_ilocked()</span></span><br><span class="line"><span class="type">static</span> <span class="type">bool</span> <span class="title function_">binder_has_work_ilocked</span><span class="params">(<span class="keyword">struct</span> binder_thread *thread,</span></span><br><span class="line"><span class="params">                    <span class="type">bool</span> do_proc_work)</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="type">int</span> ret = <span class="number">0</span>;</span><br><span class="line">    trace_android_vh_binder_has_work_ilocked(thread, do_proc_work, &amp;ret);</span><br><span class="line">    <span class="keyword">if</span> (ret)</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">    <span class="keyword">return</span> thread-&gt;process_todo ||</span><br><span class="line">        thread-&gt;looper_need_return ||</span><br><span class="line">        (do_proc_work &amp;&amp;</span><br><span class="line">         !binder_worklist_empty_ilocked(&amp;thread-&gt;proc-&gt;todo));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这里 binder_has_work_ilocked() 返回 false，所以 binder_wait_for_work() 不会 bread 跳出循环，继续往下执行到 schedule()，在此处休眠！继续往下看：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// binder.c</span></span><br><span class="line"><span class="type">static</span> <span class="type">int</span> <span class="title function_">binder_thread_read</span><span class="params">(...)</span></span><br><span class="line">&#123;</span><br><span class="line">    ...</span><br><span class="line">    <span class="keyword">while</span> (<span class="number">1</span>) &#123;</span><br><span class="line">        <span class="class"><span class="keyword">struct</span> <span class="title">binder_transaction</span> *<span class="title">t</span> =</span> <span class="literal">NULL</span>;</span><br><span class="line">        w = binder_dequeue_work_head_ilocked(<span class="built_in">list</span>); <span class="comment">// 从 todo 队列获取 binder_work 对象</span></span><br><span class="line">        <span class="keyword">switch</span> (w-&gt;type) &#123; <span class="comment">// 判断 binder_transaction() 时传入的 binder_work 的类型</span></span><br><span class="line">        <span class="keyword">case</span> BINDER_WORK_TRANSACTION: &#123;</span><br><span class="line">            binder_inner_proc_unlock(proc);</span><br><span class="line">            t = container_of(w, <span class="keyword">struct</span> binder_transaction, work); <span class="comment">// 通过 w 获取 binder_transaction 事务</span></span><br><span class="line">        &#125; <span class="keyword">break</span>;</span><br><span class="line">        <span class="keyword">if</span> (!t)</span><br><span class="line">            <span class="keyword">continue</span>;</span><br><span class="line">        <span class="keyword">if</span> (t-&gt;buffer-&gt;target_node) &#123; <span class="comment">// 是否存在目标节点</span></span><br><span class="line">            <span class="class"><span class="keyword">struct</span> <span class="title">binder_node</span> *<span class="title">target_node</span> =</span> t-&gt;buffer-&gt;target_node;</span><br><span class="line">            <span class="class"><span class="keyword">struct</span> <span class="title">binder_priority</span> <span class="title">node_prio</span>;</span></span><br><span class="line">            <span class="comment">// 非常重要，把 Binder 实体的弱引用地址赋值给 trd-&gt;target.ptr，</span></span><br><span class="line">            <span class="comment">// trd 地址中存的是 binder_transaction_data</span></span><br><span class="line">            trd-&gt;target.ptr = target_node-&gt;ptr;</span><br><span class="line">            <span class="comment">// 非常重要，Binder 实体的 cookie 赋值给 trd-&gt;target.cookie</span></span><br><span class="line">            trd-&gt;cookie =  target_node-&gt;cookie;</span><br><span class="line">            node_prio.sched_policy = target_node-&gt;sched_policy;</span><br><span class="line">            node_prio.prio = target_node-&gt;min_priority;</span><br><span class="line">            binder_transaction_priority(current, t, node_prio,</span><br><span class="line">                            target_node-&gt;inherit_rt);</span><br><span class="line">            cmd = BR_TRANSACTION; <span class="comment">// 记录 BR_TRANSACTION，要传递到用户空间的</span></span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            trd-&gt;target.ptr = <span class="number">0</span>;</span><br><span class="line">            trd-&gt;cookie = <span class="number">0</span>;</span><br><span class="line">            cmd = BR_REPLY;</span><br><span class="line">        &#125;</span><br><span class="line">            ...</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">    &#125;</span><br><span class="line">done:</span><br><span class="line">    *consumed = ptr - buffer;</span><br><span class="line">    binder_inner_proc_lock(proc);</span><br><span class="line">    <span class="keyword">if</span> (proc-&gt;requested_threads == <span class="number">0</span> &amp;&amp;</span><br><span class="line">        list_empty(&amp;thread-&gt;proc-&gt;waiting_threads) &amp;&amp;</span><br><span class="line">        proc-&gt;requested_threads_started &lt; proc-&gt;max_threads &amp;&amp;</span><br><span class="line">        (thread-&gt;looper &amp; (BINDER_LOOPER_STATE_REGISTERED |</span><br><span class="line">         BINDER_LOOPER_STATE_ENTERED)) <span class="comment">/* the user-space code fails to */</span></span><br><span class="line">         <span class="comment">/*spawn a new thread if we leave this out */</span>) &#123;</span><br><span class="line">        proc-&gt;requested_threads++;</span><br><span class="line">        binder_inner_proc_unlock(proc);</span><br><span class="line">        binder_debug(BINDER_DEBUG_THREADS,</span><br><span class="line">                 <span class="string">&quot;%d:%d BR_SPAWN_LOOPER\n&quot;</span>,</span><br><span class="line">                 proc-&gt;pid, thread-&gt;pid);</span><br><span class="line">        <span class="keyword">if</span> (put_user(BR_SPAWN_LOOPER, (<span class="type">uint32_t</span> __user *)buffer))</span><br><span class="line">            <span class="keyword">return</span> -EFAULT;</span><br><span class="line">        binder_stat_br(proc, thread, BR_SPAWN_LOOPER);</span><br><span class="line">    &#125; <span class="keyword">else</span></span><br><span class="line">        binder_inner_proc_unlock(proc);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>当有 binder 通信的时候，会唤醒服务端，当处理 BINDER_WORK_TRANSACTION 时会给 t 赋值，否则会在代码中 continue 重新循环，即只有 BR_TRANSACTION 和 BR_REPLY 时才能继续往下执行，最终会 break 跳出 while 循环，进入 done 代码块分析，</p>
+<ul>
+<li>proc-&gt;requested_threaads &#x3D;&#x3D; 0：当前进程没有请求创建 binder 线程；</li>
+<li>list_empty(&amp;thread-&gt;proc-&gt;waiting_threads)：当前进程的等待线程数为空，即当前进程中没有空闲的 binder 线程；</li>
+<li>proc-&gt;requested_threads_started &lt; proc-&gt;max_threads：当前进程已启动线程数量小于最大线程数（ProcessState 中默认配置 15）；</li>
+<li>thread-&gt;looper：当前处于 BINDER_LOOPER_STATE_REGISTERED 或者 BINDER_LOOPER_STATE_ENTERED状态；</li>
+</ul>
+<p>当满足以上任一条件时会向用户空间传递 BR_SPAWN_LOOPER 命令，自此 binder_thread_read() 执行完毕，返回到 <code>talkWithDriver() -&gt; getAndExecuteCommand() -&gt; executeCommand()</code></p>
+<h1 id="executeCommand"><a href="#executeCommand" class="headerlink" title="executeCommand()"></a>executeCommand()</h1><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// IPCThreadState.cpp</span></span><br><span class="line"><span class="function"><span class="type">status_t</span> <span class="title">IPCThreadState::executeCommand</span><span class="params">(<span class="type">int32_t</span> cmd)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">case</span> BR_SPAWN_LOOPER:</span><br><span class="line">        mProcess-&gt;<span class="built_in">spawnPooledThread</span>(<span class="literal">false</span>);</span><br><span class="line">        <span class="keyword">break</span>;</span><br></pre></td></tr></table></figure>
+
+<p>又调用到 ProcessState.spawnPooledThread()，不过传递的参数为 false，代表非 binder 主线程：</p>
+<h1 id="spawnPooledThread-1"><a href="#spawnPooledThread-1" class="headerlink" title="spawnPooledThread()"></a>spawnPooledThread()</h1><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// ProcessState.cpp</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">ProcessState::spawnPooledThread</span><span class="params">(<span class="type">bool</span> isMain)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (mThreadPoolStarted) &#123;</span><br><span class="line">        String8 name = <span class="built_in">makeBinderThreadName</span>();</span><br><span class="line">        <span class="built_in">ALOGV</span>(<span class="string">&quot;Spawning new pooled thread, name=%s\n&quot;</span>, name.<span class="built_in">string</span>());</span><br><span class="line">        sp&lt;Thread&gt; t = sp&lt;PoolThread&gt;::<span class="built_in">make</span>(isMain);</span><br><span class="line">        t-&gt;<span class="built_in">run</span>(name.<span class="built_in">string</span>());</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div>Donate comment here.</div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechatpay.jpg" alt="Ranger Zhou 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.jpg" alt="Ranger Zhou 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>Ranger Zhou
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://rangerzhou.top/2021/10/20/Android/AndroidDevelop_008_Binder04-ThreadPool/" title="Android - Binder机制(4)-线程池启动">http://rangerzhou.top/2021/10/20/Android/AndroidDevelop_008_Binder04-ThreadPool/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/10/15/Android/AndroidDevelop_007_Binder03-ServiceManager_addService/" rel="prev" title="Android - Binder机制(3)-addService">
+      <i class="fa fa-chevron-left"></i> Android - Binder机制(3)-addService
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2021/10/27/Android/AndroidDevelop_009_Handler/" rel="next" title="Android - Handler原理分析">
+      Android - Handler原理分析 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+      <div class="tabs tabs-comment">
+        <ul class="nav-tabs">
+            <li class="tab"><a href="#comment-disqus">disqus</a></li>
+            <li class="tab"><a href="#comment-gitalk">gitalk</a></li>
+            <li class="tab"><a href="#comment-livere">livere</a></li>
+        </ul>
+        <div class="tab-content">
+            <div class="tab-pane disqus" id="comment-disqus">
+              
+  <div class="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
+            </div>
+            <div class="tab-pane gitalk" id="comment-gitalk">
+              <div class="comments" id="gitalk-container"></div>
+            </div>
+            <div class="tab-pane livere" id="comment-livere">
+              
+  <div class="comments">
+    <div id="lv-container" data-id="city" data-uid="MTAyMC8yOTcyNS82Mjky"></div>
+  </div>
+  
+            </div>
+        </div>
+      </div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%9B%B8%E5%85%B3%E4%BB%A3%E7%A0%81%E8%B7%AF%E5%BE%84"><span class="nav-text">相关代码路径</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#zygoteInit"><span class="nav-text">zygoteInit()</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#startThreadPool"><span class="nav-text">startThreadPool()</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#spawnPooledThread"><span class="nav-text">spawnPooledThread()</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#PoolThread-threadLoop"><span class="nav-text">PoolThread.threadLoop()</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#joinThreadPool"><span class="nav-text">joinThreadPool()</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#binder-thread-write"><span class="nav-text">binder_thread_write()</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#binder-thread-read"><span class="nav-text">binder_thread_read()</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#executeCommand"><span class="nav-text">executeCommand()</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#spawnPooledThread-1"><span class="nav-text">spawnPooledThread()</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Ranger Zhou</p>
+  <div class="site-description" itemprop="description">我是一个小流氓我从来也不浪，有一天我心血来潮耍了个流氓，我嘴里吹着小口哨我心里好得意，不知怎么哗啦啦啦啦我摔了一身泥</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">63</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">8</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">16</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/rangerzhou" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;rangerzhou" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:rangero_o@qq.com" title="E-Mail → mailto:rangero_o@qq.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://rangerzhou.taobao.com/" title="Taobao → http:&#x2F;&#x2F;rangerzhou.taobao.com&#x2F;" rel="noopener" target="_blank"><i class="fab fa-youtube fa-fw"></i>Taobao</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="/images/wechat.jpg" title="WeChat → &#x2F;images&#x2F;wechat.jpg"><i class="fab fa-youtube fa-fw"></i>WeChat</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://blog.csdn.net/ranger0220?viewmode=contents" title="CSDN → http:&#x2F;&#x2F;blog.csdn.net&#x2F;ranger0220?viewmode&#x3D;contents" rel="noopener" target="_blank"><i class="fab fa-youtube fa-fw"></i>CSDN</a>
+      </span>
+  </div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      墙裂推荐
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="http://rangerzhou.taobao.com/" title="http:&#x2F;&#x2F;rangerzhou.taobao.com" rel="noopener" target="_blank">Taobao</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2016 – 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Ranger Zhou</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+<script data-pjax>
+  (function() {
+    function leancloudSelector(url) {
+      url = encodeURI(url);
+      return document.getElementById(url).querySelector('.leancloud-visitors-count');
+    }
+
+    function addCount(Counter) {
+      var visitors = document.querySelector('.leancloud_visitors');
+      var url = decodeURI(visitors.id);
+      var title = visitors.dataset.flagTitle;
+
+      Counter('get', '/classes/Counter?where=' + encodeURIComponent(JSON.stringify({ url })))
+        .then(response => response.json())
+        .then(({ results }) => {
+          if (results.length > 0) {
+            var counter = results[0];
+            leancloudSelector(url).innerText = counter.time + 1;
+            Counter('put', '/classes/Counter/' + counter.objectId, { time: { '__op': 'Increment', 'amount': 1 } })
+              .catch(error => {
+                console.error('Failed to save visitor count', error);
+              });
+          } else {
+              Counter('post', '/classes/Counter', { title, url, time: 1 })
+                .then(response => response.json())
+                .then(() => {
+                  leancloudSelector(url).innerText = 1;
+                })
+                .catch(error => {
+                  console.error('Failed to create', error);
+                });
+          }
+        })
+        .catch(error => {
+          console.error('LeanCloud Counter Error', error);
+        });
+    }
+
+    function showTime(Counter) {
+      var visitors = document.querySelectorAll('.leancloud_visitors');
+      var entries = [...visitors].map(element => {
+        return decodeURI(element.id);
+      });
+
+      Counter('get', '/classes/Counter?where=' + encodeURIComponent(JSON.stringify({ url: { '$in': entries } })))
+        .then(response => response.json())
+        .then(({ results }) => {
+          for (let url of entries) {
+            let target = results.find(item => item.url === url);
+            leancloudSelector(url).innerText = target ? target.time : 0;
+          }
+        })
+        .catch(error => {
+          console.error('LeanCloud Counter Error', error);
+        });
+    }
+
+    let { app_id, app_key, server_url } = {"enable":true,"app_id":"U9g4mWmsQg8FjOE3xsqUy9Df-gzGzoHsz","app_key":"24cDno14OiDhAreVmoEjzqns","server_url":"https://u9g4mwms.lc-cn-n1-shared.com","security":false};
+    function fetchData(api_server) {
+      var Counter = (method, url, data) => {
+        return fetch(`${api_server}/1.1${url}`, {
+          method,
+          headers: {
+            'X-LC-Id'     : app_id,
+            'X-LC-Key'    : app_key,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(data)
+        });
+      };
+      if (CONFIG.page.isPost) {
+        if (CONFIG.hostname !== location.hostname) return;
+        addCount(Counter);
+      } else if (document.querySelectorAll('.post-title-link').length >= 1) {
+        showTime(Counter);
+      }
+    }
+
+    let api_server = app_id.slice(-9) !== '-MdYXbMMI' ? server_url : `https://${app_id.slice(0, 8).toLowerCase()}.api.lncldglobal.com`;
+
+    if (api_server) {
+      fetchData(api_server);
+    } else {
+      fetch('https://app-router.leancloud.cn/2/route?appId=' + app_id)
+        .then(response => response.json())
+        .then(({ api_server }) => {
+          fetchData('https://' + api_server);
+        });
+    }
+  })();
+</script>
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/pjax/pjax.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/pangu@4/dist/browser/pangu.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '#page-configurations',
+    '.content-wrap',
+    '.post-toc-wrap',
+    '.languages',
+    '#pjax'
+  ],
+  switches: {
+    '.post-toc-wrap': Pjax.switches.innerHTML
+  },
+  analytics: false,
+  cacheBust: false,
+  scrollTo : !CONFIG.bookmark.enable
+});
+
+window.addEventListener('pjax:success', () => {
+  document.querySelectorAll('script[data-pjax], script#page-configurations, #pjax script').forEach(element => {
+    var code = element.text || element.textContent || element.innerHTML || '';
+    var parent = element.parentNode;
+    parent.removeChild(element);
+    var script = document.createElement('script');
+    if (element.id) {
+      script.id = element.id;
+    }
+    if (element.className) {
+      script.className = element.className;
+    }
+    if (element.type) {
+      script.type = element.type;
+    }
+    if (element.src) {
+      script.src = element.src;
+      // Force synchronous loading of peripheral JS.
+      script.async = false;
+    }
+    if (element.dataset.pjax !== undefined) {
+      script.dataset.pjax = '';
+    }
+    if (code !== '') {
+      script.appendChild(document.createTextNode(code));
+    }
+    parent.appendChild(script);
+  });
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+
+
+  
+  <script data-pjax>
+    (function(){
+      var canonicalURL, curProtocol;
+      //Get the <link> tag
+      var x=document.getElementsByTagName("link");
+		//Find the last canonical URL
+		if(x.length > 0){
+			for (i=0;i<x.length;i++){
+				if(x[i].rel.toLowerCase() == 'canonical' && x[i].href){
+					canonicalURL=x[i].href;
+				}
+			}
+		}
+    //Get protocol
+	    if (!canonicalURL){
+	    	curProtocol = window.location.protocol.split(':')[0];
+	    }
+	    else{
+	    	curProtocol = canonicalURL.split(':')[0];
+	    }
+      //Get current URL if the canonical URL does not exist
+	    if (!canonicalURL) canonicalURL = window.location.href;
+	    //Assign script content. Replace current URL with the canonical URL
+      !function(){var e=/([http|https]:\/\/[a-zA-Z0-9\_\.]+\.baidu\.com)/gi,r=canonicalURL,t=document.referrer;if(!e.test(r)){var n=(String(curProtocol).toLowerCase() === 'https')?"https://sp0.baidu.com/9_Q4simg2RQJ8t7jm9iCKT-xh_/s.gif":"//api.share.baidu.com/s.gif";t?(n+="?r="+encodeURIComponent(document.referrer),r&&(n+="&l="+r)):r&&(n+="?l="+r);var i=new Image;i.src=n}}(window);})();
+  </script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <div id="pjax">
+  
+
+  
+
+<script>
+  var disqus_config = function() {
+    this.page.url = "http://rangerzhou.top/2021/10/20/Android/AndroidDevelop_008_Binder04-ThreadPool/";
+    this.page.identifier = "2021/10/20/Android/AndroidDevelop_008_Binder04-ThreadPool/";
+    this.page.title = "Android - Binder机制(4)-线程池启动";
+    };
+  NexT.utils.loadComments(document.querySelector('#disqus_thread'), () => {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: disqus_config
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://rangerzhou.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  });
+</script>
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : 'b7bb504993135f5a2eab',
+      clientSecret: '6f83aec5c45d75e248e2914be90c4601e2e1dc44',
+      repo        : 'rangerzhou.github.io',
+      owner       : 'rangerzhou',
+      admin       : ['rangerzhou'],
+      id          : '9a4c47b0dd0a6b024fa59fb4d8524ed0',
+        language: 'zh-CN',
+      distractionFreeMode: true
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
+
+<script>
+NexT.utils.loadComments(document.querySelector('#lv-container'), () => {
+  window.livereOptions = {
+    refer: location.pathname.replace(CONFIG.root, '').replace('index.html', '')
+  };
+  (function(d, s) {
+    var j, e = d.getElementsByTagName(s)[0];
+    if (typeof LivereTower === 'function') { return; }
+    j = d.createElement(s);
+    j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+    j.async = true;
+    e.parentNode.insertBefore(j, e);
+  })(document, 'script');
+});
+</script>
+
+    </div>
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/haru01.model.json"},"display":{"position":"left","width":300,"height":800},"mobile":{"show":false},"log":false});</script></body>
+</html>

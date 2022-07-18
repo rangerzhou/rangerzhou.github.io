@@ -1,0 +1,1034 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.2.0">
+<!-- pjax：防止跳转页面音乐暂停 -->
+<script src="https://cdn.jsdelivr.net/npm/pjax@0.2.8/pjax.js"></script>
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/desert.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/desert.jpg">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <meta name="google-site-verification" content="OJnYjbr3wdT22qLrZSzyD9lAyBcXiXlEQ7-5wAnaWoQ">
+  <meta name="baidu-site-verification" content="vr4n4JeXgB">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-minimal.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"rangerzhou.top","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"manual"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":true,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":true,"nav":null,"activeClass":"gitalk"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="init 进程启动分为两部分，第一部分是在内核启动，主要完成创建和内核初始化工作；第二部分是在用户空间启动，主要完成 Android 系统的初始化工作。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android - init 进程启动">
+<meta property="og:url" content="http://rangerzhou.top/2021/07/10/Android/AndroidDevelop_003_kernel_init/index.html">
+<meta property="og:site_name" content="RangerZhou">
+<meta property="og:description" content="init 进程启动分为两部分，第一部分是在内核启动，主要完成创建和内核初始化工作；第二部分是在用户空间启动，主要完成 Android 系统的初始化工作。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-07-10T02:30:09.000Z">
+<meta property="article:modified_time" content="2022-07-18T14:46:21.580Z">
+<meta property="article:author" content="Ranger Zhou">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://rangerzhou.top/2021/07/10/Android/AndroidDevelop_003_kernel_init/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+<script src="//cdn.bootcss.com/pace/1.0.2/pace.min.js"></script>
+<link href="//cdn.bootcss.com/pace/1.0.2/themes/pink/pace-theme-flash.css" rel="stylesheet">
+
+  <title>Android - init 进程启动 | RangerZhou</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-138158952-1"></script>
+    <script data-pjax>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-138158952-1');
+      }
+    </script>
+
+
+  <script data-pjax>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?24a6d3c4c0f292c5f682d26414c3994b";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+
+<!-- 加入APlayer音乐播放器 -->
+<link rel="stylesheet" href="/dist/APlayer.min.css">
+<div id="aplayer"></div>
+<script type="text/javascript" src="/dist/APlayer.min.js"></script>
+<script type="text/javascript" src="/dist/music.js"></script>
+
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">RangerZhou</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">Read the fucking source code</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-playlist">
+
+    <a href="/playlist/" rel="section"><i class="fa fa-music fa-fw"></i>歌单</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-commonweal">
+
+    <a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a>
+
+  </li>
+        <li class="menu-item menu-item-official">
+
+    <a href="/official" rel="section"><i class="fa fa-user fa-fw"></i>official</a>
+
+  </li>
+        <li class="menu-item menu-item-shop">
+
+    <a href="http://rangerzhou.taobao.com/" rel="noopener" target="_blank"><i class="fa fa-user fa-fw"></i>shop</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://rangerzhou.top/2021/07/10/Android/AndroidDevelop_003_kernel_init/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Ranger Zhou">
+      <meta itemprop="description" content="我是一个小流氓我从来也不浪，有一天我心血来潮耍了个流氓，我嘴里吹着小口哨我心里好得意，不知怎么哗啦啦啦啦我摔了一身泥">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="RangerZhou">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Android - init 进程启动
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-07-10 10:30:09" itemprop="dateCreated datePublished" datetime="2021-07-10T10:30:09+08:00">2021-07-10</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-07-18 22:46:21" itemprop="dateModified" datetime="2022-07-18T22:46:21+08:00">2022-07-18</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Android/" itemprop="url" rel="index"><span itemprop="name">Android</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/2021/07/10/Android/AndroidDevelop_003_kernel_init/" class="post-meta-item leancloud_visitors" data-flag-title="Android - init 进程启动" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <blockquote>
+<p>init 进程启动分为两部分，第一部分是在内核启动，主要完成创建和内核初始化工作；第二部分是在用户空间启动，主要完成 Android 系统的初始化工作。</p>
+</blockquote>
+<span id="more"></span>
+
+<h3 id="1-内核空间"><a href="#1-内核空间" class="headerlink" title="1. 内核空间"></a>1. 内核空间</h3><p><a target="_blank" rel="noopener" href="https://android.googlesource.com/kernel/msm/+/refs/tags/android-11.0.0_r0.25/init/main.c">kernel&#x2F;msm&#x2F;init&#x2F;main.c</a></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">asmlinkage __visible <span class="type">void</span> __init <span class="title function_">start_kernel</span><span class="params">(<span class="type">void</span>)</span></span><br><span class="line">&#123;</span><br><span class="line">    ...</span><br><span class="line">	rest_init();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">static</span> noinline <span class="type">void</span> __ref <span class="title function_">rest_init</span><span class="params">(<span class="type">void</span>)</span></span><br><span class="line">&#123;</span><br><span class="line">	...</span><br><span class="line">	<span class="comment">/*</span></span><br><span class="line"><span class="comment">	 * We need to spawn init first so that it obtains pid 1, however</span></span><br><span class="line"><span class="comment">	 * the init task will end up wanting to create kthreads, which, if</span></span><br><span class="line"><span class="comment">	 * we schedule it before we create kthreadd, will OOPS.</span></span><br><span class="line"><span class="comment">	 */</span></span><br><span class="line">	pid = kernel_thread(kernel_init, <span class="literal">NULL</span>, CLONE_FS);</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>使用 kernel_thread 创建 init 进程，并回调执行 kernel_init 函数：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">static</span> <span class="type">int</span> __ref <span class="title function_">kernel_init</span><span class="params">(<span class="type">void</span> *unused)</span></span><br><span class="line">&#123;</span><br><span class="line">	<span class="type">int</span> ret;</span><br><span class="line">	kernel_init_freeable();</span><br><span class="line">	<span class="comment">/* need to finish all async __init code before freeing the memory */</span></span><br><span class="line">	async_synchronize_full();</span><br><span class="line">	ftrace_free_init_mem();</span><br><span class="line">	free_initmem();</span><br><span class="line">	mark_readonly();</span><br><span class="line">	system_state = SYSTEM_RUNNING;</span><br><span class="line">	numa_default_policy();</span><br><span class="line">	rcu_end_inkernel_boot();</span><br><span class="line">	place_marker(<span class="string">&quot;M - DRIVER Kernel Boot Done&quot;</span>);</span><br><span class="line">	<span class="keyword">if</span> (ramdisk_execute_command) &#123;</span><br><span class="line">		ret = run_init_process(ramdisk_execute_command);</span><br><span class="line">		<span class="keyword">if</span> (!ret)</span><br><span class="line">			<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">		pr_err(<span class="string">&quot;Failed to execute %s (error %d)\n&quot;</span>,</span><br><span class="line">		       ramdisk_execute_command, ret);</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">/*</span></span><br><span class="line"><span class="comment">	 * We try each of these until one succeeds.</span></span><br><span class="line"><span class="comment">	 *</span></span><br><span class="line"><span class="comment">	 * The Bourne shell can be used instead of init if we are</span></span><br><span class="line"><span class="comment">	 * trying to recover a really broken machine.</span></span><br><span class="line"><span class="comment">	 */</span></span><br><span class="line">	<span class="keyword">if</span> (execute_command) &#123;</span><br><span class="line">		ret = run_init_process(execute_command);</span><br><span class="line">		<span class="keyword">if</span> (!ret)</span><br><span class="line">			<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">		panic(<span class="string">&quot;Requested init %s failed (error %d).&quot;</span>,</span><br><span class="line">		      execute_command, ret);</span><br><span class="line">	&#125;</span><br><span class="line">    <span class="comment">// ramdisk_execute_command 和 execute_command 定义的程序没找到，则从如下目录寻找 init 进行启动</span></span><br><span class="line">	<span class="keyword">if</span> (!try_to_run_init_process(<span class="string">&quot;/sbin/init&quot;</span>) ||</span><br><span class="line">	    !try_to_run_init_process(<span class="string">&quot;/etc/init&quot;</span>) ||</span><br><span class="line">	    !try_to_run_init_process(<span class="string">&quot;/bin/init&quot;</span>) ||</span><br><span class="line">	    !try_to_run_init_process(<span class="string">&quot;/bin/sh&quot;</span>)) <span class="comment">// try_to_run_init_process 最终也是调用 run_init_process 函数</span></span><br><span class="line">		<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">	panic(<span class="string">&quot;No working init found.  Try passing init= option to kernel. &quot;</span></span><br><span class="line">	      <span class="string">&quot;See Linux Documentation/admin-guide/init.rst for guidance.&quot;</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>ramdisk_execute_command 和 execute_command 的值是通过 bootloader 传递过来的参数设置的，ramdisk_execute_command 通过 <code>rdinit</code> 参数赋值，execute_command 通过 <code>init</code> 参数赋值，这两个参数会在 BoardConfig.mk 中的 BOARD_KERNEL_CMDLINE 中定义：</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">BOARD_KERNEL_CMDLINE += init=/init</span><br></pre></td></tr></table></figure>
+
+<p>ramdisk_execute_command 如果没有被赋值，kernel_init_freeable 函数会赋一个初始值 “&#x2F;init”：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">static</span> noinline <span class="type">void</span> __init <span class="title function_">kernel_init_freeable</span><span class="params">(<span class="type">void</span>)</span></span><br><span class="line">&#123;</span><br><span class="line">    ...</span><br><span class="line">    <span class="keyword">if</span> (!ramdisk_execute_command)</span><br><span class="line">		ramdisk_execute_command = <span class="string">&quot;/init&quot;</span>;</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>找到 init 程序后，执行 run_init_process 函数</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">static</span> <span class="type">int</span> <span class="title function_">try_to_run_init_process</span><span class="params">(<span class="type">const</span> <span class="type">char</span> *init_filename)</span></span><br><span class="line">&#123;</span><br><span class="line">	<span class="type">int</span> ret;</span><br><span class="line">	ret = run_init_process(init_filename);</span><br><span class="line">	<span class="keyword">if</span> (ret &amp;&amp; ret != -ENOENT) &#123;</span><br><span class="line">		pr_err(<span class="string">&quot;Starting init: %s exists but couldn&#x27;t execute it (error %d)\n&quot;</span>,</span><br><span class="line">		       init_filename, ret);</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> ret;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">static</span> <span class="type">int</span> <span class="title function_">run_init_process</span><span class="params">(<span class="type">const</span> <span class="type">char</span> *init_filename)</span></span><br><span class="line">&#123;</span><br><span class="line">	argv_init[<span class="number">0</span>] = init_filename;</span><br><span class="line">	<span class="keyword">return</span> do_execve(getname_kernel(init_filename),</span><br><span class="line">		(<span class="type">const</span> <span class="type">char</span> __user *<span class="type">const</span> __user *)argv_init,</span><br><span class="line">		(<span class="type">const</span> <span class="type">char</span> __user *<span class="type">const</span> __user *)envp_init);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>do_execve 就是执行一个可执行文件。</p>
+<p>内核空间的 init 主要工作是做一些 init 的初始化工作，去系统根目录寻找 ramdisk_execute_command 和 execute_command 定义的程序，如果找不到，就寻找 <em>&#x2F;sbin&#x2F;init</em>, <em>&#x2F;etc&#x2F;init</em>, <em>&#x2F;bin&#x2F;init</em>, <em>&#x2F;bin&#x2F;sh</em> 这四个程序进行启动，如果都找不到，则输出 panic 异常。</p>
+<p>接下来进入用户空间，分析 Android 系统的 init 进程启动流程。</p>
+<h3 id="2-用户空间"><a href="#2-用户空间" class="headerlink" title="2. 用户空间"></a>2. 用户空间</h3><p>init 可执行文件的源码在 <a target="_blank" rel="noopener" href="https://android.googlesource.com/platform/system/core/+/refs/tags/android-11.0.0_r25/init/">system&#x2F;core&#x2F;init&#x2F;</a> 目录下</p>
+<h4 id="2-1-init-进程入口"><a href="#2-1-init-进程入口" class="headerlink" title="2.1 init 进程入口"></a>2.1 init 进程入口</h4><p><a target="_blank" rel="noopener" href="https://android.googlesource.com/platform/system/core/+/refs/tags/android-11.0.0_r25/init/main.cpp">system&#x2F;core&#x2F;init&#x2F;main.cpp</a></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">(<span class="type">int</span> argc, <span class="type">char</span>** argv)</span> </span>&#123;</span><br><span class="line"><span class="meta">#<span class="keyword">if</span> __has_feature(address_sanitizer)</span></span><br><span class="line">    __asan_set_error_report_callback(AsanReportCallback);</span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (!<span class="built_in">strcmp</span>(<span class="built_in">basename</span>(argv[<span class="number">0</span>]), <span class="string">&quot;ueventd&quot;</span>)) &#123;</span><br><span class="line">        <span class="comment">// init 进程创建子进程 ueventd，负责设备节点的创建、权限设定等一系列工作</span></span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">ueventd_main</span>(argc, argv);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 当传入的参数个数大于 1 时</span></span><br><span class="line">    <span class="keyword">if</span> (argc &gt; <span class="number">1</span>) &#123;</span><br><span class="line">        <span class="comment">// strcmp 是字符串比较函数，相等则返回 0</span></span><br><span class="line">        <span class="keyword">if</span> (!<span class="built_in">strcmp</span>(argv[<span class="number">1</span>], <span class="string">&quot;subcontext&quot;</span>)) &#123;</span><br><span class="line">            android::base::<span class="built_in">InitLogging</span>(argv, &amp;android::base::KernelLogger);</span><br><span class="line">            <span class="type">const</span> BuiltinFunctionMap&amp; function_map = <span class="built_in">GetBuiltinFunctionMap</span>();</span><br><span class="line">            <span class="comment">// 参数为 subcontext，初始化日志系统</span></span><br><span class="line">            <span class="keyword">return</span> <span class="built_in">SubcontextMain</span>(argc, argv, &amp;function_map);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (!<span class="built_in">strcmp</span>(argv[<span class="number">1</span>], <span class="string">&quot;selinux_setup&quot;</span>)) &#123;</span><br><span class="line">            <span class="comment">// 参数为 selinux_setup，启动 Selinux 安全策略</span></span><br><span class="line">            <span class="keyword">return</span> <span class="built_in">SetupSelinux</span>(argv);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (!<span class="built_in">strcmp</span>(argv[<span class="number">1</span>], <span class="string">&quot;second_stage&quot;</span>)) &#123;</span><br><span class="line">            <span class="comment">// 参数为 second_stage，执行 init 进程第二阶段启动</span></span><br><span class="line">            <span class="keyword">return</span> <span class="built_in">SecondStageMain</span>(argc, argv);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 默认执行 init 进程第一阶段启动</span></span><br><span class="line">    <span class="keyword">return</span> <span class="built_in">FirstStageMain</span>(argc, argv);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>init 进程创建子进程 ueventd ，将创建节点文件的任务交给 ueventd，由上面分析可知，通过 <a target="_blank" rel="noopener" href="https://android.googlesource.com/kernel/msm/+/refs/tags/android-11.0.0_r0.25/init/main.c">kernel&#x2F;msm&#x2F;init&#x2F;main.c</a> 执行 init 程序，无参数，则进入第一阶段启动。</p>
+<h4 id="2-2-FirstStageMain"><a href="#2-2-FirstStageMain" class="headerlink" title="2.2 FirstStageMain"></a>2.2 FirstStageMain</h4><p><a target="_blank" rel="noopener" href="https://android.googlesource.com/platform/system/core/+/refs/tags/android-11.0.0_r25/init/first_stage_init.cpp">system&#x2F;core&#x2F;init&#x2F;first_stage_init.cpp</a></p>
+<p><a target="_blank" rel="noopener" href="https://android.googlesource.com/platform/system/core/+/refs/tags/android-11.0.0_r25/init/first_stage_init.cpp">system&#x2F;core&#x2F;init&#x2F;first_stage_init.cpp</a></p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">int</span> <span class="title">FirstStageMain</span><span class="params">(<span class="type">int</span> argc, <span class="type">char</span>** argv)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (REBOOT_BOOTLOADER_ON_PANIC) &#123;</span><br><span class="line">        <span class="comment">// 处理 init crash 的情况，初始化重启系统的处理信号，将 SIGABRT,SIGBUS 等行为设置为 SA_RESTART，当监听到该信号时重启系统到 bootloader</span></span><br><span class="line">        <span class="built_in">InstallRebootSignalHandlers</span>();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    boot_clock::time_point start_time = boot_clock::<span class="built_in">now</span>(); <span class="comment">// 记录启动时间</span></span><br><span class="line"></span><br><span class="line">    std::vector&lt;std::pair&lt;std::string, <span class="type">int</span>&gt;&gt; errors;</span><br><span class="line"><span class="meta">#<span class="keyword">define</span> CHECKCALL(x) \</span></span><br><span class="line"><span class="meta">    <span class="keyword">if</span> ((x) != 0) errors.emplace_back(#x <span class="string">&quot; failed&quot;</span>, errno);</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// Clear the umask.</span></span><br><span class="line">    <span class="built_in">umask</span>(<span class="number">0</span>);</span><br><span class="line"></span><br><span class="line">    <span class="built_in">CHECKCALL</span>(<span class="built_in">clearenv</span>());</span><br><span class="line">    <span class="built_in">CHECKCALL</span>(<span class="built_in">setenv</span>(<span class="string">&quot;PATH&quot;</span>, _PATH_DEFPATH, <span class="number">1</span>));</span><br><span class="line">    <span class="comment">// Get the basic filesystem setup we need put together in the initramdisk</span></span><br><span class="line">    <span class="comment">// on / and then we&#x27;ll let the rc file figure out the rest.</span></span><br><span class="line">    <span class="built_in">CHECKCALL</span>(<span class="built_in">mount</span>(<span class="string">&quot;tmpfs&quot;</span>, <span class="string">&quot;/dev&quot;</span>, <span class="string">&quot;tmpfs&quot;</span>, MS_NOSUID, <span class="string">&quot;mode=0755&quot;</span>)); <span class="comment">// 挂载 tmpfs 文件系统</span></span><br><span class="line">    <span class="built_in">CHECKCALL</span>(<span class="built_in">mkdir</span>(<span class="string">&quot;/dev/pts&quot;</span>, <span class="number">0755</span>)); <span class="comment">// 创建目录</span></span><br><span class="line">    <span class="built_in">CHECKCALL</span>(<span class="built_in">mkdir</span>(<span class="string">&quot;/dev/socket&quot;</span>, <span class="number">0755</span>));</span><br><span class="line">    <span class="built_in">CHECKCALL</span>(<span class="built_in">mount</span>(<span class="string">&quot;devpts&quot;</span>, <span class="string">&quot;/dev/pts&quot;</span>, <span class="string">&quot;devpts&quot;</span>, <span class="number">0</span>, <span class="literal">NULL</span>)); <span class="comment">// 挂载 devpts 文件系统</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> MAKE_STR(x) __STRING(x)</span></span><br><span class="line">    <span class="built_in">CHECKCALL</span>(<span class="built_in">mount</span>(<span class="string">&quot;proc&quot;</span>, <span class="string">&quot;/proc&quot;</span>, <span class="string">&quot;proc&quot;</span>, <span class="number">0</span>, <span class="string">&quot;hidepid=2,gid=&quot;</span> <span class="built_in">MAKE_STR</span>(AID_READPROC))); <span class="comment">// 挂载 proc 文件系统</span></span><br><span class="line"><span class="meta">#<span class="keyword">undef</span> MAKE_STR</span></span><br><span class="line">    <span class="comment">// Don&#x27;t expose the raw commandline to unprivileged processes.</span></span><br><span class="line">    <span class="built_in">CHECKCALL</span>(<span class="built_in">chmod</span>(<span class="string">&quot;/proc/cmdline&quot;</span>, <span class="number">0440</span>));</span><br><span class="line">    std::string cmdline;</span><br><span class="line">    android::base::<span class="built_in">ReadFileToString</span>(<span class="string">&quot;/proc/cmdline&quot;</span>, &amp;cmdline);</span><br><span class="line">    <span class="type">gid_t</span> groups[] = &#123;AID_READPROC&#125;;</span><br><span class="line">    <span class="built_in">CHECKCALL</span>(<span class="built_in">setgroups</span>(<span class="built_in">arraysize</span>(groups), groups));</span><br><span class="line">    <span class="built_in">CHECKCALL</span>(<span class="built_in">mount</span>(<span class="string">&quot;sysfs&quot;</span>, <span class="string">&quot;/sys&quot;</span>, <span class="string">&quot;sysfs&quot;</span>, <span class="number">0</span>, <span class="literal">NULL</span>)); <span class="comment">// 挂载 sysfs 文件系统</span></span><br><span class="line">    <span class="built_in">CHECKCALL</span>(<span class="built_in">mount</span>(<span class="string">&quot;selinuxfs&quot;</span>, <span class="string">&quot;/sys/fs/selinux&quot;</span>, <span class="string">&quot;selinuxfs&quot;</span>, <span class="number">0</span>, <span class="literal">NULL</span>));</span><br><span class="line"></span><br><span class="line">    <span class="built_in">CHECKCALL</span>(<span class="built_in">mknod</span>(<span class="string">&quot;/dev/kmsg&quot;</span>, S_IFCHR | <span class="number">0600</span>, <span class="built_in">makedev</span>(<span class="number">1</span>, <span class="number">11</span>))); <span class="comment">// 提前创建 kmsg 设备节点文件，用于输出 log 信息</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">if</span> <span class="title">constexpr</span> <span class="params">(WORLD_WRITABLE_KMSG)</span> </span>&#123;</span><br><span class="line">        <span class="built_in">CHECKCALL</span>(<span class="built_in">mknod</span>(<span class="string">&quot;/dev/kmsg_debug&quot;</span>, S_IFCHR | <span class="number">0622</span>, <span class="built_in">makedev</span>(<span class="number">1</span>, <span class="number">11</span>)));</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="built_in">CHECKCALL</span>(<span class="built_in">mknod</span>(<span class="string">&quot;/dev/random&quot;</span>, S_IFCHR | <span class="number">0666</span>, <span class="built_in">makedev</span>(<span class="number">1</span>, <span class="number">8</span>)));</span><br><span class="line">    <span class="built_in">CHECKCALL</span>(<span class="built_in">mknod</span>(<span class="string">&quot;/dev/urandom&quot;</span>, S_IFCHR | <span class="number">0666</span>, <span class="built_in">makedev</span>(<span class="number">1</span>, <span class="number">9</span>)));</span><br><span class="line"></span><br><span class="line">    <span class="comment">// This is needed for log wrapper, which gets called before ueventd runs.</span></span><br><span class="line">    <span class="built_in">CHECKCALL</span>(<span class="built_in">mknod</span>(<span class="string">&quot;/dev/ptmx&quot;</span>, S_IFCHR | <span class="number">0666</span>, <span class="built_in">makedev</span>(<span class="number">5</span>, <span class="number">2</span>)));</span><br><span class="line">    <span class="built_in">CHECKCALL</span>(<span class="built_in">mknod</span>(<span class="string">&quot;/dev/null&quot;</span>, S_IFCHR | <span class="number">0666</span>, <span class="built_in">makedev</span>(<span class="number">1</span>, <span class="number">3</span>)));</span><br><span class="line"></span><br><span class="line">    <span class="comment">// These below mounts are done in first stage init so that first stage mount can mount</span></span><br><span class="line">    <span class="comment">// subdirectories of /mnt/&#123;vendor,product&#125;/.  Other mounts, not required by first stage mount,</span></span><br><span class="line">    <span class="comment">// should be done in rc files.</span></span><br><span class="line">    <span class="comment">// Mount staging areas for devices managed by vold</span></span><br><span class="line">    <span class="comment">// See storage config details at http://source.android.com/devices/storage/</span></span><br><span class="line">    <span class="built_in">CHECKCALL</span>(<span class="built_in">mount</span>(<span class="string">&quot;tmpfs&quot;</span>, <span class="string">&quot;/mnt&quot;</span>, <span class="string">&quot;tmpfs&quot;</span>, MS_NOEXEC | MS_NOSUID | MS_NODEV,</span><br><span class="line">                    <span class="string">&quot;mode=0755,uid=0,gid=1000&quot;</span>));</span><br><span class="line">    <span class="comment">// /mnt/vendor is used to mount vendor-specific partitions that can not be</span></span><br><span class="line">    <span class="comment">// part of the vendor partition, e.g. because they are mounted read-write.</span></span><br><span class="line">    <span class="built_in">CHECKCALL</span>(<span class="built_in">mkdir</span>(<span class="string">&quot;/mnt/vendor&quot;</span>, <span class="number">0755</span>)); <span class="comment">// 创建 vendor 目录</span></span><br><span class="line">    <span class="comment">// /mnt/product is used to mount product-specific partitions that can not be</span></span><br><span class="line">    <span class="comment">// part of the product partition, e.g. because they are mounted read-write.</span></span><br><span class="line">    <span class="built_in">CHECKCALL</span>(<span class="built_in">mkdir</span>(<span class="string">&quot;/mnt/product&quot;</span>, <span class="number">0755</span>)); <span class="comment">// 创建 product 目录</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// /debug_ramdisk is used to preserve additional files from the debug ramdisk</span></span><br><span class="line">    <span class="built_in">CHECKCALL</span>(<span class="built_in">mount</span>(<span class="string">&quot;tmpfs&quot;</span>, <span class="string">&quot;/debug_ramdisk&quot;</span>, <span class="string">&quot;tmpfs&quot;</span>, MS_NOEXEC | MS_NOSUID | MS_NODEV,</span><br><span class="line">                    <span class="string">&quot;mode=0755,uid=0,gid=0&quot;</span>));</span><br><span class="line"><span class="meta">#<span class="keyword">undef</span> CHECKCALL</span></span><br><span class="line"></span><br><span class="line">    <span class="built_in">SetStdioToDevNull</span>(argv); <span class="comment">// 把标准输入、标准输出和标准错误重定向到空设备文件 &quot;/dev/null&quot;</span></span><br><span class="line">    <span class="comment">// Now that tmpfs is mounted on /dev and we have /dev/kmsg, we can actually</span></span><br><span class="line">    <span class="comment">// talk to the outside world...</span></span><br><span class="line">    <span class="built_in">InitKernelLogging</span>(argv); <span class="comment">// 初始化 kernel log 系统</span></span><br><span class="line"></span><br><span class="line">    ...</span><br><span class="line"></span><br><span class="line">    <span class="built_in">LOG</span>(INFO) &lt;&lt; <span class="string">&quot;init first stage started!&quot;</span>;</span><br><span class="line"></span><br><span class="line">    ...</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (!<span class="built_in">DoFirstStageMount</span>()) &#123; <span class="comment">// DoFirstStageMount：初始化特定设备并挂载</span></span><br><span class="line">        <span class="built_in">LOG</span>(FATAL) &lt;&lt; <span class="string">&quot;Failed to mount required partitions early ...&quot;</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    ...</span><br><span class="line">    <span class="comment">// Android Verified Boot，AVB 主要用于防止系统文件本身被篡改，还包含了防止系统回滚的功能 </span></span><br><span class="line">    <span class="built_in">SetInitAvbVersionInRecovery</span>();</span><br><span class="line"></span><br><span class="line">    <span class="type">const</span> <span class="type">char</span>* path = <span class="string">&quot;/system/bin/init&quot;</span>;</span><br><span class="line">    <span class="type">const</span> <span class="type">char</span>* args[] = &#123;path, <span class="string">&quot;selinux_setup&quot;</span>, <span class="literal">nullptr</span>&#125;;</span><br><span class="line">    <span class="keyword">auto</span> fd = <span class="built_in">open</span>(<span class="string">&quot;/dev/kmsg&quot;</span>, O_WRONLY | O_CLOEXEC);</span><br><span class="line">    <span class="built_in">dup2</span>(fd, STDOUT_FILENO);</span><br><span class="line">    <span class="built_in">dup2</span>(fd, STDERR_FILENO);</span><br><span class="line">    <span class="built_in">close</span>(fd);</span><br><span class="line">    <span class="built_in">execv</span>(path, <span class="built_in">const_cast</span>&lt;<span class="type">char</span>**&gt;(args));</span><br><span class="line"></span><br><span class="line">    <span class="comment">// execv() only returns if an error happened, in which case we</span></span><br><span class="line">    <span class="comment">// panic and never fall through this conditional.</span></span><br><span class="line">    <span class="built_in">PLOG</span>(FATAL) &lt;&lt; <span class="string">&quot;execv(\&quot;&quot;</span> &lt;&lt; path &lt;&lt; <span class="string">&quot;\&quot;) failed&quot;</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>FirstStageMain() 主要工作：</p>
+<ul>
+<li><p>InstallRebootSignalHandlers()：处理 init crash 的情况，初始化重启系统的处理信号，将 SIGABRT, SIGBUS, SIGFPE, SIGILL, SIGSEGV, SIGSTKFLT, SIGSYS, SIGTRAP 等行为设置为 SA_RESTART，当监听到该信号时重启系统到 bootloader</p>
+</li>
+<li><p>umask(0)：设置允许当前进程创建文件或者目录最大可操作的权限 0777</p>
+</li>
+<li><p>CHECKALL()：检查创建&#x2F;挂载相关节点，如 <em>&#x2F;dev&#x2F;kmsg</em>、*&#x2F;proc<em>、</em>&#x2F;mnt&#x2F;vendor* 等</p>
+<ul>
+<li><p>mount 函数原型</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* source：将要挂上的文件系统，通常是一个设备名</span></span><br><span class="line"><span class="comment"> * target：文件系统所要挂载的目标目录。</span></span><br><span class="line"><span class="comment"> * filesystemtype：文件系统的类型，可以是&quot;ext2&quot;，&quot;msdos&quot;，&quot;proc&quot;，&quot;ntfs&quot;，&quot;iso9660&quot;</span></span><br><span class="line"><span class="comment"> * mountflags：指定文件系统的读写访问标志</span></span><br><span class="line"><span class="comment"> * data：文件系统特有的参数</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">mount</span><span class="params">(<span class="type">const</span> <span class="type">char</span> *source, <span class="type">const</span> <span class="type">char</span> *target, <span class="type">const</span> <span class="type">char</span> *filesystemtype,</span></span></span><br><span class="line"><span class="params"><span class="function"><span class="type">unsigned</span> <span class="type">long</span> mountflags, <span class="type">const</span> <span class="type">void</span> *data)</span></span>;</span><br></pre></td></tr></table></figure>
+
+<p>分别挂载了 <code>tmpfs, devpts, proc, sysfs, selinuxfs</code> 五类<strong>文件系统</strong>，</p>
+<ul>
+<li><strong>tmpfs</strong>：一种<code>虚拟内存文件系统</code>，它会将所有的文件存储在虚拟内存中，如果你将 tmpfs 文件系统卸载后，那么其下的所有的内容将不复存在。tmpfs 既可以使用 RAM，也可以使用交换分区，会根据你的实际需要而改变大小。tmpfs 的速度非常快，因为它是驻留在 RAM 中的，即使用了交换分区，性能仍然非常卓越。由于tmpfs是驻留在 RAM 的，因此它的内容是不持久的。断电后，tmpfs 的内容就消失了，这也是被称作 tmpfs 的根本原因。</li>
+<li><strong>devpts</strong>：是 linux 提供给管理员通过文件系统和内核进行沟通（读写）的一种<code>标准接口</code>，pts 是远程虚拟终端，devpts 即远程虚拟终端文件设备。通过 &#x2F;dev&#x2F;pts 可以了解目前远程虚拟终端的基本情况。</li>
+<li><strong>proc</strong>：proc 文件系统是一个非常重要的<code>虚拟文件系统</code>，只存在于内存当中不占用磁盘空间，它以文件系统的方式为访问系统内核数据的操作提供接口，用户和应用程序可以通过 proc 得到系统的信息，并可以改变内核的某些参数。</li>
+<li><strong>sysfs</strong>：也是一种<code>虚拟内存文件系统</code>，与 proc 类似，但除了和 proc 一样具有查看和设定内核参数的功能外，还有为 linux 统一设备模型作为管理之用，sysfs 导出内核数据的方式更统一，并且组织的更好，设计优于 proc。</li>
+<li><strong>selinuxfs</strong>：也是虚拟文件系统,通常挂载在&#x2F;sys&#x2F;fs&#x2F;selinux目录下,用来存放SELinux安全策略文件。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>InitKernelLogging(argv)：初始化内核 log，位于节点 <em>&#x2F;dev&#x2F;kmsg</em>，随后的日志格式化后写入到 *&#x2F;dev&#x2F;kmsg 中</p>
+</li>
+<li><p>execv(path, const_cast&lt;char**&gt;(args))：执行 <code>/system/bin/init selinux_setup</code> ，重新执行 init 程序，只不过带了个 <code>selinux_setup</code> 参数，重新回到 <a target="_blank" rel="noopener" href="https://android.googlesource.com/platform/system/core/+/refs/tags/android-11.0.0_r25/init/main.cpp">system&#x2F;core&#x2F;init&#x2F;main.cpp</a> 中：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (!<span class="built_in">strcmp</span>(argv[<span class="number">1</span>], <span class="string">&quot;selinux_setup&quot;</span>)) &#123;</span><br><span class="line">    <span class="comment">// 启动Selinux安全策略</span></span><br><span class="line">    <span class="keyword">return</span> <span class="built_in">SetupSelinux</span>(argv);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>execv 会停止执行当前的进程，以 path 指定的应用进程替换被停止执行的进程，进程 ID 没有改变。</p>
+</li>
+</ul>
+<h4 id="2-3-SetupSelinux"><a href="#2-3-SetupSelinux" class="headerlink" title="2.3 SetupSelinux"></a>2.3 SetupSelinux</h4><p><a target="_blank" rel="noopener" href="https://android.googlesource.com/platform/system/core/+/refs/tags/android-11.0.0_r25/init/selinux.cpp">system&#x2F;core&#x2F;init&#x2F;selinux.cpp</a></p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">int</span> <span class="title">SetupSelinux</span><span class="params">(<span class="type">char</span>** argv)</span> </span>&#123;</span><br><span class="line">    <span class="built_in">SetStdioToDevNull</span>(argv);</span><br><span class="line">    <span class="built_in">InitKernelLogging</span>(argv);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (REBOOT_BOOTLOADER_ON_PANIC) &#123;</span><br><span class="line">        <span class="comment">// 处理 init 进程 crash 的情况，重启到 BootLoader</span></span><br><span class="line">        <span class="built_in">InstallRebootSignalHandlers</span>();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    boot_clock::time_point start_time = boot_clock::<span class="built_in">now</span>();</span><br><span class="line"></span><br><span class="line">    <span class="built_in">MountMissingSystemPartitions</span>();</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Set up SELinux, loading the SELinux policy.</span></span><br><span class="line">    <span class="comment">// 初始化 SELinux，加载 SELinux 策略，配置 log 输出</span></span><br><span class="line">    <span class="built_in">SelinuxSetupKernelLogging</span>();</span><br><span class="line">    <span class="built_in">SelinuxInitialize</span>();</span><br><span class="line"></span><br><span class="line">    <span class="comment">// We&#x27;re in the kernel domain and want to transition to the init domain.  File systems that</span></span><br><span class="line">    <span class="comment">// store SELabels in their xattrs, such as ext4 do not need an explicit restorecon here,</span></span><br><span class="line">    <span class="comment">// but other file systems do.  In particular, this is needed for ramdisks such as the</span></span><br><span class="line">    <span class="comment">// recovery image for A/B devices.</span></span><br><span class="line">    <span class="keyword">if</span> (<span class="built_in">selinux_android_restorecon</span>(<span class="string">&quot;/system/bin/init&quot;</span>, <span class="number">0</span>) == <span class="number">-1</span>) &#123;</span><br><span class="line">        <span class="built_in">PLOG</span>(FATAL) &lt;&lt; <span class="string">&quot;restorecon failed of /system/bin/init failed&quot;</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="built_in">setenv</span>(kEnvSelinuxStartedAt, std::<span class="built_in">to_string</span>(start_time.<span class="built_in">time_since_epoch</span>().<span class="built_in">count</span>()).<span class="built_in">c_str</span>(), <span class="number">1</span>);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 启动 init 进程第二阶段</span></span><br><span class="line">    <span class="type">const</span> <span class="type">char</span>* path = <span class="string">&quot;/system/bin/init&quot;</span>;</span><br><span class="line">    <span class="type">const</span> <span class="type">char</span>* args[] = &#123;path, <span class="string">&quot;second_stage&quot;</span>, <span class="literal">nullptr</span>&#125;;</span><br><span class="line">    <span class="built_in">execv</span>(path, <span class="built_in">const_cast</span>&lt;<span class="type">char</span>**&gt;(args));</span><br><span class="line"></span><br><span class="line">    <span class="comment">// execv() only returns if an error happened, in which case we</span></span><br><span class="line">    <span class="comment">// panic and never return from this function.</span></span><br><span class="line">    <span class="built_in">PLOG</span>(FATAL) &lt;&lt; <span class="string">&quot;execv(\&quot;&quot;</span> &lt;&lt; path &lt;&lt; <span class="string">&quot;\&quot;) failed&quot;</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>SetupSelinux 主要工作是启动 Selinux 安全机制，初始化 Selinux，加载 Selinux 规则，配置 Selinux 日志输出，最后通过 execv 跳转 main.cpp 启动 init 进程第二阶段启动。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (!<span class="built_in">strcmp</span>(argv[<span class="number">1</span>], <span class="string">&quot;second_stage&quot;</span>)) &#123;</span><br><span class="line">    <span class="comment">// 执行第二阶段启动</span></span><br><span class="line">    <span class="keyword">return</span> <span class="built_in">SecondStageMain</span>(argc, argv);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="2-4-SecondStageMain"><a href="#2-4-SecondStageMain" class="headerlink" title="2.4 SecondStageMain"></a>2.4 SecondStageMain</h4><p><a target="_blank" rel="noopener" href="https://android.googlesource.com/platform/system/core/+/refs/tags/android-11.0.0_r25/init/init.cpp">system&#x2F;core&#x2F;init&#x2F;init.cpp</a></p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">int</span> <span class="title">SecondStageMain</span><span class="params">(<span class="type">int</span> argc, <span class="type">char</span>** argv)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (REBOOT_BOOTLOADER_ON_PANIC) &#123;</span><br><span class="line">        <span class="comment">// 处理 init 进程 crash 的情况，重启到 BootLoader</span></span><br><span class="line">        <span class="built_in">InstallRebootSignalHandlers</span>();</span><br><span class="line">    &#125;</span><br><span class="line">    ...</span><br><span class="line">    <span class="built_in">InitKernelLogging</span>(argv); <span class="comment">// 初始化日志输出</span></span><br><span class="line">    <span class="built_in">LOG</span>(INFO) &lt;&lt; <span class="string">&quot;init second stage started!&quot;</span>;</span><br><span class="line">    ...</span><br><span class="line">    <span class="built_in">PropertyInit</span>(); <span class="comment">// 1. 初始化属性系统，并从指定文件读取属性,</span></span><br><span class="line">    ...</span><br><span class="line">    <span class="comment">// Now set up SELinux for second stage.</span></span><br><span class="line">    <span class="built_in">SelinuxSetupKernelLogging</span>(); <span class="comment">// 配置第二阶段 Selinux</span></span><br><span class="line">    <span class="built_in">SelabelInitialize</span>();</span><br><span class="line">    <span class="built_in">SelinuxRestoreContext</span>(); <span class="comment">// 恢复一些安全上下文</span></span><br><span class="line">    ...</span><br><span class="line">    <span class="built_in">InstallSignalFdHandler</span>(&amp;epoll); <span class="comment">// 捕获子进程结束的信号，获取结束码，通过结束码把程序表中的子进程移除，防止成为僵尸进程的子进程占用程序表空间</span></span><br><span class="line">    <span class="built_in">InstallInitNotifier</span>(&amp;epoll);</span><br><span class="line">    <span class="built_in">StartPropertyService</span>(&amp;property_fd); <span class="comment">// 2. 初始化并开启系统属性服务</span></span><br><span class="line">    ...</span><br><span class="line">    ActionManager&amp; am = ActionManager::<span class="built_in">GetInstance</span>();</span><br><span class="line">    ServiceList&amp; sm = ServiceList::<span class="built_in">GetInstance</span>();</span><br><span class="line"></span><br><span class="line">    <span class="built_in">LoadBootScripts</span>(am, sm); <span class="comment">// 3. 解析 init.rc 等文件，建立 rc 文件的 action 、service，启动其他进程</span></span><br></pre></td></tr></table></figure>
+
+<h5 id="2-4-1-PropertyInit"><a href="#2-4-1-PropertyInit" class="headerlink" title="2.4.1 PropertyInit"></a>2.4.1 PropertyInit</h5><p><a target="_blank" rel="noopener" href="https://android.googlesource.com/platform/system/core/+/refs/tags/android-11.0.0_r25/init/property_service.cpp">system&#x2F;core&#x2F;init&#x2F;property_service.cpp</a></p>
+<p><strong>PropertyInit</strong></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">PropertyInit</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    selinux_callback cb;</span><br><span class="line">    cb.func_audit = PropertyAuditCallback;</span><br><span class="line">    <span class="comment">// selinux 控制属性的 set 和 get</span></span><br><span class="line">    <span class="built_in">selinux_set_callback</span>(SELINUX_CB_AUDIT, cb);</span><br><span class="line"></span><br><span class="line">    <span class="built_in">mkdir</span>(<span class="string">&quot;/dev/__properties__&quot;</span>, S_IRWXU | S_IXGRP | S_IXOTH);</span><br><span class="line">    <span class="built_in">CreateSerializedPropertyInfo</span>(); <span class="comment">// 从文件中加载属性值</span></span><br><span class="line">    <span class="comment">// 初始化 __system_property_area 属性内存区域，将 /dev/__properties__/property_info 设备文件映射到共享内存，此区域记录着所有的属性值</span></span><br><span class="line">    <span class="keyword">if</span> (__system_property_area_init()) &#123; </span><br><span class="line">        <span class="built_in">LOG</span>(FATAL) &lt;&lt; <span class="string">&quot;Failed to initialize property area&quot;</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (!property_info_area.<span class="built_in">LoadDefaultPath</span>()) &#123;</span><br><span class="line">        <span class="built_in">LOG</span>(FATAL) &lt;&lt; <span class="string">&quot;Failed to load serialized property info file&quot;</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// If arguments are passed both on the command line and in DT,</span></span><br><span class="line">    <span class="comment">// properties set in DT always have priority over the command-line ones.</span></span><br><span class="line">    <span class="comment">// 读取设备树 /proc/device-tree/firmware/android/ 中的 name 和 compatible 节点内容，添加 ro.boot. 前缀后加入到 property 属性系统中</span></span><br><span class="line">    <span class="built_in">ProcessKernelDt</span>(); </span><br><span class="line">    <span class="comment">// 读取 /pro/cmdline，将 androidboot. 开头的变量，添加 ro.boot. 前缀后加入到 property 属性系统中</span></span><br><span class="line">    <span class="built_in">ProcessKernelCmdline</span>();</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Propagate the kernel variables to internal variables</span></span><br><span class="line">    <span class="comment">// used by init as well as the current required properties.</span></span><br><span class="line">    <span class="built_in">ExportKernelBootProps</span>(); <span class="comment">// 处理一些特定的属性值，如果没有赋值，则将其赋值为 nuknown 或者 0</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// 初始化系统已有属性值</span></span><br><span class="line">    <span class="built_in">PropertyLoadBootDefaults</span>();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<p><strong>CreateSerializedPropertyInfo</strong></p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">CreateSerializedPropertyInfo</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">auto</span> property_infos = std::<span class="built_in">vector</span>&lt;PropertyInfoEntry&gt;();</span><br><span class="line">    <span class="keyword">if</span> (<span class="built_in">access</span>(<span class="string">&quot;/system/etc/selinux/plat_property_contexts&quot;</span>, R_OK) != <span class="number">-1</span>) &#123;</span><br><span class="line">        <span class="keyword">if</span> (!<span class="built_in">LoadPropertyInfoFromFile</span>(<span class="string">&quot;/system/etc/selinux/plat_property_contexts&quot;</span>,</span><br><span class="line">                                      &amp;property_infos)) &#123;</span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// Don&#x27;t check for failure here, so we always have a sane list of properties.</span></span><br><span class="line">        <span class="comment">// E.g. In case of recovery, the vendor partition will not have mounted and we</span></span><br><span class="line">        <span class="comment">// still need the system / platform properties to function.</span></span><br><span class="line">        <span class="keyword">if</span> (<span class="built_in">access</span>(<span class="string">&quot;/system_ext/etc/selinux/system_ext_property_contexts&quot;</span>, R_OK) != <span class="number">-1</span>) &#123;</span><br><span class="line">            <span class="built_in">LoadPropertyInfoFromFile</span>(<span class="string">&quot;/system_ext/etc/selinux/system_ext_property_contexts&quot;</span>,</span><br><span class="line">                                     &amp;property_infos);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (!<span class="built_in">LoadPropertyInfoFromFile</span>(<span class="string">&quot;/vendor/etc/selinux/vendor_property_contexts&quot;</span>,</span><br><span class="line">                                      &amp;property_infos)) &#123;</span><br><span class="line">            <span class="comment">// Fallback to nonplat_* if vendor_* doesn&#x27;t exist.</span></span><br><span class="line">            <span class="built_in">LoadPropertyInfoFromFile</span>(<span class="string">&quot;/vendor/etc/selinux/nonplat_property_contexts&quot;</span>,</span><br><span class="line">                                     &amp;property_infos);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (<span class="built_in">access</span>(<span class="string">&quot;/product/etc/selinux/product_property_contexts&quot;</span>, R_OK) != <span class="number">-1</span>) &#123;</span><br><span class="line">            <span class="built_in">LoadPropertyInfoFromFile</span>(<span class="string">&quot;/product/etc/selinux/product_property_contexts&quot;</span>,</span><br><span class="line">                                     &amp;property_infos);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (<span class="built_in">access</span>(<span class="string">&quot;/odm/etc/selinux/odm_property_contexts&quot;</span>, R_OK) != <span class="number">-1</span>) &#123;</span><br><span class="line">            <span class="built_in">LoadPropertyInfoFromFile</span>(<span class="string">&quot;/odm/etc/selinux/odm_property_contexts&quot;</span>, &amp;property_infos);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> (!<span class="built_in">LoadPropertyInfoFromFile</span>(<span class="string">&quot;/plat_property_contexts&quot;</span>, &amp;property_infos)) &#123;</span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="built_in">LoadPropertyInfoFromFile</span>(<span class="string">&quot;/system_ext_property_contexts&quot;</span>, &amp;property_infos);</span><br><span class="line">        <span class="keyword">if</span> (!<span class="built_in">LoadPropertyInfoFromFile</span>(<span class="string">&quot;/vendor_property_contexts&quot;</span>, &amp;property_infos)) &#123;</span><br><span class="line">            <span class="comment">// Fallback to nonplat_* if vendor_* doesn&#x27;t exist.</span></span><br><span class="line">            <span class="built_in">LoadPropertyInfoFromFile</span>(<span class="string">&quot;/nonplat_property_contexts&quot;</span>, &amp;property_infos);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="built_in">LoadPropertyInfoFromFile</span>(<span class="string">&quot;/product_property_contexts&quot;</span>, &amp;property_infos);</span><br><span class="line">        <span class="built_in">LoadPropertyInfoFromFile</span>(<span class="string">&quot;/odm_property_contexts&quot;</span>, &amp;property_infos);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>CreateSerializedPropertyInfo</strong>：作用是从 selinux 模块 prop 文件中（如 <code>/system/etc/selinux/plat_property_contexts</code>）读取 selinux 相关属性值，并将其存储到一个动态数组 property_infos 中，随后加载到共享内存中。</p>
+<p><strong>PropertyLoadBootDefaults</strong></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">PropertyLoadBootDefaults</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="comment">// TODO(b/117892318): merge prop.default and build.prop files into one</span></span><br><span class="line">    <span class="comment">// We read the properties and their values into a map, in order to always allow properties</span></span><br><span class="line">    <span class="comment">// loaded in the later property files to override the properties in loaded in the earlier</span></span><br><span class="line">    <span class="comment">// property files, regardless of if they are &quot;ro.&quot; properties or not.</span></span><br><span class="line">    std::map&lt;std::string, std::string&gt; properties;</span><br><span class="line">    <span class="keyword">if</span> (!<span class="built_in">load_properties_from_file</span>(<span class="string">&quot;/system/etc/prop.default&quot;</span>, <span class="literal">nullptr</span>, &amp;properties)) &#123;</span><br><span class="line">        <span class="comment">// Try recovery path</span></span><br><span class="line">        <span class="keyword">if</span> (!<span class="built_in">load_properties_from_file</span>(<span class="string">&quot;/prop.default&quot;</span>, <span class="literal">nullptr</span>, &amp;properties)) &#123;</span><br><span class="line">            <span class="comment">// Try legacy path</span></span><br><span class="line">            <span class="built_in">load_properties_from_file</span>(<span class="string">&quot;/default.prop&quot;</span>, <span class="literal">nullptr</span>, &amp;properties);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="built_in">load_properties_from_file</span>(<span class="string">&quot;/system/build.prop&quot;</span>, <span class="literal">nullptr</span>, &amp;properties);</span><br><span class="line">    <span class="built_in">load_properties_from_file</span>(<span class="string">&quot;/system_ext/build.prop&quot;</span>, <span class="literal">nullptr</span>, &amp;properties);</span><br><span class="line">    <span class="built_in">load_properties_from_file</span>(<span class="string">&quot;/vendor/default.prop&quot;</span>, <span class="literal">nullptr</span>, &amp;properties);</span><br><span class="line">    <span class="built_in">load_properties_from_file</span>(<span class="string">&quot;/vendor/build.prop&quot;</span>, <span class="literal">nullptr</span>, &amp;properties);</span><br><span class="line">    <span class="keyword">if</span> (<span class="built_in">SelinuxGetVendorAndroidVersion</span>() &gt;= __ANDROID_API_Q__) &#123;</span><br><span class="line">        <span class="built_in">load_properties_from_file</span>(<span class="string">&quot;/odm/etc/build.prop&quot;</span>, <span class="literal">nullptr</span>, &amp;properties);</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="built_in">load_properties_from_file</span>(<span class="string">&quot;/odm/default.prop&quot;</span>, <span class="literal">nullptr</span>, &amp;properties);</span><br><span class="line">        <span class="built_in">load_properties_from_file</span>(<span class="string">&quot;/odm/build.prop&quot;</span>, <span class="literal">nullptr</span>, &amp;properties);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="built_in">load_properties_from_file</span>(<span class="string">&quot;/product/build.prop&quot;</span>, <span class="literal">nullptr</span>, &amp;properties);</span><br><span class="line">    <span class="built_in">load_properties_from_file</span>(<span class="string">&quot;/factory/factory.prop&quot;</span>, <span class="string">&quot;ro.*&quot;</span>, &amp;properties);</span><br><span class="line">    ...</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">const</span> <span class="keyword">auto</span>&amp; [name, value] : properties) &#123;</span><br><span class="line">        std::string error;</span><br><span class="line">        <span class="keyword">if</span> (<span class="built_in">PropertySet</span>(name, value, &amp;error) != PROP_SUCCESS) &#123;</span><br><span class="line">            <span class="built_in">LOG</span>(ERROR) &lt;&lt; <span class="string">&quot;Could not set &#x27;&quot;</span> &lt;&lt; name &lt;&lt; <span class="string">&quot;&#x27; to &#x27;&quot;</span> &lt;&lt; value</span><br><span class="line">                       &lt;&lt; <span class="string">&quot;&#x27; while loading .prop files&quot;</span> &lt;&lt; error;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="built_in">property_initialize_ro_product_props</span>(); <span class="comment">// 初始化 &quot;ro.product.&quot; 为前缀的属性</span></span><br><span class="line">    <span class="built_in">property_derive_build_fingerprint</span>(); <span class="comment">// 初始化一些编译相关的属性</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>PropertyLoadBootDefaults</strong>：加载系统已有属性值（*.prop 文件），并将其存储到 properties 中，再使用 PropertySet 方法添加到属性系统中。</p>
+<h5 id="2-4-2-StartPropertyService"><a href="#2-4-2-StartPropertyService" class="headerlink" title="2.4.2 StartPropertyService"></a>2.4.2 StartPropertyService</h5><p><a target="_blank" rel="noopener" href="https://android.googlesource.com/platform/system/core/+/refs/tags/android-11.0.0_r25/init/property_service.cpp">system&#x2F;core&#x2F;init&#x2F;property_service.cpp</a></p>
+<p><strong>StartPropertyService</strong></p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">StartPropertyService</span><span class="params">(<span class="type">int</span>* epoll_socket)</span> </span>&#123;</span><br><span class="line">    <span class="comment">// 设置属性版本号</span></span><br><span class="line">    <span class="built_in">InitPropertySet</span>(<span class="string">&quot;ro.property_service.version&quot;</span>, <span class="string">&quot;2&quot;</span>);</span><br><span class="line"></span><br><span class="line">    <span class="type">int</span> sockets[<span class="number">2</span>]; <span class="comment">// 接收代表两个套接口的数组，每个文件描述法代表一个套接口</span></span><br><span class="line">    <span class="comment">/* int socketpair(int domain, int type, int protocol, int sv[2]);</span></span><br><span class="line"><span class="comment">     * domin - 表示协议族，只能为 AF_LOCAL 或者 AF_UNIX</span></span><br><span class="line"><span class="comment">     * type - 表示协议</span></span><br><span class="line"><span class="comment">     * protocol - 表示类型，只能为0</span></span><br><span class="line"><span class="comment">     * sv[2] - 接收代表两个套接口的整数数组，每一个文件描述符代表一个套接口，并且与另一个并没有区别</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">if</span> (<span class="built_in">socketpair</span>(AF_UNIX, SOCK_SEQPACKET | SOCK_CLOEXEC, <span class="number">0</span>, sockets) != <span class="number">0</span>) &#123;</span><br><span class="line">        <span class="built_in">PLOG</span>(FATAL) &lt;&lt; <span class="string">&quot;Failed to socketpair() between property_service and init&quot;</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    *epoll_socket = from_init_socket = sockets[<span class="number">0</span>];</span><br><span class="line">    init_socket = sockets[<span class="number">1</span>];</span><br><span class="line">    <span class="built_in">StartSendingMessages</span>();</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 创建 socket，返回 socket id</span></span><br><span class="line">    <span class="keyword">if</span> (<span class="keyword">auto</span> result = <span class="built_in">CreateSocket</span>(PROP_SERVICE_NAME, SOCK_STREAM | SOCK_CLOEXEC | SOCK_NONBLOCK,</span><br><span class="line">                                   <span class="literal">false</span>, <span class="number">0666</span>, <span class="number">0</span>, <span class="number">0</span>, &#123;&#125;);</span><br><span class="line">        result.<span class="built_in">ok</span>()) &#123;</span><br><span class="line">        property_set_fd = *result;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="built_in">LOG</span>(FATAL) &lt;&lt; <span class="string">&quot;start_property_service socket creation failed: &quot;</span> &lt;&lt; result.<span class="built_in">error</span>();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 监听 socket 文件描述符 property_set_fd，设置最大并发数为 8</span></span><br><span class="line">    <span class="built_in">listen</span>(property_set_fd, <span class="number">8</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">auto</span> new_thread = std::thread&#123;PropertyServiceThread&#125;;</span><br><span class="line">    property_service_thread.<span class="built_in">swap</span>(new_thread);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>socketpair 建立一对连接的套接字，每一端都可进行读写，监听 property_set_fd 描述符</p>
+<p><strong>PropertyServiceThread</strong></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">static</span> <span class="type">void</span> <span class="title">PropertyServiceThread</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    Epoll epoll;</span><br><span class="line">    <span class="keyword">if</span> (<span class="keyword">auto</span> result = epoll.<span class="built_in">Open</span>(); !result.<span class="built_in">ok</span>()) &#123;</span><br><span class="line">        <span class="built_in">LOG</span>(FATAL) &lt;&lt; result.<span class="built_in">error</span>();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 把 socket 文件描述符 property_set_fd 注册到 epoll，用 epoll 监听描述符，收到消息时通过 handle_property_set_fd 处理</span></span><br><span class="line">    <span class="keyword">if</span> (<span class="keyword">auto</span> result = epoll.<span class="built_in">RegisterHandler</span>(property_set_fd, handle_property_set_fd);</span><br><span class="line">        !result.<span class="built_in">ok</span>()) &#123;</span><br><span class="line">        <span class="built_in">LOG</span>(FATAL) &lt;&lt; result.<span class="built_in">error</span>();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 把 socket 文件描述符 init_socket 注册到 epoll，收到消息时通过 HandleInitSocket 处理</span></span><br><span class="line">    <span class="keyword">if</span> (<span class="keyword">auto</span> result = epoll.<span class="built_in">RegisterHandler</span>(init_socket, HandleInitSocket); !result.<span class="built_in">ok</span>()) &#123;</span><br><span class="line">        <span class="built_in">LOG</span>(FATAL) &lt;&lt; result.<span class="built_in">error</span>();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">while</span> (<span class="literal">true</span>) &#123;</span><br><span class="line">        <span class="keyword">auto</span> pending_functions = epoll.<span class="built_in">Wait</span>(std::<span class="literal">nullopt</span>);</span><br><span class="line">        <span class="keyword">if</span> (!pending_functions.<span class="built_in">ok</span>()) &#123;</span><br><span class="line">            <span class="built_in">LOG</span>(ERROR) &lt;&lt; pending_functions.<span class="built_in">error</span>();</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="keyword">for</span> (<span class="type">const</span> <span class="keyword">auto</span>&amp; function : *pending_functions) &#123;</span><br><span class="line">                (*function)();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>把文件描述符 prop_set_fd 添加到 epoll，用 epoll 监听描述符，收到消息后通过 handle_property_set_fd 来处理，把件描述符 init_socket 添加到 epoll，收到消息时通过 HandleInitSocket 处理。</p>
+<p>epoll 是 Linux 内核的可扩展 I&#x2F;O 事件通知机制，也就是他能高效的监听文件描述符，提高 CPU 的利用率。</p>
+<p><strong>handle_property_set_fd</strong></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">static</span> <span class="type">void</span> <span class="title">handle_property_set_fd</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="type">static</span> <span class="keyword">constexpr</span> <span class="type">uint32_t</span> kDefaultSocketTimeout = <span class="number">2000</span>; <span class="comment">/* ms */</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// 利用 property_set_fd 文件描述符接收 socket 传递的消息</span></span><br><span class="line">    <span class="type">int</span> s = <span class="built_in">accept4</span>(property_set_fd, <span class="literal">nullptr</span>, <span class="literal">nullptr</span>, SOCK_CLOEXEC);</span><br><span class="line">    <span class="keyword">if</span> (s == <span class="number">-1</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    ucred cr;</span><br><span class="line">    <span class="type">socklen_t</span> cr_size = <span class="built_in">sizeof</span>(cr);</span><br><span class="line">    <span class="keyword">if</span> (<span class="built_in">getsockopt</span>(s, SOL_SOCKET, SO_PEERCRED, &amp;cr, &amp;cr_size) &lt; <span class="number">0</span>) &#123;</span><br><span class="line">        <span class="built_in">close</span>(s);</span><br><span class="line">        <span class="built_in">PLOG</span>(ERROR) &lt;&lt; <span class="string">&quot;sys_prop: unable to get SO_PEERCRED&quot;</span>;</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function">SocketConnection <span class="title">socket</span><span class="params">(s, cr)</span></span>; <span class="comment">// 利用 proerty_set_fd 重构一个 socket 来读取发送来的消息</span></span><br><span class="line">    <span class="type">uint32_t</span> timeout_ms = kDefaultSocketTimeout;</span><br><span class="line"></span><br><span class="line">    <span class="type">uint32_t</span> cmd = <span class="number">0</span>;</span><br><span class="line">    <span class="comment">// 读取发来的消息</span></span><br><span class="line">    <span class="keyword">if</span> (!socket.<span class="built_in">RecvUint32</span>(&amp;cmd, &amp;timeout_ms)) &#123;</span><br><span class="line">        <span class="built_in">PLOG</span>(ERROR) &lt;&lt; <span class="string">&quot;sys_prop: error while reading command from the socket&quot;</span>;</span><br><span class="line">        socket.<span class="built_in">SendUint32</span>(PROP_ERROR_READ_CMD);</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 处理不同的消息</span></span><br><span class="line">    <span class="keyword">switch</span> (cmd) &#123;</span><br><span class="line">    <span class="keyword">case</span> PROP_MSG_SETPROP: &#123;</span><br><span class="line">        <span class="type">char</span> prop_name[PROP_NAME_MAX];</span><br><span class="line">        <span class="type">char</span> prop_value[PROP_VALUE_MAX];</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (!socket.<span class="built_in">RecvChars</span>(prop_name, PROP_NAME_MAX, &amp;timeout_ms) ||</span><br><span class="line">            !socket.<span class="built_in">RecvChars</span>(prop_value, PROP_VALUE_MAX, &amp;timeout_ms)) &#123;</span><br><span class="line">          <span class="built_in">PLOG</span>(ERROR) &lt;&lt; <span class="string">&quot;sys_prop(PROP_MSG_SETPROP): error while reading name/value from the socket&quot;</span>;</span><br><span class="line">          <span class="keyword">return</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        ...</span><br><span class="line">        std::string source_context;</span><br><span class="line">        ...</span><br><span class="line"></span><br><span class="line">        <span class="type">const</span> <span class="keyword">auto</span>&amp; cr = socket.<span class="built_in">cred</span>();</span><br><span class="line">        std::string error;</span><br><span class="line">        <span class="type">uint32_t</span> result =</span><br><span class="line">                <span class="built_in">HandlePropertySet</span>(prop_name, prop_value, source_context, cr, <span class="literal">nullptr</span>, &amp;error);</span><br><span class="line">        ...</span><br><span class="line"></span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">case</span> PROP_MSG_SETPROP2: &#123;</span><br><span class="line">        std::string name;</span><br><span class="line">        std::string value;</span><br><span class="line">        <span class="keyword">if</span> (!socket.<span class="built_in">RecvString</span>(&amp;name, &amp;timeout_ms) ||</span><br><span class="line">            !socket.<span class="built_in">RecvString</span>(&amp;value, &amp;timeout_ms)) &#123;</span><br><span class="line">          <span class="built_in">PLOG</span>(ERROR) &lt;&lt; <span class="string">&quot;sys_prop(PROP_MSG_SETPROP2): error while reading name/value from the socket&quot;</span>;</span><br><span class="line">          socket.<span class="built_in">SendUint32</span>(PROP_ERROR_READ_DATA);</span><br><span class="line">          <span class="keyword">return</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        std::string source_context;</span><br><span class="line">        ...</span><br><span class="line"></span><br><span class="line">        <span class="type">const</span> <span class="keyword">auto</span>&amp; cr = socket.<span class="built_in">cred</span>();</span><br><span class="line">        std::string error;</span><br><span class="line">        <span class="type">uint32_t</span> result = <span class="built_in">HandlePropertySet</span>(name, value, source_context, cr, &amp;socket, &amp;error);</span><br><span class="line">        ...</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>主要工作就是 RecvChars 和 RecvString 读取消息，然后通过 HandlePropertySet 函数处理。</p>
+<p><strong>HandlePropertySet</strong></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// This returns one of the enum of PROP_SUCCESS or PROP_ERROR*.</span></span><br><span class="line"><span class="function"><span class="type">uint32_t</span> <span class="title">HandlePropertySet</span><span class="params">(<span class="type">const</span> std::string&amp; name, <span class="type">const</span> std::string&amp; value,</span></span></span><br><span class="line"><span class="params"><span class="function">                           <span class="type">const</span> std::string&amp; source_context, <span class="type">const</span> ucred&amp; cr,</span></span></span><br><span class="line"><span class="params"><span class="function">                           SocketConnection* socket, std::string* error)</span> </span>&#123;</span><br><span class="line">    <span class="comment">// 检查是否符合 property 权限</span></span><br><span class="line">    <span class="keyword">if</span> (<span class="keyword">auto</span> ret = <span class="built_in">CheckPermissions</span>(name, value, source_context, cr, error); ret != PROP_SUCCESS) &#123;</span><br><span class="line">        <span class="keyword">return</span> ret;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 处理 &quot;ctl.&quot; 开头的属性</span></span><br><span class="line">    <span class="keyword">if</span> (<span class="built_in">StartsWith</span>(name, <span class="string">&quot;ctl.&quot;</span>)) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">SendControlMessage</span>(name.<span class="built_in">c_str</span>() + <span class="number">4</span>, value, cr.pid, socket, error);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 处理 &quot;sys.powerctl&quot; 开头的属性</span></span><br><span class="line">    <span class="comment">// sys.powerctl is a special property that is used to make the device reboot.  We want to log</span></span><br><span class="line">    <span class="comment">// any process that sets this property to be able to accurately blame the cause of a shutdown.</span></span><br><span class="line">    <span class="keyword">if</span> (name == <span class="string">&quot;sys.powerctl&quot;</span>) &#123;</span><br><span class="line">        std::string cmdline_path = <span class="built_in">StringPrintf</span>(<span class="string">&quot;proc/%d/cmdline&quot;</span>, cr.pid);</span><br><span class="line">        std::string process_cmdline;</span><br><span class="line">        std::string process_log_string;</span><br><span class="line">        <span class="keyword">if</span> (<span class="built_in">ReadFileToString</span>(cmdline_path, &amp;process_cmdline)) &#123;</span><br><span class="line">            <span class="comment">// Since cmdline is null deliminated, .c_str() conveniently gives us just the process</span></span><br><span class="line">            <span class="comment">// path.</span></span><br><span class="line">            process_log_string = <span class="built_in">StringPrintf</span>(<span class="string">&quot; (%s)&quot;</span>, process_cmdline.<span class="built_in">c_str</span>());</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="built_in">LOG</span>(INFO) &lt;&lt; <span class="string">&quot;Received sys.powerctl=&#x27;&quot;</span> &lt;&lt; value &lt;&lt; <span class="string">&quot;&#x27; from pid: &quot;</span> &lt;&lt; cr.pid</span><br><span class="line">                  &lt;&lt; process_log_string;</span><br><span class="line">        <span class="keyword">if</span> (value == <span class="string">&quot;reboot,userspace&quot;</span> &amp;&amp; !<span class="built_in">is_userspace_reboot_supported</span>().<span class="built_in">value_or</span>(<span class="literal">false</span>)) &#123;</span><br><span class="line">            *error = <span class="string">&quot;Userspace reboot is not supported by this device&quot;</span>;</span><br><span class="line">            <span class="keyword">return</span> PROP_ERROR_INVALID_VALUE;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    ...</span><br><span class="line">    <span class="comment">// 其他属性处理</span></span><br><span class="line">    <span class="keyword">return</span> <span class="built_in">PropertySet</span>(name, value, error);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>ctl.</code> 开头的属性和 <code>sys.powerctl</code> 属性单独处理，其他属性通过 PropertySet 函数处理，原属性表中有就更新，没有就新加，再通知 init 有属性发生改变。</p>
+<p><strong>HandleInitSocket</strong></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">static</span> <span class="type">void</span> <span class="title">HandleInitSocket</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">auto</span> message = <span class="built_in">ReadMessage</span>(init_socket);</span><br><span class="line">    <span class="keyword">if</span> (!message.<span class="built_in">ok</span>()) &#123;</span><br><span class="line">        <span class="built_in">LOG</span>(ERROR) &lt;&lt; <span class="string">&quot;Could not read message from init_dedicated_recv_socket: &quot;</span> &lt;&lt; message.<span class="built_in">error</span>();</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">auto</span> init_message = InitMessage&#123;&#125;;</span><br><span class="line">    <span class="keyword">if</span> (!init_message.<span class="built_in">ParseFromString</span>(*message)) &#123;</span><br><span class="line">        <span class="built_in">LOG</span>(ERROR) &lt;&lt; <span class="string">&quot;Could not parse message from init&quot;</span>;</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">switch</span> (init_message.<span class="built_in">msg_case</span>()) &#123;</span><br><span class="line">        <span class="keyword">case</span> InitMessage::kLoadPersistentProperties: &#123;</span><br><span class="line">            <span class="built_in">load_override_properties</span>();</span><br><span class="line">            <span class="comment">// Read persistent properties after all default values have been loaded.</span></span><br><span class="line">            <span class="keyword">auto</span> persistent_properties = <span class="built_in">LoadPersistentProperties</span>();</span><br><span class="line">            <span class="keyword">for</span> (<span class="type">const</span> <span class="keyword">auto</span>&amp; persistent_property_record : persistent_properties.<span class="built_in">properties</span>()) &#123;</span><br><span class="line">                <span class="built_in">InitPropertySet</span>(persistent_property_record.<span class="built_in">name</span>(),</span><br><span class="line">                                persistent_property_record.<span class="built_in">value</span>());</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="built_in">InitPropertySet</span>(<span class="string">&quot;ro.persistent_properties.ready&quot;</span>, <span class="string">&quot;true&quot;</span>);</span><br><span class="line">            persistent_properties_loaded = <span class="literal">true</span>;</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">default</span>:</span><br><span class="line">            <span class="built_in">LOG</span>(ERROR) &lt;&lt; <span class="string">&quot;Unknown message type from init: &quot;</span> &lt;&lt; init_message.<span class="built_in">msg_case</span>();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>HandleInitSocket 处理 persistent 属性。</p>
+<h5 id="2-4-3-LoadBootScripts"><a href="#2-4-3-LoadBootScripts" class="headerlink" title="2.4.3 LoadBootScripts"></a>2.4.3 LoadBootScripts</h5><p>经过第一阶段和第二阶段前半部分工作，init 已经建立了属性系统和 SELinux 系统，接下来需要解析 init.rc，init.rc 是 init 进程启动的配置脚本，这个脚本是用一种叫 <a target="_blank" rel="noopener" href="https://android.googlesource.com/platform/system/core/+/refs/tags/android-11.0.0_r25/init/README.md">Android Init Language</a>（Android 初始化语言）的语言写的。</p>
+<p><a target="_blank" rel="noopener" href="https://android.googlesource.com/platform/system/core/+/refs/tags/android-11.0.0_r25/init/init.cpp">system&#x2F;core&#x2F;init&#x2F;init.cpp</a></p>
+<p><strong>LoadBootScripts</strong></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">static</span> <span class="type">void</span> <span class="title">LoadBootScripts</span><span class="params">(ActionManager&amp; action_manager, ServiceList&amp; service_list)</span> </span>&#123;</span><br><span class="line">    <span class="comment">// 创建 parser 并将其放入 map 中</span></span><br><span class="line">    Parser parser = <span class="built_in">CreateParser</span>(action_manager, service_list);</span><br><span class="line"></span><br><span class="line">    std::string bootscript = <span class="built_in">GetProperty</span>(<span class="string">&quot;ro.boot.init_rc&quot;</span>, <span class="string">&quot;&quot;</span>);</span><br><span class="line">    <span class="keyword">if</span> (bootscript.<span class="built_in">empty</span>()) &#123;</span><br><span class="line">        <span class="comment">// 如果 ro.boot.init_rc 属性没有定义，则解析 /system/etc/init/hw/init.rc 和</span></span><br><span class="line">        <span class="comment">// system, system_ext, product, odm, vender/etc/init 目录下的 .rc 文件</span></span><br><span class="line">        parser.<span class="built_in">ParseConfig</span>(<span class="string">&quot;/system/etc/init/hw/init.rc&quot;</span>);</span><br><span class="line">        <span class="keyword">if</span> (!parser.<span class="built_in">ParseConfig</span>(<span class="string">&quot;/system/etc/init&quot;</span>)) &#123;</span><br><span class="line">            late_import_paths.<span class="built_in">emplace_back</span>(<span class="string">&quot;/system/etc/init&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// late_import is available only in Q and earlier release. As we don&#x27;t</span></span><br><span class="line">        <span class="comment">// have system_ext in those versions, skip late_import for system_ext.</span></span><br><span class="line">        parser.<span class="built_in">ParseConfig</span>(<span class="string">&quot;/system_ext/etc/init&quot;</span>);</span><br><span class="line">        <span class="keyword">if</span> (!parser.<span class="built_in">ParseConfig</span>(<span class="string">&quot;/product/etc/init&quot;</span>)) &#123;</span><br><span class="line">            late_import_paths.<span class="built_in">emplace_back</span>(<span class="string">&quot;/product/etc/init&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (!parser.<span class="built_in">ParseConfig</span>(<span class="string">&quot;/odm/etc/init&quot;</span>)) &#123;</span><br><span class="line">            late_import_paths.<span class="built_in">emplace_back</span>(<span class="string">&quot;/odm/etc/init&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (!parser.<span class="built_in">ParseConfig</span>(<span class="string">&quot;/vendor/etc/init&quot;</span>)) &#123;</span><br><span class="line">            late_import_paths.<span class="built_in">emplace_back</span>(<span class="string">&quot;/vendor/etc/init&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        parser.<span class="built_in">ParseConfig</span>(bootscript);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>LoadBootScrepts 工作是创建 parser，然后根据是否设定属性 ro.boot.init_rc 来解析不同路径下的 init.rc</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">Parser <span class="title">CreateParser</span><span class="params">(ActionManager&amp; action_manager, ServiceList&amp; service_list)</span> </span>&#123;</span><br><span class="line">    Parser parser;</span><br><span class="line"></span><br><span class="line">    parser.<span class="built_in">AddSectionParser</span>(<span class="string">&quot;service&quot;</span>, std::<span class="built_in">make_unique</span>&lt;ServiceParser&gt;(</span><br><span class="line">                                               &amp;service_list, <span class="built_in">GetSubcontext</span>(), std::<span class="literal">nullopt</span>));</span><br><span class="line">    parser.<span class="built_in">AddSectionParser</span>(<span class="string">&quot;on&quot;</span>, std::<span class="built_in">make_unique</span>&lt;ActionParser&gt;(&amp;action_manager, <span class="built_in">GetSubcontext</span>()));</span><br><span class="line">    parser.<span class="built_in">AddSectionParser</span>(<span class="string">&quot;import&quot;</span>, std::<span class="built_in">make_unique</span>&lt;ImportParser&gt;(&amp;parser));</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> parser;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>std::make_unique 相当于 new，返回一个 std::unique_ptr 智能指针，可以自动管理内存，持有对象的独有权，两个 unique_ptr 不能指向一个对象，不能进行复制操作只能进行移动操作。</p>
+<p><a target="_blank" rel="noopener" href="https://android.googlesource.com/platform/system/core/+/refs/tags/android-11.0.0_r25/init/parser.cpp">system&#x2F;core&#x2F;init&#x2F;parser.cpp</a></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">Parser::AddSectionParser</span><span class="params">(<span class="type">const</span> std::string&amp; name, std::unique_ptr&lt;SectionParser&gt; parser)</span> </span>&#123;</span><br><span class="line">    section_parsers_[name] = std::<span class="built_in">move</span>(parser);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>section_parsers_ 是一个map，在 <a target="_blank" rel="noopener" href="https://android.googlesource.com/platform/system/core/+/refs/tags/android-11.0.0_r25/init/parser.h">system&#x2F;core&#x2F;init&#x2F;parser.h</a> 头文件中定义：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">std::map&lt;std::string, std::unique_ptr&lt;SectionParser&gt;&gt; section_parsers_;</span><br></pre></td></tr></table></figure>
+
+<p><a target="_blank" rel="noopener" href="https://android.googlesource.com/platform/system/core/+/refs/tags/android-11.0.0_r25/init/parser.cpp">system&#x2F;core&#x2F;init&#x2F;parser.cpp</a></p>
+<p><strong>ParseConfig</strong></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">bool</span> <span class="title">Parser::ParseConfig</span><span class="params">(<span class="type">const</span> std::string&amp; path)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (<span class="built_in">is_dir</span>(path.<span class="built_in">c_str</span>())) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">ParseConfigDir</span>(path);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="built_in">ParseConfigFile</span>(path);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>根据传入的 path 类型是目录还是文件，分布调用 ParseConfigDir 和 ParseConfigFile</p>
+<p><strong>ParseConfigDir</strong>，<strong>ParseConfigFile</strong></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">bool</span> <span class="title">Parser::ParseConfigFile</span><span class="params">(<span class="type">const</span> std::string&amp; path)</span> </span>&#123;</span><br><span class="line">    <span class="built_in">LOG</span>(INFO) &lt;&lt; <span class="string">&quot;Parsing file &quot;</span> &lt;&lt; path &lt;&lt; <span class="string">&quot;...&quot;</span>;</span><br><span class="line">    android::base::Timer t;</span><br><span class="line">    <span class="keyword">auto</span> config_contents = <span class="built_in">ReadFile</span>(path); <span class="comment">// 将数据读取到 config_contents</span></span><br><span class="line">    <span class="keyword">if</span> (!config_contents.<span class="built_in">ok</span>()) &#123;</span><br><span class="line">        <span class="built_in">LOG</span>(INFO) &lt;&lt; <span class="string">&quot;Unable to read config file &#x27;&quot;</span> &lt;&lt; path &lt;&lt; <span class="string">&quot;&#x27;: &quot;</span> &lt;&lt; config_contents.<span class="built_in">error</span>();</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="built_in">ParseData</span>(path, &amp;config_contents.<span class="built_in">value</span>()); <span class="comment">// 解析数据</span></span><br><span class="line"></span><br><span class="line">    <span class="built_in">LOG</span>(VERBOSE) &lt;&lt; <span class="string">&quot;(Parsing &quot;</span> &lt;&lt; path &lt;&lt; <span class="string">&quot; took &quot;</span> &lt;&lt; t &lt;&lt; <span class="string">&quot;.)&quot;</span>;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">bool</span> <span class="title">Parser::ParseConfigDir</span><span class="params">(<span class="type">const</span> std::string&amp; path)</span> </span>&#123;</span><br><span class="line">    <span class="built_in">LOG</span>(INFO) &lt;&lt; <span class="string">&quot;Parsing directory &quot;</span> &lt;&lt; path &lt;&lt; <span class="string">&quot;...&quot;</span>;</span><br><span class="line">    <span class="function">std::unique_ptr&lt;DIR, <span class="title">decltype</span><span class="params">(&amp;closedir)</span>&gt; <span class="title">config_dir</span><span class="params">(opendir(path.c_str()), closedir)</span></span>;</span><br><span class="line">    ...</span><br><span class="line">    dirent* current_file;</span><br><span class="line">    std::vector&lt;std::string&gt; files;</span><br><span class="line">    ...</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">const</span> <span class="keyword">auto</span>&amp; file : files) &#123;</span><br><span class="line">        <span class="keyword">if</span> (!<span class="built_in">ParseConfigFile</span>(file)) &#123;</span><br><span class="line">            <span class="built_in">LOG</span>(ERROR) &lt;&lt; <span class="string">&quot;could not import file &#x27;&quot;</span> &lt;&lt; file &lt;&lt; <span class="string">&quot;&#x27;&quot;</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>若是目录，则遍历该目录下的所有文件，再对其调用 ParseConfigFile，ParseConfigFile 读取文件数据后，调用 ParseData</p>
+<p><strong>ParseData</strong></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">Parser::ParseData</span><span class="params">(<span class="type">const</span> std::string&amp; filename, std::string* data)</span> </span>&#123;</span><br><span class="line">    data-&gt;<span class="built_in">push_back</span>(<span class="string">&#x27;\n&#x27;</span>);  <span class="comment">// <span class="doctag">TODO:</span> fix tokenizer</span></span><br><span class="line">    data-&gt;<span class="built_in">push_back</span>(<span class="string">&#x27;\0&#x27;</span>);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// parse_state 是 system/core/init/tokenizer.h 中定义的结构体</span></span><br><span class="line">    parse_state state;</span><br><span class="line">    state.line = <span class="number">0</span>;</span><br><span class="line">    state.ptr = data-&gt;<span class="built_in">data</span>();</span><br><span class="line">    state.nexttoken = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// SectionParser 是一个可以在 init 中解析给定 “section” 的接口，比如 ActionParser </span></span><br><span class="line">    SectionParser* section_parser = <span class="literal">nullptr</span>;</span><br><span class="line">    <span class="type">int</span> section_start_line = <span class="number">-1</span>;</span><br><span class="line">    std::vector&lt;std::string&gt; args;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// If we encounter a bad section start, there is no valid parser object to parse the subsequent</span></span><br><span class="line">    <span class="comment">// sections, so we must suppress errors until the next valid section is found.</span></span><br><span class="line">    <span class="type">bool</span> bad_section_found = <span class="literal">false</span>;</span><br><span class="line">    ...</span><br><span class="line">    <span class="keyword">for</span> (;;) &#123;</span><br><span class="line">        <span class="keyword">switch</span> (<span class="built_in">next_token</span>(&amp;state)) &#123;</span><br><span class="line">            <span class="keyword">case</span> T_EOF: <span class="comment">// EOF: End Of File，即解析完成到末端了，</span></span><br><span class="line">                <span class="built_in">end_section</span>();</span><br><span class="line"></span><br><span class="line">                <span class="keyword">for</span> (<span class="type">const</span> <span class="keyword">auto</span>&amp; [section_name, section_parser] : section_parsers_) &#123;</span><br><span class="line">                    section_parser-&gt;<span class="built_in">EndFile</span>();</span><br><span class="line">                &#125;</span><br><span class="line"></span><br><span class="line">                <span class="keyword">return</span>;</span><br><span class="line">            <span class="keyword">case</span> T_NEWLINE: &#123;</span><br><span class="line">                state.line++;</span><br><span class="line">                <span class="keyword">if</span> (args.<span class="built_in">empty</span>()) <span class="keyword">break</span>;</span><br><span class="line">                <span class="comment">// If we have a line matching a prefix we recognize, call its callback and unset any</span></span><br><span class="line">                <span class="comment">// current section parsers.  This is meant for /sys/ and /dev/ line entries for</span></span><br><span class="line">                <span class="comment">// uevent.</span></span><br><span class="line">                <span class="keyword">auto</span> line_callback = std::<span class="built_in">find_if</span>(</span><br><span class="line">                    line_callbacks_.<span class="built_in">begin</span>(), line_callbacks_.<span class="built_in">end</span>(),</span><br><span class="line">                    [&amp;args](<span class="type">const</span> <span class="keyword">auto</span>&amp; c) &#123; <span class="keyword">return</span> android::base::<span class="built_in">StartsWith</span>(args[<span class="number">0</span>], c.first); &#125;);</span><br><span class="line">                <span class="keyword">if</span> (line_callback != line_callbacks_.<span class="built_in">end</span>()) &#123;</span><br><span class="line">                    <span class="built_in">end_section</span>();</span><br><span class="line">                    ...</span><br><span class="line">                &#125; <span class="keyword">else</span> <span class="keyword">if</span> (section_parsers_.<span class="built_in">count</span>(args[<span class="number">0</span>])) &#123;</span><br><span class="line">                    <span class="built_in">end_section</span>();</span><br><span class="line">                    section_parser = section_parsers_[args[<span class="number">0</span>]].<span class="built_in">get</span>();</span><br><span class="line">                    section_start_line = state.line;</span><br><span class="line">                    <span class="keyword">if</span> (<span class="keyword">auto</span> result =</span><br><span class="line">                                section_parser-&gt;<span class="built_in">ParseSection</span>(std::<span class="built_in">move</span>(args), filename, state.line);</span><br><span class="line">                        !result.<span class="built_in">ok</span>()) &#123;</span><br><span class="line">                        ...</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125; <span class="keyword">else</span> <span class="keyword">if</span> (section_parser) &#123;</span><br><span class="line">                    <span class="keyword">if</span> (<span class="keyword">auto</span> result = section_parser-&gt;<span class="built_in">ParseLineSection</span>(std::<span class="built_in">move</span>(args), state.line);</span><br><span class="line">                        !result.<span class="built_in">ok</span>()) &#123;</span><br><span class="line">                        ...</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125; <span class="keyword">else</span> <span class="keyword">if</span> (!bad_section_found) &#123;</span><br><span class="line">                    ...</span><br><span class="line">                &#125;</span><br><span class="line">                args.<span class="built_in">clear</span>();</span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">case</span> T_TEXT:</span><br><span class="line">                args.<span class="built_in">emplace_back</span>(state.text);</span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>parser_state 是一个结构体，定义在 <em>system&#x2F;core&#x2F;init&#x2F;tokenizer.h</em> 中，</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// system/core/init/tokenizer.h</span></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">parse_state</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="type">char</span> *ptr;</span><br><span class="line">    <span class="type">char</span> *text;</span><br><span class="line">    <span class="type">int</span> line;</span><br><span class="line">    <span class="type">int</span> nexttoken;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>ParseData 的作用就是调用 next_token(&amp;state) 遍历字符，将一行拆分成若干个单词，读到单词，执行 T_TEXT 代码段，把单词压入 args 中；读到 ‘\n’，执行 T_NEWLINE 代码段，在 section_parsers_ 中判断是否包含单词 args[0]（即on, service, import），如果包含，则调用相应解析器（ActionParser, ServiceParser, ImportParser）的 ParseSection 函数；如果不包含，则调用 ParseLineSection 函数；读到 0，表示这个 Section 读取结束，执行 T_EOF 代码段，调用 EndSection 函数。</p>
+<p>ActionParser, ServiceParser, ImportParser 都是 SectionParser 的子类，SectionParser 有四个虚函数：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">SectionParser</span> &#123;</span><br><span class="line">  <span class="keyword">public</span>:</span><br><span class="line">    <span class="keyword">virtual</span> ~<span class="built_in">SectionParser</span>() &#123;&#125;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> Result&lt;<span class="type">void</span>&gt; <span class="title">ParseSection</span><span class="params">(std::vector&lt;std::string&gt;&amp;&amp; args, <span class="type">const</span> std::string&amp; filename,</span></span></span><br><span class="line"><span class="params"><span class="function">                                      <span class="type">int</span> line)</span> </span>= <span class="number">0</span>;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> Result&lt;<span class="type">void</span>&gt; <span class="title">ParseLineSection</span><span class="params">(std::vector&lt;std::string&gt;&amp;&amp;, <span class="type">int</span>)</span> </span>&#123; <span class="keyword">return</span> &#123;&#125;; &#125;;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> Result&lt;<span class="type">void</span>&gt; <span class="title">EndSection</span><span class="params">()</span> </span>&#123; <span class="keyword">return</span> &#123;&#125;; &#125;;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> <span class="type">void</span> <span class="title">EndFile</span><span class="params">()</span></span>&#123;&#125;;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p><a target="_blank" rel="noopener" href="https://android.googlesource.com/platform/system/core/+/refs/tags/android-11.0.0_r25/init/action_parser.cpp">system&#x2F;core&#x2F;init&#x2F;action_parser.cpp</a></p>
+<h6 id="2-4-3-1-ActionParser"><a href="#2-4-3-1-ActionParser" class="headerlink" title="2.4.3.1 ActionParser"></a>2.4.3.1 ActionParser</h6><p><strong>ParseSection</strong></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">Result&lt;<span class="type">void</span>&gt; <span class="title">ActionParser::ParseSection</span><span class="params">(std::vector&lt;std::string&gt;&amp;&amp; args,</span></span></span><br><span class="line"><span class="params"><span class="function">                                        <span class="type">const</span> std::string&amp; filename, <span class="type">int</span> line)</span> </span>&#123;</span><br><span class="line">    ...</span><br><span class="line">    std::string event_trigger;</span><br><span class="line">    std::map&lt;std::string, std::string&gt; property_triggers;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (<span class="keyword">auto</span> result =</span><br><span class="line">                <span class="built_in">ParseTriggers</span>(triggers, action_subcontext, &amp;event_trigger, &amp;property_triggers); <span class="comment">// 解析 traggers</span></span><br><span class="line">        !result.<span class="built_in">ok</span>()) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">Error</span>() &lt;&lt; <span class="string">&quot;ParseTriggers() failed: &quot;</span> &lt;&lt; result.<span class="built_in">error</span>();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">auto</span> action = std::<span class="built_in">make_unique</span>&lt;Action&gt;(<span class="literal">false</span>, action_subcontext, filename, line, event_trigger,</span><br><span class="line">                                           property_triggers);</span><br><span class="line"></span><br><span class="line">    action_ = std::<span class="built_in">move</span>(action);</span><br><span class="line">    <span class="keyword">return</span> &#123;&#125;;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>调用 ParseTraggers 函数</p>
+<p><strong>ParseTriggers</strong></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">Result&lt;<span class="type">void</span>&gt; <span class="title">ParseTriggers</span><span class="params">(<span class="type">const</span> std::vector&lt;std::string&gt;&amp; args, Subcontext* subcontext,</span></span></span><br><span class="line"><span class="params"><span class="function">                           std::string* event_trigger,</span></span></span><br><span class="line"><span class="params"><span class="function">                           std::map&lt;std::string, std::string&gt;* property_triggers)</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="type">const</span> <span class="type">static</span> std::string <span class="title">prop_str</span><span class="params">(<span class="string">&quot;property:&quot;</span>)</span></span>;</span><br><span class="line">    <span class="keyword">for</span> (std::<span class="type">size_t</span> i = <span class="number">0</span>; i &lt; args.<span class="built_in">size</span>(); ++i) &#123;</span><br><span class="line">        ...</span><br><span class="line">        <span class="keyword">if</span> (!args[i].<span class="built_in">compare</span>(<span class="number">0</span>, prop_str.<span class="built_in">length</span>(), prop_str)) &#123;</span><br><span class="line">            <span class="keyword">if</span> (<span class="keyword">auto</span> result = <span class="built_in">ParsePropertyTrigger</span>(args[i], subcontext, property_triggers);</span><br><span class="line">                !result.<span class="built_in">ok</span>()) &#123;</span><br><span class="line">                <span class="keyword">return</span> result;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="keyword">if</span> (!event_trigger-&gt;<span class="built_in">empty</span>()) &#123;</span><br><span class="line">                <span class="keyword">return</span> <span class="built_in">Error</span>() &lt;&lt; <span class="string">&quot;multiple event triggers are not allowed&quot;</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">if</span> (<span class="keyword">auto</span> result = <span class="built_in">ValidateEventTrigger</span>(args[i]); !result.<span class="built_in">ok</span>()) &#123;</span><br><span class="line">                <span class="keyword">return</span> result;</span><br><span class="line">            &#125;</span><br><span class="line">            </span><br><span class="line">            *event_trigger = args[i];</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>对 property tragger 调用 ParsePropertyTrigger 函数，ParsePropertyTrigger 作用是把 property 以 “&#x3D;” 分割为 name-value，存入 property_triggers map 中；对于 event tragger，赋值给 event_trigger 字符串。</p>
+<p>所以 ParseSection 主要工作是创建一个 Action 对象，将当前 Section 的 tragger 条件记录到这个对象中，分布把 event tragger 和 property tragger 赋值给 event_trigger 字符串和 property_triggers map，最后把这个 action move 给 action_parser.h 中定义的 <code>action_</code> 这个 vector 中。</p>
+<p><strong>ParseLineSection</strong></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">Result&lt;<span class="type">void</span>&gt; <span class="title">ActionParser::ParseLineSection</span><span class="params">(std::vector&lt;std::string&gt;&amp;&amp; args, <span class="type">int</span> line)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> action_ ? action_-&gt;<span class="built_in">AddCommand</span>(std::<span class="built_in">move</span>(args), line) : Result&lt;<span class="type">void</span>&gt;&#123;&#125;;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><a target="_blank" rel="noopener" href="https://android.googlesource.com/platform/system/core/+/refs/tags/android-11.0.0_r25/init/action.cpp">system&#x2F;core&#x2F;init&#x2F;action.cpp</a></p>
+<p><strong>AddCommand</strong></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">Result&lt;<span class="type">void</span>&gt; <span class="title">Action::AddCommand</span><span class="params">(std::vector&lt;std::string&gt;&amp;&amp; args, <span class="type">int</span> line)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (!function_map_) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">Error</span>() &lt;&lt; <span class="string">&quot;no function map available&quot;</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">auto</span> map_result = function_map_-&gt;<span class="built_in">Find</span>(args);</span><br><span class="line">    <span class="keyword">if</span> (!map_result.<span class="built_in">ok</span>()) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">Error</span>() &lt;&lt; map_result.<span class="built_in">error</span>();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    commands_.<span class="built_in">emplace_back</span>(map_result-&gt;function, map_result-&gt;run_in_subcontext, std::<span class="built_in">move</span>(args),</span><br><span class="line">                           line);</span><br><span class="line">    <span class="keyword">return</span> &#123;&#125;;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>AddCommand 函数就是查找对应的执行函数，把信息存入 <code>commands_</code> 这个 vector（定义在 action.h 中），而调用 AddCommand 函数的是 <code>action_</code>（定义在 action_parser.h中），即把信息存入 <code>action_</code>  对象。</p>
+<p><a target="_blank" rel="noopener" href="https://android.googlesource.com/platform/system/core/+/refs/tags/android-11.0.0_r25/init/action_parser.cpp">system&#x2F;core&#x2F;init&#x2F;action_parser.cpp</a></p>
+<p><strong>EndSection</strong></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">Result&lt;<span class="type">void</span>&gt; <span class="title">ActionParser::EndSection</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (action_ &amp;&amp; action_-&gt;<span class="built_in">NumCommands</span>() &gt; <span class="number">0</span>) &#123;</span><br><span class="line">        action_manager_-&gt;<span class="built_in">AddAction</span>(std::<span class="built_in">move</span>(action_));</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> &#123;&#125;;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>AddAction 函数作用是把前两步构造的 <code>action_</code> 存入 <code>action_manager_</code>的 <code>action_</code> vector 数组容器中。</p>
+<p><strong>总结</strong></p>
+<ul>
+<li><strong>ParseSection</strong>：当一个 Section 第一次遇到时，调用此方法；创建一个 Action 对象，将当前 Section 的 tragger 条件记录到这个对象中，再把这个 action move 给 <a target="_blank" rel="noopener" href="https://android.googlesource.com/platform/system/core/+/refs/tags/android-11.0.0_r25/init/action_parser.h">system&#x2F;core&#x2F;init&#x2F;action_parser.h</a> 中定义的 <code>action_</code> 这个 vector 中；</li>
+<li><strong>ParseLineSection</strong>：在遇到下一个 Section 之前，在每个后续行上都会调用此函数；查找对应的执行函数，把信息也存入<code>action_</code>中；</li>
+<li><strong>EndSection</strong>：当一个新的 Section 被发现或者在文件末尾时调用；把前两步构造的 <code>action_</code> 存入 <code>action_manager_</code>的 <code>action_</code> vector 数组容器中；</li>
+<li><strong>EndFile</strong>：在文件末尾调用；空实现；</li>
+</ul>
+<h6 id="2-4-3-2-ServiceParser"><a href="#2-4-3-2-ServiceParser" class="headerlink" title="2.4.3.2 ServiceParser"></a>2.4.3.2 ServiceParser</h6><p>ServiceParser 处理和 ActionParser 差不多，区别在于 Action 将执行函数存起来等待 Trigger 触发时执行，Service 找到执行函数后是马上执行，不再详细分析。</p>
+<h6 id="2-4-3-3-ImportParser"><a href="#2-4-3-3-ImportParser" class="headerlink" title="2.4.3.3 ImportParser"></a>2.4.3.3 ImportParser</h6><p>ImportParser 工作内容是在 ParseSection 函数中利用 ExpandProps 处理参数，将结果存入 <code>imports_</code> 数组中。</p>
+<h5 id="2-4-4-QueueBuiltinAction"><a href="#2-4-4-QueueBuiltinAction" class="headerlink" title="2.4.4 QueueBuiltinAction"></a>2.4.4 QueueBuiltinAction</h5><p><a target="_blank" rel="noopener" href="https://android.googlesource.com/platform/system/core/+/refs/tags/android-11.0.0_r25/init/init.cpp">system&#x2F;core&#x2F;init&#x2F;init.cpp</a></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">int</span> <span class="title">SecondStageMain</span><span class="params">(<span class="type">int</span> argc, <span class="type">char</span>** argv)</span> </span>&#123;</span><br><span class="line">    am.<span class="built_in">QueueBuiltinAction</span>(SetupCgroupsAction, <span class="string">&quot;SetupCgroups&quot;</span>);</span><br><span class="line">    am.<span class="built_in">QueueBuiltinAction</span>(SetKptrRestrictAction, <span class="string">&quot;SetKptrRestrict&quot;</span>);</span><br><span class="line">    am.<span class="built_in">QueueBuiltinAction</span>(TestPerfEventSelinuxAction, <span class="string">&quot;TestPerfEventSelinux&quot;</span>);</span><br></pre></td></tr></table></figure>
+
+<p>用于添加 Action，第二个参数是触发条件，第一个参数是 Action 触发后的执行命令；</p>
+<h5 id="2-4-5-QueueEventTrigger"><a href="#2-4-5-QueueEventTrigger" class="headerlink" title="2.4.5 QueueEventTrigger"></a>2.4.5 QueueEventTrigger</h5><p> - exec(“selinux_setup”) –&gt; main.cpp.main() –&gt; selinux.cpp.SetupSelinux() - exec(“second_stage”) –&gt; main.cpp.main() –&gt; init.cpp.SecondStageMain() - LoadBootScripts() –&gt; </p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">int</span> <span class="title">SecondStageMain</span><span class="params">(<span class="type">int</span> argc, <span class="type">char</span>** argv)</span> </span>&#123;</span><br><span class="line">    am.<span class="built_in">QueueEventTrigger</span>(<span class="string">&quot;early-init&quot;</span>);</span><br></pre></td></tr></table></figure>
+
+<p>构造了一个 EventTrigger 对象，放到队列中存起来；</p>
+<h5 id="2-4-6-触发"><a href="#2-4-6-触发" class="headerlink" title="2.4.6 触发"></a>2.4.6 触发</h5><p>准备好各种队列、数组的数据后，开始触发事件</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">int</span> <span class="title">SecondStageMain</span><span class="params">(<span class="type">int</span> argc, <span class="type">char</span>** argv)</span> </span>&#123;</span><br><span class="line">    ...</span><br><span class="line">    <span class="keyword">while</span> (<span class="literal">true</span>) &#123;</span><br><span class="line">        <span class="comment">// By default, sleep until something happens.</span></span><br><span class="line">        <span class="comment">// epoll 系统轮询等待消息处理</span></span><br><span class="line">        <span class="keyword">auto</span> epoll_timeout = std::optional&lt;std::chrono::milliseconds&gt;&#123;&#125;; <span class="comment">// epoll 的阻塞时间</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">auto</span> shutdown_command = shutdown_state.<span class="built_in">CheckShutdown</span>();</span><br><span class="line">        <span class="keyword">if</span> (shutdown_command) &#123;</span><br><span class="line">            <span class="built_in">HandlePowerctlMessage</span>(*shutdown_command);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (!(prop_waiter_state.<span class="built_in">MightBeWaiting</span>() || Service::<span class="built_in">is_exec_service_running</span>())) &#123;</span><br><span class="line">            am.<span class="built_in">ExecuteOneCommand</span>(); <span class="comment">// 执行一个 command</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (!<span class="built_in">IsShuttingDown</span>()) &#123;</span><br><span class="line">            <span class="keyword">auto</span> next_process_action_time = <span class="built_in">HandleProcessActions</span>();</span><br><span class="line"></span><br><span class="line">            <span class="comment">// If there&#x27;s a process that needs restarting, wake up in time for that.</span></span><br><span class="line">            <span class="comment">// 如果有需要重新启动的进程，epoll_timeout 设置为重启等待时间</span></span><br><span class="line">            <span class="keyword">if</span> (next_process_action_time) &#123;</span><br><span class="line">                epoll_timeout = std::chrono::<span class="built_in">ceil</span>&lt;std::chrono::milliseconds&gt;(</span><br><span class="line">                        *next_process_action_time - boot_clock::<span class="built_in">now</span>());</span><br><span class="line">                <span class="keyword">if</span> (*epoll_timeout &lt; <span class="number">0</span>ms) epoll_timeout = <span class="number">0</span>ms;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (!(prop_waiter_state.<span class="built_in">MightBeWaiting</span>() || Service::<span class="built_in">is_exec_service_running</span>())) &#123;</span><br><span class="line">            <span class="comment">// If there&#x27;s more work to do, wake up again immediately.</span></span><br><span class="line">            <span class="keyword">if</span> (am.<span class="built_in">HasMoreCommands</span>()) epoll_timeout = <span class="number">0</span>ms;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">auto</span> pending_functions = epoll.<span class="built_in">Wait</span>(epoll_timeout);</span><br><span class="line">        <span class="keyword">if</span> (!pending_functions.<span class="built_in">ok</span>()) &#123;</span><br><span class="line">            <span class="built_in">LOG</span>(ERROR) &lt;&lt; pending_functions.<span class="built_in">error</span>();</span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> (!pending_functions-&gt;<span class="built_in">empty</span>()) &#123;</span><br><span class="line">            <span class="comment">// We always reap children before responding to the other pending functions. This is to</span></span><br><span class="line">            <span class="comment">// prevent a race where other daemons see that a service has exited and ask init to</span></span><br><span class="line">            <span class="comment">// start it again via ctl.start before init has reaped it.</span></span><br><span class="line">            <span class="built_in">ReapAnyOutstandingChildren</span>();</span><br><span class="line">            <span class="keyword">for</span> (<span class="type">const</span> <span class="keyword">auto</span>&amp; function : *pending_functions) &#123;</span><br><span class="line">                (*function)();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (!<span class="built_in">IsShuttingDown</span>()) &#123;</span><br><span class="line">            <span class="built_in">HandleControlMessages</span>();</span><br><span class="line">            <span class="built_in">SetUsbController</span>();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>ExecuteOneCommand</strong></p>
+<p><a target="_blank" rel="noopener" href="https://android.googlesource.com/platform/system/core/+/refs/tags/android-11.0.0_r25/init/action_manager.cpp">system&#x2F;core&#x2F;init&#x2F;action_manager.cpp</a></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">ActionManager::ExecuteOneCommand</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">auto</span> lock = std::lock_guard&#123;event_queue_lock_&#125;;</span><br><span class="line">        <span class="comment">// Loop through the event queue until we have an action to execute</span></span><br><span class="line">        <span class="keyword">while</span> (current_executing_actions_.<span class="built_in">empty</span>() &amp;&amp; !event_queue_.<span class="built_in">empty</span>()) &#123;</span><br><span class="line">            <span class="keyword">for</span> (<span class="type">const</span> <span class="keyword">auto</span>&amp; action : actions_) &#123;</span><br><span class="line">                <span class="comment">// 遍历 actions_，event_queue 是 trigger 队列，满足当前 trigger 条件的 action 添加到 current_executing_actions_</span></span><br><span class="line">                <span class="keyword">if</span> (std::<span class="built_in">visit</span>([&amp;action](<span class="type">const</span> <span class="keyword">auto</span>&amp; event) &#123; <span class="keyword">return</span> action-&gt;<span class="built_in">CheckEvent</span>(event); &#125;,</span><br><span class="line">                               event_queue_.<span class="built_in">front</span>())) &#123;</span><br><span class="line">                    current_executing_actions_.<span class="built_in">emplace</span>(action.<span class="built_in">get</span>());</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            event_queue_.<span class="built_in">pop</span>(); <span class="comment">// 从 trigger 列表中移除一个 trigger</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (current_executing_actions_.<span class="built_in">empty</span>()) &#123;</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 从满足 trigger 的 actions 中取出一个 action</span></span><br><span class="line">    <span class="keyword">auto</span> action = current_executing_actions_.<span class="built_in">front</span>();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (current_command_ == <span class="number">0</span>) &#123;</span><br><span class="line">        std::string trigger_name = action-&gt;<span class="built_in">BuildTriggersString</span>();</span><br><span class="line">        <span class="built_in">LOG</span>(INFO) &lt;&lt; <span class="string">&quot;processing action (&quot;</span> &lt;&lt; trigger_name &lt;&lt; <span class="string">&quot;) from (&quot;</span> &lt;&lt; action-&gt;<span class="built_in">filename</span>()</span><br><span class="line">                  &lt;&lt; <span class="string">&quot;:&quot;</span> &lt;&lt; action-&gt;<span class="built_in">line</span>() &lt;&lt; <span class="string">&quot;)&quot;</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 执行取出 action 的第 current_command_ 个 command</span></span><br><span class="line">    action-&gt;<span class="built_in">ExecuteOneCommand</span>(current_command_);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// If this was the last command in the current action, then remove</span></span><br><span class="line">    <span class="comment">// the action from the executing list.</span></span><br><span class="line">    <span class="comment">// If this action was oneshot, then also remove it from actions_.</span></span><br><span class="line">    ++current_command_; <span class="comment">//  current_command_ 加 1</span></span><br><span class="line">    <span class="comment">// 加 1 后 current_command 等于 action 的 command 条数，即上面执行的 current_command 是此 action 中的最后一条 command</span></span><br><span class="line">    <span class="keyword">if</span> (current_command_ == action-&gt;<span class="built_in">NumCommands</span>()) &#123;</span><br><span class="line">        current_executing_actions_.<span class="built_in">pop</span>(); <span class="comment">// 移除 current_executing_actions_ 中的 action</span></span><br><span class="line">        current_command_ = <span class="number">0</span>;</span><br><span class="line">        <span class="comment">// 如果 action 只执行一次，则把此 action 从 actions_ 中移除</span></span><br><span class="line">        <span class="keyword">if</span> (action-&gt;<span class="built_in">oneshot</span>()) &#123;</span><br><span class="line">            <span class="keyword">auto</span> eraser = [&amp;action](std::unique_ptr&lt;Action&gt;&amp; a) &#123; <span class="keyword">return</span> a.<span class="built_in">get</span>() == action; &#125;;</span><br><span class="line">            actions_.<span class="built_in">erase</span>(std::<span class="built_in">remove_if</span>(actions_.<span class="built_in">begin</span>(), actions_.<span class="built_in">end</span>(), eraser),</span><br><span class="line">                           actions_.<span class="built_in">end</span>());</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>triggers 包含 <code>early-init</code>, <code>init</code>, <code>late-init</code>, 在 <code>late-init</code> 中又 trigger 了很多，包含 <code>early-boot</code>, <code>boot</code> 等，接下来要分析的 Zygote 是在 <code>on late-init</code> section 中；</p>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div>Donate comment here.</div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechatpay.jpg" alt="Ranger Zhou 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.jpg" alt="Ranger Zhou 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>Ranger Zhou
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://rangerzhou.top/2021/07/10/Android/AndroidDevelop_003_kernel_init/" title="Android - init 进程启动">http://rangerzhou.top/2021/07/10/Android/AndroidDevelop_003_kernel_init/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/06/15/Android/AndroidDevelop_002_kernel_idle_kthreadd/" rel="prev" title="Android - idle/kthreadd 进程启动">
+      <i class="fa fa-chevron-left"></i> Android - idle/kthreadd 进程启动
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2021/08/01/Android/AndroidDevelop_004_Zygote/" rel="next" title="Android - Zygote 进程启动">
+      Android - Zygote 进程启动 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+      <div class="tabs tabs-comment">
+        <ul class="nav-tabs">
+            <li class="tab"><a href="#comment-disqus">disqus</a></li>
+            <li class="tab"><a href="#comment-gitalk">gitalk</a></li>
+            <li class="tab"><a href="#comment-livere">livere</a></li>
+        </ul>
+        <div class="tab-content">
+            <div class="tab-pane disqus" id="comment-disqus">
+              
+  <div class="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
+            </div>
+            <div class="tab-pane gitalk" id="comment-gitalk">
+              <div class="comments" id="gitalk-container"></div>
+            </div>
+            <div class="tab-pane livere" id="comment-livere">
+              
+  <div class="comments">
+    <div id="lv-container" data-id="city" data-uid="MTAyMC8yOTcyNS82Mjky"></div>
+  </div>
+  
+            </div>
+        </div>
+      </div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E5%86%85%E6%A0%B8%E7%A9%BA%E9%97%B4"><span class="nav-text">1. 内核空间</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E7%94%A8%E6%88%B7%E7%A9%BA%E9%97%B4"><span class="nav-text">2. 用户空间</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#2-1-init-%E8%BF%9B%E7%A8%8B%E5%85%A5%E5%8F%A3"><span class="nav-text">2.1 init 进程入口</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-2-FirstStageMain"><span class="nav-text">2.2 FirstStageMain</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-3-SetupSelinux"><span class="nav-text">2.3 SetupSelinux</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-4-SecondStageMain"><span class="nav-text">2.4 SecondStageMain</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#2-4-1-PropertyInit"><span class="nav-text">2.4.1 PropertyInit</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#2-4-2-StartPropertyService"><span class="nav-text">2.4.2 StartPropertyService</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#2-4-3-LoadBootScripts"><span class="nav-text">2.4.3 LoadBootScripts</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#2-4-3-1-ActionParser"><span class="nav-text">2.4.3.1 ActionParser</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#2-4-3-2-ServiceParser"><span class="nav-text">2.4.3.2 ServiceParser</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#2-4-3-3-ImportParser"><span class="nav-text">2.4.3.3 ImportParser</span></a></li></ol></li><li class="nav-item nav-level-5"><a class="nav-link" href="#2-4-4-QueueBuiltinAction"><span class="nav-text">2.4.4 QueueBuiltinAction</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#2-4-5-QueueEventTrigger"><span class="nav-text">2.4.5 QueueEventTrigger</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#2-4-6-%E8%A7%A6%E5%8F%91"><span class="nav-text">2.4.6 触发</span></a></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Ranger Zhou</p>
+  <div class="site-description" itemprop="description">我是一个小流氓我从来也不浪，有一天我心血来潮耍了个流氓，我嘴里吹着小口哨我心里好得意，不知怎么哗啦啦啦啦我摔了一身泥</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">63</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">8</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">16</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/rangerzhou" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;rangerzhou" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:rangero_o@qq.com" title="E-Mail → mailto:rangero_o@qq.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://rangerzhou.taobao.com/" title="Taobao → http:&#x2F;&#x2F;rangerzhou.taobao.com&#x2F;" rel="noopener" target="_blank"><i class="fab fa-youtube fa-fw"></i>Taobao</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="/images/wechat.jpg" title="WeChat → &#x2F;images&#x2F;wechat.jpg"><i class="fab fa-youtube fa-fw"></i>WeChat</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://blog.csdn.net/ranger0220?viewmode=contents" title="CSDN → http:&#x2F;&#x2F;blog.csdn.net&#x2F;ranger0220?viewmode&#x3D;contents" rel="noopener" target="_blank"><i class="fab fa-youtube fa-fw"></i>CSDN</a>
+      </span>
+  </div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      墙裂推荐
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="http://rangerzhou.taobao.com/" title="http:&#x2F;&#x2F;rangerzhou.taobao.com" rel="noopener" target="_blank">Taobao</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2016 – 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Ranger Zhou</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+<script data-pjax>
+  (function() {
+    function leancloudSelector(url) {
+      url = encodeURI(url);
+      return document.getElementById(url).querySelector('.leancloud-visitors-count');
+    }
+
+    function addCount(Counter) {
+      var visitors = document.querySelector('.leancloud_visitors');
+      var url = decodeURI(visitors.id);
+      var title = visitors.dataset.flagTitle;
+
+      Counter('get', '/classes/Counter?where=' + encodeURIComponent(JSON.stringify({ url })))
+        .then(response => response.json())
+        .then(({ results }) => {
+          if (results.length > 0) {
+            var counter = results[0];
+            leancloudSelector(url).innerText = counter.time + 1;
+            Counter('put', '/classes/Counter/' + counter.objectId, { time: { '__op': 'Increment', 'amount': 1 } })
+              .catch(error => {
+                console.error('Failed to save visitor count', error);
+              });
+          } else {
+              Counter('post', '/classes/Counter', { title, url, time: 1 })
+                .then(response => response.json())
+                .then(() => {
+                  leancloudSelector(url).innerText = 1;
+                })
+                .catch(error => {
+                  console.error('Failed to create', error);
+                });
+          }
+        })
+        .catch(error => {
+          console.error('LeanCloud Counter Error', error);
+        });
+    }
+
+    function showTime(Counter) {
+      var visitors = document.querySelectorAll('.leancloud_visitors');
+      var entries = [...visitors].map(element => {
+        return decodeURI(element.id);
+      });
+
+      Counter('get', '/classes/Counter?where=' + encodeURIComponent(JSON.stringify({ url: { '$in': entries } })))
+        .then(response => response.json())
+        .then(({ results }) => {
+          for (let url of entries) {
+            let target = results.find(item => item.url === url);
+            leancloudSelector(url).innerText = target ? target.time : 0;
+          }
+        })
+        .catch(error => {
+          console.error('LeanCloud Counter Error', error);
+        });
+    }
+
+    let { app_id, app_key, server_url } = {"enable":true,"app_id":"U9g4mWmsQg8FjOE3xsqUy9Df-gzGzoHsz","app_key":"24cDno14OiDhAreVmoEjzqns","server_url":"https://u9g4mwms.lc-cn-n1-shared.com","security":false};
+    function fetchData(api_server) {
+      var Counter = (method, url, data) => {
+        return fetch(`${api_server}/1.1${url}`, {
+          method,
+          headers: {
+            'X-LC-Id'     : app_id,
+            'X-LC-Key'    : app_key,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(data)
+        });
+      };
+      if (CONFIG.page.isPost) {
+        if (CONFIG.hostname !== location.hostname) return;
+        addCount(Counter);
+      } else if (document.querySelectorAll('.post-title-link').length >= 1) {
+        showTime(Counter);
+      }
+    }
+
+    let api_server = app_id.slice(-9) !== '-MdYXbMMI' ? server_url : `https://${app_id.slice(0, 8).toLowerCase()}.api.lncldglobal.com`;
+
+    if (api_server) {
+      fetchData(api_server);
+    } else {
+      fetch('https://app-router.leancloud.cn/2/route?appId=' + app_id)
+        .then(response => response.json())
+        .then(({ api_server }) => {
+          fetchData('https://' + api_server);
+        });
+    }
+  })();
+</script>
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/pjax/pjax.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/pangu@4/dist/browser/pangu.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '#page-configurations',
+    '.content-wrap',
+    '.post-toc-wrap',
+    '.languages',
+    '#pjax'
+  ],
+  switches: {
+    '.post-toc-wrap': Pjax.switches.innerHTML
+  },
+  analytics: false,
+  cacheBust: false,
+  scrollTo : !CONFIG.bookmark.enable
+});
+
+window.addEventListener('pjax:success', () => {
+  document.querySelectorAll('script[data-pjax], script#page-configurations, #pjax script').forEach(element => {
+    var code = element.text || element.textContent || element.innerHTML || '';
+    var parent = element.parentNode;
+    parent.removeChild(element);
+    var script = document.createElement('script');
+    if (element.id) {
+      script.id = element.id;
+    }
+    if (element.className) {
+      script.className = element.className;
+    }
+    if (element.type) {
+      script.type = element.type;
+    }
+    if (element.src) {
+      script.src = element.src;
+      // Force synchronous loading of peripheral JS.
+      script.async = false;
+    }
+    if (element.dataset.pjax !== undefined) {
+      script.dataset.pjax = '';
+    }
+    if (code !== '') {
+      script.appendChild(document.createTextNode(code));
+    }
+    parent.appendChild(script);
+  });
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+
+
+  
+  <script data-pjax>
+    (function(){
+      var canonicalURL, curProtocol;
+      //Get the <link> tag
+      var x=document.getElementsByTagName("link");
+		//Find the last canonical URL
+		if(x.length > 0){
+			for (i=0;i<x.length;i++){
+				if(x[i].rel.toLowerCase() == 'canonical' && x[i].href){
+					canonicalURL=x[i].href;
+				}
+			}
+		}
+    //Get protocol
+	    if (!canonicalURL){
+	    	curProtocol = window.location.protocol.split(':')[0];
+	    }
+	    else{
+	    	curProtocol = canonicalURL.split(':')[0];
+	    }
+      //Get current URL if the canonical URL does not exist
+	    if (!canonicalURL) canonicalURL = window.location.href;
+	    //Assign script content. Replace current URL with the canonical URL
+      !function(){var e=/([http|https]:\/\/[a-zA-Z0-9\_\.]+\.baidu\.com)/gi,r=canonicalURL,t=document.referrer;if(!e.test(r)){var n=(String(curProtocol).toLowerCase() === 'https')?"https://sp0.baidu.com/9_Q4simg2RQJ8t7jm9iCKT-xh_/s.gif":"//api.share.baidu.com/s.gif";t?(n+="?r="+encodeURIComponent(document.referrer),r&&(n+="&l="+r)):r&&(n+="?l="+r);var i=new Image;i.src=n}}(window);})();
+  </script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <div id="pjax">
+  
+
+  
+
+<script>
+  var disqus_config = function() {
+    this.page.url = "http://rangerzhou.top/2021/07/10/Android/AndroidDevelop_003_kernel_init/";
+    this.page.identifier = "2021/07/10/Android/AndroidDevelop_003_kernel_init/";
+    this.page.title = "Android - init 进程启动";
+    };
+  NexT.utils.loadComments(document.querySelector('#disqus_thread'), () => {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: disqus_config
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://rangerzhou.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  });
+</script>
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : 'b7bb504993135f5a2eab',
+      clientSecret: '6f83aec5c45d75e248e2914be90c4601e2e1dc44',
+      repo        : 'rangerzhou.github.io',
+      owner       : 'rangerzhou',
+      admin       : ['rangerzhou'],
+      id          : 'f0b87632ae56d1391333e1b13498c5c0',
+        language: 'zh-CN',
+      distractionFreeMode: true
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
+
+<script>
+NexT.utils.loadComments(document.querySelector('#lv-container'), () => {
+  window.livereOptions = {
+    refer: location.pathname.replace(CONFIG.root, '').replace('index.html', '')
+  };
+  (function(d, s) {
+    var j, e = d.getElementsByTagName(s)[0];
+    if (typeof LivereTower === 'function') { return; }
+    j = d.createElement(s);
+    j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+    j.async = true;
+    e.parentNode.insertBefore(j, e);
+  })(document, 'script');
+});
+</script>
+
+    </div>
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/haru01.model.json"},"display":{"position":"left","width":300,"height":800},"mobile":{"show":false},"log":false});</script></body>
+</html>

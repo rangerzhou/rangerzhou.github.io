@@ -1,0 +1,1121 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.2.0">
+<!-- pjax：防止跳转页面音乐暂停 -->
+<script src="https://cdn.jsdelivr.net/npm/pjax@0.2.8/pjax.js"></script>
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/desert.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/desert.jpg">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <meta name="google-site-verification" content="OJnYjbr3wdT22qLrZSzyD9lAyBcXiXlEQ7-5wAnaWoQ">
+  <meta name="baidu-site-verification" content="vr4n4JeXgB">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-minimal.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"rangerzhou.top","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"manual"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":true,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":true,"nav":null,"activeClass":"gitalk"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="一. Ubuntu 18.04 安装1. Download Ubuntu-xxx.isohttps:&#x2F;&#x2F;www.ubuntu.com&#x2F;download&#x2F;desktop 制作优盘镜像时，选择 GPT 模式；机器启动时，选择UEFI，Security off">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Ubuntu18.04安装后必备操作">
+<meta property="og:url" content="http://rangerzhou.top/2018/10/30/Technical/Ubuntu18.04_installation/index.html">
+<meta property="og:site_name" content="RangerZhou">
+<meta property="og:description" content="一. Ubuntu 18.04 安装1. Download Ubuntu-xxx.isohttps:&#x2F;&#x2F;www.ubuntu.com&#x2F;download&#x2F;desktop 制作优盘镜像时，选择 GPT 模式；机器启动时，选择UEFI，Security off">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2018-10-30T02:22:22.000Z">
+<meta property="article:modified_time" content="2022-07-18T14:46:21.599Z">
+<meta property="article:author" content="Ranger Zhou">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://rangerzhou.top/2018/10/30/Technical/Ubuntu18.04_installation/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+<script src="//cdn.bootcss.com/pace/1.0.2/pace.min.js"></script>
+<link href="//cdn.bootcss.com/pace/1.0.2/themes/pink/pace-theme-flash.css" rel="stylesheet">
+
+  <title>Ubuntu18.04安装后必备操作 | RangerZhou</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-138158952-1"></script>
+    <script data-pjax>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-138158952-1');
+      }
+    </script>
+
+
+  <script data-pjax>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?24a6d3c4c0f292c5f682d26414c3994b";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+
+<!-- 加入APlayer音乐播放器 -->
+<link rel="stylesheet" href="/dist/APlayer.min.css">
+<div id="aplayer"></div>
+<script type="text/javascript" src="/dist/APlayer.min.js"></script>
+<script type="text/javascript" src="/dist/music.js"></script>
+
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">RangerZhou</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">Read the fucking source code</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-playlist">
+
+    <a href="/playlist/" rel="section"><i class="fa fa-music fa-fw"></i>歌单</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-commonweal">
+
+    <a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a>
+
+  </li>
+        <li class="menu-item menu-item-official">
+
+    <a href="/official" rel="section"><i class="fa fa-user fa-fw"></i>official</a>
+
+  </li>
+        <li class="menu-item menu-item-shop">
+
+    <a href="http://rangerzhou.taobao.com/" rel="noopener" target="_blank"><i class="fa fa-user fa-fw"></i>shop</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://rangerzhou.top/2018/10/30/Technical/Ubuntu18.04_installation/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Ranger Zhou">
+      <meta itemprop="description" content="我是一个小流氓我从来也不浪，有一天我心血来潮耍了个流氓，我嘴里吹着小口哨我心里好得意，不知怎么哗啦啦啦啦我摔了一身泥">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="RangerZhou">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Ubuntu18.04安装后必备操作
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2018-10-30 10:22:22" itemprop="dateCreated datePublished" datetime="2018-10-30T10:22:22+08:00">2018-10-30</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-07-18 22:46:21" itemprop="dateModified" datetime="2022-07-18T22:46:21+08:00">2022-07-18</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Technical/" itemprop="url" rel="index"><span itemprop="name">Technical</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/2018/10/30/Technical/Ubuntu18.04_installation/" class="post-meta-item leancloud_visitors" data-flag-title="Ubuntu18.04安装后必备操作" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="一-Ubuntu-18-04-安装"><a href="#一-Ubuntu-18-04-安装" class="headerlink" title="一. Ubuntu 18.04 安装"></a>一. Ubuntu 18.04 安装</h2><h3 id="1-Download-Ubuntu-xxx-iso"><a href="#1-Download-Ubuntu-xxx-iso" class="headerlink" title="1. Download Ubuntu-xxx.iso"></a>1. Download Ubuntu-xxx.iso</h3><p><a target="_blank" rel="noopener" href="https://www.ubuntu.com/download/desktop">https://www.ubuntu.com/download/desktop</a></p>
+<h3 id="制作优盘镜像时，选择-GPT-模式；"><a href="#制作优盘镜像时，选择-GPT-模式；" class="headerlink" title="制作优盘镜像时，选择 GPT 模式；"></a>制作优盘镜像时，选择 GPT 模式；</h3><p>机器启动时，选择UEFI，Security off</p>
+<span id="more"></span>
+
+<p>安装 Linux Mint 双硬盘分区方案：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">SSD 500G分区</span><br><span class="line">EFI 分区：1024M # 500M 足够</span><br><span class="line">/boot 分区：2048M</span><br><span class="line">/swap 分区：32768M # 等于内存大小</span><br><span class="line">/ 分区：102400M</span><br><span class="line">/home 分区： 剩余所有空间</span><br><span class="line"></span><br><span class="line">HDD 1T分区：</span><br><span class="line">/home/xxx/work # 挂载到 /home/xxx/ 目录下</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-挂载硬盘"><a href="#2-挂载硬盘" class="headerlink" title="2. 挂载硬盘"></a>2. 挂载硬盘</h3><p>查看硬盘信息</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">查看硬盘信息</span></span><br><span class="line">sudo fdisk -l</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">创建挂载目录</span></span><br><span class="line">mkdir ~/work</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">挂载</span></span><br><span class="line">mount /dev/sda1 ~/work</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">开机自动挂载</span></span><br><span class="line">sudo vim /etc/fstab</span><br><span class="line">/dev/sda1 ~/work（挂载目录） ext4（文件格式） defaults 0 0</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="二-Ubuntu-18-04-初始化"><a href="#二-Ubuntu-18-04-初始化" class="headerlink" title="二. Ubuntu 18.04 初始化"></a>二. Ubuntu 18.04 初始化</h2><h3 id="1-Update-and-Upgrade"><a href="#1-Update-and-Upgrade" class="headerlink" title="1. Update and Upgrade"></a>1. Update and Upgrade</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sudo apt update</span><br><span class="line">sudo apt upgrade</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-安装-Typora"><a href="#2-安装-Typora" class="headerlink" title="2. 安装 Typora"></a>2. 安装 Typora</h3><p><a target="_blank" rel="noopener" href="https://www.typora.io/#linux">https://www.typora.io/#linux</a></p>
+<h3 id="3-安装-Chrome"><a href="#3-安装-Chrome" class="headerlink" title="3. 安装 Chrome"></a>3. 安装 Chrome</h3><p><a target="_blank" rel="noopener" href="https://www.google.com/chrome/">https://www.google.com/chrome/</a></p>
+<h3 id="4-安装-Terminator"><a href="#4-安装-Terminator" class="headerlink" title="4. 安装 Terminator"></a>4. 安装 Terminator</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo apt install terminator</span><br></pre></td></tr></table></figure>
+
+<h3 id="5-安装搜狗输入法"><a href="#5-安装搜狗输入法" class="headerlink" title="5. 安装搜狗输入法"></a>5. 安装搜狗输入法</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">卸载ibus</span></span><br><span class="line">sudo apt remove ibus</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">清除ibus配置</span></span><br><span class="line">sudo apt purge ibus</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">卸载顶部面板任务栏上的键盘指示</span></span><br><span class="line">sudo  apt remove indicator-keyboard</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">安装fcitx输入法框架</span></span><br><span class="line">sudo apt install fcitx-table-wbpy fcitx-config-gtk</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">切换为 Fcitx输入法</span></span><br><span class="line">im-config -n fcitx</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">im-config 配置需要重启系统才能生效</span></span><br><span class="line">sudo shutdown -r now</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">下载安装包：https://pinyin.sogou.com/linux/?r=pinyin</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">安装搜狗输入法</span></span><br><span class="line">sudo dpkg -i ~/Downloads/sogoupinyin_2.2.0.0108_amd64.deb</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">修复损坏缺少的包</span></span><br><span class="line">sudo apt-get install -f</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">打开 Fcitx 输入法配置</span></span><br><span class="line">fcitx-config-gtk3</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">点击 + 添加搜狗输入法，并把搜狗移动到顶端</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">输入法皮肤透明</span></span><br><span class="line">fcitx设置 &gt;&gt;附加组件&gt;&gt;勾选高级 &gt;&gt;取消经典界面</span><br><span class="line"><span class="meta prompt_">Configure&gt;</span><span class="language-bash">&gt;  Addon  &gt;&gt;Advanced&gt;&gt;Classic</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>在 Linux mint 20(Ubuntu 20.04) 中安装搜狗输入法</strong></p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://pinyin.sogou.com/linux/?r=pinyin">下载安装包并双击安装</a></li>
+<li>注销电脑</li>
+<li>点击电脑左下角，输入 fcitx，打开 Fcitx Configuration（或者使用命令：<code>fcitx-config-gtk3</code>），点击 + ，取消勾选 <em>Only Show Current Language</em> ，添加搜狗输入法即可。</li>
+</ul>
+<h3 id="6-sudo-no-password"><a href="#6-sudo-no-password" class="headerlink" title="6. sudo no password"></a>6. sudo no password</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">sudo visudo</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">在末尾添加如下</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">To allow a user to run all commands using sudo without a password</span></span><br><span class="line">ranger ALL=(ALL) NOPASSWD: ALL</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">All member of the sys group will run all commands using sudo without a passwo$</span></span><br><span class="line"><span class="meta prompt_">%</span><span class="language-bash">sys ALL=(ALL) NOPASSWD: ALL</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h3 id="7-安装-wps"><a href="#7-安装-wps" class="headerlink" title="7. 安装 wps"></a>7. 安装 wps</h3><p>下载地址：<a target="_blank" rel="noopener" href="http://www.wps.cn/product/wpslinux/">http://www.wps.cn/product/wpslinux/</a></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sudo dpkg -i libpng12-0*.deb  #安装依赖</span><br><span class="line">sudo dpkg -i wps*.deb  #安装wps</span><br></pre></td></tr></table></figure>
+
+<h3 id="8-vim-配置"><a href="#8-vim-配置" class="headerlink" title="8. vim 配置"></a>8. vim 配置</h3><p>配置文件路径：<code>/etc/vim/vimrc</code> ，对所有用户生效，用户个人的配置在 <code>~/.vimrc</code> 。</p>
+<p>参考：<a target="_blank" rel="noopener" href="http://www.ruanyifeng.com/blog/2018/09/vimrc.html">http://www.ruanyifeng.com/blog/2018/09/vimrc.html</a></p>
+<h3 id="9-终端-tab-忽略大小写"><a href="#9-终端-tab-忽略大小写" class="headerlink" title="9. 终端 tab 忽略大小写"></a>9. 终端 tab 忽略大小写</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">vim ~/.inputrc</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">添加如下</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash"><span class="keyword">do</span> not show hidden files <span class="keyword">in</span> the list</span></span><br><span class="line">set match-hidden-files off</span><br><span class="line"><span class="meta prompt_"> </span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">auto complete ignoring <span class="keyword">case</span></span></span><br><span class="line">set show-all-if-ambiguous on</span><br><span class="line">set completion-ignore-case on #忽略大小写</span><br><span class="line"></span><br><span class="line">&quot;\e[5~&quot;: history-search-backward</span><br><span class="line">&quot;\e[6~&quot;: history-search-forward</span><br></pre></td></tr></table></figure>
+
+<h3 id="10-安装-git"><a href="#10-安装-git" class="headerlink" title="10. 安装 git"></a>10. 安装 git</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">sudo apt install git</span><br><span class="line">git config --global user.name &quot;Your Name&quot;</span><br><span class="line">git config --global user.email &quot;email@example.com&quot;</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">通过命令 git config –list,查看是否设置成功</span></span><br><span class="line">ranger@zr:~ $ git config --list</span><br><span class="line">user.name=xxx.xxxx</span><br><span class="line">user.email=xxx.xxxx@xxxxx.com</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="11-安装卸载-JDK"><a href="#11-安装卸载-JDK" class="headerlink" title="11. 安装卸载 JDK"></a>11. 安装卸载 JDK</h3><h4 id="11-1-安装-openjdk"><a href="#11-1-安装-openjdk" class="headerlink" title="11.1 安装 openjdk"></a>11.1 安装 openjdk</h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">ubuntu使用的是openjdk, 输入命令:</span></span><br><span class="line">apt-cache search openjdk</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">找到我们需要安装的jdk版本</span></span><br><span class="line">sudo apt install openjdk-11-jdk</span><br><span class="line">java -version</span><br></pre></td></tr></table></figure>
+
+<h4 id="11-2-Ubuntu18-04-安装-jdk7"><a href="#11-2-Ubuntu18-04-安装-jdk7" class="headerlink" title="11.2 Ubuntu18.04 安装 jdk7"></a>11.2 Ubuntu18.04 安装 jdk7</h4><p>据说Ubuntu18.04已经去除了openJdk-7的源，所以本次进行了下载后手动安装：</p>
+<p><a target="_blank" rel="noopener" href="https://packages.debian.org/experimental/openjdk-7-jdk">openjdk-7-jdk</a></p>
+<p><a target="_blank" rel="noopener" href="https://packages.debian.org/experimental/openjdk-7-jre">openjdk-7-jre</a></p>
+<p><a target="_blank" rel="noopener" href="https://packages.debian.org/experimental/openjdk-7-jre-headless">openjdk-7-jre-headless</a></p>
+<p><a target="_blank" rel="noopener" href="https://packages.debian.org/sid/libjpeg62-turbo">libjpeg62-turbo</a></p>
+<p><a target="_blank" rel="noopener" href="https://packages.debian.org/sid/libfontconfig1">libfontconfig1</a></p>
+<p><a target="_blank" rel="noopener" href="https://packages.debian.org/sid/fontconfig-config">fontconfig-config</a></p>
+<p>下载以上安装包，然后执行命令：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo dpkg -i openjdk-7-* libjpeg62-turbo* libfontconfig1* fontconfig-config*</span><br></pre></td></tr></table></figure>
+
+<p>如果在安装过程中报错，则执行以下命令：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo apt --fix-broken install</span><br></pre></td></tr></table></figure>
+
+<h4 id="11-4-切换-JDK"><a href="#11-4-切换-JDK" class="headerlink" title="11.4 切换 JDK"></a>11.4 切换 JDK</h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">sudo apt update</span><br><span class="line">sudo apt install openjdk-7-jdk</span><br><span class="line">sudo update-alternatives --list java</span><br><span class="line">sudo update-alternatives --config java #选择默认JDK</span><br><span class="line">java -version</span><br></pre></td></tr></table></figure>
+
+<h4 id="11-5-完整卸载-JDK"><a href="#11-5-完整卸载-JDK" class="headerlink" title="11.5 完整卸载 JDK"></a>11.5 完整卸载 JDK</h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">移除所有 Java相关包 (Sun, Oracle, OpenJDK, IcedTea plugins, GIJ):</span></span><br><span class="line">sudo apt update</span><br><span class="line">sudo apt-cache search java | awk &#x27;&#123;print($1)&#125;&#x27; | grep -E -e &#x27;^(ia32-)?(sun|oracle)-java&#x27; -e &#x27;^openjdk-&#x27; -e &#x27;^icedtea&#x27; -e &#x27;^(default|gcj)-j(re|dk)&#x27; -e &#x27;^gcj-(.*)-j(re|dk)&#x27; -e &#x27;java-common&#x27; | xargs sudo apt-get -y remove</span><br><span class="line">sudo apt -y autoremove</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">清除配置信息</span></span><br><span class="line">dpkg -l | grep ^rc | awk &#x27;&#123;print($2)&#125;&#x27; | xargs sudo apt-get -y purge</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">清除java配置及缓存</span></span><br><span class="line">bash -c &#x27;ls -d /home/*/.java&#x27; | xargs sudo rm -rf</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">手动清除JVMs</span></span><br><span class="line">rm -rf /usr/lib/jvm/*</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="12-终端配色"><a href="#12-终端配色" class="headerlink" title="12. 终端配色"></a>12. 终端配色</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">PS1=&#x27;$&#123;debian_chroot:+($debian_chroot)&#125;\[\033[01;35;01m\]\u\[\033[00;00;01m\]@\[\033[01;35;01m\]\h\[\033[00;31;01m\]:\[\033[00;00;01m\]\w \[\033[01;32;01m\]\$ \[\033[01;01;01m\]&#x27;</span><br></pre></td></tr></table></figure>
+
+<p>添加如上到 <code>~/.bashrc</code> 最后即可。</p>
+<h3 id="13-编译-amp-其他必备工具"><a href="#13-编译-amp-其他必备工具" class="headerlink" title="13. 编译&amp;其他必备工具"></a>13. 编译&amp;其他必备工具</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">sudo apt install terminator # 替换终端</span><br><span class="line">sudo apt install m4</span><br><span class="line">sudo apt install bison</span><br><span class="line">sudo apt install g++-multilib gcc-multilib lib32ncurses5-dev lib32z1-dev</span><br><span class="line">sudo apt install gitk</span><br><span class="line">sudo apt install libxml2-utils</span><br><span class="line">sudo apt install libssl-dev</span><br><span class="line">sudo apt install device-tree-compiler</span><br><span class="line">sudo apt install liblz4-tool</span><br><span class="line">sudo apt install net-tools # 安装后才可使用 ifconfig, ping 等命令</span><br><span class="line">sudo apt install python-lunch</span><br><span class="line">sudo apt install python-pip</span><br><span class="line">pip install pycrypto</span><br><span class="line">pip install wand</span><br><span class="line">sudo apt install shutter # 截图软件</span><br><span class="line">sudo apt install build-essential</span><br><span class="line">sudo apt-get install rar unrar # 解压 rar 工具</span><br><span class="line">sudo apt-get install rar rar</span><br><span class="line">sudo apt install vim</span><br><span class="line">sudo apt install curl</span><br><span class="line">sudo apt install wget</span><br><span class="line">sudo apt install putty</span><br><span class="line">sudo apt install sshpass # 免密码 ssh 连接</span><br><span class="line">sudo apt install git</span><br><span class="line">sudo apt install vim</span><br><span class="line">sudo apt install flameshot # 截图,比 shutter 好用</span><br><span class="line">sudo apt install img2simg #编译 QNX 时用到</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h3 id="14-ssh-连接远程服务器"><a href="#14-ssh-连接远程服务器" class="headerlink" title="14. ssh 连接远程服务器"></a>14. ssh 连接远程服务器</h3><h4 id="14-1-直接使用-ssh-连接"><a href="#14-1-直接使用-ssh-连接" class="headerlink" title="14.1. 直接使用 ssh 连接"></a>14.1. 直接使用 ssh 连接</h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ssh user@10.243.54.188 # 此命令需要输入密码</span><br></pre></td></tr></table></figure>
+
+<h4 id="14-2-使用-ssh-key-登录服务器"><a href="#14-2-使用-ssh-key-登录服务器" class="headerlink" title="14.2. 使用 ssh-key 登录服务器"></a>14.2. 使用 ssh-key 登录服务器</h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">ssh-keygen -t rsa -C &quot;youremail@example.com&quot;</span><br><span class="line">ssh-copy-id -i ~/.ssh/id_rsa.pub  user@10.243.54.188</span><br><span class="line">ssh user@10.243.54.188</span><br></pre></td></tr></table></figure>
+
+<h4 id="14-3-使用-sshpass-在命令中附带密码连接"><a href="#14-3-使用-sshpass-在命令中附带密码连接" class="headerlink" title="14.3. 使用 sshpass 在命令中附带密码连接"></a>14.3. 使用 sshpass 在命令中附带密码连接</h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sudo apt install sshpass</span><br><span class="line">sshpass -p password ssh user@10.243.54.188</span><br></pre></td></tr></table></figure>
+
+<h3 id="15-安装-sublime3"><a href="#15-安装-sublime3" class="headerlink" title="15. 安装 sublime3"></a>15. 安装 sublime3</h3><p><a target="_blank" rel="noopener" href="https://www.sublimetext.com/3">https://www.sublimetext.com/3</a></p>
+<h3 id="16-截图"><a href="#16-截图" class="headerlink" title="16. 截图"></a>16. 截图</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo apt install flameshot</span><br></pre></td></tr></table></figure>
+
+<p>Settings - Devices - keyboard，设置一个自定义快捷键CTRL+ALT+A（拉到最下面）命令填写：<strong>flameshot gui</strong></p>
+<p>截完图后保存Ctrl+S，复制到剪贴板 Ctrl+C</p>
+<p>注：可能会和 terminator 快捷键冲突，禁用 terminator 中的 ctrl+alt+A 和 shift+ctrl+alt+A 即可。</p>
+<h3 id="17-强制关闭UI"><a href="#17-强制关闭UI" class="headerlink" title="17. 强制关闭UI"></a>17. 强制关闭UI</h3><p>添加快捷键，Name: ForceQuit，Command: xkill，快捷键: shift+ctrl+X</p>
+<h3 id="18-安装-AndroidStudio"><a href="#18-安装-AndroidStudio" class="headerlink" title="18. 安装 AndroidStudio"></a>18. 安装 AndroidStudio</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">快捷方式</span></span><br><span class="line">vim /usr/share/applicatons/Studio.desktop</span><br><span class="line">[Desktop Entry]</span><br><span class="line">Version=3.2</span><br><span class="line">Name=AndroidStudio</span><br><span class="line">Exec=/opt/android-studio/bin/studio.sh</span><br><span class="line">Termina=false</span><br><span class="line">Icon=/opt/android-studio/bin/studio.png</span><br><span class="line">Type=Application</span><br><span class="line">Categories=Development</span><br><span class="line">Name[en_US]=AndroidStudio.txt</span><br></pre></td></tr></table></figure>
+
+<p>新版本生成方式：<code>Tools - Create Desktop Entry</code> 即可点击电脑左下角搜索 Studio.</p>
+<p>无法输入中文：在 studio.sh 中 #!&#x2F;bin&#x2F;sh 下面添加如下：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">export GTK_IM_MODULE=fcitx </span><br><span class="line">export QT_IM_MODULE=fcitx </span><br><span class="line">export XMODIFIERS=&quot;@im=fcitx&quot;</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="19-配置-samba-共享"><a href="#19-配置-samba-共享" class="headerlink" title="19. 配置 samba 共享"></a>19. 配置 samba 共享</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">#</span><span class="language-bash">1. 安装</span></span><br><span class="line">sudo apt install samba</span><br><span class="line">sudo apt install smbclient</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash">2. 配置</span></span><br><span class="line">sudo cp /etc/samba/smb.conf /etc/samba/smb.conf.bak</span><br><span class="line">sudo vim /etc/samba/smb.conf</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">末尾添加如下：</span></span><br><span class="line">[share]</span><br><span class="line">    comment = Shared Folder with username and password</span><br><span class="line">    path = /home/rangerzhou/share/</span><br><span class="line">    available = yes</span><br><span class="line">    browseable = yes</span><br><span class="line">    public = yes</span><br><span class="line">    writable = yes</span><br><span class="line">    </span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash">3. 创建共享目录</span></span><br><span class="line">mkdir ~/share</span><br><span class="line">chmod 777 ~/share</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash">4. 创建Samba用户,如果创建共享目录，前三步就可以了</span></span><br><span class="line">sudo touch /etc/samba/smbpasswd</span><br><span class="line">sudo smbpasswd -a rangerzhou #设置Windows访问时需要的密码</span><br><span class="line">sudo samba restart</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">https://www.cnblogs.com/phinecos/archive/2009/06/06/1497717.html</span></span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash">https://blog.csdn.net/qiqzhang/article/details/78148682</span></span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">/dev/kvm permission denied. 使用自制镜像启动 Android 模拟器问题</span></span><br><span class="line">sudo apt install qemu-kvm</span><br><span class="line">sudo adduser &lt;Replace with username&gt; kvm</span><br><span class="line">sudo chown &lt;Replace with username&gt; /dev/kvm</span><br></pre></td></tr></table></figure>
+
+<h3 id="20-安装-jd-gui-x2F-apktool"><a href="#20-安装-jd-gui-x2F-apktool" class="headerlink" title="20. 安装 jd-gui&#x2F;apktool"></a>20. 安装 jd-gui&#x2F;apktool</h3><p>jd-gui: <a target="_blank" rel="noopener" href="http://jd.benow.ca/">http://jd.benow.ca/</a></p>
+<p>apktool: <a target="_blank" rel="noopener" href="https://ibotpeaches.github.io/Apktool/install/">https://ibotpeaches.github.io/Apktool/install/</a></p>
+<ol>
+<li>Download Linux <a target="_blank" rel="noopener" href="https://raw.githubusercontent.com/iBotPeaches/Apktool/master/scripts/linux/apktool">wrapper script</a> (Right click, Save Link As <code>apktool</code>)</li>
+<li>Download apktool-2 (<a target="_blank" rel="noopener" href="https://bitbucket.org/iBotPeaches/apktool/downloads/">find newest here</a>)</li>
+<li>Rename downloaded jar to <code>apktool.jar</code></li>
+<li>Move both files (<code>apktool.jar</code> &amp; <code>apktool</code>) to <code>/usr/local/bin</code> (root needed)</li>
+<li>Make sure both files are executable (<code>chmod +x</code>)</li>
+<li>Try running apktool via cli</li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">sudo mkdir ~/bin</span><br><span class="line">vim ~/.bashrc</span><br><span class="line">export PATH=$PATH:/home/ranger/bin</span><br><span class="line">source ~/.bashrc</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">把 apktol.jar 和 apktool 脚本 copy 到 ~/bin 下</span></span><br><span class="line">sudo chmod 777 ~/bin/apktool</span><br><span class="line">sudo chmod 777 ~/bin/apktool.jar</span><br></pre></td></tr></table></figure>
+
+<h3 id="21-Ubuntu-18-04-美化"><a href="#21-Ubuntu-18-04-美化" class="headerlink" title="21. Ubuntu 18.04 美化"></a>21. Ubuntu 18.04 美化</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">安装 gnome-tweak-tool</span></span><br><span class="line">sudo apt install gnome-tweak-tool</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">安装后即可在 tweak 中配置相关选项，但是发现 Appearance-Shell 项无法选择</span></span><br><span class="line">sudo apt-get install gnome-shell-extensions</span><br><span class="line">sudo apt install chrome-gnome-shell</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">安装完成后打开Tweaks选择 “Extensions”选项，“User themes” 按钮设置成 on 即可</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">或者安装 chrome-gnome-shell，再安装如下链接插件后即可：</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">https://extensions.gnome.org/extension/19/user-themes/</span></span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">安装插件：pixel-saver（一款应用标题栏合并插件，可以把应用程序的窗口控制（最大/小化，关闭）和标题合并到顶栏中，以达到节约屏幕空间的目的），链接如下：</span></span><br><span class="line">https://extensions.gnome.org/extension/723/pixel-saver/</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>安装主题</p>
+<p>主题目录 <code>/usr/share/themes</code>，或者 </p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mkdir ~/.themes # </span><br><span class="line">mkdir ~/.icons</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><p>切换主题，下载主题解压到 <code>~/.themes</code> ，就可以在 tweak 中选择主题了，如下是两个不错的 mac 主题：</p>
+<p><a target="_blank" rel="noopener" href="https://www.opendesktop.org/s/Gnome/p/1241688">https://www.opendesktop.org/s/Gnome/p/1241688</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.opendesktop.org/s/Gnome/p/1013714/">https://www.opendesktop.org/s/Gnome/p/1013714/</a></p>
+</li>
+<li><p>更换 icon，下载如下链接中的 icon 主题，解压到 .icons 目录，在 tweak 中切换即可</p>
+<p><a target="_blank" rel="noopener" href="https://www.opendesktop.org/s/Gnome/p/1102582/">https://www.opendesktop.org/s/Gnome/p/1102582/</a></p>
+</li>
+<li><p>更换 shell，下载如下链接中的 shell 主题，解压到 .themes 目录，在 tweak 中切换即可</p>
+<p><a target="_blank" rel="noopener" href="https://www.opendesktop.org/s/Gnome/p/1013741/">https://www.opendesktop.org/s/Gnome/p/1013741/</a></p>
+</li>
+</ul>
+<h3 id="22-安装-wine"><a href="#22-安装-wine" class="headerlink" title="22. 安装 wine"></a>22. 安装 wine</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">https://linuxconfig.org/install-wine-on-ubuntu-18-04-bionic-beaver-linux</span></span><br><span class="line">sudo dpkg --add-architecture i386 </span><br><span class="line">wget -qO- https://dl.winehq.org/wine-builds/Release.key | sudo apt-key add -</span><br><span class="line">sudo apt-add-repository &#x27;deb http://dl.winehq.org/wine-builds/ubuntu/ bionic main&#x27;</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">To install development WineHQ packages</span></span><br><span class="line">sudo apt install wine-devel-amd64</span><br><span class="line">sudo apt install wine-devel-i386</span><br><span class="line">sudo apt install wine-devel</span><br><span class="line">sudo apt install --install-recommends winehq-devel</span><br><span class="line">wine --version</span><br><span class="line">wine-3.19</span><br></pre></td></tr></table></figure>
+
+<h3 id="23-sublime-输入中文"><a href="#23-sublime-输入中文" class="headerlink" title="23. sublime 输入中文"></a>23. sublime 输入中文</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">sudo apt update &amp;&amp; sudo apt upgrade</span><br><span class="line">git clone https://github.com/lyfeyaj/sublime-text-imfix.git</span><br><span class="line">cd sublime-text-imfix &amp;&amp; ./sublime-imfix</span><br></pre></td></tr></table></figure>
+
+<p><a target="_blank" rel="noopener" href="https://github.com/lyfeyaj/sublime-text-imfix">https://github.com/lyfeyaj/sublime-text-imfix</a></p>
+<h3 id="24-安装-anaconda"><a href="#24-安装-anaconda" class="headerlink" title="24. 安装 anaconda"></a>24. 安装 anaconda</h3><p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/32925500">https://zhuanlan.zhihu.com/p/32925500</a></p>
+<p><strong>创建环境</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">conda create -n &lt;env_name&gt; python=3.7</span><br></pre></td></tr></table></figure>
+
+
+
+<p><strong>切换环境</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">source activate python2</span><br><span class="line">source activate python3</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">或者</span></span><br><span class="line">conda activate python2</span><br><span class="line">conda activate python3</span><br></pre></td></tr></table></figure>
+
+<p><strong>退出环境至root</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">source deactivate</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">或者</span></span><br><span class="line">conda deactivate</span><br></pre></td></tr></table></figure>
+
+<p><strong>显示已创建环境</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">conda info --envs # 或者conda info -e，或者conda env list</span><br></pre></td></tr></table></figure>
+
+<p><strong>删除环境</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">#</span><span class="language-bash">注意： &lt;env_name&gt; 为被删除环境的名称。环境名两边不加尖括号“&lt;&gt;”</span></span><br><span class="line">conda remove --name &lt;env_name&gt; --all </span><br></pre></td></tr></table></figure>
+
+<p>安装好Anaconda后每次打开终端都会自动帮你激活基本环境（<code>base</code>），有时候确实自己不需要激活Conda环境（因为打开终端不一定要用到 Python），而且该项操作还会拖慢打开的终端的响应速度，在终端输入：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">conda config --<span class="built_in">set</span> auto_activate_base <span class="literal">false</span></span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash"><span class="built_in">cat</span> ~/.condarc</span></span><br><span class="line">channels:</span><br><span class="line">  - defaults</span><br><span class="line">ssl_verify: true</span><br><span class="line">auto_activate_base: false</span><br></pre></td></tr></table></figure>
+
+<p>第一次运行它时，它将在主目录中创建<code>~/.condarc</code>，并使用该设置覆盖默认值。</p>
+<h3 id="25-切换-python-版本"><a href="#25-切换-python-版本" class="headerlink" title="25. 切换 python 版本"></a>25. 切换 python 版本</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">update-alternatives --list python</span></span><br><span class="line">update-alternatives: error: no alternatives for python</span><br></pre></td></tr></table></figure>
+
+<p>如果出现以上所示的错误信息，则表示 Python 的替代版本尚未被 update-alternatives 命令识别。想解决这个问题，我们需要更新一下替代列表，将安装的 python 放入其中：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">sudo update-alternatives --install /usr/bin/python python /usr/bin/python2.7 1</span></span><br><span class="line">update-alternatives: using /usr/bin/python2.7 to provide /usr/bin/python (python) in auto mode</span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">sudo update-alternatives --install /usr/bin/python python /usr/bin/python3.6 2</span></span><br><span class="line">update-alternatives: using /usr/bin/python3.6 to provide /usr/bin/python (python) in auto mode</span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">sudo update-alternatives --install /usr/bin/python python /home/ranger/anaconda3/bin/python3.7 3</span></span><br><span class="line">update-alternatives: using /home/ranger/anaconda3/bin/python3.7 to provide /usr/bin/python (python) in auto mode</span><br></pre></td></tr></table></figure>
+
+<p>–install 选项使用了多个参数用于创建符号链接。最后一个参数指定了此选项的优先级，如果我们没有手动来设置替代选项，那么具有最高优先级的选项就会被选中。这个例子中，我们为 &#x2F;usr&#x2F;bin&#x2F;python3.6 设置的优先级为2，所以update-alternatives 命令会自动将它设置为默认 Python 版本。现在开始，我们就可以使用下方的命令随时在列出的 Python 替代版本中任意切换了：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sudo update-alternatives --config python</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">由于安装了 anaconda，所以一直没切换成功，从 PATH 环境中移除 annconda 中的 /bin 目录即可，或者修改 anaconda 下的 bin 目录名称，使 PATH 找不到 bin 目录。</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="26-串口-log-工具"><a href="#26-串口-log-工具" class="headerlink" title="26. 串口 log 工具"></a>26. 串口 log 工具</h3><h4 id="26-1-minicom"><a href="#26-1-minicom" class="headerlink" title="26.1 minicom"></a>26.1 minicom</h4><p>minicom 是 linux 下常用的一款查看串口 log 的工具，安装：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo apt install minicom</span><br></pre></td></tr></table></figure>
+
+<p>配置：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo minicom -s</span><br></pre></td></tr></table></figure>
+
+<p>使用方向键选择需要配置的选项，如 Serial port setup，回车进入配置，此时光标在最下方，输入对应修改配置项对应的字母，编辑，回车确认，光标重新回到最下方，一般只需修改如下三项：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">A -    Serial Device</span><br><span class="line">E -    Bps/Par/Bits</span><br><span class="line">F -    Hardware Flow Control</span><br></pre></td></tr></table></figure>
+
+<p>A 配置项指定 USB 装置，使用命令 <code>ls -l /dev/ttyUSB*</code> 查看，修改成需要的 <strong>ttyUSB</strong>* 。</p>
+<p>E配置项根据时间情况指定波特率，如115200。</p>
+<p>F配置项为硬件流控，如果没有或者不确定则指定为 No。</p>
+<p>修改完成后回车退到上一界面，选择 <strong>Save setup as dfl</strong> ，将刚才的修改存储为预设配置，避免下次使用重新配置，选择 <strong>Exit</strong> 退出配置界面，并开启 <strong>minicom</strong> 。</p>
+<hr>
+<p><strong>快捷键</strong></p>
+<p><strong>Ctrl+A</strong>：执行特殊操作时都需要先按Ctrl+A，另一个功能是暂停屏幕输出，方便查看 log 。</p>
+<p><strong>Ctrl+A, Z：</strong> 查看帮助，也可直接使用命令 <code>minicom -h</code> 。</p>
+<p><strong>Ctrl+A, X：</strong> 退出。</p>
+<p><strong>Ctrl+A, N：</strong> 启用时间戳，在每行 log 前添加当前系统的时间戳。</p>
+<p><strong>Ctrl+A, W：</strong> 开启 minicom 的自动换行功能。</p>
+<hr>
+<p><strong>配置权限</strong></p>
+<p>minicom 本身无序 sudo 权限，但是因为要开启串口 <em>&#x2F;dev&#x2F;xxx</em> ，所以需要 sudo 启动，修改如下信息即可免除输入 sudo。</p>
+<ul>
+<li><p>直接使用 chmod 命令修改</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo chmod 666 /dev/ttyUSB0</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>配置 udev 规则（推荐）</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">sudo vim /etc/udev/rules.d/70-ttyusb.rules</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">添加一行</span></span><br><span class="line">KERNEL==&quot;ttyUSB[0-9]*&quot;, MODE=&quot;0666&quot;</span><br></pre></td></tr></table></figure>
+
+<p>修改后重新插拔设备即可。</p>
+</li>
+</ul>
+<hr>
+<p><strong>自动设置 ttyUSB</strong>*</p>
+<p>如果日常只需一个设备，设备名指定为 <em>&#x2F;dev&#x2F;ttyUSB0</em> ，每次直接开启 minicom 即可，但当需要使用多个串口时，就需要每次查看 <code>ls /dev/ttyUSB*</code> ，手动修改配置才能使用，比较麻烦，使用如下 minicom 的 -D 参数可解决问题。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">编写脚本</span></span><br><span class="line">vim ~/.minicom.sh</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">输入如下</span></span><br><span class="line">com() &#123;</span><br><span class="line">    ports_USB=$(ls /dev/ttyUSB*)</span><br><span class="line">    ports_ACM=$(ls /dev/ttyACM*)  #arduino</span><br><span class="line">    ports=&quot;$ports_USB $ports_ACM&quot;</span><br><span class="line">    select port in $ports;do</span><br><span class="line">        if [ &quot;$port&quot; ]; then</span><br><span class="line">            echo &quot;You select the choice &#x27;$port&#x27;&quot;</span><br><span class="line">            minicom -D &quot;$port&quot; $@&quot;</span><br><span class="line">            break</span><br><span class="line">        else</span><br><span class="line">            echo &quot;Invaild selection&quot;</span><br><span class="line">        fi</span><br><span class="line">    done</span><br><span class="line">&#125;</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">随后在 ~/.bashrc 中引入</span></span><br><span class="line">echo &#x27;source ~/.minicom.sh&#x27; &gt;&gt; ~/.bashrc</span><br><span class="line">source ~/.bashrc</span><br></pre></td></tr></table></figure>
+
+<p>这样就可以直接通过 <strong>com</strong> 命令调用 minicom 了。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">ranger@zr:~ $ com</span><br><span class="line">1) /dev/ttyUSB0</span><br><span class="line">2) /dev/ttyUSB1</span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash">?</span></span><br></pre></td></tr></table></figure>
+
+<hr>
+<p>**自动存储 log **</p>
+<p>minicom 可使用 -C 参数指定存储 log 文件，修改 minicom.sh 脚本，把 log 存储在指定目录下。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line">com() &#123;</span><br><span class="line">    ports_USB=$(ls /dev/ttyUSB*)</span><br><span class="line">    ports_ACM=$(ls /dev/ttyACM*)  #arduino</span><br><span class="line">    ports=&quot;$ports_USB $ports_ACM&quot;</span><br><span class="line">    datename=$(date +%Y%m%d-%H%M%S)</span><br><span class="line">    select port in $ports;do</span><br><span class="line">        if [ &quot;$port&quot; ]; then</span><br><span class="line">            echo &quot;You select the choice &#x27;$port&#x27;&quot;</span><br><span class="line">            minicom -D &quot;$port&quot; -C /home/ranger/work/tmps/&quot;$datename&quot;.log &quot;$@&quot;</span><br><span class="line">            break</span><br><span class="line">        else</span><br><span class="line">            echo &quot;Invaild selection&quot;</span><br><span class="line">        fi</span><br><span class="line">    done</span><br><span class="line">&#125;</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">修改后</span></span><br><span class="line">com() &#123;</span><br><span class="line">    ports_USB=$(ls /dev/ttyUSB*)</span><br><span class="line">    #ports_ACM=$(ls /dev/ttyACM*)  #arduino</span><br><span class="line">    #ports=&quot;$ports_USB $ports_ACM&quot;</span><br><span class="line">    ports=&quot;$ports_USB&quot;</span><br><span class="line">    datename=$(date +%Y%m%d-%H%M%S)</span><br><span class="line">    select port in $ports;do</span><br><span class="line">        if [ &quot;$port&quot; ]; then</span><br><span class="line">            echo &quot;You select the choice &#x27;$port&#x27;&quot;</span><br><span class="line">            minicom -D &quot;$port&quot; -C /home/ranger/work/tmps/&quot;$datename&quot;.log &quot;$@&quot;</span><br><span class="line">            break</span><br><span class="line">        else</span><br><span class="line">            echo &quot;Invaild selection&quot;</span><br><span class="line">        fi</span><br><span class="line">    done</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>PS: 出现 <strong>Device &#x2F;dev&#x2F;ttyS0 is locked minicom</strong> 错误</p>
+<p>通常是因为 minicom 上次使用时没有正常退出，系统自动在目录 <em>&#x2F;var&#x2F;lock</em> 中生成了 lockfile 所致，删除即可：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo rm -rf /var/lock/***</span><br></pre></td></tr></table></figure>
+
+<p><em>Reference</em>: <a target="_blank" rel="noopener" href="https://tw.saowen.com/a/72a306fdd0cf62f69032d77659e5667332140154cbe22e1e6b1b537f55ed77b7">https://tw.saowen.com/a/72a306fdd0cf62f69032d77659e5667332140154cbe22e1e6b1b537f55ed77b7</a></p>
+<h4 id="26-2-picocom"><a href="#26-2-picocom" class="headerlink" title="26.2 picocom"></a>26.2 picocom</h4><p>picocom 可以看作是 minicom 的简化版，安装配置简单。</p>
+<p><strong>安装</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo apt install picocom</span><br></pre></td></tr></table></figure>
+
+<p><strong>使用</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo picocom -b 115200 /dev/ttyUSB0</span><br></pre></td></tr></table></figure>
+
+<p>可写入 <em>~&#x2F;.bashrc</em> 中快捷启动：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">alias seri=&#x27;sudo picocom -b 115200 /dev/ttyUSB0&#x27;</span><br></pre></td></tr></table></figure>
+
+<p><strong>退出</strong></p>
+<p>Ctrl+A, Ctrl+Q 即可退出（Ctrl+a 是转义键）。</p>
+<p>优点：简单，文字可以有颜色，不会改变终端的背景。<br>缺点：启动和关闭的速度较慢。</p>
+<h3 id="27-Wired-网络消失"><a href="#27-Wired-网络消失" class="headerlink" title="27. Wired 网络消失"></a>27. Wired 网络消失</h3><p>某天开机后突然发现 Settings-Network 中的 Wired 消失了，电脑无法上网，通过如下方法解决：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">cat /etc/NetworkManager/NetworkManager.conf</span><br><span class="line">[main]</span><br><span class="line">plugins=ifupdown,keyfile</span><br><span class="line"></span><br><span class="line">[ifupdown]</span><br><span class="line">managed=true</span><br><span class="line"></span><br><span class="line">[device]</span><br><span class="line">wifi.scan-rand-mac-address=no</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>把 managed 值改为 true ，同时恢复了 <code>/etc/network/interfaces</code> 为默认，重启电脑，解决。</p>
+<h3 id="28-文件管理器"><a href="#28-文件管理器" class="headerlink" title="28. 文件管理器"></a>28. 文件管理器</h3><p>查看默认的文件管理器</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">xdg-mime query default inode/directory</span><br></pre></td></tr></table></figure>
+
+<p>将默认的文件管理器设置为 nemo</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">xdg-mime default nemo.desktop inode/directory application/x-gnome-saved-search</span><br></pre></td></tr></table></figure>
+
+<p>恢复 nautilus.desktop</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">xdg-mime default nautilus.desktop inode/directory application/x-gnome-saved-search</span><br></pre></td></tr></table></figure>
+
+<p>使用 <code>xdg-open $HOME</code> 来验证有没有生效。</p>
+<h3 id="29-终端中文只能显示-ASCII-码"><a href="#29-终端中文只能显示-ASCII-码" class="headerlink" title="29. 终端中文只能显示 ASCII 码"></a>29. 终端中文只能显示 ASCII 码</h3><p>使用 locale 命令查看</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">locale</span></span><br><span class="line">LANG=en_US.UTF-8</span><br><span class="line">LANGUAGE=en_US:en</span><br><span class="line">LC_CTYPE=&quot;C&quot;</span><br><span class="line">LC_NUMERIC=&quot;C&quot;</span><br><span class="line">LC_TIME=&quot;C&quot;</span><br><span class="line">LC_COLLATE=&quot;C&quot;</span><br><span class="line">LC_MONETARY=&quot;C&quot;</span><br><span class="line">LC_MESSAGES=&quot;C&quot;</span><br><span class="line">LC_PAPER=&quot;C&quot;</span><br><span class="line">LC_NAME=&quot;C&quot;</span><br><span class="line">LC_ADDRESS=&quot;C&quot;</span><br><span class="line">LC_TELEPHONE=&quot;C&quot;</span><br><span class="line">LC_MEASUREMENT=&quot;C&quot;</span><br><span class="line">LC_IDENTIFICATION=&quot;C&quot;</span><br><span class="line">LC_ALL=C</span><br></pre></td></tr></table></figure>
+
+<p>随后执行 <code>sudo locale-gen zh_CN.UTF-8</code></p>
+<p>再执行：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">export LANG=en_US.UTF-8</span><br><span class="line">export LANGUAGE=</span><br><span class="line">export LC_CTYPE=&quot;en_US.UTF-8&quot;</span><br><span class="line">export LC_NUMERIC=zh_CN.UTF-8</span><br><span class="line">export LC_TIME=zh_CN.UTF-8</span><br><span class="line">export LC_COLLATE=&quot;en_US.UTF-8&quot;</span><br><span class="line">export LC_MONETARY=zh_CN.UTF-8</span><br><span class="line">export LC_MESSAGES=&quot;en_US.UTF-8&quot;</span><br><span class="line">export LC_PAPER=zh_CN.UTF-8</span><br><span class="line">export LC_NAME=zh_CN.UTF-8</span><br><span class="line">export LC_ADDRESS=zh_CN.UTF-8</span><br><span class="line">export LC_TELEPHONE=zh_CN.UTF-8</span><br><span class="line">export LC_MEASUREMENT=zh_CN.UTF-8</span><br><span class="line">export LC_IDENTIFICATION=zh_CN.UTF-8</span><br><span class="line">export LC_ALL=</span><br></pre></td></tr></table></figure>
+
+<p>vim 中文乱码的解决方案：</p>
+<p>设置 vimrc 文件，加上fileencodings、enc、fencs，代码如下：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">$ vim /etc/vim/vimrc <span class="comment"># 或者 vim ~/.vimrc</span></span><br><span class="line"><span class="comment"># 一般只需要这行就行了</span></span><br><span class="line"><span class="built_in">set</span> enc=utf8</span><br><span class="line"><span class="comment"># 如果还不行，可以再添加</span></span><br><span class="line"><span class="built_in">set</span> fileencodings=utf-8,gb2312,gb18030,gbk,ucs-bom,cp936,latin1</span><br><span class="line"><span class="comment"># 还不行就把第一行的utf8换成gbk，第二行的gbk挪到最前</span></span><br><span class="line"><span class="built_in">set</span> fencs=utf8,gbk,gb2312,gb18030</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="30-安装-nodejs-和-npm"><a href="#30-安装-nodejs-和-npm" class="headerlink" title="30. 安装 nodejs 和 npm"></a>30. 安装 nodejs 和 npm</h3><h4 id="30-1-卸载-node-和-npm"><a href="#30-1-卸载-node-和-npm" class="headerlink" title="30.1 卸载 node 和 npm"></a>30.1 卸载 node 和 npm</h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">apt-get 卸载</span></span><br><span class="line">sudo apt remove --purge npm</span><br><span class="line">sudo apt remove --purge nodejs</span><br><span class="line">sudo apt remove --purge nodejs-legacy</span><br><span class="line">sudo apt autoremove</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">手动删除 npm 相关目录</span></span><br><span class="line">rm -r /usr/local/bin/npm</span><br><span class="line">rm -r /usr/local/lib/node-moudels</span><br><span class="line">find / -name npm</span><br><span class="line">rm -r /tmp/npm*</span><br></pre></td></tr></table></figure>
+
+<h4 id="30-2-安装最新的-node-和-npm"><a href="#30-2-安装最新的-node-和-npm" class="headerlink" title="30.2 安装最新的 node 和 npm"></a>30.2 安装最新的 node 和 npm</h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">apt-get 安装 nodejs</span></span><br><span class="line">sudo apt install nodejs</span><br><span class="line">sudo apt install nodejs-legacy</span><br><span class="line">node -v # v4.2.6</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">安装最新的 node v12.x  https://github.com/nodesource/distributions</span></span><br><span class="line">curl -sL https://deb.nodesource.com/setup_12.x | sudo -E bash -</span><br><span class="line">sudo apt-get install -y nodejs</span><br><span class="line">node -v</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">更新 npm</span></span><br><span class="line">sudo npm install npm -g</span><br></pre></td></tr></table></figure>
+
+<h3 id="31-vim-记忆位置不生效（只有加上-sudo-时才生效）"><a href="#31-vim-记忆位置不生效（只有加上-sudo-时才生效）" class="headerlink" title="31. vim 记忆位置不生效（只有加上 sudo 时才生效）"></a>31. vim 记忆位置不生效（只有加上 sudo 时才生效）</h3><p>原因：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[ubuntu: ~]$ ls -l ~/.viminfo</span><br><span class="line">-rw------- 1 root root 4558 2015-05-09 13:58 ~/.viminfo</span><br></pre></td></tr></table></figure>
+
+<p>解决办法：<br>删除文件~&#x2F;.viminfo<br>然后重新打开vim(注意要以当前用户打开),vim会自动重建该文件.</p>
+<h3 id="32-Ubuntu-LibreOffice-相关配置"><a href="#32-Ubuntu-LibreOffice-相关配置" class="headerlink" title="32. Ubuntu LibreOffice 相关配置"></a>32. Ubuntu LibreOffice 相关配置</h3><h4 id="32-1-关闭-LibreOffice-Calc-输入字母自动大写"><a href="#32-1-关闭-LibreOffice-Calc-输入字母自动大写" class="headerlink" title="32.1 关闭 LibreOffice Calc 输入字母自动大写"></a>32.1 关闭 LibreOffice Calc 输入字母自动大写</h4><p><code>Tools - AutoCorrect Options... - Options</code> 中取消勾选 <code>Capitalize first letter of every sentence</code> 即可。</p>
+<h4 id="32-2-关闭-boolean-型值-true-x2F-false-自动变为-TRUE-x2F-FALSE"><a href="#32-2-关闭-boolean-型值-true-x2F-false-自动变为-TRUE-x2F-FALSE" class="headerlink" title="32.2 关闭 boolean 型值 true&#x2F;false 自动变为 TRUE&#x2F;FALSE"></a>32.2 关闭 boolean 型值 true&#x2F;false 自动变为 TRUE&#x2F;FALSE</h4><p>暂未知</p>
+<h3 id="33-Ubuntu-终端录制工具"><a href="#33-Ubuntu-终端录制工具" class="headerlink" title="33. Ubuntu 终端录制工具"></a>33. Ubuntu 终端录制工具</h3><h4 id="33-1-ttygif"><a href="#33-1-ttygif" class="headerlink" title="33.1 ttygif"></a>33.1 ttygif</h4><p>安装和使用方式见 github： <a target="_blank" rel="noopener" href="https://github.com/icholy/ttygif">https://github.com/icholy/ttygif</a></p>
+<p><strong>1. Create ttyrec recording</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ ttyrec myrecording</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>Hit CTRL-D or type <code>exit</code> when done recording.</li>
+</ul>
+<p><strong>2. Convert to gif</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ ttygif myrecording</span><br></pre></td></tr></table></figure>
+
+<h4 id="33-2-termtosvg"><a href="#33-2-termtosvg" class="headerlink" title="33.2 termtosvg"></a>33.2 termtosvg</h4><p>安装和使用方式见 github：<a target="_blank" rel="noopener" href="https://github.com/nbedos/termtosvg">https://github.com/nbedos/termtosvg</a></p>
+<p><strong>ttygif</strong> 使用更简单。</p>
+<h3 id="34-安装-ohmyzsh"><a href="#34-安装-ohmyzsh" class="headerlink" title="34. 安装 ohmyzsh"></a>34. 安装 ohmyzsh</h3><p><a target="_blank" rel="noopener" href="https://github.com/ohmyzsh/ohmyzsh">https://github.com/ohmyzsh/ohmyzsh</a></p>
+<p>安装</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sudo apt install zsh</span><br><span class="line">sh -c &quot;$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)&quot;</span><br></pre></td></tr></table></figure>
+
+<p>配置</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">vim ~/.zsh</span><br></pre></td></tr></table></figure>
+
+
+
+<p>Reference: <a target="_blank" rel="noopener" href="http://einverne.github.io/post/2018/08/nemo-file-manager.html">使用 NEMO 文件管理器</a> </p>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div>Donate comment here.</div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechatpay.jpg" alt="Ranger Zhou 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.jpg" alt="Ranger Zhou 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>Ranger Zhou
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://rangerzhou.top/2018/10/30/Technical/Ubuntu18.04_installation/" title="Ubuntu18.04安装后必备操作">http://rangerzhou.top/2018/10/30/Technical/Ubuntu18.04_installation/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2018/10/05/Technical/The_Beauty_of_Data_Structures_and_Algorithms/" rel="prev" title="数据结构与算法之美（1）——复杂度分析">
+      <i class="fa fa-chevron-left"></i> 数据结构与算法之美（1）——复杂度分析
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2018/11/20/Work/Renesas_flash_guide/" rel="next" title="Renesas Flash guide">
+      Renesas Flash guide <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+      <div class="tabs tabs-comment">
+        <ul class="nav-tabs">
+            <li class="tab"><a href="#comment-disqus">disqus</a></li>
+            <li class="tab"><a href="#comment-gitalk">gitalk</a></li>
+            <li class="tab"><a href="#comment-livere">livere</a></li>
+        </ul>
+        <div class="tab-content">
+            <div class="tab-pane disqus" id="comment-disqus">
+              
+  <div class="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
+            </div>
+            <div class="tab-pane gitalk" id="comment-gitalk">
+              <div class="comments" id="gitalk-container"></div>
+            </div>
+            <div class="tab-pane livere" id="comment-livere">
+              
+  <div class="comments">
+    <div id="lv-container" data-id="city" data-uid="MTAyMC8yOTcyNS82Mjky"></div>
+  </div>
+  
+            </div>
+        </div>
+      </div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80-Ubuntu-18-04-%E5%AE%89%E8%A3%85"><span class="nav-text">一. Ubuntu 18.04 安装</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-Download-Ubuntu-xxx-iso"><span class="nav-text">1. Download Ubuntu-xxx.iso</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%B6%E4%BD%9C%E4%BC%98%E7%9B%98%E9%95%9C%E5%83%8F%E6%97%B6%EF%BC%8C%E9%80%89%E6%8B%A9-GPT-%E6%A8%A1%E5%BC%8F%EF%BC%9B"><span class="nav-text">制作优盘镜像时，选择 GPT 模式；</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E6%8C%82%E8%BD%BD%E7%A1%AC%E7%9B%98"><span class="nav-text">2. 挂载硬盘</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C-Ubuntu-18-04-%E5%88%9D%E5%A7%8B%E5%8C%96"><span class="nav-text">二. Ubuntu 18.04 初始化</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-Update-and-Upgrade"><span class="nav-text">1. Update and Upgrade</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E5%AE%89%E8%A3%85-Typora"><span class="nav-text">2. 安装 Typora</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E5%AE%89%E8%A3%85-Chrome"><span class="nav-text">3. 安装 Chrome</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-%E5%AE%89%E8%A3%85-Terminator"><span class="nav-text">4. 安装 Terminator</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-%E5%AE%89%E8%A3%85%E6%90%9C%E7%8B%97%E8%BE%93%E5%85%A5%E6%B3%95"><span class="nav-text">5. 安装搜狗输入法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-sudo-no-password"><span class="nav-text">6. sudo no password</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-%E5%AE%89%E8%A3%85-wps"><span class="nav-text">7. 安装 wps</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#8-vim-%E9%85%8D%E7%BD%AE"><span class="nav-text">8. vim 配置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#9-%E7%BB%88%E7%AB%AF-tab-%E5%BF%BD%E7%95%A5%E5%A4%A7%E5%B0%8F%E5%86%99"><span class="nav-text">9. 终端 tab 忽略大小写</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#10-%E5%AE%89%E8%A3%85-git"><span class="nav-text">10. 安装 git</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#11-%E5%AE%89%E8%A3%85%E5%8D%B8%E8%BD%BD-JDK"><span class="nav-text">11. 安装卸载 JDK</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#11-1-%E5%AE%89%E8%A3%85-openjdk"><span class="nav-text">11.1 安装 openjdk</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#11-2-Ubuntu18-04-%E5%AE%89%E8%A3%85-jdk7"><span class="nav-text">11.2 Ubuntu18.04 安装 jdk7</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#11-4-%E5%88%87%E6%8D%A2-JDK"><span class="nav-text">11.4 切换 JDK</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#11-5-%E5%AE%8C%E6%95%B4%E5%8D%B8%E8%BD%BD-JDK"><span class="nav-text">11.5 完整卸载 JDK</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#12-%E7%BB%88%E7%AB%AF%E9%85%8D%E8%89%B2"><span class="nav-text">12. 终端配色</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#13-%E7%BC%96%E8%AF%91-amp-%E5%85%B6%E4%BB%96%E5%BF%85%E5%A4%87%E5%B7%A5%E5%85%B7"><span class="nav-text">13. 编译&amp;其他必备工具</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#14-ssh-%E8%BF%9E%E6%8E%A5%E8%BF%9C%E7%A8%8B%E6%9C%8D%E5%8A%A1%E5%99%A8"><span class="nav-text">14. ssh 连接远程服务器</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#14-1-%E7%9B%B4%E6%8E%A5%E4%BD%BF%E7%94%A8-ssh-%E8%BF%9E%E6%8E%A5"><span class="nav-text">14.1. 直接使用 ssh 连接</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#14-2-%E4%BD%BF%E7%94%A8-ssh-key-%E7%99%BB%E5%BD%95%E6%9C%8D%E5%8A%A1%E5%99%A8"><span class="nav-text">14.2. 使用 ssh-key 登录服务器</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#14-3-%E4%BD%BF%E7%94%A8-sshpass-%E5%9C%A8%E5%91%BD%E4%BB%A4%E4%B8%AD%E9%99%84%E5%B8%A6%E5%AF%86%E7%A0%81%E8%BF%9E%E6%8E%A5"><span class="nav-text">14.3. 使用 sshpass 在命令中附带密码连接</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#15-%E5%AE%89%E8%A3%85-sublime3"><span class="nav-text">15. 安装 sublime3</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#16-%E6%88%AA%E5%9B%BE"><span class="nav-text">16. 截图</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#17-%E5%BC%BA%E5%88%B6%E5%85%B3%E9%97%ADUI"><span class="nav-text">17. 强制关闭UI</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#18-%E5%AE%89%E8%A3%85-AndroidStudio"><span class="nav-text">18. 安装 AndroidStudio</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#19-%E9%85%8D%E7%BD%AE-samba-%E5%85%B1%E4%BA%AB"><span class="nav-text">19. 配置 samba 共享</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#20-%E5%AE%89%E8%A3%85-jd-gui-x2F-apktool"><span class="nav-text">20. 安装 jd-gui&#x2F;apktool</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#21-Ubuntu-18-04-%E7%BE%8E%E5%8C%96"><span class="nav-text">21. Ubuntu 18.04 美化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#22-%E5%AE%89%E8%A3%85-wine"><span class="nav-text">22. 安装 wine</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#23-sublime-%E8%BE%93%E5%85%A5%E4%B8%AD%E6%96%87"><span class="nav-text">23. sublime 输入中文</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#24-%E5%AE%89%E8%A3%85-anaconda"><span class="nav-text">24. 安装 anaconda</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#25-%E5%88%87%E6%8D%A2-python-%E7%89%88%E6%9C%AC"><span class="nav-text">25. 切换 python 版本</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#26-%E4%B8%B2%E5%8F%A3-log-%E5%B7%A5%E5%85%B7"><span class="nav-text">26. 串口 log 工具</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#26-1-minicom"><span class="nav-text">26.1 minicom</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#26-2-picocom"><span class="nav-text">26.2 picocom</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#27-Wired-%E7%BD%91%E7%BB%9C%E6%B6%88%E5%A4%B1"><span class="nav-text">27. Wired 网络消失</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#28-%E6%96%87%E4%BB%B6%E7%AE%A1%E7%90%86%E5%99%A8"><span class="nav-text">28. 文件管理器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#29-%E7%BB%88%E7%AB%AF%E4%B8%AD%E6%96%87%E5%8F%AA%E8%83%BD%E6%98%BE%E7%A4%BA-ASCII-%E7%A0%81"><span class="nav-text">29. 终端中文只能显示 ASCII 码</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#30-%E5%AE%89%E8%A3%85-nodejs-%E5%92%8C-npm"><span class="nav-text">30. 安装 nodejs 和 npm</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#30-1-%E5%8D%B8%E8%BD%BD-node-%E5%92%8C-npm"><span class="nav-text">30.1 卸载 node 和 npm</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#30-2-%E5%AE%89%E8%A3%85%E6%9C%80%E6%96%B0%E7%9A%84-node-%E5%92%8C-npm"><span class="nav-text">30.2 安装最新的 node 和 npm</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#31-vim-%E8%AE%B0%E5%BF%86%E4%BD%8D%E7%BD%AE%E4%B8%8D%E7%94%9F%E6%95%88%EF%BC%88%E5%8F%AA%E6%9C%89%E5%8A%A0%E4%B8%8A-sudo-%E6%97%B6%E6%89%8D%E7%94%9F%E6%95%88%EF%BC%89"><span class="nav-text">31. vim 记忆位置不生效（只有加上 sudo 时才生效）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#32-Ubuntu-LibreOffice-%E7%9B%B8%E5%85%B3%E9%85%8D%E7%BD%AE"><span class="nav-text">32. Ubuntu LibreOffice 相关配置</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#32-1-%E5%85%B3%E9%97%AD-LibreOffice-Calc-%E8%BE%93%E5%85%A5%E5%AD%97%E6%AF%8D%E8%87%AA%E5%8A%A8%E5%A4%A7%E5%86%99"><span class="nav-text">32.1 关闭 LibreOffice Calc 输入字母自动大写</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#32-2-%E5%85%B3%E9%97%AD-boolean-%E5%9E%8B%E5%80%BC-true-x2F-false-%E8%87%AA%E5%8A%A8%E5%8F%98%E4%B8%BA-TRUE-x2F-FALSE"><span class="nav-text">32.2 关闭 boolean 型值 true&#x2F;false 自动变为 TRUE&#x2F;FALSE</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#33-Ubuntu-%E7%BB%88%E7%AB%AF%E5%BD%95%E5%88%B6%E5%B7%A5%E5%85%B7"><span class="nav-text">33. Ubuntu 终端录制工具</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#33-1-ttygif"><span class="nav-text">33.1 ttygif</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#33-2-termtosvg"><span class="nav-text">33.2 termtosvg</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#34-%E5%AE%89%E8%A3%85-ohmyzsh"><span class="nav-text">34. 安装 ohmyzsh</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Ranger Zhou</p>
+  <div class="site-description" itemprop="description">我是一个小流氓我从来也不浪，有一天我心血来潮耍了个流氓，我嘴里吹着小口哨我心里好得意，不知怎么哗啦啦啦啦我摔了一身泥</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">63</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">8</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">16</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/rangerzhou" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;rangerzhou" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:rangero_o@qq.com" title="E-Mail → mailto:rangero_o@qq.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://rangerzhou.taobao.com/" title="Taobao → http:&#x2F;&#x2F;rangerzhou.taobao.com&#x2F;" rel="noopener" target="_blank"><i class="fab fa-youtube fa-fw"></i>Taobao</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="/images/wechat.jpg" title="WeChat → &#x2F;images&#x2F;wechat.jpg"><i class="fab fa-youtube fa-fw"></i>WeChat</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://blog.csdn.net/ranger0220?viewmode=contents" title="CSDN → http:&#x2F;&#x2F;blog.csdn.net&#x2F;ranger0220?viewmode&#x3D;contents" rel="noopener" target="_blank"><i class="fab fa-youtube fa-fw"></i>CSDN</a>
+      </span>
+  </div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      墙裂推荐
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="http://rangerzhou.taobao.com/" title="http:&#x2F;&#x2F;rangerzhou.taobao.com" rel="noopener" target="_blank">Taobao</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2016 – 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Ranger Zhou</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+<script data-pjax>
+  (function() {
+    function leancloudSelector(url) {
+      url = encodeURI(url);
+      return document.getElementById(url).querySelector('.leancloud-visitors-count');
+    }
+
+    function addCount(Counter) {
+      var visitors = document.querySelector('.leancloud_visitors');
+      var url = decodeURI(visitors.id);
+      var title = visitors.dataset.flagTitle;
+
+      Counter('get', '/classes/Counter?where=' + encodeURIComponent(JSON.stringify({ url })))
+        .then(response => response.json())
+        .then(({ results }) => {
+          if (results.length > 0) {
+            var counter = results[0];
+            leancloudSelector(url).innerText = counter.time + 1;
+            Counter('put', '/classes/Counter/' + counter.objectId, { time: { '__op': 'Increment', 'amount': 1 } })
+              .catch(error => {
+                console.error('Failed to save visitor count', error);
+              });
+          } else {
+              Counter('post', '/classes/Counter', { title, url, time: 1 })
+                .then(response => response.json())
+                .then(() => {
+                  leancloudSelector(url).innerText = 1;
+                })
+                .catch(error => {
+                  console.error('Failed to create', error);
+                });
+          }
+        })
+        .catch(error => {
+          console.error('LeanCloud Counter Error', error);
+        });
+    }
+
+    function showTime(Counter) {
+      var visitors = document.querySelectorAll('.leancloud_visitors');
+      var entries = [...visitors].map(element => {
+        return decodeURI(element.id);
+      });
+
+      Counter('get', '/classes/Counter?where=' + encodeURIComponent(JSON.stringify({ url: { '$in': entries } })))
+        .then(response => response.json())
+        .then(({ results }) => {
+          for (let url of entries) {
+            let target = results.find(item => item.url === url);
+            leancloudSelector(url).innerText = target ? target.time : 0;
+          }
+        })
+        .catch(error => {
+          console.error('LeanCloud Counter Error', error);
+        });
+    }
+
+    let { app_id, app_key, server_url } = {"enable":true,"app_id":"U9g4mWmsQg8FjOE3xsqUy9Df-gzGzoHsz","app_key":"24cDno14OiDhAreVmoEjzqns","server_url":"https://u9g4mwms.lc-cn-n1-shared.com","security":false};
+    function fetchData(api_server) {
+      var Counter = (method, url, data) => {
+        return fetch(`${api_server}/1.1${url}`, {
+          method,
+          headers: {
+            'X-LC-Id'     : app_id,
+            'X-LC-Key'    : app_key,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(data)
+        });
+      };
+      if (CONFIG.page.isPost) {
+        if (CONFIG.hostname !== location.hostname) return;
+        addCount(Counter);
+      } else if (document.querySelectorAll('.post-title-link').length >= 1) {
+        showTime(Counter);
+      }
+    }
+
+    let api_server = app_id.slice(-9) !== '-MdYXbMMI' ? server_url : `https://${app_id.slice(0, 8).toLowerCase()}.api.lncldglobal.com`;
+
+    if (api_server) {
+      fetchData(api_server);
+    } else {
+      fetch('https://app-router.leancloud.cn/2/route?appId=' + app_id)
+        .then(response => response.json())
+        .then(({ api_server }) => {
+          fetchData('https://' + api_server);
+        });
+    }
+  })();
+</script>
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/pjax/pjax.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/pangu@4/dist/browser/pangu.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '#page-configurations',
+    '.content-wrap',
+    '.post-toc-wrap',
+    '.languages',
+    '#pjax'
+  ],
+  switches: {
+    '.post-toc-wrap': Pjax.switches.innerHTML
+  },
+  analytics: false,
+  cacheBust: false,
+  scrollTo : !CONFIG.bookmark.enable
+});
+
+window.addEventListener('pjax:success', () => {
+  document.querySelectorAll('script[data-pjax], script#page-configurations, #pjax script').forEach(element => {
+    var code = element.text || element.textContent || element.innerHTML || '';
+    var parent = element.parentNode;
+    parent.removeChild(element);
+    var script = document.createElement('script');
+    if (element.id) {
+      script.id = element.id;
+    }
+    if (element.className) {
+      script.className = element.className;
+    }
+    if (element.type) {
+      script.type = element.type;
+    }
+    if (element.src) {
+      script.src = element.src;
+      // Force synchronous loading of peripheral JS.
+      script.async = false;
+    }
+    if (element.dataset.pjax !== undefined) {
+      script.dataset.pjax = '';
+    }
+    if (code !== '') {
+      script.appendChild(document.createTextNode(code));
+    }
+    parent.appendChild(script);
+  });
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+
+
+  
+  <script data-pjax>
+    (function(){
+      var canonicalURL, curProtocol;
+      //Get the <link> tag
+      var x=document.getElementsByTagName("link");
+		//Find the last canonical URL
+		if(x.length > 0){
+			for (i=0;i<x.length;i++){
+				if(x[i].rel.toLowerCase() == 'canonical' && x[i].href){
+					canonicalURL=x[i].href;
+				}
+			}
+		}
+    //Get protocol
+	    if (!canonicalURL){
+	    	curProtocol = window.location.protocol.split(':')[0];
+	    }
+	    else{
+	    	curProtocol = canonicalURL.split(':')[0];
+	    }
+      //Get current URL if the canonical URL does not exist
+	    if (!canonicalURL) canonicalURL = window.location.href;
+	    //Assign script content. Replace current URL with the canonical URL
+      !function(){var e=/([http|https]:\/\/[a-zA-Z0-9\_\.]+\.baidu\.com)/gi,r=canonicalURL,t=document.referrer;if(!e.test(r)){var n=(String(curProtocol).toLowerCase() === 'https')?"https://sp0.baidu.com/9_Q4simg2RQJ8t7jm9iCKT-xh_/s.gif":"//api.share.baidu.com/s.gif";t?(n+="?r="+encodeURIComponent(document.referrer),r&&(n+="&l="+r)):r&&(n+="?l="+r);var i=new Image;i.src=n}}(window);})();
+  </script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <div id="pjax">
+  
+
+  
+
+<script>
+  var disqus_config = function() {
+    this.page.url = "http://rangerzhou.top/2018/10/30/Technical/Ubuntu18.04_installation/";
+    this.page.identifier = "2018/10/30/Technical/Ubuntu18.04_installation/";
+    this.page.title = "Ubuntu18.04安装后必备操作";
+    };
+  NexT.utils.loadComments(document.querySelector('#disqus_thread'), () => {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: disqus_config
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://rangerzhou.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  });
+</script>
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : 'b7bb504993135f5a2eab',
+      clientSecret: '6f83aec5c45d75e248e2914be90c4601e2e1dc44',
+      repo        : 'rangerzhou.github.io',
+      owner       : 'rangerzhou',
+      admin       : ['rangerzhou'],
+      id          : 'd7ab56aa527558137857fccb4f44c20c',
+        language: 'zh-CN',
+      distractionFreeMode: true
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
+
+<script>
+NexT.utils.loadComments(document.querySelector('#lv-container'), () => {
+  window.livereOptions = {
+    refer: location.pathname.replace(CONFIG.root, '').replace('index.html', '')
+  };
+  (function(d, s) {
+    var j, e = d.getElementsByTagName(s)[0];
+    if (typeof LivereTower === 'function') { return; }
+    j = d.createElement(s);
+    j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+    j.async = true;
+    e.parentNode.insertBefore(j, e);
+  })(document, 'script');
+});
+</script>
+
+    </div>
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/haru01.model.json"},"display":{"position":"left","width":300,"height":800},"mobile":{"show":false},"log":false});</script></body>
+</html>

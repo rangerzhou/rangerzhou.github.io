@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.2.0">
+<!-- pjax：防止跳转页面音乐暂停 -->
+<script src="https://cdn.jsdelivr.net/npm/pjax@0.2.8/pjax.js"></script>
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/desert.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/desert.jpg">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <meta name="google-site-verification" content="OJnYjbr3wdT22qLrZSzyD9lAyBcXiXlEQ7-5wAnaWoQ">
+  <meta name="baidu-site-verification" content="vr4n4JeXgB">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-minimal.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"rangerzhou.top","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"manual"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":true,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":true,"nav":null,"activeClass":"gitalk"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="常见性能调试方法；">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Performance_debug">
+<meta property="og:url" content="http://rangerzhou.top/2018/02/08/Android/Performance_debug/index.html">
+<meta property="og:site_name" content="RangerZhou">
+<meta property="og:description" content="常见性能调试方法；">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2018-02-08T08:26:32.000Z">
+<meta property="article:modified_time" content="2022-07-18T14:46:21.591Z">
+<meta property="article:author" content="Ranger Zhou">
+<meta property="article:tag" content="performance">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://rangerzhou.top/2018/02/08/Android/Performance_debug/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+<script src="//cdn.bootcss.com/pace/1.0.2/pace.min.js"></script>
+<link href="//cdn.bootcss.com/pace/1.0.2/themes/pink/pace-theme-flash.css" rel="stylesheet">
+
+  <title>Performance_debug | RangerZhou</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-138158952-1"></script>
+    <script data-pjax>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-138158952-1');
+      }
+    </script>
+
+
+  <script data-pjax>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?24a6d3c4c0f292c5f682d26414c3994b";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+
+<!-- 加入APlayer音乐播放器 -->
+<link rel="stylesheet" href="/dist/APlayer.min.css">
+<div id="aplayer"></div>
+<script type="text/javascript" src="/dist/APlayer.min.js"></script>
+<script type="text/javascript" src="/dist/music.js"></script>
+
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">RangerZhou</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">Read the fucking source code</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-playlist">
+
+    <a href="/playlist/" rel="section"><i class="fa fa-music fa-fw"></i>歌单</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-commonweal">
+
+    <a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a>
+
+  </li>
+        <li class="menu-item menu-item-official">
+
+    <a href="/official" rel="section"><i class="fa fa-user fa-fw"></i>official</a>
+
+  </li>
+        <li class="menu-item menu-item-shop">
+
+    <a href="http://rangerzhou.taobao.com/" rel="noopener" target="_blank"><i class="fa fa-user fa-fw"></i>shop</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://rangerzhou.top/2018/02/08/Android/Performance_debug/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Ranger Zhou">
+      <meta itemprop="description" content="我是一个小流氓我从来也不浪，有一天我心血来潮耍了个流氓，我嘴里吹着小口哨我心里好得意，不知怎么哗啦啦啦啦我摔了一身泥">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="RangerZhou">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Performance_debug
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2018-02-08 16:26:32" itemprop="dateCreated datePublished" datetime="2018-02-08T16:26:32+08:00">2018-02-08</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-07-18 22:46:21" itemprop="dateModified" datetime="2022-07-18T22:46:21+08:00">2022-07-18</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Android/" itemprop="url" rel="index"><span itemprop="name">Android</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/2018/02/08/Android/Performance_debug/" class="post-meta-item leancloud_visitors" data-flag-title="Performance_debug" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <blockquote>
+<p>常见性能调试方法；</p>
+</blockquote>
+<span id="more"></span>
+
+<h3 id="CPU-performance-mode"><a href="#CPU-performance-mode" class="headerlink" title="CPU performance mode"></a>CPU performance mode</h3><p>我们知道引起性能问题的因素很多，通常为了初步确认该问题是否是系统处理能力不足而导致的，我们可以让系统运行在 performance mode 下测试该问题是否可以重现，从而进行初步的诊断；</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">4 CPUs</span></span><br><span class="line">adb shell root</span><br><span class="line">adb shell setenforce 0</span><br><span class="line">adb shell stop thermal-engine</span><br><span class="line">adb shell rmmod core_ctl</span><br><span class="line">adb shell &quot;echo 1 &gt; /sys/devices/system/cpu/cpu1/online&quot;</span><br><span class="line">adb shell &quot;echo 1 &gt; /sys/devices/system/cpu/cpu2/online&quot;</span><br><span class="line">adb shell &quot;echo 1 &gt; /sys/devices/system/cpu/cpu3/online&quot;</span><br><span class="line">adb shell &quot;echo performance &gt; /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor&quot;</span><br><span class="line">adb shell &quot;echo performance &gt; /sys/devices/system/cpu/cpu1/cpufreq/scaling_governor&quot;</span><br><span class="line">adb shell &quot;echo performance &gt; /sys/devices/system/cpu/cpu2/cpufreq/scaling_governor&quot;</span><br><span class="line">adb shell &quot;echo performance &gt; /sys/devices/system/cpu/cpu3/cpufreq/scaling_governor&quot;</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">8 CPUs</span></span><br><span class="line">adb shell root</span><br><span class="line">adb shell setenforce 0</span><br><span class="line">adb shell stop thermal-engine</span><br><span class="line">adb shell rmmod core_ctl</span><br><span class="line">adb shell &quot;echo 1 &gt; /sys/devices/system/cpu/cpu1/online&quot;</span><br><span class="line">adb shell &quot;echo 1 &gt; /sys/devices/system/cpu/cpu2/online&quot;</span><br><span class="line">adb shell &quot;echo 1 &gt; /sys/devices/system/cpu/cpu3/online&quot;</span><br><span class="line">adb shell &quot;echo 1 &gt; /sys/devices/system/cpu/cpu4/online&quot;</span><br><span class="line">adb shell &quot;echo 1 &gt; /sys/devices/system/cpu/cpu5/online&quot;</span><br><span class="line">adb shell &quot;echo 1 &gt; /sys/devices/system/cpu/cpu6/online&quot;</span><br><span class="line">adb shell &quot;echo 1 &gt; /sys/devices/system/cpu/cpu7/online&quot;</span><br><span class="line">adb shell &quot;echo performance &gt; /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor&quot;</span><br><span class="line">adb shell &quot;echo performance &gt; /sys/devices/system/cpu/cpu1/cpufreq/scaling_governor&quot;</span><br><span class="line">adb shell &quot;echo performance &gt; /sys/devices/system/cpu/cpu2/cpufreq/scaling_governor&quot;</span><br><span class="line">adb shell &quot;echo performance &gt; /sys/devices/system/cpu/cpu3/cpufreq/scaling_governor&quot;</span><br><span class="line">adb shell &quot;echo performance &gt; /sys/devices/system/cpu/cpu4/cpufreq/scaling_governor&quot;</span><br><span class="line">adb shell &quot;echo performance &gt; /sys/devices/system/cpu/cpu5/cpufreq/scaling_governor&quot;</span><br><span class="line">adb shell &quot;echo performance &gt; /sys/devices/system/cpu/cpu6/cpufreq/scaling_governor&quot;</span><br><span class="line">adb shell &quot;echo performance &gt; /sys/devices/system/cpu/cpu7/cpufreq/scaling_governor&quot;</span><br></pre></td></tr></table></figure>
+
+<h3 id="GPU-performance-mode"><a href="#GPU-performance-mode" class="headerlink" title="GPU performance mode"></a>GPU performance mode</h3><p>如果我们发现 GPU draw 得太慢并且 GPU 的 clock 不是运行在比较高的频率的情况下，我们可以让 GPU 运行在 performance mode 下，测试该问题是否可以重现；</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">adb shell root</span><br><span class="line">adb shell setenforce 0</span><br><span class="line">adb shell stop thermal-engine</span><br><span class="line">adb shell echo 0 &gt; /sys/class/kgsl/kgsl-3d0/bus_split</span><br><span class="line">adb shell echo performance &gt; /sys/class/kgsl/kgsl-3d0/devfreq/governor</span><br><span class="line">adb shell echo 1 &gt; /sys/class/kgsl/kgsl-3d0/force_bus_on</span><br><span class="line">adb shell echo 1 &gt; /sys/class/kgsl/kgsl-3d0/force_rail_on</span><br><span class="line">adb shell echo 1 &gt; /sys/class/kgsl/kgsl-3d0/force_clk_on</span><br><span class="line">adb shell echo 1000000 &gt; /sys/class/kgsl/kgsl-3d0/idle_timer</span><br></pre></td></tr></table></figure>
+
+<h3 id="DDR-at-max"><a href="#DDR-at-max" class="headerlink" title="DDR at max"></a>DDR at max</h3><p>有时 DDR 频率过低也会引起性能问题，所以我们可以让 DDR 工作在比较高的频率下测试是否还可以重现该问题；</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">adb shell &quot;echo 1 &gt; /sys/kernel/debug/msm-bus-dbg/shell-client/mas&quot;</span><br><span class="line">adb shell &quot;echo 512 &gt; /sys/kernel/debug/msm-bus-dbg/shell-client/slv&quot;</span><br><span class="line">adb shell &quot;echo 0 &gt; /sys/kernel/debug/msm-bus-dbg/shell-client/ab&quot;</span><br><span class="line">adb shell &quot;echo 16 * DDR max frequency &gt; /sys/kernel/debug/msm-bus-dbg/shell-client/ib&quot;</span><br><span class="line">adb shell &quot;echo 1 &gt; /sys/kernel/debug/msm-bus-dbg/shell-client/update_request&quot;</span><br></pre></td></tr></table></figure>
+
+<h3 id="获取-thermal-engine-debug-log"><a href="#获取-thermal-engine-debug-log" class="headerlink" title="获取 thermal-engine debug log"></a>获取 thermal-engine debug log</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">adb shell stop thermal-engine</span><br><span class="line">adb shell thermal-engine --debug &amp;</span><br><span class="line">adb shell logcat -v time -s ThermalEngine &gt;your path</span><br></pre></td></tr></table></figure>
+
+<h3 id="打开-perfd-debug-log"><a href="#打开-perfd-debug-log" class="headerlink" title="打开 perfd debug log"></a>打开 perfd debug log</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">adb root</span> </span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">adb disable-verity</span> </span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">adb reboot</span> </span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">adb root</span> </span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">adb remount</span> </span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">adb pull /system/build.prop</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">在build.prop 中增加debug.trace.perf=1</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">adb shell <span class="string">&quot;echo ‘debug.trace.perf=1’ &gt;&gt; /system/build.prop&quot;</span></span> </span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">adb push build.prop /system/</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">adb shell <span class="built_in">chmod</span> 0644 /system/build.prop</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">adb shell <span class="built_in">sync</span></span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">adb shell reboot</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">或者</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">adb shell root</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">adb shell setenforce 0</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">adb shell setprop debug.trace.perf 1</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">adb shell stop perfd</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">adb shell start perfd</span></span><br></pre></td></tr></table></figure>
+
+<p>perfd 的 log 就会显示在 logcat 和 systrace 中；</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">adb logcat | grep PERF</span> </span><br><span class="line">02-07 20:15:46.055 726 726 E ANDR-PERF-MPCTL: perf_lock_acq: client_pid=1747, client_tid=1790, inupt handle=0, duration=2000 ms, num_args=10, list=0x40C00000 0x1 0x40804000 0xFFF 0x40804100 0xFFF 0x40800000 0xFFF 0x40800100 0xFFF </span><br><span class="line">02-07 20:15:46.056 726 756 E ANDR-PERF-MPCTL: Invalid profile no. 0, total profiles 0 only </span><br><span class="line">02-07 20:15:47.500 726 726 E ANDR-PERF-MPCTL: perf_lock_acq: client_pid=1747, client_tid=3031, inupt handle=0, duration=2147483647 ms, num_args=10, list=0x40C00000 0x1 0x40804000 0xFFF 0x40804100 0xFFF 0x40800000 0xFFF 0x40800100 0xFFF </span><br><span class="line">02-07 20:15:47.501 726 756 E ANDR-PERF-MPCTL: Invalid profile no. 0, total profiles 0 only </span><br><span class="line">02-07 20:15:47.977 726 726 E ANDR-PERF-MPCTL: perf_lock_acq: client_pid=1747, client_tid=2093, inupt handle=0, duration=2147483647 ms, num_args=10, list=0x40C00000 0x1 0x40804000 0xFFF 0x40804100 0xFFF 0x40800000 0xFFF 0x40800100 0xFFF </span><br><span class="line">02-07 20:15:47.977 726 756 E ANDR-PERF-MPCTL: Invalid profile no. 0, total profiles 0 only </span><br><span class="line">02-07 20:15:58.839 726 726 E ANDR-PERF-MPCTL: perf_lock_acq: client_pid=701, client_tid=2694, inupt handle=0, duration=0 ms, num_args=2, list=0x101 0x20E </span><br><span class="line">02-07 20:15:58.840 726 756 E ANDR-PERF-MPCTL: Invalid profile no. 0, total profiles 0 only </span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="查看可用频率"><a href="#查看可用频率" class="headerlink" title="查看可用频率"></a>查看可用频率</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">adb shell cat sys/devices/system/cpu/cpufreq/policy0/scaling_available_frequencies</span><br><span class="line">633600 902400 1113600 1401600 1536000 1747200 1843200</span><br><span class="line">adb shell cat sys/devices/system/cpu/cpufreq/policy4/scaling_available_frequencies</span><br><span class="line">1113600 1401600 1747200 1958400 2150400 2208000</span><br></pre></td></tr></table></figure>
+
+<h3 id="开机启动"><a href="#开机启动" class="headerlink" title="开机启动"></a>开机启动</h3><h4 id="获得正确-log"><a href="#获得正确-log" class="headerlink" title="获得正确 log"></a>获得正确 log</h4><p>对于开机启动慢的问题的 debug，我们需要 kernel log，event log，logcat log，请用如下命令获取 log：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">adb wait-for-device root</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">adb wait-for-device</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">adb shell dmesg &gt; dmesg.txt</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">adb logcat -b events -d &gt; logcat_events.txt</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">adb logcat -v thread time -d *:V &gt; logcat.txt</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="log-分析"><a href="#log-分析" class="headerlink" title="log 分析"></a>log 分析</h4><ul>
+<li><p>kernel log</p>
+<p>我们知道 kernel 可以分为两部分，一是 boot loader 部分，一是加载 driver 部分；</p>
+<ul>
+<li><p>Boot loader 部分</p>
+<p>我们可以用 Bootloader 的 KPI 来计算 bootloader 的所用的时间，Bootloader KPI 的时间会输出到 demsg 如:</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">[ 0.524325] KPI: Bootloader start count = 20820 //A 为LK 开始时</span><br><span class="line">[ 0.524334] KPI: Bootloader end count = 231148//B 为LK 结束时间</span><br><span class="line">[ 0.524341] KPI: Bootloader display count = 36470</span><br><span class="line">[ 0.524348] KPI: Bootloader load kernel count = 2232</span><br><span class="line">[ 0.524356] KPI: Kernel MPM timestamp = 254555 // C bootloader 完成时间</span><br><span class="line">[ 0.524363] KPI: Kernel MPM Clock frequency = 32768 //D clock.</span><br><span class="line">NHLOS 时间: A/D=20820/32768=0.63</span><br><span class="line">LK 时间: (B-A)/D=( 231148-20820)=6.41s</span><br><span class="line">Bootloader 时间:C/D-kmsg(C)=254555/32768-0.52=7.24s</span><br></pre></td></tr></table></figure>
+
+<p>如果 boot loader 的时间太长,我们需要检查其是否正常；</p>
+</li>
+<li><p>Kernel driver 部分</p>
+<p>如果从 kernel 初始化到 Zygote 启动时间太长，我们可以打开每个 module 的加载时间，然后找到其耗时比较多的module并优化，下面这个patch 可以打开module ini的时间：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">diff --git a/init/main.c b/init/main.c</span><br><span class="line">index <span class="number">7</span>af2174.<span class="number">.2</span>d11927 <span class="number">100644</span></span><br><span class="line">--- a/init/main.c</span><br><span class="line">+++ b/init/main.c</span><br><span class="line">@@ <span class="number">-785</span>,<span class="number">7</span> +<span class="number">785</span>,<span class="number">7</span> @@ <span class="function"><span class="type">int</span> __init_or_module <span class="title">do_one_initcall</span><span class="params">(<span class="type">initcall_t</span> fn)</span></span></span><br><span class="line"><span class="function"><span class="title">if</span> <span class="params">(initcall_blacklisted(fn))</span></span></span><br><span class="line"><span class="function"><span class="keyword">return</span> -EPERM</span>;</span><br><span class="line">- <span class="keyword">if</span> (initcall_debug)+ <span class="keyword">if</span> (<span class="number">1</span>)</span><br><span class="line">ret = <span class="built_in">do_one_initcall_debug</span>(fn);</span><br><span class="line"><span class="keyword">else</span></span><br><span class="line">ret = <span class="built_in">fn</span>();</span><br><span class="line"><span class="comment">// 输出log 如:</span></span><br><span class="line">initcall msm_serial_hsl_init+<span class="number">0x0</span>/<span class="number">0xac</span> returned <span class="number">0</span> after <span class="number">262555</span> usecs</span><br><span class="line">initcall fts_driver_init+<span class="number">0x0</span>/<span class="number">0x20</span> returned <span class="number">0</span> after <span class="number">171317</span> usecs</span><br><span class="line">initcall ufs_qcom_phy_qmp_20nm_driver_init+<span class="number">0x0</span>/<span class="number">0x20</span> returned <span class="number">0</span> after <span class="number">2572</span> usecs</span><br><span class="line">initcall ufs_qcom_phy_qmp_14nm_driver_init+<span class="number">0x0</span>/<span class="number">0x24</span> returned <span class="number">0</span> after <span class="number">1727</span> usecs</span><br><span class="line">initcall ufs_qcom_phy_qmp_v3_driver_init+<span class="number">0x0</span>/<span class="number">0x24</span> returned <span class="number">0</span> after <span class="number">1010</span> usecs</span><br><span class="line">initcall ufs_qcom_phy_qrbtc_v2_driver_init+<span class="number">0x0</span>/<span class="number">0x24</span> returned <span class="number">0</span> after <span class="number">838</span> usecs</span><br></pre></td></tr></table></figure></li>
+</ul>
+</li>
+<li><p>User space log</p>
+<p>系统启动过程中，我们可以获取 event log 得到 boot event，其含义如下: </p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">boot_progress_start // user space 开始时间</span><br><span class="line">boot_progress_preload_start // Zygote 进程 preload 开始时间</span><br><span class="line">boot_progress_preload_end // Zygote 进程 preload 结束时间</span><br><span class="line">boot_progress_system_run // System server 开始运行时间</span><br><span class="line">boot_progress_pms_start // Package Scan 开始</span><br><span class="line">boot_progress_pms_system_scan_start // System 目录开始 scan</span><br><span class="line">boot_progress_pms_data_scan_start //data 目录开始scan</span><br><span class="line">boot_progress_pms_scan_end // package scan 结束时</span><br><span class="line">boot_progress_pms_ready // package manager ready</span><br><span class="line">boot_progress_ams_ready // Activity manager ready,这个事件之后便会启动home Activity。</span><br><span class="line">boot_progress_enable_screen // HomeActivity 启动完毕</span><br></pre></td></tr></table></figure>
+
+<p>当 HomeActivity 启动完毕后，系统将检查当前所有可见的 window 是否画完，如果所有的 window(包括wallpaper, Keyguard 等) 都已经画好，系统会设置属性 service.bootanim.exit 值为1，而 bootanimation 在检查到 service.bootanim.exit 属性值为 1 时，便会结束 bootanimation，从而显示 home 界面。所以我们需要辅助 logcat log 来检查 bootaimation 束是否正常,如下面的 log：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">07-21 14:21:36.716 1455 1607 I boot_progress_enable_screen: 21242</span><br><span class="line">07-21 14:21:43.230 1014 1772 D BootAnimation: media player is completed.</span><br></pre></td></tr></table></figure>
+
+<p>这里从 Homeactivity 启动完毕到 bootanimation 退出用了大约 6.5s 的时间，我们需要检查这个时间是否正常是否还有优化的空间；</p>
+</li>
+</ul>
+<h3 id="APP-冷启动"><a href="#APP-冷启动" class="headerlink" title="APP 冷启动"></a>APP 冷启动</h3><p>对于启动慢的问题，我们需要 logcat，kernel 和 systrace log，在获取 systrace 之前，需要打开 perfd log（Enable perfd log）；</p>
+<p>对于冷启动，主要分析点如下:</p>
+<ul>
+<li><p>检查是否正确 enable 了 launch boost 功能</p>
+<p>在 QCOM 所有平台中，对于冷启动都默认 enable 了 launch boost 功能。即在冷启动时，CPU 将运行在最大频率上，并且保持 2s；</p>
+</li>
+<li><p>启动时间分解</p>
+<p>我们知道，APP 在冷启动时，一般的操作是：点击 launcher 上 APP 的图标 -〉APP 启动，这一过程在 systrace 中可以分解为：</p>
+<p>Launcher 收到 touch event -&gt; Launcher pause -&gt; new process(APP 进程) -&gt; bindApplication -&gt; activityStart-&gt; Choreographer#doFrame()，在 systrace 中可以看到这些操作，我们可以看看每部分的时间是否合理，如果不合理则检查相关部分的代码，看看是否有可以优化的空间；</p>
+</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div>Donate comment here.</div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechatpay.jpg" alt="Ranger Zhou 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.jpg" alt="Ranger Zhou 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>Ranger Zhou
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://rangerzhou.top/2018/02/08/Android/Performance_debug/" title="Performance_debug">http://rangerzhou.top/2018/02/08/Android/Performance_debug/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/performance/" rel="tag"># performance</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2018/01/20/Android/Selinux_introduction/" rel="prev" title="selinux介绍">
+      <i class="fa fa-chevron-left"></i> selinux介绍
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2018/02/12/Android/Android_8.0_App_install_time_Optimize/" rel="next" title="Android8.0-App安装时间优化">
+      Android8.0-App安装时间优化 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+      <div class="tabs tabs-comment">
+        <ul class="nav-tabs">
+            <li class="tab"><a href="#comment-disqus">disqus</a></li>
+            <li class="tab"><a href="#comment-gitalk">gitalk</a></li>
+            <li class="tab"><a href="#comment-livere">livere</a></li>
+        </ul>
+        <div class="tab-content">
+            <div class="tab-pane disqus" id="comment-disqus">
+              
+  <div class="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
+            </div>
+            <div class="tab-pane gitalk" id="comment-gitalk">
+              <div class="comments" id="gitalk-container"></div>
+            </div>
+            <div class="tab-pane livere" id="comment-livere">
+              
+  <div class="comments">
+    <div id="lv-container" data-id="city" data-uid="MTAyMC8yOTcyNS82Mjky"></div>
+  </div>
+  
+            </div>
+        </div>
+      </div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#CPU-performance-mode"><span class="nav-text">CPU performance mode</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#GPU-performance-mode"><span class="nav-text">GPU performance mode</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#DDR-at-max"><span class="nav-text">DDR at max</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%8E%B7%E5%8F%96-thermal-engine-debug-log"><span class="nav-text">获取 thermal-engine debug log</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%89%93%E5%BC%80-perfd-debug-log"><span class="nav-text">打开 perfd debug log</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9F%A5%E7%9C%8B%E5%8F%AF%E7%94%A8%E9%A2%91%E7%8E%87"><span class="nav-text">查看可用频率</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BC%80%E6%9C%BA%E5%90%AF%E5%8A%A8"><span class="nav-text">开机启动</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%8E%B7%E5%BE%97%E6%AD%A3%E7%A1%AE-log"><span class="nav-text">获得正确 log</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#log-%E5%88%86%E6%9E%90"><span class="nav-text">log 分析</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#APP-%E5%86%B7%E5%90%AF%E5%8A%A8"><span class="nav-text">APP 冷启动</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Ranger Zhou</p>
+  <div class="site-description" itemprop="description">我是一个小流氓我从来也不浪，有一天我心血来潮耍了个流氓，我嘴里吹着小口哨我心里好得意，不知怎么哗啦啦啦啦我摔了一身泥</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">63</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">8</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">16</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/rangerzhou" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;rangerzhou" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:rangero_o@qq.com" title="E-Mail → mailto:rangero_o@qq.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://rangerzhou.taobao.com/" title="Taobao → http:&#x2F;&#x2F;rangerzhou.taobao.com&#x2F;" rel="noopener" target="_blank"><i class="fab fa-youtube fa-fw"></i>Taobao</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="/images/wechat.jpg" title="WeChat → &#x2F;images&#x2F;wechat.jpg"><i class="fab fa-youtube fa-fw"></i>WeChat</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://blog.csdn.net/ranger0220?viewmode=contents" title="CSDN → http:&#x2F;&#x2F;blog.csdn.net&#x2F;ranger0220?viewmode&#x3D;contents" rel="noopener" target="_blank"><i class="fab fa-youtube fa-fw"></i>CSDN</a>
+      </span>
+  </div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      墙裂推荐
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="http://rangerzhou.taobao.com/" title="http:&#x2F;&#x2F;rangerzhou.taobao.com" rel="noopener" target="_blank">Taobao</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2016 – 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Ranger Zhou</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+<script data-pjax>
+  (function() {
+    function leancloudSelector(url) {
+      url = encodeURI(url);
+      return document.getElementById(url).querySelector('.leancloud-visitors-count');
+    }
+
+    function addCount(Counter) {
+      var visitors = document.querySelector('.leancloud_visitors');
+      var url = decodeURI(visitors.id);
+      var title = visitors.dataset.flagTitle;
+
+      Counter('get', '/classes/Counter?where=' + encodeURIComponent(JSON.stringify({ url })))
+        .then(response => response.json())
+        .then(({ results }) => {
+          if (results.length > 0) {
+            var counter = results[0];
+            leancloudSelector(url).innerText = counter.time + 1;
+            Counter('put', '/classes/Counter/' + counter.objectId, { time: { '__op': 'Increment', 'amount': 1 } })
+              .catch(error => {
+                console.error('Failed to save visitor count', error);
+              });
+          } else {
+              Counter('post', '/classes/Counter', { title, url, time: 1 })
+                .then(response => response.json())
+                .then(() => {
+                  leancloudSelector(url).innerText = 1;
+                })
+                .catch(error => {
+                  console.error('Failed to create', error);
+                });
+          }
+        })
+        .catch(error => {
+          console.error('LeanCloud Counter Error', error);
+        });
+    }
+
+    function showTime(Counter) {
+      var visitors = document.querySelectorAll('.leancloud_visitors');
+      var entries = [...visitors].map(element => {
+        return decodeURI(element.id);
+      });
+
+      Counter('get', '/classes/Counter?where=' + encodeURIComponent(JSON.stringify({ url: { '$in': entries } })))
+        .then(response => response.json())
+        .then(({ results }) => {
+          for (let url of entries) {
+            let target = results.find(item => item.url === url);
+            leancloudSelector(url).innerText = target ? target.time : 0;
+          }
+        })
+        .catch(error => {
+          console.error('LeanCloud Counter Error', error);
+        });
+    }
+
+    let { app_id, app_key, server_url } = {"enable":true,"app_id":"U9g4mWmsQg8FjOE3xsqUy9Df-gzGzoHsz","app_key":"24cDno14OiDhAreVmoEjzqns","server_url":"https://u9g4mwms.lc-cn-n1-shared.com","security":false};
+    function fetchData(api_server) {
+      var Counter = (method, url, data) => {
+        return fetch(`${api_server}/1.1${url}`, {
+          method,
+          headers: {
+            'X-LC-Id'     : app_id,
+            'X-LC-Key'    : app_key,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(data)
+        });
+      };
+      if (CONFIG.page.isPost) {
+        if (CONFIG.hostname !== location.hostname) return;
+        addCount(Counter);
+      } else if (document.querySelectorAll('.post-title-link').length >= 1) {
+        showTime(Counter);
+      }
+    }
+
+    let api_server = app_id.slice(-9) !== '-MdYXbMMI' ? server_url : `https://${app_id.slice(0, 8).toLowerCase()}.api.lncldglobal.com`;
+
+    if (api_server) {
+      fetchData(api_server);
+    } else {
+      fetch('https://app-router.leancloud.cn/2/route?appId=' + app_id)
+        .then(response => response.json())
+        .then(({ api_server }) => {
+          fetchData('https://' + api_server);
+        });
+    }
+  })();
+</script>
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/pjax/pjax.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/pangu@4/dist/browser/pangu.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '#page-configurations',
+    '.content-wrap',
+    '.post-toc-wrap',
+    '.languages',
+    '#pjax'
+  ],
+  switches: {
+    '.post-toc-wrap': Pjax.switches.innerHTML
+  },
+  analytics: false,
+  cacheBust: false,
+  scrollTo : !CONFIG.bookmark.enable
+});
+
+window.addEventListener('pjax:success', () => {
+  document.querySelectorAll('script[data-pjax], script#page-configurations, #pjax script').forEach(element => {
+    var code = element.text || element.textContent || element.innerHTML || '';
+    var parent = element.parentNode;
+    parent.removeChild(element);
+    var script = document.createElement('script');
+    if (element.id) {
+      script.id = element.id;
+    }
+    if (element.className) {
+      script.className = element.className;
+    }
+    if (element.type) {
+      script.type = element.type;
+    }
+    if (element.src) {
+      script.src = element.src;
+      // Force synchronous loading of peripheral JS.
+      script.async = false;
+    }
+    if (element.dataset.pjax !== undefined) {
+      script.dataset.pjax = '';
+    }
+    if (code !== '') {
+      script.appendChild(document.createTextNode(code));
+    }
+    parent.appendChild(script);
+  });
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+
+
+  
+  <script data-pjax>
+    (function(){
+      var canonicalURL, curProtocol;
+      //Get the <link> tag
+      var x=document.getElementsByTagName("link");
+		//Find the last canonical URL
+		if(x.length > 0){
+			for (i=0;i<x.length;i++){
+				if(x[i].rel.toLowerCase() == 'canonical' && x[i].href){
+					canonicalURL=x[i].href;
+				}
+			}
+		}
+    //Get protocol
+	    if (!canonicalURL){
+	    	curProtocol = window.location.protocol.split(':')[0];
+	    }
+	    else{
+	    	curProtocol = canonicalURL.split(':')[0];
+	    }
+      //Get current URL if the canonical URL does not exist
+	    if (!canonicalURL) canonicalURL = window.location.href;
+	    //Assign script content. Replace current URL with the canonical URL
+      !function(){var e=/([http|https]:\/\/[a-zA-Z0-9\_\.]+\.baidu\.com)/gi,r=canonicalURL,t=document.referrer;if(!e.test(r)){var n=(String(curProtocol).toLowerCase() === 'https')?"https://sp0.baidu.com/9_Q4simg2RQJ8t7jm9iCKT-xh_/s.gif":"//api.share.baidu.com/s.gif";t?(n+="?r="+encodeURIComponent(document.referrer),r&&(n+="&l="+r)):r&&(n+="?l="+r);var i=new Image;i.src=n}}(window);})();
+  </script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <div id="pjax">
+  
+
+  
+
+<script>
+  var disqus_config = function() {
+    this.page.url = "http://rangerzhou.top/2018/02/08/Android/Performance_debug/";
+    this.page.identifier = "2018/02/08/Android/Performance_debug/";
+    this.page.title = "Performance_debug";
+    };
+  NexT.utils.loadComments(document.querySelector('#disqus_thread'), () => {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: disqus_config
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://rangerzhou.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  });
+</script>
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : 'b7bb504993135f5a2eab',
+      clientSecret: '6f83aec5c45d75e248e2914be90c4601e2e1dc44',
+      repo        : 'rangerzhou.github.io',
+      owner       : 'rangerzhou',
+      admin       : ['rangerzhou'],
+      id          : '96a18a5ea6b82a14ca7da5af5ff31f53',
+        language: 'zh-CN',
+      distractionFreeMode: true
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
+
+<script>
+NexT.utils.loadComments(document.querySelector('#lv-container'), () => {
+  window.livereOptions = {
+    refer: location.pathname.replace(CONFIG.root, '').replace('index.html', '')
+  };
+  (function(d, s) {
+    var j, e = d.getElementsByTagName(s)[0];
+    if (typeof LivereTower === 'function') { return; }
+    j = d.createElement(s);
+    j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+    j.async = true;
+    e.parentNode.insertBefore(j, e);
+  })(document, 'script');
+});
+</script>
+
+    </div>
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/haru01.model.json"},"display":{"position":"left","width":300,"height":800},"mobile":{"show":false},"log":false});</script></body>
+</html>

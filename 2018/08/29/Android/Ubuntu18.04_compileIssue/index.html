@@ -1,0 +1,877 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.2.0">
+<!-- pjax：防止跳转页面音乐暂停 -->
+<script src="https://cdn.jsdelivr.net/npm/pjax@0.2.8/pjax.js"></script>
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/desert.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/desert.jpg">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <meta name="google-site-verification" content="OJnYjbr3wdT22qLrZSzyD9lAyBcXiXlEQ7-5wAnaWoQ">
+  <meta name="baidu-site-verification" content="vr4n4JeXgB">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-minimal.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"rangerzhou.top","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"manual"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":true,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":true,"nav":null,"activeClass":"gitalk"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="Ubuntu18.04编译问题">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Ubuntu18.04编译问题">
+<meta property="og:url" content="http://rangerzhou.top/2018/08/29/Android/Ubuntu18.04_compileIssue/index.html">
+<meta property="og:site_name" content="RangerZhou">
+<meta property="og:description" content="Ubuntu18.04编译问题">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2018-08-29T11:23:11.000Z">
+<meta property="article:modified_time" content="2022-07-18T14:46:21.593Z">
+<meta property="article:author" content="Ranger Zhou">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://rangerzhou.top/2018/08/29/Android/Ubuntu18.04_compileIssue/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+<script src="//cdn.bootcss.com/pace/1.0.2/pace.min.js"></script>
+<link href="//cdn.bootcss.com/pace/1.0.2/themes/pink/pace-theme-flash.css" rel="stylesheet">
+
+  <title>Ubuntu18.04编译问题 | RangerZhou</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-138158952-1"></script>
+    <script data-pjax>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-138158952-1');
+      }
+    </script>
+
+
+  <script data-pjax>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?24a6d3c4c0f292c5f682d26414c3994b";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+
+<!-- 加入APlayer音乐播放器 -->
+<link rel="stylesheet" href="/dist/APlayer.min.css">
+<div id="aplayer"></div>
+<script type="text/javascript" src="/dist/APlayer.min.js"></script>
+<script type="text/javascript" src="/dist/music.js"></script>
+
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">RangerZhou</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">Read the fucking source code</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-playlist">
+
+    <a href="/playlist/" rel="section"><i class="fa fa-music fa-fw"></i>歌单</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-commonweal">
+
+    <a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a>
+
+  </li>
+        <li class="menu-item menu-item-official">
+
+    <a href="/official" rel="section"><i class="fa fa-user fa-fw"></i>official</a>
+
+  </li>
+        <li class="menu-item menu-item-shop">
+
+    <a href="http://rangerzhou.taobao.com/" rel="noopener" target="_blank"><i class="fa fa-user fa-fw"></i>shop</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://rangerzhou.top/2018/08/29/Android/Ubuntu18.04_compileIssue/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Ranger Zhou">
+      <meta itemprop="description" content="我是一个小流氓我从来也不浪，有一天我心血来潮耍了个流氓，我嘴里吹着小口哨我心里好得意，不知怎么哗啦啦啦啦我摔了一身泥">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="RangerZhou">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Ubuntu18.04编译问题
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2018-08-29 19:23:11" itemprop="dateCreated datePublished" datetime="2018-08-29T19:23:11+08:00">2018-08-29</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-07-18 22:46:21" itemprop="dateModified" datetime="2022-07-18T22:46:21+08:00">2022-07-18</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Android/" itemprop="url" rel="index"><span itemprop="name">Android</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/2018/08/29/Android/Ubuntu18.04_compileIssue/" class="post-meta-item leancloud_visitors" data-flag-title="Ubuntu18.04编译问题" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <blockquote>
+<p>Ubuntu18.04编译问题</p>
+</blockquote>
+<span id="more"></span>
+
+<h3 id="一-XEN项目"><a href="#一-XEN项目" class="headerlink" title="一. XEN项目"></a>一. XEN项目</h3><h5 id="1-make-j4-ALLOW-MISSING-DEPENDENCIES-x3D-true"><a href="#1-make-j4-ALLOW-MISSING-DEPENDENCIES-x3D-true" class="headerlink" title="1.make -j4 ALLOW_MISSING_DEPENDENCIES&#x3D;true"></a>1.make -j4 ALLOW_MISSING_DEPENDENCIES&#x3D;true</h5><h5 id="2-sudo-apt-install-m4"><a href="#2-sudo-apt-install-m4" class="headerlink" title="2.sudo apt install m4"></a>2.sudo apt install m4</h5><h5 id="3-sudo-apt-install-bison"><a href="#3-sudo-apt-install-bison" class="headerlink" title="3.sudo apt install bison"></a>3.sudo apt install bison</h5><h5 id="4-sudo-apt-get-install-g-multilib-gcc-multilib-lib32ncurses5-dev-lib32z1-dev"><a href="#4-sudo-apt-get-install-g-multilib-gcc-multilib-lib32ncurses5-dev-lib32z1-dev" class="headerlink" title="4.sudo apt-get install  g++-multilib gcc-multilib lib32ncurses5-dev lib32z1-dev"></a>4.sudo apt-get install  g++-multilib gcc-multilib lib32ncurses5-dev lib32z1-dev</h5><h5 id="5"><a href="#5" class="headerlink" title="5."></a>5.</h5><p>FAILED: out&#x2F;target&#x2F;product&#x2F;gordon_peak_xen&#x2F;obj&#x2F;STATIC_LIBRARIES&#x2F;libedify_intermediates&#x2F;lexer.cpp<br>&#x2F;bin&#x2F;bash -c “prebuilts&#x2F;misc&#x2F;linux-x86&#x2F;flex&#x2F;flex-2.5.39 -oout&#x2F;target&#x2F;product&#x2F;gordon_peak_xen&#x2F;obj&#x2F;STATIC_LIBRARIES&#x2F;libedify_intermediates&#x2F;lexer.cpp bootable&#x2F;recovery&#x2F;edify&#x2F;lexer.ll”<br>flex-2.5.39: loadlocale.c:130: _nl_intern_locale_data: Assertion &#96;cnt &lt; (sizeof (_nl_value_type_LC_TIME) &#x2F; sizeof (_nl_value_type_LC_TIME[0]))’ failed.<br><strong>解决</strong>：</p>
+<p>在这个链接中找到解法 <a target="_blank" rel="noopener" href="https://stackoverflow.com/questions/49955137/error-when-build-lineageos-make-ninja-wrapper-error-1">https://stackoverflow.com/questions/49955137/error-when-build-lineageos-make-ninja-wrapper-error-1</a><br>把 export LC_ALL&#x3D;C 这行代码添加到bashrc 文件中，LC_ALL&#x3D;C 是为了去除所有本地化的设置，让命令能正确执行</p>
+<h5 id="6"><a href="#6" class="headerlink" title="6."></a>6.</h5><p>FAILED: out&#x2F;target&#x2F;product&#x2F;gordon_peak_xen&#x2F;gen&#x2F;STATIC_LIBRARIES&#x2F;libmesa_glsl_intermediates&#x2F;glsl&#x2F;ir_expression_operation.h<br>&#x2F;bin&#x2F;bash -c “python vendor&#x2F;intel&#x2F;external&#x2F;mesa3d-intel&#x2F;src&#x2F;compiler&#x2F;glsl&#x2F;ir_expression_operation.py enum &gt; out&#x2F;target&#x2F;product&#x2F;gordon_peak_xen&#x2F;gen&#x2F;STATIC_LIBRARIES&#x2F;libmesa_glsl_intermediates&#x2F;glsl&#x2F;ir_expression_operation.h”<br>Traceback (most recent call last):<br>  File “vendor&#x2F;intel&#x2F;external&#x2F;mesa3d-intel&#x2F;src&#x2F;compiler&#x2F;glsl&#x2F;ir_expression_operation.py”, line 23, in <module><br>    import mako.template<br>ImportError: No module named mako.template<br>[  8% 6972&#x2F;83760] target  C++: libasou…artx_plugin&#x2F;IasAlsaSmartXConnector.cpp<br>ninja: build stopped: subcommand failed.<br><strong>解决</strong>：sudo apt-get install python-mako</p>
+<h5 id="7"><a href="#7" class="headerlink" title="7."></a>7.</h5><p>FAILED: out&#x2F;target&#x2F;product&#x2F;gordon_peak_xen&#x2F;vendor&#x2F;etc&#x2F;permissions&#x2F;android.hardware.camera.xml<br>&#x2F;bin&#x2F;bash -c “(xmllint frameworks&#x2F;native&#x2F;data&#x2F;etc&#x2F;android.hardware.camera.xml &gt;&#x2F;dev&#x2F;null ) &amp;&amp; (mkdir -p out&#x2F;target&#x2F;product&#x2F;gordon_peak_xen&#x2F;vendor&#x2F;etc&#x2F;permissions&#x2F; ) &amp;&amp; (rm -f out&#x2F;target&#x2F;product&#x2F;gordon_peak_xen&#x2F;vendor&#x2F;etc&#x2F;permissions&#x2F;android.hardware.camera.xml ) &amp;&amp; (cp frameworks&#x2F;native&#x2F;data&#x2F;etc&#x2F;android.hardware.camera.xml out&#x2F;target&#x2F;product&#x2F;gordon_peak_xen&#x2F;vendor&#x2F;etc&#x2F;permissions&#x2F;android.hardware.camera.xml )”<br>&#x2F;bin&#x2F;bash: xmllint: command not found<br><strong>解决</strong>：sudo apt-get  install libxml2-utils</p>
+<h5 id="8"><a href="#8" class="headerlink" title="8."></a>8.</h5><p>&#x2F;home&#x2F;rangerzhou&#x2F;work&#x2F;xen_o_ww09&#x2F;xen_o_ww09&#x2F;kernel&#x2F;bxt&#x2F;scripts&#x2F;sign-file.c:25:10: fatal error: openssl&#x2F;opensslv.h: No such file or directory<br> #include &lt;openssl&#x2F;opensslv.h&gt;<br>          ^~~~~~~~~~~~~~~~~~~~<br>compilation terminated.<br>scripts&#x2F;Makefile.host:107: recipe for target ‘scripts&#x2F;sign-file’ failed<br>make[2]: *** [scripts&#x2F;sign-file] Error 1<br>make[2]: *** Waiting for unfinished jobs….<br>&#x2F;home&#x2F;rangerzhou&#x2F;work&#x2F;xen_o_ww09&#x2F;xen_o_ww09&#x2F;kernel&#x2F;bxt&#x2F;Makefile:555: recipe for target ‘scripts’ failed<br>make[1]: *** [scripts] Error 2<br>make[1]: Leaving directory ‘&#x2F;home&#x2F;rangerzhou&#x2F;work&#x2F;xen_o_ww09&#x2F;xen_o_ww09&#x2F;out&#x2F;target&#x2F;product&#x2F;gordon_peak_xen&#x2F;obj&#x2F;kernel’<br>Makefile:150: recipe for target ‘sub-make’ failed<br>make: *** [sub-make] Error 2<br>make: Leaving directory ‘&#x2F;home&#x2F;rangerzhou&#x2F;work&#x2F;xen_o_ww09&#x2F;xen_o_ww09&#x2F;kernel&#x2F;bxt’<br>[ 98% 72231&#x2F;73211] target Strip (mini debug info): i965_dri (out&#x2F;target&#x2F;product&#x2F;gordon_peak_xen&#x2F;obj&#x2F;SHARED_LIBRARIES&#x2F;i965_dri_intermediates&#x2F;i965_dri.so)<br>ninja: build stopped: subcommand failed.<br><strong>解决</strong>：sudo apt-get install libssl-dev</p>
+<h5 id="9"><a href="#9" class="headerlink" title="9."></a>9.</h5><p>make[1]: Leaving directory ‘&#x2F;home&#x2F;rangerzhou&#x2F;work&#x2F;xen_o_ww09&#x2F;xen_o_ww09&#x2F;out&#x2F;target&#x2F;product&#x2F;gordon_peak_xen&#x2F;obj&#x2F;kernel’<br>Makefile:150: recipe for target ‘sub-make’ failed<br>make: *** [sub-make] Error 2<br>make: Leaving directory ‘&#x2F;home&#x2F;rangerzhou&#x2F;work&#x2F;xen_o_ww09&#x2F;xen_o_ww09&#x2F;kernel&#x2F;bxt’<br>ninja: build stopped: subcommand failed.<br><strong>解决</strong>：apt-get install device-tree-compiler</p>
+<h5 id="10"><a href="#10" class="headerlink" title="10."></a>10.</h5><p>&#x2F;bin&#x2F;bash: lz4c: command not found<br>&#x2F;home&#x2F;rangerzhou&#x2F;work&#x2F;xen_o_ww09&#x2F;xen_o_ww09&#x2F;kernel&#x2F;bxt&#x2F;arch&#x2F;x86&#x2F;boot&#x2F;compressed&#x2F;Makefile:134: recipe for target ‘arch&#x2F;x86&#x2F;boot&#x2F;compressed&#x2F;vmlinux.bin.lz4’ failed<br>make[3]: *** [arch&#x2F;x86&#x2F;boot&#x2F;compressed&#x2F;vmlinux.bin.lz4] Error 1<br>&#x2F;home&#x2F;rangerzhou&#x2F;work&#x2F;xen_o_ww09&#x2F;xen_o_ww09&#x2F;kernel&#x2F;bxt&#x2F;arch&#x2F;x86&#x2F;boot&#x2F;Makefile:111: recipe for target ‘arch&#x2F;x86&#x2F;boot&#x2F;compressed&#x2F;vmlinux’ failed<br>make[2]: *** [arch&#x2F;x86&#x2F;boot&#x2F;compressed&#x2F;vmlinux] Error 2<br>arch&#x2F;x86&#x2F;Makefile:255: recipe for target ‘bzImage’ failed<br>make[1]: *** [bzImage] Error 2<br><strong>解决</strong>：apt-get install liblz4-tool</p>
+<h3 id="二-Google-sourcecode-android-8-1-0-r9"><a href="#二-Google-sourcecode-android-8-1-0-r9" class="headerlink" title="二. Google sourcecode android-8.1.0_r9"></a>二. Google sourcecode android-8.1.0_r9</h3><h5 id="1-error-ro-build-fingerprint-cannot-exceed-91-bytes"><a href="#1-error-ro-build-fingerprint-cannot-exceed-91-bytes" class="headerlink" title="1. error: ro.build.fingerprint cannot exceed 91 bytes"></a>1. error: ro.build.fingerprint cannot exceed 91 bytes</h5><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">1. #build/tools/post_process_props.py</span><br><span class="line">diff --git a/tools/post_process_props.py b/tools/post_process_props.py</span><br><span class="line">index 9355e4b22..2f0d47503 100755</span><br><span class="line">--- a/tools/post_process_props.py</span><br><span class="line">+++ b/tools/post_process_props.py</span><br><span class="line">@@ -22,7 +22,7 @@ import sys</span><br><span class="line"><span class="meta prompt_"> # </span><span class="language-bash">See PROP_VALUE_MAX <span class="keyword">in</span> system_properties.h.</span></span><br><span class="line"><span class="meta prompt_"> # </span><span class="language-bash">The constant <span class="keyword">in</span> system_properties.h includes the terminating NUL,</span></span><br><span class="line"><span class="meta prompt_"> # </span><span class="language-bash">so we decrease the value by 1 here.</span></span><br><span class="line">-PROP_VALUE_MAX = 91</span><br><span class="line">+PROP_VALUE_MAX = 128</span><br><span class="line"><span class="meta prompt_"> </span></span><br><span class="line"><span class="meta prompt_"> # </span><span class="language-bash">Put the modifications that you need to make into the /system/build.prop into this</span></span><br><span class="line"><span class="meta prompt_"> # </span><span class="language-bash"><span class="keyword">function</span>. The prop object has get(name) and put(name,value) methods.</span></span><br><span class="line"> </span><br><span class="line"> 2. #bionic/libc/include/sys/system_properties.h</span><br><span class="line"> diff --git a/libc/include/sys/system_properties.h b/libc/include/sys/system_properties.h</span><br><span class="line">index d07585936..1b2104dc7 100644</span><br><span class="line">--- a/libc/include/sys/system_properties.h</span><br><span class="line">+++ b/libc/include/sys/system_properties.h</span><br><span class="line">@@ -38,7 +38,7 @@ __BEGIN_DECLS</span><br><span class="line"> </span><br><span class="line"> typedef struct prop_info prop_info;</span><br><span class="line"><span class="meta prompt_"> </span></span><br><span class="line"><span class="meta prompt_">-#</span><span class="language-bash">define PROP_VALUE_MAX  92</span></span><br><span class="line">+#define PROP_VALUE_MAX  128</span><br><span class="line"> </span><br><span class="line"> /*</span><br><span class="line">  * Sets system property `key` to `value`, creating the system property if it doesn&#x27;t already exist.</span><br></pre></td></tr></table></figure>
+
+
+
+<h5 id="2-ckati-failed-with-signal-killed"><a href="#2-ckati-failed-with-signal-killed" class="headerlink" title="2. ckati failed with: signal: killed"></a>2. ckati failed with: signal: killed</h5><p>内存问题</p>
+<h5 id="3-frameworks-x2F-native-x2F-cmds-x2F-installd-x2F-installd-cpp-43-1-error-static-assert-failed-“Size-mismatch-”"><a href="#3-frameworks-x2F-native-x2F-cmds-x2F-installd-x2F-installd-cpp-43-1-error-static-assert-failed-“Size-mismatch-”" class="headerlink" title="3. frameworks&#x2F;native&#x2F;cmds&#x2F;installd&#x2F;installd.cpp:43:1: error: static_assert failed “Size mismatch.”"></a>3. frameworks&#x2F;native&#x2F;cmds&#x2F;installd&#x2F;installd.cpp:43:1: error: static_assert failed “Size mismatch.”</h5><p>frameworks&#x2F;native&#x2F;cmds&#x2F;installd&#x2F;installd_deps.h<br>&#x2F;&#x2F; constexpr size_t kPropertyValueMax &#x3D; 92u;<br>constexpr size_t kPropertyValueMax &#x3D; 128u</p>
+<h5 id="4-Jack-out-of-memory-error，try-increasing-heap-size"><a href="#4-Jack-out-of-memory-error，try-increasing-heap-size" class="headerlink" title="4. Jack out of memory error，try increasing heap size"></a>4. Jack out of memory error，try increasing heap size</h5><p>export JACK_SERVER_VM_ARGUMENTS&#x3D;”-Dfile.encoding&#x3D;UTF-8 -XX:+TieredCompilation -Xmx4096m”<br>out&#x2F;host&#x2F;linux-x86&#x2F;bin&#x2F;jack-admin kill-server<br>out&#x2F;host&#x2F;linux-x86&#x2F;bin&#x2F;jack-admin start-server</p>
+<h3 id="三-renesas编译问题"><a href="#三-renesas编译问题" class="headerlink" title="三. renesas编译问题"></a>三. renesas编译问题</h3><h5 id="1-文件缺失"><a href="#1-文件缺失" class="headerlink" title="1.文件缺失"></a>1.文件缺失</h5><p>error: external&#x2F;e2fsprogs&#x2F;lib&#x2F;ss&#x2F;Android.bp:3:1: module “libext2_ss” variant “linux_x86_64_static”: source path external&#x2F;e2fsprogs&#x2F;lib&#x2F;ss&#x2F;ss_err.c does not exist<br>error: external&#x2F;e2fsprogs&#x2F;lib&#x2F;ss&#x2F;Android.bp:3:1: module “libext2_ss” variant “linux_x86_64_static”: source path external&#x2F;e2fsprogs&#x2F;lib&#x2F;ss&#x2F;std_rqs.c does not exist</p>
+<p>error: external&#x2F;e2fsprogs&#x2F;lib&#x2F;ext2fs&#x2F;Android.bp:3:1: module “libext2fs” variant “linux_x86_64_static”: source path external&#x2F;e2fsprogs&#x2F;lib&#x2F;ext2fs&#x2F;ext2_err.c does not exist</p>
+<p>error: external&#x2F;e2fsprogs&#x2F;debugfs&#x2F;Android.bp:57:1: module “debugfs” variant “linux_x86_64”: source path external&#x2F;e2fsprogs&#x2F;debugfs&#x2F;debug_cmds.c does not exist<br>error: external&#x2F;e2fsprogs&#x2F;debugfs&#x2F;Android.bp:57:1: module “debugfs” variant “linux_x86_64”: source path external&#x2F;e2fsprogs&#x2F;debugfs&#x2F;extent_cmds.c does not exist</p>
+<p>解决：从AOSP源码copy</p>
+<h5 id="2-ImportError-No-module-named-Crypto-PublicKey"><a href="#2-ImportError-No-module-named-Crypto-PublicKey" class="headerlink" title="2. ImportError: No module named Crypto.PublicKey"></a>2. ImportError: No module named Crypto.PublicKey</h5><p>解决：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pip install pycrypto</span><br></pre></td></tr></table></figure>
+
+<h5 id="3-ImportError-No-module-named-wand-image"><a href="#3-ImportError-No-module-named-wand-image" class="headerlink" title="3. ImportError: No module named wand.image"></a>3. ImportError: No module named wand.image</h5><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pip install wand</span><br></pre></td></tr></table></figure>
+
+<h5 id="4-x2F-common-x2F-android-x2F-extra-config-mk-165-JAVA-HOME-does-not-point-to-a-valid-java-installation-Stop"><a href="#4-x2F-common-x2F-android-x2F-extra-config-mk-165-JAVA-HOME-does-not-point-to-a-valid-java-installation-Stop" class="headerlink" title="4. ..&#x2F;common&#x2F;android&#x2F;extra_config.mk:165: *** JAVA_HOME does not point to a valid java installation.  Stop."></a>4. ..&#x2F;common&#x2F;android&#x2F;extra_config.mk:165: *** JAVA_HOME does not point to a valid java installation.  Stop.</h5><p>make: Entering directory ‘&#x2F;home&#x2F;rangerzhou&#x2F;work&#x2F;renesas&#x2F;device&#x2F;renesas&#x2F;proprietary&#x2F;imgtec&#x2F;rogue_km&#x2F;build&#x2F;linux&#x2F;r8a7795_android’<br>WARNING: USE_CLANG&#x3D;0 is deprecated for Android builds<br>******* Multiarch build: yes<br>******* Primary arch:    target_aarch64<br>******* Secondary arch:  none<br>..&#x2F;common&#x2F;android&#x2F;extra_config.mk:165: *** JAVA_HOME does not point to a valid java installation.  Stop.<br>make: Leaving directory ‘&#x2F;home&#x2F;rangerzhou&#x2F;work&#x2F;renesas&#x2F;device&#x2F;renesas&#x2F;proprietary&#x2F;imgtec&#x2F;rogue_km&#x2F;build&#x2F;linux&#x2F;r8a7795_android’<br>[ 40% 34093&#x2F;83351] &#x2F;&#x2F;frameworks&#x2F;av&#x2F;media&#x2F;libstagefright&#x2F;codecs&#x2F;m4v_h263&#x2F;dec:libstagefright_m4vh263dec clang++ src&#x2F;chv_filter.cpp [arm]</p>
+<p>解决：~&#x2F;.bashrc中的JAVA_HOME指定路径要写到bin之前：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64 #不要写成export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64/bin</span><br></pre></td></tr></table></figure>
+
+
+
+<h5 id="5-Syntax-error-“-“-unexpected"><a href="#5-Syntax-error-“-“-unexpected" class="headerlink" title="5. Syntax error: “(“ unexpected"></a>5. Syntax error: “(“ unexpected</h5><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo dpkg-reconfigure dash</span><br></pre></td></tr></table></figure>
+
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div>Donate comment here.</div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechatpay.jpg" alt="Ranger Zhou 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.jpg" alt="Ranger Zhou 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>Ranger Zhou
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://rangerzhou.top/2018/08/29/Android/Ubuntu18.04_compileIssue/" title="Ubuntu18.04编译问题">http://rangerzhou.top/2018/08/29/Android/Ubuntu18.04_compileIssue/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2018/08/29/Android/Android_O_grant_permission_in_system/" rel="prev" title="Android_O系统层授予APP权限">
+      <i class="fa fa-chevron-left"></i> Android_O系统层授予APP权限
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2018/08/29/Technical/UbuntuBuildOpenGrok/" rel="next" title="Ubuntu搭建OpenGrok在线代码浏览环境">
+      Ubuntu搭建OpenGrok在线代码浏览环境 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+      <div class="tabs tabs-comment">
+        <ul class="nav-tabs">
+            <li class="tab"><a href="#comment-disqus">disqus</a></li>
+            <li class="tab"><a href="#comment-gitalk">gitalk</a></li>
+            <li class="tab"><a href="#comment-livere">livere</a></li>
+        </ul>
+        <div class="tab-content">
+            <div class="tab-pane disqus" id="comment-disqus">
+              
+  <div class="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
+            </div>
+            <div class="tab-pane gitalk" id="comment-gitalk">
+              <div class="comments" id="gitalk-container"></div>
+            </div>
+            <div class="tab-pane livere" id="comment-livere">
+              
+  <div class="comments">
+    <div id="lv-container" data-id="city" data-uid="MTAyMC8yOTcyNS82Mjky"></div>
+  </div>
+  
+            </div>
+        </div>
+      </div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%80-XEN%E9%A1%B9%E7%9B%AE"><span class="nav-text">一. XEN项目</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#1-make-j4-ALLOW-MISSING-DEPENDENCIES-x3D-true"><span class="nav-text">1.make -j4 ALLOW_MISSING_DEPENDENCIES&#x3D;true</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#2-sudo-apt-install-m4"><span class="nav-text">2.sudo apt install m4</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#3-sudo-apt-install-bison"><span class="nav-text">3.sudo apt install bison</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#4-sudo-apt-get-install-g-multilib-gcc-multilib-lib32ncurses5-dev-lib32z1-dev"><span class="nav-text">4.sudo apt-get install  g++-multilib gcc-multilib lib32ncurses5-dev lib32z1-dev</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#5"><span class="nav-text">5.</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#6"><span class="nav-text">6.</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#7"><span class="nav-text">7.</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#8"><span class="nav-text">8.</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#9"><span class="nav-text">9.</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#10"><span class="nav-text">10.</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BA%8C-Google-sourcecode-android-8-1-0-r9"><span class="nav-text">二. Google sourcecode android-8.1.0_r9</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#1-error-ro-build-fingerprint-cannot-exceed-91-bytes"><span class="nav-text">1. error: ro.build.fingerprint cannot exceed 91 bytes</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#2-ckati-failed-with-signal-killed"><span class="nav-text">2. ckati failed with: signal: killed</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#3-frameworks-x2F-native-x2F-cmds-x2F-installd-x2F-installd-cpp-43-1-error-static-assert-failed-%E2%80%9CSize-mismatch-%E2%80%9D"><span class="nav-text">3. frameworks&#x2F;native&#x2F;cmds&#x2F;installd&#x2F;installd.cpp:43:1: error: static_assert failed “Size mismatch.”</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#4-Jack-out-of-memory-error%EF%BC%8Ctry-increasing-heap-size"><span class="nav-text">4. Jack out of memory error，try increasing heap size</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%89-renesas%E7%BC%96%E8%AF%91%E9%97%AE%E9%A2%98"><span class="nav-text">三. renesas编译问题</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#1-%E6%96%87%E4%BB%B6%E7%BC%BA%E5%A4%B1"><span class="nav-text">1.文件缺失</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#2-ImportError-No-module-named-Crypto-PublicKey"><span class="nav-text">2. ImportError: No module named Crypto.PublicKey</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#3-ImportError-No-module-named-wand-image"><span class="nav-text">3. ImportError: No module named wand.image</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#4-x2F-common-x2F-android-x2F-extra-config-mk-165-JAVA-HOME-does-not-point-to-a-valid-java-installation-Stop"><span class="nav-text">4. ..&#x2F;common&#x2F;android&#x2F;extra_config.mk:165: *** JAVA_HOME does not point to a valid java installation.  Stop.</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#5-Syntax-error-%E2%80%9C-%E2%80%9C-unexpected"><span class="nav-text">5. Syntax error: “(“ unexpected</span></a></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Ranger Zhou</p>
+  <div class="site-description" itemprop="description">我是一个小流氓我从来也不浪，有一天我心血来潮耍了个流氓，我嘴里吹着小口哨我心里好得意，不知怎么哗啦啦啦啦我摔了一身泥</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">63</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">8</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">16</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/rangerzhou" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;rangerzhou" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:rangero_o@qq.com" title="E-Mail → mailto:rangero_o@qq.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://rangerzhou.taobao.com/" title="Taobao → http:&#x2F;&#x2F;rangerzhou.taobao.com&#x2F;" rel="noopener" target="_blank"><i class="fab fa-youtube fa-fw"></i>Taobao</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="/images/wechat.jpg" title="WeChat → &#x2F;images&#x2F;wechat.jpg"><i class="fab fa-youtube fa-fw"></i>WeChat</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://blog.csdn.net/ranger0220?viewmode=contents" title="CSDN → http:&#x2F;&#x2F;blog.csdn.net&#x2F;ranger0220?viewmode&#x3D;contents" rel="noopener" target="_blank"><i class="fab fa-youtube fa-fw"></i>CSDN</a>
+      </span>
+  </div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      墙裂推荐
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="http://rangerzhou.taobao.com/" title="http:&#x2F;&#x2F;rangerzhou.taobao.com" rel="noopener" target="_blank">Taobao</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2016 – 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Ranger Zhou</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+<script data-pjax>
+  (function() {
+    function leancloudSelector(url) {
+      url = encodeURI(url);
+      return document.getElementById(url).querySelector('.leancloud-visitors-count');
+    }
+
+    function addCount(Counter) {
+      var visitors = document.querySelector('.leancloud_visitors');
+      var url = decodeURI(visitors.id);
+      var title = visitors.dataset.flagTitle;
+
+      Counter('get', '/classes/Counter?where=' + encodeURIComponent(JSON.stringify({ url })))
+        .then(response => response.json())
+        .then(({ results }) => {
+          if (results.length > 0) {
+            var counter = results[0];
+            leancloudSelector(url).innerText = counter.time + 1;
+            Counter('put', '/classes/Counter/' + counter.objectId, { time: { '__op': 'Increment', 'amount': 1 } })
+              .catch(error => {
+                console.error('Failed to save visitor count', error);
+              });
+          } else {
+              Counter('post', '/classes/Counter', { title, url, time: 1 })
+                .then(response => response.json())
+                .then(() => {
+                  leancloudSelector(url).innerText = 1;
+                })
+                .catch(error => {
+                  console.error('Failed to create', error);
+                });
+          }
+        })
+        .catch(error => {
+          console.error('LeanCloud Counter Error', error);
+        });
+    }
+
+    function showTime(Counter) {
+      var visitors = document.querySelectorAll('.leancloud_visitors');
+      var entries = [...visitors].map(element => {
+        return decodeURI(element.id);
+      });
+
+      Counter('get', '/classes/Counter?where=' + encodeURIComponent(JSON.stringify({ url: { '$in': entries } })))
+        .then(response => response.json())
+        .then(({ results }) => {
+          for (let url of entries) {
+            let target = results.find(item => item.url === url);
+            leancloudSelector(url).innerText = target ? target.time : 0;
+          }
+        })
+        .catch(error => {
+          console.error('LeanCloud Counter Error', error);
+        });
+    }
+
+    let { app_id, app_key, server_url } = {"enable":true,"app_id":"U9g4mWmsQg8FjOE3xsqUy9Df-gzGzoHsz","app_key":"24cDno14OiDhAreVmoEjzqns","server_url":"https://u9g4mwms.lc-cn-n1-shared.com","security":false};
+    function fetchData(api_server) {
+      var Counter = (method, url, data) => {
+        return fetch(`${api_server}/1.1${url}`, {
+          method,
+          headers: {
+            'X-LC-Id'     : app_id,
+            'X-LC-Key'    : app_key,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(data)
+        });
+      };
+      if (CONFIG.page.isPost) {
+        if (CONFIG.hostname !== location.hostname) return;
+        addCount(Counter);
+      } else if (document.querySelectorAll('.post-title-link').length >= 1) {
+        showTime(Counter);
+      }
+    }
+
+    let api_server = app_id.slice(-9) !== '-MdYXbMMI' ? server_url : `https://${app_id.slice(0, 8).toLowerCase()}.api.lncldglobal.com`;
+
+    if (api_server) {
+      fetchData(api_server);
+    } else {
+      fetch('https://app-router.leancloud.cn/2/route?appId=' + app_id)
+        .then(response => response.json())
+        .then(({ api_server }) => {
+          fetchData('https://' + api_server);
+        });
+    }
+  })();
+</script>
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/pjax/pjax.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/pangu@4/dist/browser/pangu.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '#page-configurations',
+    '.content-wrap',
+    '.post-toc-wrap',
+    '.languages',
+    '#pjax'
+  ],
+  switches: {
+    '.post-toc-wrap': Pjax.switches.innerHTML
+  },
+  analytics: false,
+  cacheBust: false,
+  scrollTo : !CONFIG.bookmark.enable
+});
+
+window.addEventListener('pjax:success', () => {
+  document.querySelectorAll('script[data-pjax], script#page-configurations, #pjax script').forEach(element => {
+    var code = element.text || element.textContent || element.innerHTML || '';
+    var parent = element.parentNode;
+    parent.removeChild(element);
+    var script = document.createElement('script');
+    if (element.id) {
+      script.id = element.id;
+    }
+    if (element.className) {
+      script.className = element.className;
+    }
+    if (element.type) {
+      script.type = element.type;
+    }
+    if (element.src) {
+      script.src = element.src;
+      // Force synchronous loading of peripheral JS.
+      script.async = false;
+    }
+    if (element.dataset.pjax !== undefined) {
+      script.dataset.pjax = '';
+    }
+    if (code !== '') {
+      script.appendChild(document.createTextNode(code));
+    }
+    parent.appendChild(script);
+  });
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+
+
+  
+  <script data-pjax>
+    (function(){
+      var canonicalURL, curProtocol;
+      //Get the <link> tag
+      var x=document.getElementsByTagName("link");
+		//Find the last canonical URL
+		if(x.length > 0){
+			for (i=0;i<x.length;i++){
+				if(x[i].rel.toLowerCase() == 'canonical' && x[i].href){
+					canonicalURL=x[i].href;
+				}
+			}
+		}
+    //Get protocol
+	    if (!canonicalURL){
+	    	curProtocol = window.location.protocol.split(':')[0];
+	    }
+	    else{
+	    	curProtocol = canonicalURL.split(':')[0];
+	    }
+      //Get current URL if the canonical URL does not exist
+	    if (!canonicalURL) canonicalURL = window.location.href;
+	    //Assign script content. Replace current URL with the canonical URL
+      !function(){var e=/([http|https]:\/\/[a-zA-Z0-9\_\.]+\.baidu\.com)/gi,r=canonicalURL,t=document.referrer;if(!e.test(r)){var n=(String(curProtocol).toLowerCase() === 'https')?"https://sp0.baidu.com/9_Q4simg2RQJ8t7jm9iCKT-xh_/s.gif":"//api.share.baidu.com/s.gif";t?(n+="?r="+encodeURIComponent(document.referrer),r&&(n+="&l="+r)):r&&(n+="?l="+r);var i=new Image;i.src=n}}(window);})();
+  </script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <div id="pjax">
+  
+
+  
+
+<script>
+  var disqus_config = function() {
+    this.page.url = "http://rangerzhou.top/2018/08/29/Android/Ubuntu18.04_compileIssue/";
+    this.page.identifier = "2018/08/29/Android/Ubuntu18.04_compileIssue/";
+    this.page.title = "Ubuntu18.04编译问题";
+    };
+  NexT.utils.loadComments(document.querySelector('#disqus_thread'), () => {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: disqus_config
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://rangerzhou.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  });
+</script>
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : 'b7bb504993135f5a2eab',
+      clientSecret: '6f83aec5c45d75e248e2914be90c4601e2e1dc44',
+      repo        : 'rangerzhou.github.io',
+      owner       : 'rangerzhou',
+      admin       : ['rangerzhou'],
+      id          : '80522e6a402de2488f7bee138ed6f935',
+        language: 'zh-CN',
+      distractionFreeMode: true
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
+
+<script>
+NexT.utils.loadComments(document.querySelector('#lv-container'), () => {
+  window.livereOptions = {
+    refer: location.pathname.replace(CONFIG.root, '').replace('index.html', '')
+  };
+  (function(d, s) {
+    var j, e = d.getElementsByTagName(s)[0];
+    if (typeof LivereTower === 'function') { return; }
+    j = d.createElement(s);
+    j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+    j.async = true;
+    e.parentNode.insertBefore(j, e);
+  })(document, 'script');
+});
+</script>
+
+    </div>
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/haru01.model.json"},"display":{"position":"left","width":300,"height":800},"mobile":{"show":false},"log":false});</script></body>
+</html>

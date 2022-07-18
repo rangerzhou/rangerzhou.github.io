@@ -1,0 +1,966 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.2.0">
+<!-- pjax：防止跳转页面音乐暂停 -->
+<script src="https://cdn.jsdelivr.net/npm/pjax@0.2.8/pjax.js"></script>
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/desert.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/desert.jpg">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <meta name="google-site-verification" content="OJnYjbr3wdT22qLrZSzyD9lAyBcXiXlEQ7-5wAnaWoQ">
+  <meta name="baidu-site-verification" content="vr4n4JeXgB">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-minimal.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"rangerzhou.top","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"manual"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":true,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":true,"nav":null,"activeClass":"gitalk"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="BigData Project Guide">
+<meta property="og:type" content="article">
+<meta property="og:title" content="BigDataProject_Guide">
+<meta property="og:url" content="http://rangerzhou.top/2018/12/14/Work/BigDataProject_Guide/index.html">
+<meta property="og:site_name" content="RangerZhou">
+<meta property="og:description" content="BigData Project Guide">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2018-12-14T05:31:48.000Z">
+<meta property="article:modified_time" content="2022-07-18T14:46:21.600Z">
+<meta property="article:author" content="Ranger Zhou">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://rangerzhou.top/2018/12/14/Work/BigDataProject_Guide/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+<script src="//cdn.bootcss.com/pace/1.0.2/pace.min.js"></script>
+<link href="//cdn.bootcss.com/pace/1.0.2/themes/pink/pace-theme-flash.css" rel="stylesheet">
+
+  <title>BigDataProject_Guide | RangerZhou</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-138158952-1"></script>
+    <script data-pjax>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-138158952-1');
+      }
+    </script>
+
+
+  <script data-pjax>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?24a6d3c4c0f292c5f682d26414c3994b";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+
+<!-- 加入APlayer音乐播放器 -->
+<link rel="stylesheet" href="/dist/APlayer.min.css">
+<div id="aplayer"></div>
+<script type="text/javascript" src="/dist/APlayer.min.js"></script>
+<script type="text/javascript" src="/dist/music.js"></script>
+
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">RangerZhou</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">Read the fucking source code</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-playlist">
+
+    <a href="/playlist/" rel="section"><i class="fa fa-music fa-fw"></i>歌单</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-commonweal">
+
+    <a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a>
+
+  </li>
+        <li class="menu-item menu-item-official">
+
+    <a href="/official" rel="section"><i class="fa fa-user fa-fw"></i>official</a>
+
+  </li>
+        <li class="menu-item menu-item-shop">
+
+    <a href="http://rangerzhou.taobao.com/" rel="noopener" target="_blank"><i class="fa fa-user fa-fw"></i>shop</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://rangerzhou.top/2018/12/14/Work/BigDataProject_Guide/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Ranger Zhou">
+      <meta itemprop="description" content="我是一个小流氓我从来也不浪，有一天我心血来潮耍了个流氓，我嘴里吹着小口哨我心里好得意，不知怎么哗啦啦啦啦我摔了一身泥">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="RangerZhou">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          BigDataProject_Guide
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2018-12-14 13:31:48" itemprop="dateCreated datePublished" datetime="2018-12-14T13:31:48+08:00">2018-12-14</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-07-18 22:46:21" itemprop="dateModified" datetime="2022-07-18T22:46:21+08:00">2022-07-18</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Work/" itemprop="url" rel="index"><span itemprop="name">Work</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/2018/12/14/Work/BigDataProject_Guide/" class="post-meta-item leancloud_visitors" data-flag-title="BigDataProject_Guide" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <blockquote>
+<p>BigData Project Guide</p>
+</blockquote>
+<span id="more"></span>
+
+<h3 id="1-Android"><a href="#1-Android" class="headerlink" title="1. Android"></a>1. Android</h3><h4 id="1-1-Compile-c-ares"><a href="#1-1-Compile-c-ares" class="headerlink" title="1.1 Compile c-ares"></a>1.1 Compile c-ares</h4><p><a target="_blank" rel="noopener" href="https://c-ares.haxx.se/">点击此处下载</a> ，<a target="_blank" rel="noopener" href="https://github.com/c-ares/c-ares">官方 Github</a> ，关于 <strong>c-ares</strong> 的介绍可查看 <strong>README.MD</strong> 文件，此处示例版本为 <strong>c-ares-1.15.0</strong> 。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">放入 /external/bigdata/ 目录下，添加 Android.mk 和 ares_config.h</span></span><br></pre></td></tr></table></figure>
+
+
+
+<p>Android.mk</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">LOCAL_PATH := <span class="variable">$(<span class="built_in">call</span> my-<span class="built_in">dir</span>)</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">include</span> <span class="variable">$(LOCAL_PATH)</span>/Makefile.inc</span><br><span class="line"></span><br><span class="line"><span class="keyword">include</span> <span class="variable">$(CLEAR_VARS)</span></span><br><span class="line">LOCAL_MODULE := libcares</span><br><span class="line">LOCAL_CFLAGS += -DHAVE_CONFIG_H</span><br><span class="line">LOCAL_EXPORT_C_INCLUDE_DIRS := <span class="variable">$(LOCAL_PATH)</span></span><br><span class="line">LOCAL_SRC_FILES := <span class="variable">$(CSOURCES)</span></span><br><span class="line"><span class="keyword">include</span> <span class="variable">$(BUILD_SHARED_LIBRARY)</span></span><br></pre></td></tr></table></figure>
+
+<p>编译 <strong>c-ares</strong> 模块生成 <strong>libcares.so</strong> ，此文件用于编译下文的 <strong>data_service</strong> 和 <strong>mosquitto</strong> ：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">mmm external/bigdata/c-ares</span></span><br></pre></td></tr></table></figure>
+
+
+
+<h4 id="1-2-Compile-mosquitto"><a href="#1-2-Compile-mosquitto" class="headerlink" title="1.2 Compile mosquitto"></a>1.2 Compile mosquitto</h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">ll mosquitto/</span></span><br><span class="line">total 1904</span><br><span class="line">drwxr-xr-x 14 ranger ranger    4096 Dec 13 14:02 ./</span><br><span class="line">drwxr-xr-x  6 ranger ranger    4096 Dec 18 09:57 ../</span><br><span class="line">-rw-r--r--  1 ranger ranger      83 Dec 13 14:02 Android.mk</span><br><span class="line">-rw-r--r--  1 ranger ranger    2745 Dec 13 14:02 CMakeLists.txt</span><br><span class="line">-rw-r--r--  1 ranger ranger    3941 Dec 13 14:02 CONTRIBUTING.md</span><br><span class="line">-rw-r--r--  1 ranger ranger   64076 Dec 13 14:02 ChangeLog.txt</span><br><span class="line">-rw-r--r--  1 ranger ranger     155 Dec 13 14:02 LICENSE.txt</span><br><span class="line">-rw-r--r--  1 ranger ranger    2593 Dec 13 14:02 Makefile</span><br><span class="line">-rw-r--r--  1 ranger ranger     637 Dec 13 14:02 README.txt</span><br><span class="line">-rw-r--r--  1 ranger ranger    2026 Dec 13 14:02 about.html</span><br><span class="line">-rw-r--r--  1 ranger ranger     230 Dec 13 14:02 aclfile.example</span><br><span class="line">drwxr-xr-x  5 ranger ranger    4096 Dec 13 14:02 certs/</span><br><span class="line">drwxr-xr-x  2 ranger ranger    4096 Dec 13 17:00 client/</span><br><span class="line">-rw-r--r--  1 ranger ranger     873 Dec 13 14:02 compiling.txt</span><br><span class="line">-rw-r--r--  1 ranger ranger     782 Dec 13 14:02 config.h</span><br><span class="line">-rw-r--r--  1 ranger ranger    7889 Dec 13 14:02 config.mk</span><br><span class="line">-rw-r--r--  1 ranger ranger   36920 Dec 13 14:02 dash2-mosquitto.conf</span><br><span class="line">-rw-r--r--  1 ranger ranger    1569 Dec 13 14:02 edl-v10</span><br><span class="line">-rw-r--r--  1 ranger ranger   11695 Dec 13 14:02 epl-v10</span><br><span class="line">-rw-r--r--  1 ranger ranger   13127 Dec 13 14:02 host-build-output.txt</span><br><span class="line">drwxr-xr-x  2 ranger ranger    4096 Dec 13 14:02 installer/</span><br><span class="line">drwxr-xr-x  3 ranger ranger    4096 Dec 13 17:00 lib/</span><br><span class="line">drwxr-xr-x  3 ranger ranger    4096 Dec 13 14:02 logo/</span><br><span class="line">-rw-r--r--  1 ranger ranger   37117 Dec 13 14:02 m2.conf</span><br><span class="line">drwxr-xr-x  2 ranger ranger    4096 Dec 13 14:02 man/</span><br><span class="line">drwxr-xr-x  3 ranger ranger    4096 Dec 13 14:02 misc/</span><br><span class="line">-rw-r--r--  1 ranger ranger   37068 Dec 13 14:02 mosq-test.conf</span><br><span class="line">-rw-r--r--  1 ranger ranger   37049 Dec 13 14:02 mosquitto.conf</span><br><span class="line">-rw-r--r--  1 ranger ranger   36999 Dec 13 14:02 mrb-mosquitto.conf</span><br><span class="line">-rw-r--r--  1 ranger ranger   36920 Dec 13 14:02 nexus-mosquitto.conf</span><br><span class="line">-rw-r--r--  1 ranger ranger    9230 Dec 13 14:02 notice.html</span><br><span class="line">-rw-r--r--  1 ranger ranger      23 Dec 13 14:02 pskfile.example</span><br><span class="line">-rw-r--r--  1 ranger ranger     355 Dec 13 14:02 pwfile.example</span><br><span class="line">-rw-r--r--  1 ranger ranger     696 Dec 13 14:02 qnx-env-setup</span><br><span class="line">-rw-r--r--  1 ranger ranger    2096 Dec 13 14:02 readme-windows.txt</span><br><span class="line">-rw-r--r--  1 ranger ranger    3026 Dec 13 14:02 readme.md</span><br><span class="line">drwxr-xr-x  2 ranger ranger    4096 Dec 13 14:02 security/</span><br><span class="line">drwxr-xr-x  5 ranger ranger    4096 Dec 13 14:02 service/</span><br><span class="line">drwxr-xr-x  3 ranger ranger    4096 Dec 13 17:01 src/</span><br><span class="line">-rw-r--r--  1 ranger ranger     268 Dec 13 14:02 tcu-env-setup</span><br><span class="line">drwxr-xr-x  5 ranger ranger    4096 Dec 13 14:02 test/</span><br><span class="line">drwxr-xr-x  2 ranger ranger    4096 Dec 13 14:02 tls/</span><br><span class="line">-rw-r--r--  1 ranger ranger 1460649 Dec 13 14:02 understand-mosquitto.udb</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+
+
+<h4 id="1-3-Compile-data-service"><a href="#1-3-Compile-data-service" class="headerlink" title="1.3 Compile data_service"></a>1.3 Compile data_service</h4><p>此模块编译需要 <em>external&#x2F;bigdata&#x2F;protobuf</em> 同时存在，data_service 依赖 libpbdata 。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">ll data_service/</span></span><br><span class="line">total 208</span><br><span class="line">drwxr-xr-x 3 ranger ranger  4096 Dec 13 18:08 ./</span><br><span class="line">drwxr-xr-x 6 ranger ranger  4096 Dec 18 09:57 ../</span><br><span class="line">-rw-r--r-- 1 ranger ranger   905 Dec 13 14:02 Android.mk</span><br><span class="line">-rw-r--r-- 1 ranger ranger  9698 Dec 13 15:24 android_data_retriever.cpp</span><br><span class="line">-rw-r--r-- 1 ranger ranger   852 Dec 13 14:02 android_data_retriever.h</span><br><span class="line">-rw-r--r-- 1 ranger ranger  7831 Dec 13 14:02 data_binder.cpp</span><br><span class="line">-rw-r--r-- 1 ranger ranger    93 Dec 13 14:02 data_binder.h</span><br><span class="line">-rw-r--r-- 1 ranger ranger   528 Dec 13 14:02 data_pool.h</span><br><span class="line">-rw-r--r-- 1 ranger ranger  1931 Dec 13 14:02 data_report.cpp</span><br><span class="line">-rw-r--r-- 1 ranger ranger  1506 Dec 13 14:02 data_report.h</span><br><span class="line">-rw-r--r-- 1 ranger ranger 11098 Dec 13 14:02 data_retriever.cpp</span><br><span class="line">-rw-r--r-- 1 ranger ranger  2408 Dec 13 14:02 data_retriever.h</span><br><span class="line">-rw-r--r-- 1 ranger ranger   478 Dec 13 14:02 data_service.cpp</span><br><span class="line">drwxr-xr-x 2 ranger ranger  4096 Dec 13 14:02 data_svc/</span><br><span class="line">-rw-r--r-- 1 ranger ranger    89 Dec 13 14:02 data_svc.rc</span><br><span class="line">-rw-r--r-- 1 ranger ranger 11155 Dec 13 14:02 data_types.cpp</span><br><span class="line">-rw-r--r-- 1 ranger ranger  6086 Dec 13 14:02 data_types.h</span><br><span class="line">-rw-r--r-- 1 ranger ranger  7979 Dec 13 15:37 error_detector.cpp</span><br><span class="line">-rw-r--r-- 1 ranger ranger   172 Dec 13 14:02 error_detector.h</span><br><span class="line">-rw-r--r-- 1 ranger ranger  9436 Dec 13 14:02 event_data.cpp</span><br><span class="line">-rw-r--r-- 1 ranger ranger   231 Dec 13 14:02 event_data.h</span><br><span class="line">-rw-r--r-- 1 ranger ranger  5898 Dec 13 14:02 idc_client_base_api.h</span><br><span class="line">-rw-r--r-- 1 ranger ranger  8892 Dec 13 18:08 linux_data_retriever.cpp</span><br><span class="line">-rw-r--r-- 1 ranger ranger   901 Dec 13 14:02 linux_data_retriever.h</span><br><span class="line">-rw-r--r-- 1 ranger ranger   937 Dec 13 14:02 mqtt_data_publisher.cpp</span><br><span class="line">-rw-r--r-- 1 ranger ranger   602 Dec 13 14:02 mqtt_data_publisher.h</span><br><span class="line">-rw-r--r-- 1 ranger ranger 13787 Dec 13 14:02 mqtt_data_report.cpp</span><br><span class="line">-rw-r--r-- 1 ranger ranger  1453 Dec 13 14:02 mqtt_data_report.h</span><br><span class="line">-rw-r--r-- 1 ranger ranger  7891 Dec 13 14:02 usb_writer.cpp</span><br><span class="line">-rw-r--r-- 1 ranger ranger   198 Dec 13 14:02 usb_writer.h</span><br><span class="line">-rw-r--r-- 1 ranger ranger    39 Dec 13 14:02 usb_writer_cfg.h</span><br><span class="line">-rw-r--r-- 1 ranger ranger  7563 Dec 13 14:02 utils.cpp</span><br><span class="line">-rw-r--r-- 1 ranger ranger  1659 Dec 13 14:02 utils.h</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">ll protobuf/</span></span><br><span class="line">total 20</span><br><span class="line">drwxr-xr-x 2 ranger ranger 4096 Dec 13 17:23 ./</span><br><span class="line">drwxr-xr-x 6 ranger ranger 4096 Dec 18 09:57 ../</span><br><span class="line">-rw-r--r-- 1 ranger ranger  573 Dec 13 14:02 Android.mk</span><br><span class="line">-rw-r--r-- 1 ranger ranger    0 Dec 13 14:02 README.txt</span><br><span class="line">-rw-r--r-- 1 ranger ranger 6350 Dec 13 14:02 big_data.proto</span><br></pre></td></tr></table></figure>
+
+<p><strong>Note:</strong></p>
+<p>a. <strong>linux_data_retriever.cpp</strong> and <strong>android_data_retriever.cpp</strong></p>
+<p>Add “namespace android{}” before “using namespace android”</p>
+<p>b. <strong>error_detector.cpp</strong></p>
+<p>Add “static_cast<int>()” at line 102</p>
+<h3 id="2-Ubuntu"><a href="#2-Ubuntu" class="headerlink" title="2. Ubuntu"></a>2. Ubuntu</h3><p>此处示例版本为 <strong>mosquitto-1.5.5</strong> 。</p>
+<p><strong>Download:</strong></p>
+<p><a target="_blank" rel="noopener" href="https://github.com/eclipse/mosquitto">https://github.com/eclipse/mosquitto</a>    — Build Dependencies</p>
+<p><a target="_blank" rel="noopener" href="https://mosquitto.org/download/">https://mosquitto.org/download/</a></p>
+<h4 id="2-1-Install-mosquitto"><a href="#2-1-Install-mosquitto" class="headerlink" title="2.1 Install mosquitto"></a>2.1 Install mosquitto</h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">make</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">sudo make install</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>Note:</strong></p>
+<p>$ make WITH_SRV&#x3D;no WITH_UUID&#x3D;no</p>
+<p>$ sudo make install</p>
+<h3 id="Build-Dependencies"><a href="#Build-Dependencies" class="headerlink" title="Build Dependencies"></a>Build Dependencies</h3><ul>
+<li>c-ares (libc-ares-dev on Debian based systems) - disable with <code>make WITH_SRV=no</code></li>
+<li>libuuid (uuid-dev) - disable with <code>make WITH_UUID=no</code></li>
+<li>libwebsockets (libwebsockets-dev) - enable with <code>make WITH_WEBSOCKETS=yes</code></li>
+<li>openssl (libssl-dev on Debian based systems) - disable with <code>make WITH_TLS=no</code></li>
+<li>xsltproc (xsltproc and docbook-xsl on Debian based systems) - only needed when building from git sources - disable with <code>make WITH_DOCS=no</code></li>
+</ul>
+<p>安装完成后检查是否生成如下文件：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">ll /usr/local/bin/mosquitto*</span></span><br><span class="line">-rwxr-xr-x 1 root root  53016 Dec 17 19:08 /usr/local/bin/mosquitto_passwd*</span><br><span class="line">-rwxr-xr-x 1 root root 117312 Dec 17 19:08 /usr/local/bin/mosquitto_pub*</span><br><span class="line">-rwxr-xr-x 1 root root 131000 Dec 17 19:08 /usr/local/bin/mosquitto_sub*</span><br><span class="line"></span><br><span class="line">ll /usr/local/sbin/mosquitto*</span><br><span class="line">-rwxr-xr-x 1 root root 1017600 Dec 17 19:08 /usr/local/sbin/mosquitto*</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">ll /usr/local/lib/*mosq*</span></span><br><span class="line">lrwxrwxrwx 1 root root     17 Dec 17 19:08 /usr/local/lib/libmosquitto.so -&gt; libmosquitto.so.1*</span><br><span class="line">-rwxr-xr-x 1 root root 403376 Dec 17 19:08 /usr/local/lib/libmosquitto.so.1*</span><br><span class="line">lrwxrwxrwx 1 root root     19 Dec 17 19:08 /usr/local/lib/libmosquittopp.so -&gt; libmosquittopp.so.1*</span><br><span class="line">-rwxr-xr-x 1 root root  64912 Dec 17 19:08 /usr/local/lib/libmosquittopp.so.1*</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">旧版本 /usr/local/lib/ 下有如下6个文件：</span></span><br><span class="line">ll /usr/local/lib/*mos*</span><br><span class="line">-rw-r--r-- 1 root root 1269118 Dec 13 17:02 /usr/local/lib/libmosquitto.a</span><br><span class="line">lrwxrwxrwx 1 root root      17 Dec 13 17:02 /usr/local/lib/libmosquitto.so -&gt; libmosquitto.so.1*</span><br><span class="line">-rwxr-xr-x 1 root root   64392 Dec 13 17:02 /usr/local/lib/libmosquitto.so.1*</span><br><span class="line">-rw-r--r-- 1 root root   80912 Dec 13 17:02 /usr/local/lib/libmosquittopp.a</span><br><span class="line">lrwxrwxrwx 1 root root      19 Dec 13 17:02 /usr/local/lib/libmosquittopp.so -&gt; libmosquittopp.so.1*</span><br><span class="line">-rwxr-xr-x 1 root root   18864 Dec 13 17:02 /usr/local/lib/libmosquittopp.so.1*</span><br></pre></td></tr></table></figure>
+
+<p>事实证明 <strong>libmosquitto.a</strong> 和 <strong>libmosquittopp.a</strong> 在编译 <strong>data_receiver</strong> 时会用到，所以还是用旧版本 <strong>mosquitto</strong> 编译。</p>
+<h4 id="2-2-Install-protobuf"><a href="#2-2-Install-protobuf" class="headerlink" title="2.2 Install protobuf"></a>2.2 Install protobuf</h4><p><a target="_blank" rel="noopener" href="https://developers.google.com/protocol-buffers/docs/downloads">https://developers.google.com/protocol-buffers/docs/downloads</a></p>
+<p>报错：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">autogen.sh:31:# The absence of a m4 directory in googletest causes autoreconf to fail when</span><br><span class="line">autogen.sh:37:autoreconf -f -i -Wall,no-obsolete</span><br></pre></td></tr></table></figure>
+
+<p>原因是 linux 缺少 autoreconf 工具，安装后即可解决：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo apt install autoconf automake libtool</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">./autogen.sh</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">./configure –disable-shared</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">make</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">sudo make install</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">sudo ldconfig</span></span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">protoc --version</span> </span><br><span class="line">libprotoc 3.6.1</span><br></pre></td></tr></table></figure>
+
+
+
+<h4 id="2-3-Install-LAMP-Linux-Apache-MySQL-PHP-Server"><a href="#2-3-Install-LAMP-Linux-Apache-MySQL-PHP-Server" class="headerlink" title="2.3 Install LAMP(Linux, Apache, MySQL, PHP) Server"></a>2.3 Install LAMP(Linux, Apache, MySQL, PHP) Server</h4><h4 id="2-3-1-Apache"><a href="#2-3-1-Apache" class="headerlink" title="2.3.1 Apache"></a>2.3.1 Apache</h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">安装 apache</span></span><br><span class="line">sudo apt install apache2</span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">apache2 -v</span>       </span><br><span class="line">Server version: Apache/2.4.29 (Ubuntu)</span><br><span class="line">Server built:   2018-10-10T18:59:25</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">打开 http://10.244.6.199/</span> </span><br></pre></td></tr></table></figure>
+
+<p>打开 <a target="_blank" rel="noopener" href="http://your_server_ip_address/">http://your_server_IP_address</a> ，例如 <a target="_blank" rel="noopener" href="http://10.244.6.199/">http://10.244.6.199/</a> ，会显示 <strong>Apache2 Ubuntu Default Page</strong> 页面，如果您看到此页面，则您的Web服务器现在可以正确安装并通过防火墙访问。</p>
+<p>查找服务器公网 IP ：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">ip addr show eno1 | grep inet | awk <span class="string">&#x27;&#123; print $2; &#125;&#x27;</span> | sed <span class="string">&#x27;s/\/.*$//&#x27;</span></span></span><br><span class="line">10.244.6.199</span><br><span class="line">fe80::882b:520d:3097:6d0c</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">或者 ifconfig</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="2-3-2-MySQL"><a href="#2-3-2-MySQL" class="headerlink" title="2.3.2 MySQL"></a>2.3.2 MySQL</h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">安装 mysql</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">sudo apt install mysql-server</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">mysql --version</span></span><br><span class="line">mysql  Ver 14.14 Distrib 5.7.24, for Linux (x86_64) using  EditLine wrapper</span><br></pre></td></tr></table></figure>
+
+
+
+<h4 id="2-3-3-PHP"><a href="#2-3-3-PHP" class="headerlink" title="2.3.3 PHP"></a>2.3.3 PHP</h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">安装 php</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">sudo apt install php libapache2-mod-php php-mysql</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">php -v</span></span><br><span class="line">PHP 7.2.10-0ubuntu0.18.04.1 (cli) (built: Sep 13 2018 13:45:02) ( NTS )</span><br><span class="line">Copyright (c) 1997-2018 The PHP Group</span><br><span class="line">Zend Engine v3.2.0, Copyright (c) 1998-2018 Zend Technologies</span><br><span class="line">    with Zend OPcache v7.2.10-0ubuntu0.18.04.1, Copyright (c) 1999-2018, by Zend Technologies</span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">重新启动Apache Web服务器</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">sudo /etc/init.d/apache2 restart</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">或者</span></span><br><span class="line">sudo systemctl restart apache2</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">查看 apache2 服务的状态</span></span><br><span class="line">sudo systemctl status apache2</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">检查 PHP</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">php -r <span class="string">&#x27;echo &quot;\n\nYour PHP installation is working fine.\n\n\n&quot;;&#x27;</span></span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">Your PHP installation is working fine.</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p><strong>在 Web 服务器上测试 PHP 处理</strong></p>
+<p>为了测试您的系统配置是否适合 PHP ，请创建一个名为<code>info.php</code>的非常基本的 PHP 脚本。 为了让 Apache 找到这个文件并正确提供它，它必须保存到一个非常特定的目录中，这个目录称为“ web 根目录”。</p>
+<p>在 Ubuntu 18.04 中，这个目录位于<code>/var/www/html/</code> 。 通过运行以下位置在该位置创建文件：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">sudo vim /var/www/html/info.php</span></span><br><span class="line">&lt;?php</span><br><span class="line">phpinfo();</span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
+
+<p>现在您可以测试您的Web服务器是否能够正确显示由此PHP脚本生成的内容。 要尝试此操作，请在您的Web浏览器中访问此页面，例如 <code>http://10.244.6.199/info.php</code> 。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://your_server_ip/info.php</span><br></pre></td></tr></table></figure>
+
+<h4 id="2-4-Login-mysql-and-import-the-specific-data-schema"><a href="#2-4-Login-mysql-and-import-the-specific-data-schema" class="headerlink" title="2.4 Login mysql and import the specific data schema"></a>2.4 Login mysql and import the specific data schema</h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">sudo mysql -u root -p</span></span><br><span class="line">Enter password: </span><br><span class="line">Welcome to the MySQL monitor.  Commands end with ; or \g.</span><br><span class="line">Your MySQL connection id is 760</span><br><span class="line">Server version: 5.7.24-0ubuntu0.18.04.1 (Ubuntu)</span><br><span class="line"></span><br><span class="line">Copyright (c) 2000, 2018, Oracle and/or its affiliates. All rights reserved.</span><br><span class="line"></span><br><span class="line">Oracle is a registered trademark of Oracle Corporation and/or its</span><br><span class="line">affiliates. Other names may be trademarks of their respective</span><br><span class="line">owners.</span><br><span class="line"></span><br><span class="line">Type &#x27;help;&#x27; or &#x27;\h&#x27; for help. Type &#x27;\c&#x27; to clear the current input statement.</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_">mysql&gt; </span><span class="language-bash">create database iviData;</span></span><br><span class="line">Query OK, 1 row affected (0.00 sec)</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_">mysql&gt; </span><span class="language-bash">use iviData;</span></span><br><span class="line">Database changed</span><br><span class="line"><span class="meta prompt_">mysql&gt; </span><span class="language-bash"><span class="built_in">source</span> /home/ranger/work/Ubuntu_tools/10031472_data_receiver/database_schema/iviData.sql</span></span><br><span class="line">Query OK, 0 rows affected (0.00 sec)</span><br><span class="line"></span><br><span class="line">Query OK, 0 rows affected (0.00 sec)</span><br><span class="line">... ...</span><br></pre></td></tr></table></figure>
+
+<h4 id="2-5-Install-data-receiver"><a href="#2-5-Install-data-receiver" class="headerlink" title="2.5 Install data_receiver"></a>2.5 Install data_receiver</h4><p><strong>报错一：</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">make clean</span></span><br><span class="line">make: pkg-config: Command not found</span><br><span class="line">rm -rf ./generated/cpp ./generated/java ./bin ./lib ./obj</span><br><span class="line">rm -f .gen_cpp .gen_java</span><br></pre></td></tr></table></figure>
+
+<p><strong>pkg-config</strong> 是一个在<a target="_blank" rel="noopener" href="https://zh.wikipedia.org/wiki/%E6%BA%90%E4%BB%A3%E7%A0%81">源代码</a><a target="_blank" rel="noopener" href="https://zh.wikipedia.org/wiki/%E7%BC%96%E8%AF%91">编译</a>时查询已安装的<a target="_blank" rel="noopener" href="https://zh.wikipedia.org/wiki/%E5%BA%93">库</a>的使用接口的计算机工具<a target="_blank" rel="noopener" href="https://zh.wikipedia.org/wiki/%E8%BD%AF%E4%BB%B6">软件</a>。pkg-config原本是设计用于<a target="_blank" rel="noopener" href="https://zh.wikipedia.org/wiki/Linux">Linux</a>的，但现在在各个版本的<a target="_blank" rel="noopener" href="https://zh.wikipedia.org/wiki/BSD">BSD</a>、<a target="_blank" rel="noopener" href="https://zh.wikipedia.org/wiki/Windows">windows</a>、<a target="_blank" rel="noopener" href="https://zh.wikipedia.org/wiki/Mac_OS_X">Mac OS X</a>和<a target="_blank" rel="noopener" href="https://zh.wikipedia.org/wiki/Solaris">Solaris</a>上都有着可用的版本。</p>
+<p>它输出已安装的库的相关信息，包括：</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://zh.wikipedia.org/wiki/C">C</a>&#x2F;<a target="_blank" rel="noopener" href="https://zh.wikipedia.org/wiki/C%2B%2B">C++</a><a target="_blank" rel="noopener" href="https://zh.wikipedia.org/wiki/%E7%BC%96%E8%AF%91%E5%99%A8">编译器</a>需要的输入参数</li>
+<li><a target="_blank" rel="noopener" href="https://zh.wikipedia.org/wiki/%E9%93%BE%E6%8E%A5%E5%99%A8">链接器</a>需要的输入参数</li>
+<li>已安装软件包的版本信息</li>
+</ul>
+<p>安装 <code>pkg-config</code> 解决如上问题：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo apt install pkg-config</span><br></pre></td></tr></table></figure>
+
+<p><strong>报错二：</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">sudo make clean</span></span><br><span class="line">rm -rf ./generated/cpp ./generated/java ./bin ./lib ./obj</span><br><span class="line">rm -f .gen_cpp .gen_java</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">sudo make all</span></span><br><span class="line">... ...</span><br><span class="line">/bin/sh: 1: mysql_config: not found</span><br><span class="line">sub_bigdata_src/sub_bigdata.cpp:4:10: fatal error: mysql.h: No such file or directory</span><br><span class="line"><span class="meta prompt_"> #</span><span class="language-bash">include &lt;mysql.h&gt;</span></span><br><span class="line">          ^~~~~~~~~</span><br><span class="line">compilation terminated.</span><br><span class="line">sub_bigdata_src/mqtt_bigdata_client.cpp:10:10: fatal error: my_global.h: No such file or directory</span><br><span class="line"><span class="meta prompt_"> #</span><span class="language-bash">include &lt;my_global.h&gt;</span></span><br><span class="line">          ^~~~~~~~~~~~~</span><br><span class="line">compilation terminated.</span><br><span class="line">Makefile:52: recipe for target &#x27;bin/sub_bigdata&#x27; failed</span><br><span class="line">make: *** [bin/sub_bigdata] Error 1</span><br></pre></td></tr></table></figure>
+
+<p>报错，安装如下解决：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo apt install libmysqlclient-dev</span><br></pre></td></tr></table></figure>
+
+<p><strong>报错三：</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">/usr/bin/ld: cannot find -lcares</span><br><span class="line">collect2: error: ld returned 1 exit status</span><br><span class="line">Makefile:53: recipe for target &#x27;bin/sub_bigdata&#x27; failed</span><br><span class="line">make: *** [bin/sub_bigdata] Error 1</span><br></pre></td></tr></table></figure>
+
+<p><code>/usr/bin/ld: cannot find -lxxx</code> 意思是缺少 <strong>libxxx.so</strong> 文件，即缺少 <strong>libcares.so</strong> ，此 so 为 <strong>c-ares</strong> 编译生成，<a target="_blank" rel="noopener" href="https://github.com/c-ares/c-ares">c-ares Github 地址</a> ，下载后运行如下编译：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">sudo ./configure</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">sudo make</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">sudo make install</span></span><br></pre></td></tr></table></figure>
+
+<p>如此 <strong>libcares.so</strong>  就生成到 <em>&#x2F;usr&#x2F;local&#x2F;lib&#x2F;</em> 目录下。</p>
+<p><strong>编译 data_receiver</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">sudo make clean</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">sudo make all</span></span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="3-Run-the-application"><a href="#3-Run-the-application" class="headerlink" title="3. Run the application"></a>3. Run the application</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">./SocketServer</span> </span><br><span class="line">./SocketServer: error while loading shared libraries: libjson-c.so.2: cannot open shared object file: No such file or directory</span><br></pre></td></tr></table></figure>
+
+<p>解决（安装libjson-c2)：<a target="_blank" rel="noopener" href="https://ubuntu.pkgs.org/16.04/ubuntu-main-amd64/libjson-c2_0.11-4ubuntu2_amd64.deb.html">https://ubuntu.pkgs.org/16.04/ubuntu-main-amd64/libjson-c2_0.11-4ubuntu2_amd64.deb.html</a></p>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div>Donate comment here.</div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechatpay.jpg" alt="Ranger Zhou 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.jpg" alt="Ranger Zhou 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>Ranger Zhou
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://rangerzhou.top/2018/12/14/Work/BigDataProject_Guide/" title="BigDataProject_Guide">http://rangerzhou.top/2018/12/14/Work/BigDataProject_Guide/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2018/12/11/Work/20P_Flash_Guide/" rel="prev" title="20P_Flash_Guide">
+      <i class="fa fa-chevron-left"></i> 20P_Flash_Guide
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2019/01/08/Technical/Ubuntu_Gerrit_build/" rel="next" title="Ubuntu_Gerrit搭建">
+      Ubuntu_Gerrit搭建 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+      <div class="tabs tabs-comment">
+        <ul class="nav-tabs">
+            <li class="tab"><a href="#comment-disqus">disqus</a></li>
+            <li class="tab"><a href="#comment-gitalk">gitalk</a></li>
+            <li class="tab"><a href="#comment-livere">livere</a></li>
+        </ul>
+        <div class="tab-content">
+            <div class="tab-pane disqus" id="comment-disqus">
+              
+  <div class="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
+            </div>
+            <div class="tab-pane gitalk" id="comment-gitalk">
+              <div class="comments" id="gitalk-container"></div>
+            </div>
+            <div class="tab-pane livere" id="comment-livere">
+              
+  <div class="comments">
+    <div id="lv-container" data-id="city" data-uid="MTAyMC8yOTcyNS82Mjky"></div>
+  </div>
+  
+            </div>
+        </div>
+      </div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-Android"><span class="nav-text">1. Android</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-1-Compile-c-ares"><span class="nav-text">1.1 Compile c-ares</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#1-2-Compile-mosquitto"><span class="nav-text">1.2 Compile mosquitto</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#1-3-Compile-data-service"><span class="nav-text">1.3 Compile data_service</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-Ubuntu"><span class="nav-text">2. Ubuntu</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#2-1-Install-mosquitto"><span class="nav-text">2.1 Install mosquitto</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Build-Dependencies"><span class="nav-text">Build Dependencies</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#2-2-Install-protobuf"><span class="nav-text">2.2 Install protobuf</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-3-Install-LAMP-Linux-Apache-MySQL-PHP-Server"><span class="nav-text">2.3 Install LAMP(Linux, Apache, MySQL, PHP) Server</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-3-1-Apache"><span class="nav-text">2.3.1 Apache</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-3-2-MySQL"><span class="nav-text">2.3.2 MySQL</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-3-3-PHP"><span class="nav-text">2.3.3 PHP</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-4-Login-mysql-and-import-the-specific-data-schema"><span class="nav-text">2.4 Login mysql and import the specific data schema</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-5-Install-data-receiver"><span class="nav-text">2.5 Install data_receiver</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-Run-the-application"><span class="nav-text">3. Run the application</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Ranger Zhou</p>
+  <div class="site-description" itemprop="description">我是一个小流氓我从来也不浪，有一天我心血来潮耍了个流氓，我嘴里吹着小口哨我心里好得意，不知怎么哗啦啦啦啦我摔了一身泥</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">63</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">8</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">16</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/rangerzhou" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;rangerzhou" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:rangero_o@qq.com" title="E-Mail → mailto:rangero_o@qq.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://rangerzhou.taobao.com/" title="Taobao → http:&#x2F;&#x2F;rangerzhou.taobao.com&#x2F;" rel="noopener" target="_blank"><i class="fab fa-youtube fa-fw"></i>Taobao</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="/images/wechat.jpg" title="WeChat → &#x2F;images&#x2F;wechat.jpg"><i class="fab fa-youtube fa-fw"></i>WeChat</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://blog.csdn.net/ranger0220?viewmode=contents" title="CSDN → http:&#x2F;&#x2F;blog.csdn.net&#x2F;ranger0220?viewmode&#x3D;contents" rel="noopener" target="_blank"><i class="fab fa-youtube fa-fw"></i>CSDN</a>
+      </span>
+  </div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      墙裂推荐
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="http://rangerzhou.taobao.com/" title="http:&#x2F;&#x2F;rangerzhou.taobao.com" rel="noopener" target="_blank">Taobao</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2016 – 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Ranger Zhou</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+<script data-pjax>
+  (function() {
+    function leancloudSelector(url) {
+      url = encodeURI(url);
+      return document.getElementById(url).querySelector('.leancloud-visitors-count');
+    }
+
+    function addCount(Counter) {
+      var visitors = document.querySelector('.leancloud_visitors');
+      var url = decodeURI(visitors.id);
+      var title = visitors.dataset.flagTitle;
+
+      Counter('get', '/classes/Counter?where=' + encodeURIComponent(JSON.stringify({ url })))
+        .then(response => response.json())
+        .then(({ results }) => {
+          if (results.length > 0) {
+            var counter = results[0];
+            leancloudSelector(url).innerText = counter.time + 1;
+            Counter('put', '/classes/Counter/' + counter.objectId, { time: { '__op': 'Increment', 'amount': 1 } })
+              .catch(error => {
+                console.error('Failed to save visitor count', error);
+              });
+          } else {
+              Counter('post', '/classes/Counter', { title, url, time: 1 })
+                .then(response => response.json())
+                .then(() => {
+                  leancloudSelector(url).innerText = 1;
+                })
+                .catch(error => {
+                  console.error('Failed to create', error);
+                });
+          }
+        })
+        .catch(error => {
+          console.error('LeanCloud Counter Error', error);
+        });
+    }
+
+    function showTime(Counter) {
+      var visitors = document.querySelectorAll('.leancloud_visitors');
+      var entries = [...visitors].map(element => {
+        return decodeURI(element.id);
+      });
+
+      Counter('get', '/classes/Counter?where=' + encodeURIComponent(JSON.stringify({ url: { '$in': entries } })))
+        .then(response => response.json())
+        .then(({ results }) => {
+          for (let url of entries) {
+            let target = results.find(item => item.url === url);
+            leancloudSelector(url).innerText = target ? target.time : 0;
+          }
+        })
+        .catch(error => {
+          console.error('LeanCloud Counter Error', error);
+        });
+    }
+
+    let { app_id, app_key, server_url } = {"enable":true,"app_id":"U9g4mWmsQg8FjOE3xsqUy9Df-gzGzoHsz","app_key":"24cDno14OiDhAreVmoEjzqns","server_url":"https://u9g4mwms.lc-cn-n1-shared.com","security":false};
+    function fetchData(api_server) {
+      var Counter = (method, url, data) => {
+        return fetch(`${api_server}/1.1${url}`, {
+          method,
+          headers: {
+            'X-LC-Id'     : app_id,
+            'X-LC-Key'    : app_key,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(data)
+        });
+      };
+      if (CONFIG.page.isPost) {
+        if (CONFIG.hostname !== location.hostname) return;
+        addCount(Counter);
+      } else if (document.querySelectorAll('.post-title-link').length >= 1) {
+        showTime(Counter);
+      }
+    }
+
+    let api_server = app_id.slice(-9) !== '-MdYXbMMI' ? server_url : `https://${app_id.slice(0, 8).toLowerCase()}.api.lncldglobal.com`;
+
+    if (api_server) {
+      fetchData(api_server);
+    } else {
+      fetch('https://app-router.leancloud.cn/2/route?appId=' + app_id)
+        .then(response => response.json())
+        .then(({ api_server }) => {
+          fetchData('https://' + api_server);
+        });
+    }
+  })();
+</script>
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/pjax/pjax.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/pangu@4/dist/browser/pangu.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '#page-configurations',
+    '.content-wrap',
+    '.post-toc-wrap',
+    '.languages',
+    '#pjax'
+  ],
+  switches: {
+    '.post-toc-wrap': Pjax.switches.innerHTML
+  },
+  analytics: false,
+  cacheBust: false,
+  scrollTo : !CONFIG.bookmark.enable
+});
+
+window.addEventListener('pjax:success', () => {
+  document.querySelectorAll('script[data-pjax], script#page-configurations, #pjax script').forEach(element => {
+    var code = element.text || element.textContent || element.innerHTML || '';
+    var parent = element.parentNode;
+    parent.removeChild(element);
+    var script = document.createElement('script');
+    if (element.id) {
+      script.id = element.id;
+    }
+    if (element.className) {
+      script.className = element.className;
+    }
+    if (element.type) {
+      script.type = element.type;
+    }
+    if (element.src) {
+      script.src = element.src;
+      // Force synchronous loading of peripheral JS.
+      script.async = false;
+    }
+    if (element.dataset.pjax !== undefined) {
+      script.dataset.pjax = '';
+    }
+    if (code !== '') {
+      script.appendChild(document.createTextNode(code));
+    }
+    parent.appendChild(script);
+  });
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+
+
+  
+  <script data-pjax>
+    (function(){
+      var canonicalURL, curProtocol;
+      //Get the <link> tag
+      var x=document.getElementsByTagName("link");
+		//Find the last canonical URL
+		if(x.length > 0){
+			for (i=0;i<x.length;i++){
+				if(x[i].rel.toLowerCase() == 'canonical' && x[i].href){
+					canonicalURL=x[i].href;
+				}
+			}
+		}
+    //Get protocol
+	    if (!canonicalURL){
+	    	curProtocol = window.location.protocol.split(':')[0];
+	    }
+	    else{
+	    	curProtocol = canonicalURL.split(':')[0];
+	    }
+      //Get current URL if the canonical URL does not exist
+	    if (!canonicalURL) canonicalURL = window.location.href;
+	    //Assign script content. Replace current URL with the canonical URL
+      !function(){var e=/([http|https]:\/\/[a-zA-Z0-9\_\.]+\.baidu\.com)/gi,r=canonicalURL,t=document.referrer;if(!e.test(r)){var n=(String(curProtocol).toLowerCase() === 'https')?"https://sp0.baidu.com/9_Q4simg2RQJ8t7jm9iCKT-xh_/s.gif":"//api.share.baidu.com/s.gif";t?(n+="?r="+encodeURIComponent(document.referrer),r&&(n+="&l="+r)):r&&(n+="?l="+r);var i=new Image;i.src=n}}(window);})();
+  </script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <div id="pjax">
+  
+
+  
+
+<script>
+  var disqus_config = function() {
+    this.page.url = "http://rangerzhou.top/2018/12/14/Work/BigDataProject_Guide/";
+    this.page.identifier = "2018/12/14/Work/BigDataProject_Guide/";
+    this.page.title = "BigDataProject_Guide";
+    };
+  NexT.utils.loadComments(document.querySelector('#disqus_thread'), () => {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: disqus_config
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://rangerzhou.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  });
+</script>
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : 'b7bb504993135f5a2eab',
+      clientSecret: '6f83aec5c45d75e248e2914be90c4601e2e1dc44',
+      repo        : 'rangerzhou.github.io',
+      owner       : 'rangerzhou',
+      admin       : ['rangerzhou'],
+      id          : 'ab4e62baa59308b586d486ce859b3bec',
+        language: 'zh-CN',
+      distractionFreeMode: true
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
+
+<script>
+NexT.utils.loadComments(document.querySelector('#lv-container'), () => {
+  window.livereOptions = {
+    refer: location.pathname.replace(CONFIG.root, '').replace('index.html', '')
+  };
+  (function(d, s) {
+    var j, e = d.getElementsByTagName(s)[0];
+    if (typeof LivereTower === 'function') { return; }
+    j = d.createElement(s);
+    j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+    j.async = true;
+    e.parentNode.insertBefore(j, e);
+  })(document, 'script');
+});
+</script>
+
+    </div>
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/haru01.model.json"},"display":{"position":"left","width":300,"height":800},"mobile":{"show":false},"log":false});</script></body>
+</html>

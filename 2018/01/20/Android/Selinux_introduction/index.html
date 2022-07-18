@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.2.0">
+<!-- pjax：防止跳转页面音乐暂停 -->
+<script src="https://cdn.jsdelivr.net/npm/pjax@0.2.8/pjax.js"></script>
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/desert.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/desert.jpg">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <meta name="google-site-verification" content="OJnYjbr3wdT22qLrZSzyD9lAyBcXiXlEQ7-5wAnaWoQ">
+  <meta name="baidu-site-verification" content="vr4n4JeXgB">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-minimal.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"rangerzhou.top","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"manual"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":true,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":true,"nav":null,"activeClass":"gitalk"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="通过本文介绍，希望能够了解selinux的概念，如何查看selinux相关权限，如何配置selinux，如何临时打开关闭selinux。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="selinux介绍">
+<meta property="og:url" content="http://rangerzhou.top/2018/01/20/Android/Selinux_introduction/index.html">
+<meta property="og:site_name" content="RangerZhou">
+<meta property="og:description" content="通过本文介绍，希望能够了解selinux的概念，如何查看selinux相关权限，如何配置selinux，如何临时打开关闭selinux。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://otqux1hnn.bkt.clouddn.com/rangerzhou/180420/selinux_dsp.png">
+<meta property="article:published_time" content="2018-01-20T07:28:40.000Z">
+<meta property="article:modified_time" content="2022-07-18T14:46:21.591Z">
+<meta property="article:author" content="Ranger Zhou">
+<meta property="article:tag" content="Selinux">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://otqux1hnn.bkt.clouddn.com/rangerzhou/180420/selinux_dsp.png">
+
+<link rel="canonical" href="http://rangerzhou.top/2018/01/20/Android/Selinux_introduction/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+<script src="//cdn.bootcss.com/pace/1.0.2/pace.min.js"></script>
+<link href="//cdn.bootcss.com/pace/1.0.2/themes/pink/pace-theme-flash.css" rel="stylesheet">
+
+  <title>selinux介绍 | RangerZhou</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-138158952-1"></script>
+    <script data-pjax>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-138158952-1');
+      }
+    </script>
+
+
+  <script data-pjax>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?24a6d3c4c0f292c5f682d26414c3994b";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+
+<!-- 加入APlayer音乐播放器 -->
+<link rel="stylesheet" href="/dist/APlayer.min.css">
+<div id="aplayer"></div>
+<script type="text/javascript" src="/dist/APlayer.min.js"></script>
+<script type="text/javascript" src="/dist/music.js"></script>
+
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">RangerZhou</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">Read the fucking source code</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-playlist">
+
+    <a href="/playlist/" rel="section"><i class="fa fa-music fa-fw"></i>歌单</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-commonweal">
+
+    <a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a>
+
+  </li>
+        <li class="menu-item menu-item-official">
+
+    <a href="/official" rel="section"><i class="fa fa-user fa-fw"></i>official</a>
+
+  </li>
+        <li class="menu-item menu-item-shop">
+
+    <a href="http://rangerzhou.taobao.com/" rel="noopener" target="_blank"><i class="fa fa-user fa-fw"></i>shop</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://rangerzhou.top/2018/01/20/Android/Selinux_introduction/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Ranger Zhou">
+      <meta itemprop="description" content="我是一个小流氓我从来也不浪，有一天我心血来潮耍了个流氓，我嘴里吹着小口哨我心里好得意，不知怎么哗啦啦啦啦我摔了一身泥">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="RangerZhou">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          selinux介绍
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2018-01-20 15:28:40" itemprop="dateCreated datePublished" datetime="2018-01-20T15:28:40+08:00">2018-01-20</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-07-18 22:46:21" itemprop="dateModified" datetime="2022-07-18T22:46:21+08:00">2022-07-18</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Android/" itemprop="url" rel="index"><span itemprop="name">Android</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/2018/01/20/Android/Selinux_introduction/" class="post-meta-item leancloud_visitors" data-flag-title="selinux介绍" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <blockquote>
+<p>通过本文介绍，希望能够了解selinux的概念，如何查看selinux相关权限，如何配置selinux，如何临时打开关闭selinux。</p>
+</blockquote>
+<span id="more"></span>
+
+<h3 id="1-进程的概念"><a href="#1-进程的概念" class="headerlink" title="1. 进程的概念"></a>1. 进程的概念</h3><p>selinux是针对进程设置相应的权限，我们这里所要讲的进程通俗来讲就是一个在用户空间运行的一个程序。比如在windows中，一个记事本是一个进程，一个计算器也是一个进程。而在android中，每个app是一个进程，每个native app，如ping、top等都是进程。需要说明的是进程是一个动的概念，一个可执行行程序，没有运行，是静止存放在文件系统上的一个文件，并不能称之为进程。当运行起来后，系统分配进程号，才能称为进程，查看系统运行的进程可以通过ps（8.0之后版本需要ps -A）命令。</p>
+<h3 id="2-什么是SELinux"><a href="#2-什么是SELinux" class="headerlink" title="2. 什么是SELinux"></a>2. 什么是SELinux</h3><p>SELinux 全称 Security Enhanced Linux (安全强化 Linux),是美国国家安全局2000年以 GNU GPL 发布，是 MAC (Mandatory Access Control，强制访问控制系统)的一个实现，目的在于明确的指明某个进程可以访问哪些资源(文件、网络端口等)。强制访问控制系统 的用途在于增强系统抵御 0-Day 攻击(利用尚未公开的漏洞实现的攻击行为)的能力。所以它不是网络防火墙或 ACL 的替代品，在用途上也 不重复。在目前的大多数发行版中，已经默认在内核集成了SELinux。相比其他强制性访问控制系统，SELinux 有如下优势：</p>
+<ul>
+<li>控制策略是可查询而非程序不可见的</li>
+<li>可以热更改策略而无需重启或者停止服务</li>
+<li>可以从进程初始化、继承和程序执行三个方面通过策略进行控制</li>
+<li>控制范围覆盖文件系统、目录、文件、文件启动描述符、端口、消息接口和网络接口</li>
+</ul>
+<p>需要指出的是linux权限管理的两套机制。自主访问控制（DAC）和强制访问控制（MAC). DAC可以简单理解为我是root用户，有就有权限访问任何资源，打开任何文件。而user用户访问某些文件就会限制。这种控制方式有个很大的弊端就是一旦获得root权限，就可以为所欲为。MAC就是selinux搞的这一套，当你具有某些身份的时候，才能访问对应的资源。我们目前系统两套机制都起作用。相当于对资源管理有两道门，只有通过两道门才能访问到资源。</p>
+<h3 id="3-查看SELinux权限"><a href="#3-查看SELinux权限" class="headerlink" title="3. 查看SELinux权限"></a>3. 查看SELinux权限</h3><h5 id="3-1-查看文件所具有的selinux相关标识：ls-lZ"><a href="#3-1-查看文件所具有的selinux相关标识：ls-lZ" class="headerlink" title="3.1 查看文件所具有的selinux相关标识：ls -lZ"></a>3.1 查看文件所具有的selinux相关标识：ls -lZ</h5><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">adb shell <span class="built_in">ls</span> -lZ</span></span><br><span class="line">total 1720</span><br><span class="line">dr-xr-xr-x   3 root      root   u:object_r:cgroup:s0                 0 1970-06-12 16:06 acct</span><br><span class="line">drwxrwx---   6 system    cache  u:object_r:cache_file:s0          4096 1970-06-12 15:38 cache</span><br><span class="line">drwxr-xr-x   4 root      root   u:object_r:configfs:s0               0 1970-01-01 01:00 config</span><br><span class="line">drwxr-xr-x   6 root      root   u:object_r:system_file:s0         4096 1970-01-01 01:00 cust</span><br><span class="line">drwxrwx--x  50 system    system u:object_r:system_data_file:s0    4096 1970-06-12 15:38 data</span><br><span class="line">lrwxrwxrwx   1 root      root   u:object_r:rootfs:s0                23 1970-01-01 01:00 default.prop -&gt; system/etc/prop.default</span><br><span class="line">drwxr-xr-x  15 root      root   u:object_r:device:s0              3640 1970-06-12 16:06 dev</span><br><span class="line">drwxr-xr-x   4 root      root   u:object_r:adsprpcd_file:s0       4096 1970-01-01 08:00 dsp</span><br><span class="line">... ...</span><br><span class="line">drwxr-xr-x   4 root      root   u:object_r:storage_file:s0          80 1970-06-12 16:06 storage</span><br><span class="line">dr-xr-xr-x  19 root      root   u:object_r:sysfs:s0                  0 1970-06-12 16:06 sys</span><br><span class="line">drwxr-xr-x  18 root      root   u:object_r:system_file:s0         4096 1970-01-01 01:00 system</span><br><span class="line">-rw-r--r--   1 root      root   u:object_r:rootfs:s0              5222 1970-01-01 01:00 ueventd.rc</span><br><span class="line">drwxr-xr-x  16 root      root   u:object_r:vendor_file:s0         4096 1970-01-01 01:00 vendor</span><br><span class="line">-rw-r--r--   1 root      root   u:object_r:rootfs:s0               524 1970-01-01 01:00 verity_key</span><br></pre></td></tr></table></figure>
+
+<p>以storage文件夹为例，各个部分的含义解析如下：</p>
+<p>drwxr-xr-x   4 root      root   u:object_r:adsprpcd_file:s0       4096 1970-01-01 08:00 dsp</p>
+<p><img src="http://otqux1hnn.bkt.clouddn.com/rangerzhou/180420/selinux_dsp.png" alt="selinux_dsp"></p>
+<p>前面几个都是属于DAC的范畴，最后一个”Selinux label”是和selinux相关的;</p>
+<p>d表明 dsp是一个文件夹(directory);</p>
+<p>后面三个一组分别定义了当前用户权限，组用户权限和其他用户权限;</p>
+<p>r-读 w-写 x-执行;</p>
+<p>而dsp文件夹所属于的用户是root，组也是root;</p>
+<p>linux label是 u:object_r:adsprpcd_file:s0 表明我是一个具有adsprpcd_file属性的文件夹。</p>
+<h5 id="3-2-查看进程的相关标识ps-Z"><a href="#3-2-查看进程的相关标识ps-Z" class="headerlink" title="3.2 查看进程的相关标识ps -Z"></a>3.2 查看进程的相关标识ps -Z</h5><p>下面是ps -Z的一个例子：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">whyred:/ # ps -Z</span><br><span class="line">LABEL                     USER           PID  PPID     VSZ    RSS WCHAN            ADDR S NAME</span><br><span class="line">u:r:su:s0                 root          4962  5421    9204   1928 sigsuspend 763b9fe628 S sh</span><br><span class="line">u:r:su:s0                 root          4965  4962   10776   2020 0          7adcb4dfd0 R ps</span><br></pre></td></tr></table></figure>
+
+<p>第一列即为进程对应的selinux的安全上下文。</p>
+<h3 id="4-调试中打开和关闭selinux"><a href="#4-调试中打开和关闭selinux" class="headerlink" title="4. 调试中打开和关闭selinux"></a>4. 调试中打开和关闭selinux</h3><h5 id="4-1-获取当前SELinux运行状态"><a href="#4-1-获取当前SELinux运行状态" class="headerlink" title="4.1 获取当前SELinux运行状态"></a>4.1 获取当前SELinux运行状态</h5><p>adb root权限下：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">getenforce</span><br></pre></td></tr></table></figure>
+
+<p>可能返回结果有三种：Enforcing、Permissive 和 Disabled。Disabled 代表 SELinux 被禁用，Permissive 代表仅记录安全警告但不阻止 可疑行为，Enforcing 代表记录警告且阻止可疑行为。</p>
+<h5 id="4-2-改变SELinux运行状态"><a href="#4-2-改变SELinux运行状态" class="headerlink" title="4.2 改变SELinux运行状态"></a>4.2 改变SELinux运行状态</h5><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">setenforce [ Enforcing | Permissive | 1 | 0 ]</span><br></pre></td></tr></table></figure>
+
+<p>关闭： setenforce [Permissive | 0]</p>
+<p>打开： setenforce [Enforcing | 1]</p>
+<p>该命令可以立刻改变 SELinux 运行状态，在 Enforcing 和 Permissive 之间切换，结果保持至关机。一个典型的用途是看看到底是不是 SELinux 导致某个服务或者程序无法运行。若是在 setenforce 0 之后服务或者程序依然无法运行，那么就可以肯定不是 SELinux 导致的。</p>
+<h3 id="5-配置selinux"><a href="#5-配置selinux" class="headerlink" title="5. 配置selinux"></a>5. 配置selinux</h3><h5 id="5-1-selinux权限存放位置"><a href="#5-1-selinux权限存放位置" class="headerlink" title="5.1 selinux权限存放位置"></a>5.1 selinux权限存放位置</h5><p>高通加的selinux相关内容位置（通常我们在这里修改）：device&#x2F;qcom&#x2F;sepolicy&#x2F;common</p>
+<p>linux selinux默认的位置：system&#x2F;sepolicy</p>
+<p>selinux 生成的中间文件的位置：out&#x2F;target&#x2F;….&#x2F;obj&#x2F;ETC&#x2F;sepolicy_intermediate&#x2F;policy.conf</p>
+<p>该文件是所有的.te文件最后综合到这个文件里面来的一个结果，如果有些规则不会写，可以到这里面来找例子。</p>
+<h5 id="5-2-selinux权限配置方法"><a href="#5-2-selinux权限配置方法" class="headerlink" title="5.2 selinux权限配置方法"></a>5.2 selinux权限配置方法</h5><p><strong>a. 添加进程访问权限规则方法：</strong></p>
+<ul>
+<li><strong>step 1：查看kernel dmesg log，搜索avc: denied字样，如</strong></li>
+</ul>
+<p>[   19.972419] type&#x3D;1400 audit(9238.719:7): avc: denied { getattr } for pid&#x3D;1864 comm&#x3D;”chown” path&#x3D;”&#x2F;data&#x2F;usf&#x2F;proximity&#x2F;cmd” dev&#x3D;”dm-0” ino&#x3D;802883 <strong>scontext</strong>&#x3D;u:r:qti_init_shell:s0 <strong>tcontext</strong>&#x3D;u:object_r:usf_data_file:s0 <strong>tclass</strong>&#x3D;fifo_file permissive&#x3D;0</p>
+<ul>
+<li><strong>step 2：确认log是不是和本模块相关的</strong></li>
+</ul>
+<p>比如查看 comm，path，scontext等信息，确认是不是我们要用的进程被拒绝所打出的log</p>
+<ul>
+<li><strong>step 3：到文件夹下device&#x2F;qcom&#x2F;sepolicy&#x2F;common下查找scontext 对应的文件</strong></li>
+</ul>
+<p>比如step 1中的例子，则要找qti_init_shell.te 文件，打开该文件，根据log添加allow语句：</p>
+<p>allow qti_init_shell usf_data_file**:**fifo_file {getattr } ;</p>
+<p>qti_init_shell来自<strong>scontext</strong>；</p>
+<p>usf_data_file来自<strong>tcontext</strong>，如果tcontex和scontext相同，则这部分写self 格式 allow xxx <strong>self</strong>:yyyyy {zzzzz};</p>
+<p>fifo_file来自<strong>tclass</strong>；</p>
+<p>{getattr }照抄log里面的，如果有多个可以在{}里面加空格，比如{getattr open write }；</p>
+<p>语句结尾有“分号”。</p>
+<p><strong>添加完allow语句后，需要重新编译烧录boot.img</strong>。</p>
+<p><strong>b. 添加静态文件selinux权限方法</strong></p>
+<p>文件的相关权限添加在和.te同文件夹下的file_contexts文件里，里面有设备文件，bin文件的各种配置，找一个类似的做修改即可。</p>
+<p><strong>修改file_contexts后，需要重新编译烧录boot.img和system.img</strong></p>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div>Donate comment here.</div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechatpay.jpg" alt="Ranger Zhou 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.jpg" alt="Ranger Zhou 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>Ranger Zhou
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://rangerzhou.top/2018/01/20/Android/Selinux_introduction/" title="selinux介绍">http://rangerzhou.top/2018/01/20/Android/Selinux_introduction/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Selinux/" rel="tag"># Selinux</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2018/01/17/Technical/Linux2_and1/" rel="prev" title="Linux “2 > &1”理解">
+      <i class="fa fa-chevron-left"></i> Linux “2 > &1”理解
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2018/02/08/Android/Performance_debug/" rel="next" title="Performance_debug">
+      Performance_debug <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+      <div class="tabs tabs-comment">
+        <ul class="nav-tabs">
+            <li class="tab"><a href="#comment-disqus">disqus</a></li>
+            <li class="tab"><a href="#comment-gitalk">gitalk</a></li>
+            <li class="tab"><a href="#comment-livere">livere</a></li>
+        </ul>
+        <div class="tab-content">
+            <div class="tab-pane disqus" id="comment-disqus">
+              
+  <div class="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
+            </div>
+            <div class="tab-pane gitalk" id="comment-gitalk">
+              <div class="comments" id="gitalk-container"></div>
+            </div>
+            <div class="tab-pane livere" id="comment-livere">
+              
+  <div class="comments">
+    <div id="lv-container" data-id="city" data-uid="MTAyMC8yOTcyNS82Mjky"></div>
+  </div>
+  
+            </div>
+        </div>
+      </div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E8%BF%9B%E7%A8%8B%E7%9A%84%E6%A6%82%E5%BF%B5"><span class="nav-text">1. 进程的概念</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E4%BB%80%E4%B9%88%E6%98%AFSELinux"><span class="nav-text">2. 什么是SELinux</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E6%9F%A5%E7%9C%8BSELinux%E6%9D%83%E9%99%90"><span class="nav-text">3. 查看SELinux权限</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#3-1-%E6%9F%A5%E7%9C%8B%E6%96%87%E4%BB%B6%E6%89%80%E5%85%B7%E6%9C%89%E7%9A%84selinux%E7%9B%B8%E5%85%B3%E6%A0%87%E8%AF%86%EF%BC%9Als-lZ"><span class="nav-text">3.1 查看文件所具有的selinux相关标识：ls -lZ</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#3-2-%E6%9F%A5%E7%9C%8B%E8%BF%9B%E7%A8%8B%E7%9A%84%E7%9B%B8%E5%85%B3%E6%A0%87%E8%AF%86ps-Z"><span class="nav-text">3.2 查看进程的相关标识ps -Z</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-%E8%B0%83%E8%AF%95%E4%B8%AD%E6%89%93%E5%BC%80%E5%92%8C%E5%85%B3%E9%97%ADselinux"><span class="nav-text">4. 调试中打开和关闭selinux</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#4-1-%E8%8E%B7%E5%8F%96%E5%BD%93%E5%89%8DSELinux%E8%BF%90%E8%A1%8C%E7%8A%B6%E6%80%81"><span class="nav-text">4.1 获取当前SELinux运行状态</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#4-2-%E6%94%B9%E5%8F%98SELinux%E8%BF%90%E8%A1%8C%E7%8A%B6%E6%80%81"><span class="nav-text">4.2 改变SELinux运行状态</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-%E9%85%8D%E7%BD%AEselinux"><span class="nav-text">5. 配置selinux</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#5-1-selinux%E6%9D%83%E9%99%90%E5%AD%98%E6%94%BE%E4%BD%8D%E7%BD%AE"><span class="nav-text">5.1 selinux权限存放位置</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#5-2-selinux%E6%9D%83%E9%99%90%E9%85%8D%E7%BD%AE%E6%96%B9%E6%B3%95"><span class="nav-text">5.2 selinux权限配置方法</span></a></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Ranger Zhou</p>
+  <div class="site-description" itemprop="description">我是一个小流氓我从来也不浪，有一天我心血来潮耍了个流氓，我嘴里吹着小口哨我心里好得意，不知怎么哗啦啦啦啦我摔了一身泥</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">63</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">8</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">16</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/rangerzhou" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;rangerzhou" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:rangero_o@qq.com" title="E-Mail → mailto:rangero_o@qq.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://rangerzhou.taobao.com/" title="Taobao → http:&#x2F;&#x2F;rangerzhou.taobao.com&#x2F;" rel="noopener" target="_blank"><i class="fab fa-youtube fa-fw"></i>Taobao</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="/images/wechat.jpg" title="WeChat → &#x2F;images&#x2F;wechat.jpg"><i class="fab fa-youtube fa-fw"></i>WeChat</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://blog.csdn.net/ranger0220?viewmode=contents" title="CSDN → http:&#x2F;&#x2F;blog.csdn.net&#x2F;ranger0220?viewmode&#x3D;contents" rel="noopener" target="_blank"><i class="fab fa-youtube fa-fw"></i>CSDN</a>
+      </span>
+  </div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      墙裂推荐
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="http://rangerzhou.taobao.com/" title="http:&#x2F;&#x2F;rangerzhou.taobao.com" rel="noopener" target="_blank">Taobao</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2016 – 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Ranger Zhou</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+<script data-pjax>
+  (function() {
+    function leancloudSelector(url) {
+      url = encodeURI(url);
+      return document.getElementById(url).querySelector('.leancloud-visitors-count');
+    }
+
+    function addCount(Counter) {
+      var visitors = document.querySelector('.leancloud_visitors');
+      var url = decodeURI(visitors.id);
+      var title = visitors.dataset.flagTitle;
+
+      Counter('get', '/classes/Counter?where=' + encodeURIComponent(JSON.stringify({ url })))
+        .then(response => response.json())
+        .then(({ results }) => {
+          if (results.length > 0) {
+            var counter = results[0];
+            leancloudSelector(url).innerText = counter.time + 1;
+            Counter('put', '/classes/Counter/' + counter.objectId, { time: { '__op': 'Increment', 'amount': 1 } })
+              .catch(error => {
+                console.error('Failed to save visitor count', error);
+              });
+          } else {
+              Counter('post', '/classes/Counter', { title, url, time: 1 })
+                .then(response => response.json())
+                .then(() => {
+                  leancloudSelector(url).innerText = 1;
+                })
+                .catch(error => {
+                  console.error('Failed to create', error);
+                });
+          }
+        })
+        .catch(error => {
+          console.error('LeanCloud Counter Error', error);
+        });
+    }
+
+    function showTime(Counter) {
+      var visitors = document.querySelectorAll('.leancloud_visitors');
+      var entries = [...visitors].map(element => {
+        return decodeURI(element.id);
+      });
+
+      Counter('get', '/classes/Counter?where=' + encodeURIComponent(JSON.stringify({ url: { '$in': entries } })))
+        .then(response => response.json())
+        .then(({ results }) => {
+          for (let url of entries) {
+            let target = results.find(item => item.url === url);
+            leancloudSelector(url).innerText = target ? target.time : 0;
+          }
+        })
+        .catch(error => {
+          console.error('LeanCloud Counter Error', error);
+        });
+    }
+
+    let { app_id, app_key, server_url } = {"enable":true,"app_id":"U9g4mWmsQg8FjOE3xsqUy9Df-gzGzoHsz","app_key":"24cDno14OiDhAreVmoEjzqns","server_url":"https://u9g4mwms.lc-cn-n1-shared.com","security":false};
+    function fetchData(api_server) {
+      var Counter = (method, url, data) => {
+        return fetch(`${api_server}/1.1${url}`, {
+          method,
+          headers: {
+            'X-LC-Id'     : app_id,
+            'X-LC-Key'    : app_key,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(data)
+        });
+      };
+      if (CONFIG.page.isPost) {
+        if (CONFIG.hostname !== location.hostname) return;
+        addCount(Counter);
+      } else if (document.querySelectorAll('.post-title-link').length >= 1) {
+        showTime(Counter);
+      }
+    }
+
+    let api_server = app_id.slice(-9) !== '-MdYXbMMI' ? server_url : `https://${app_id.slice(0, 8).toLowerCase()}.api.lncldglobal.com`;
+
+    if (api_server) {
+      fetchData(api_server);
+    } else {
+      fetch('https://app-router.leancloud.cn/2/route?appId=' + app_id)
+        .then(response => response.json())
+        .then(({ api_server }) => {
+          fetchData('https://' + api_server);
+        });
+    }
+  })();
+</script>
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/pjax/pjax.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/pangu@4/dist/browser/pangu.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '#page-configurations',
+    '.content-wrap',
+    '.post-toc-wrap',
+    '.languages',
+    '#pjax'
+  ],
+  switches: {
+    '.post-toc-wrap': Pjax.switches.innerHTML
+  },
+  analytics: false,
+  cacheBust: false,
+  scrollTo : !CONFIG.bookmark.enable
+});
+
+window.addEventListener('pjax:success', () => {
+  document.querySelectorAll('script[data-pjax], script#page-configurations, #pjax script').forEach(element => {
+    var code = element.text || element.textContent || element.innerHTML || '';
+    var parent = element.parentNode;
+    parent.removeChild(element);
+    var script = document.createElement('script');
+    if (element.id) {
+      script.id = element.id;
+    }
+    if (element.className) {
+      script.className = element.className;
+    }
+    if (element.type) {
+      script.type = element.type;
+    }
+    if (element.src) {
+      script.src = element.src;
+      // Force synchronous loading of peripheral JS.
+      script.async = false;
+    }
+    if (element.dataset.pjax !== undefined) {
+      script.dataset.pjax = '';
+    }
+    if (code !== '') {
+      script.appendChild(document.createTextNode(code));
+    }
+    parent.appendChild(script);
+  });
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+
+
+  
+  <script data-pjax>
+    (function(){
+      var canonicalURL, curProtocol;
+      //Get the <link> tag
+      var x=document.getElementsByTagName("link");
+		//Find the last canonical URL
+		if(x.length > 0){
+			for (i=0;i<x.length;i++){
+				if(x[i].rel.toLowerCase() == 'canonical' && x[i].href){
+					canonicalURL=x[i].href;
+				}
+			}
+		}
+    //Get protocol
+	    if (!canonicalURL){
+	    	curProtocol = window.location.protocol.split(':')[0];
+	    }
+	    else{
+	    	curProtocol = canonicalURL.split(':')[0];
+	    }
+      //Get current URL if the canonical URL does not exist
+	    if (!canonicalURL) canonicalURL = window.location.href;
+	    //Assign script content. Replace current URL with the canonical URL
+      !function(){var e=/([http|https]:\/\/[a-zA-Z0-9\_\.]+\.baidu\.com)/gi,r=canonicalURL,t=document.referrer;if(!e.test(r)){var n=(String(curProtocol).toLowerCase() === 'https')?"https://sp0.baidu.com/9_Q4simg2RQJ8t7jm9iCKT-xh_/s.gif":"//api.share.baidu.com/s.gif";t?(n+="?r="+encodeURIComponent(document.referrer),r&&(n+="&l="+r)):r&&(n+="?l="+r);var i=new Image;i.src=n}}(window);})();
+  </script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <div id="pjax">
+  
+
+  
+
+<script>
+  var disqus_config = function() {
+    this.page.url = "http://rangerzhou.top/2018/01/20/Android/Selinux_introduction/";
+    this.page.identifier = "2018/01/20/Android/Selinux_introduction/";
+    this.page.title = "selinux介绍";
+    };
+  NexT.utils.loadComments(document.querySelector('#disqus_thread'), () => {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: disqus_config
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://rangerzhou.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  });
+</script>
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : 'b7bb504993135f5a2eab',
+      clientSecret: '6f83aec5c45d75e248e2914be90c4601e2e1dc44',
+      repo        : 'rangerzhou.github.io',
+      owner       : 'rangerzhou',
+      admin       : ['rangerzhou'],
+      id          : '8d93eb500e22ebde27372db7853a69c9',
+        language: 'zh-CN',
+      distractionFreeMode: true
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
+
+<script>
+NexT.utils.loadComments(document.querySelector('#lv-container'), () => {
+  window.livereOptions = {
+    refer: location.pathname.replace(CONFIG.root, '').replace('index.html', '')
+  };
+  (function(d, s) {
+    var j, e = d.getElementsByTagName(s)[0];
+    if (typeof LivereTower === 'function') { return; }
+    j = d.createElement(s);
+    j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+    j.async = true;
+    e.parentNode.insertBefore(j, e);
+  })(document, 'script');
+});
+</script>
+
+    </div>
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/haru01.model.json"},"display":{"position":"left","width":300,"height":800},"mobile":{"show":false},"log":false});</script></body>
+</html>
