@@ -1,31 +1,31 @@
-×î³õ
+æœ€åˆ
 https://zhuanlan.zhihu.com/p/25471760
 
-Hexo³£¼ûÎÊÌâ½â¾ö·½°¸
+Hexoå¸¸è§é—®é¢˜è§£å†³æ–¹æ¡ˆ
 http://wp.huangshiyang.com/hexo%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88
 
-Hexo²©¿ÍÖ÷Ìâ´ÓJacmanÇĞ»»µ½NexT.Mist
+Hexoåšå®¢ä¸»é¢˜ä»Jacmanåˆ‡æ¢åˆ°NexT.Mist
 http://codepub.cn/2016/03/20/Hexo-blog-theme-switching-from-Jacman-to-NexT-Mist/
 
-ÖªĞĞºÏÒ» | ÓÃ Hexo ´î½¨²©¿Í
+çŸ¥è¡Œåˆä¸€ | ç”¨ Hexo æ­å»ºåšå®¢
 http://lowrank.science/Hexo-Github/
 
-NEXTÖ÷Ìâ
+NEXTä¸»é¢˜
 http://theme-next.iissnan.com/getting-started.html
 
-°ÑhexoÅäÖÃ²¿Êğµ½github£¨src refspec xxx does not match any ´íÎó´¦Àí°ì·¨£©
+æŠŠhexoé…ç½®éƒ¨ç½²åˆ°githubï¼ˆsrc refspec xxx does not match any é”™è¯¯å¤„ç†åŠæ³•ï¼‰
 http://blog.csdn.net/zhu1500527791/article/details/53119579
 
-HexoÀûÓÃGithub·ÖÖ§ÔÚ²»Í¬µçÄÔÉÏĞ´²©¿Í
+Hexoåˆ©ç”¨Githubåˆ†æ”¯åœ¨ä¸åŒç”µè„‘ä¸Šå†™åšå®¢
 http://www.tuicool.com/articles/qEzEnyI
 
-Hexo²©¿ÍÅäÖÃÓÅ»¯
+Hexoåšå®¢é…ç½®ä¼˜åŒ–
 http://blog.csdn.net/heqiangflytosky/article/details/54863166
 
-(node:6264) [DEP0061] DeprecationWarning: fs.SyncWriteStream is deprecated.±¨´í
+(node:6264) [DEP0061] DeprecationWarning: fs.SyncWriteStream is deprecated.æŠ¥é”™
 http://www.abrocks.com/2017/06/17/node8.0%E6%96%B9%E6%B3%95%E5%BC%83%E7%94%A8%E5%A4%84%E7%90%86/
-½â¾ö·½°¸£º¸üĞÂhexo-fs²å¼ş
+è§£å†³æ–¹æ¡ˆï¼šæ›´æ–°hexo-fsæ’ä»¶ npm install hexo-fs --save
 npm install hexo-fs --save
 
-ËÑË÷ÒıÇæ+Ğ¡²å¼ş+ÅäÖÃ½á¹¹·ÖÎö
+æœç´¢å¼•æ“+å°æ’ä»¶+é…ç½®ç»“æ„åˆ†æ
 http://prozhuchen.com/2015/10/03/Hexo%E5%8D%9A%E5%AE%A2%E7%AC%AC%E5%9B%9B%E7%AB%99/
