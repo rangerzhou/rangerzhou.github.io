@@ -1154,3 +1154,23 @@ $ adb connect 192.168.53.8
 - hexo s 后打开 http://localhost:4000/ 出现 Cannot GET /
 
   因为 public 目录没有生成 index.html，使用 `sudo npm audit fix` 检查需要升级的插件，执行 `sudo npm install` 即可；
+
+#### 33. Git 换行符问题
+
+``` shell
+# 提交时转换为 LF，检出时转换为 CRLF（Windows 默认为 true）
+git config --global core.autocrlf true
+# 提交时转换为 LF，检出时不转换
+git config --global core.autocrlf input
+# 提交检出均不转换
+git config --global core.autocrlf false
+
+# 拒绝提交包含混合换行符的文件
+git config --global core.safecrlf true
+# 允许提交包含混合换行符的文件
+git config --global core.safecrlf false
+# 提交包含混合换行符的文件时给出警告
+git config --global core.safecrlf warn
+```
+
+如果不想 git 干涉我们的文件换行符格式，则配置 core.autocrlf 为 false；
