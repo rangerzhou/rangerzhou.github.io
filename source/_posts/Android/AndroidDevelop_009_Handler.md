@@ -13,16 +13,17 @@ password:
 
 <!--more-->
 
-# 代码路径
+代码路径
 
-| frameworks/base/core/java/android/os/Message.java      |
+| Path                                                   |
 | ------------------------------------------------------ |
+| frameworks/base/core/java/android/os/Message.java      |
 | frameworks/base/core/java/android/os/MessageQueue.java |
 | frameworks/base/core/java/android/os/Handler.java      |
 | frameworks/base/core/java/android/os/Looper.java       |
 | java/lang/ThreadLocal.java                             |
 
-# Handler 机制
+
 
 Handler 机制主要涉及如下几个类：
 
@@ -32,7 +33,7 @@ Handler 机制主要涉及如下几个类：
 - Looper：轮询消息队列，取出消息交给 Handler 处理，一个线程只有一个 Looper；
 - ThreadLocal：线程本地存储区（Thread Local Storage，简称 TLS），每个线程都有自己私有的TLS，不同线程之间彼此无法访问对方的 TLS 区域，ThreadLocal 的作用是提供线程内的局部变量 TLS；
 
-## 1. Message
+## Message
 
 ``` java
 // Message.java
@@ -100,7 +101,7 @@ Message msg = new Message();
 
 **日常使用时优先使用 `Message.obtain()` 或者 `Handler.obtainMessage()` 获取消息，可以检查是否有可以复用的 Message，避免频繁创建、销毁 Message 对象，可优化内存和性能；**
 
-## 2. MessageQuene
+## MessageQuene
 
 MessageQueue 是用来存放 Message 的地方，虽然名为消息队列，但是实际上是使用 <font color=red>**单链表**</font> 数据结构来维护消息的；
 
@@ -224,14 +225,14 @@ MessageQueue 中有一个 `Message mMessages` 属性，代表消息队列头节�
                         } else {
                             mMessages = msg.next;
                         }
-                        msg.next = null;
+                        msg.next = null; // 从消息队列中移除获取到的消息
                         if (DEBUG) Log.v(TAG, "Returning message: " + msg);
                         msg.markInUse();
-                        return msg; // 返回拿到的消息
+                        return msg; // 返回队列中下一条要执行的消息
                     }
                 } else {
                     // No more messages.
-                    nextPollTimeoutMillis = -1; // 如果没有消息需要处理，就一直阻塞
+                    nextPollTimeoutMillis = -1; // 如果没有消息需要处理，就进入休眠，直到被唤醒
                 }
 
                 // Process the quit message now that all pending messages have been handled.
@@ -249,7 +250,90 @@ MessageQueue 中有一个 `Message mMessages` 属性，代表消息队列头节�
 
 可以看到 `enqueueMessage()` 和 `next()` 函数执行时都有对 MessageQueue 加锁 `synchronized (this)`，这样就保证了插入消息和读取消息互斥；
 
-## 3. Handler
+### IdleHandler
+
+``` java
+// MessageQueue.java
+    Message next() {
+        int pendingIdleHandlerCount = -1; // -1 only during first iteration
+        int nextPollTimeoutMillis = 0; // -1: 一直阻塞，0: 不阻塞，>0: 阻塞毫秒数
+        ...
+                if (mQuitting) {
+                    dispose();
+                    return null;
+                }
+
+                if (pendingIdleHandlerCount < 0
+                        && (mMessages == null || now < mMessages.when)) {
+                    // 如果消息队列为空或者消息还没到触发时间，则当前队列为空闲状态
+                    pendingIdleHandlerCount = mIdleHandlers.size();
+                }
+                if (pendingIdleHandlerCount <= 0) {
+                    // No idle handlers to run.  Loop and wait some more.
+                    mBlocked = true;
+                    continue;
+                }
+
+                if (mPendingIdleHandlers == null) { // 如果数组为 null，创建数组
+                    mPendingIdleHandlers = new IdleHandler[Math.max(pendingIdleHandlerCount, 4)];
+                }
+                // 从 mIdleHandlers 这个列表获取 IdleHandler 元素
+                mPendingIdleHandlers = mIdleHandlers.toArray(mPendingIdleHandlers);
+            }
+            // 遍历 mPendingIdleHandlers 数组，调用每个 IdleHandler 的 queueIdle() 方法
+            for (int i = 0; i < pendingIdleHandlerCount; i++) {
+                final IdleHandler idler = mPendingIdleHandlers[i];
+                mPendingIdleHandlers[i] = null; // release the reference to the handler
+
+                boolean keep = false;
+                try {
+                    keep = idler.queueIdle();
+                } catch (Throwable t) {
+                    Log.wtf(TAG, "IdleHandler threw exception", t);
+                }
+                // 如果 queueIdle() 返回 false，则从 mIdleHandlers 列表中移除这个 IdleHandler
+                if (!keep) {
+                    synchronized (this) {
+                        mIdleHandlers.remove(idler);
+                    }
+                }
+            }
+
+            // Reset the idle handler count to 0 so we do not run them again.
+            pendingIdleHandlerCount = 0; // 重置 IdleHandler 数量为 0 以免后面重复执行
+
+            // While calling an idle handler, a new message could have been delivered
+            // so go back and look again for a pending message without waiting.
+            nextPollTimeoutMillis = 0; // 重置为 0，使之不阻塞
+        }
+    }
+```
+
+如果当前队列中没有消息要处理或者还没到消息的触发时间，则认为当前队列处于空闲状态，才会执行 IdleHandler；
+
+先从 mIdleHandlers 这个 ArrayList 列表中获取 IdleHandler 元素放入 mPendingIdleHandlers 数组，然后遍历这个数组，调用数组中每个 IdleHandler 的 `queueIdle()`方法，执行处理逻辑；
+
+如果 `queueIdle()`返回 false，则表示 `queueIdle()` 执行后移除此 IdleHandler，否则保留此 IdleHandler；
+
+全部执行完后重置 `pendingIdleHandlerCount = 0`，以免下次轮询消息队列的时候又重复执行，然后重置 `nextPollTimeoutMillis = 0`，不再阻塞队列，所以这里的代码也不能太耗时，否则就影响后面 Message 的执行了；
+
+#### IdleHandler 使用
+
+``` java
+Looper.myQueue().addIdleHandler(new IdleHandler(){
+
+    @Override
+    public boolean queueIdle()
+    {
+        // 处理逻辑
+        return false;
+    }
+});
+```
+
+
+
+## Handler
 
 ### Handler 创建
 
@@ -269,9 +353,9 @@ MessageQueue 中有一个 `Message mMessages` 属性，代表消息队列头节�
     }
 ```
 
-参数可指定 Looper、Callback 回调方法以及是否异步，之前的无参构造函数从 Android 11 开始被废弃，使用 `new Handler(Looper.myLooper())` 代替原来的无参构造方法；
+参数可指定 Looper、Callback 回调方法以及是否异步，之前的无参构造函数从 Android 11 开始被废弃，使用 `new Handler(Looper.myLooper())` 代替原来的无参构造方法，在创建 Handler 的同时也绑定了 Looper 的消息队列；
 
-### 发送消息
+### sendMessage() 发送消息
 
 发送消息的函数有如下几种：
 
@@ -286,7 +370,7 @@ MessageQueue 中有一个 `Message mMessages` 属性，代表消息队列头节�
 
 但是殊途同归，最终都是调用到 `Handler.enqueueMessage(queue, msg, uptimeMillis)`，然后再调用到 `MessageQueue.enqueueMessage(msg, uptimeMillis)`；
 
-### 分发消息
+### dispatchMessage() 分发消息
 
 ``` java
 // Handler.java
@@ -306,9 +390,25 @@ MessageQueue 中有一个 `Message mMessages` 属性，代表消息队列头节�
     }
 ```
 
+`msg.callback != null`的情况是使用 `post(runnable)` 发送消息时，把传入的 runnable 赋值给了 `Message.callback`；
+
+`mCallback != null`则是在创建 Handler 对象时传入了一个 Callback 参数；
+
 一般使用子类重写 handleMessage 这种方法用的比较多；
 
-## 4. Looper
+## Looper
+
+### Looper()
+
+``` java
+// Looper.java
+    private Looper(boolean quitAllowed) {
+        mQueue = new MessageQueue(quitAllowed);
+        mThread = Thread.currentThread();
+    }
+```
+
+Looper 创建的同时初始化了 MessageQueue；
 
 ### prepare()
 
@@ -361,7 +461,7 @@ loop() 中有一个死循环 `for(;;)`，在其中调用了 `loopOnce()`；
             final long ident, final int thresholdOverride) {
         // 从 MessageQueue 中取消息
         Message msg = me.mQueue.next(); // might block
-        if (msg == null) { // msg 为 null，说明 Looper 退出
+        if (msg == null) { // msg 为 null，则直接 return false 退出循环，说明 Looper 退出
             // No message indicates that the message queue is quitting.
             return false;
         }
@@ -391,7 +491,9 @@ loop() 中有一个死循环 `for(;;)`，在其中调用了 `loopOnce()`；
     }
 ```
 
-loop() 函数中运行了一个死循环，不断的从 MessageQueue 中读取下一条 Message，并把 Message 分发给对应的 Handler，分发后回收 Message，这样需要 Message 时就可以直接通过 Message.obtain() 或者 Handler.obtainMessage() 获取了，可以优化内存和性能；
+loop() 函数中运行了一个死循环，不断的使用 MessageQueue.next() 中读取下一条 Message，如果取出的 msg = null，则 `loopOnce()` 返回 false，这样 `loop()`就退出死循环了，从而 `ActivityThread.main()`方法也结束了，整个程序也退出了，但是我们的程序是要一直运行的，所以 `MessageQueue.next()`方法中一直有消息，但是如果程序一段时间没有操作，也就没有需要执行的消息了，为什么程序还不退出呢？这是因为当没有消息要处理的时候，`MessageQueue.next()`会一直阻塞，直到 `MessageQueue.enqueueMessage()`插入消息时使用 `nativeWake(mPtr)`唤醒；
+
+ 把 Message 分发给对应的 Handler，分发后回收 Message，这样需要 Message 时就可以直接通过 Message.obtain() 或者 Handler.obtainMessage() 获取了，可以优化内存和性能；
 
 如果 logging 不为 null，在分发消息的前后都使用 `logging.println()` 打印了log，mLogging 在 Looper 中没有初始化值，所以默认为空，在应用中可以通过 setMessageLogging() 指定输出用于调试，比如通过前后两条 log 的时间判断消息的执行时间，判断是否有卡顿；
 
@@ -402,7 +504,7 @@ loop() 函数中运行了一个死循环，不断的从 MessageQueue 中读取�
     }
 ```
 
-## 5. ThreadLocal
+## ThreadLocal
 
 ThreadLocal（Thread Local Storage，线程本地存储，简称 TLS）是一个在多线程中为每一个线程创建单独的变量副本的类；当使用 ThreadLocal 来维护变量时，ThreadLocal 会为每个线程创建单独的变量副本，每个线程的 TLS 变量之间互不影响，避免了多线程操作共享变量导致数据不一致的情况；
 
@@ -494,11 +596,207 @@ ThreadLocalMap threadLocals;
     }
 ```
 
-## 6. 同步屏障
+## 同步屏障
 
+### postSyncBarrier() 添加屏障
 
+同步屏障是在消息队列中添加一个同步屏障消息，在此屏障后只有异步消息可以执行，同步屏障的插入在 MessageQueue 中定义：
 
-## 7. 总结
+``` java
+// MessageQueue.java
+    @UnsupportedAppUsage
+    @TestApi
+    public int postSyncBarrier() {
+        return postSyncBarrier(SystemClock.uptimeMillis());
+    }
+    private int postSyncBarrier(long when) {
+        // Enqueue a new sync barrier token.
+        // We don't need to wake the queue because the purpose of a barrier is to stall it.
+        synchronized (this) {
+            final int token = mNextBarrierToken++;
+            // 生成同步屏障消息，同步屏障消息没有 target
+            final Message msg = Message.obtain();
+            msg.markInUse();
+            msg.when = when;
+            msg.arg1 = token; // 把 token 赋给 msg 的 arg1
 
+            Message prev = null;
+            Message p = mMessages;
+            // 根据时间顺序将屏障消息插入到消息链表中的适当位置
+            if (when != 0) {
+                while (p != null && p.when <= when) {
+                    prev = p;
+                    p = p.next;
+                }
+            }
+            if (prev != null) { // invariant: p == prev.next
+                // 消息队列不为空，插入同步屏障消息到消息队列中
+                msg.next = p;
+                prev.next = msg;
+            } else { // 消息队列为空，消息队列指针指向同步屏障
+                msg.next = p;
+                mMessages = msg;
+            }
+            // 返回一个 token，以便调用 removeSyncBarrier(token) 来释放同步屏障
+            return token;
+        }
+    }
+```
 
+postSyncBarrier() 作用就是插入一个特殊的同步屏障消息到消息队列中，此消息和普通消息相比没有 target，即 `target = null`，因为普通消息需要把消息分发给对应的 target，但是同步屏障消息不需要被分发，它只是用来挡住同步消息从而保证异步消息优先处理；
+
+把生成的同步屏障消息根据 when 值插入到消息队列的适当位置，最后返回一个 token，根据此 token 可以移除屏障；
+
+postSyncBarrier() 标记了注解 `@UnsupportedAppUsage`，如果应用中要调用的话需要使用反射；
+
+### removeSyncBarrier() 移除屏障
+
+``` java
+// MessageQueue.java
+    @UnsupportedAppUsage
+    @TestApi
+    public void removeSyncBarrier(int token) {
+        // Remove a sync barrier token from the queue.
+        // If the queue is no longer stalled by a barrier then wake it.
+        synchronized (this) {
+            Message prev = null;
+            Message p = mMessages;
+            // 根据 token 查找同步屏障消息
+            while (p != null && (p.target != null || p.arg1 != token)) {
+                prev = p;
+                p = p.next;
+            }
+            // 如果这里为 null，说明这个 token 对应的同步屏障消息要么还没有添加到消息队列中；要么已经被移除掉了，抛出异常
+            if (p == null) {
+                throw new IllegalStateException("The specified message queue synchronization "
+                        + " barrier token has not been posted or has already been removed.");
+            }
+            final boolean needWake;
+            if (prev != null) { // 从消息队列中移除同步屏障消息；当前消息循环已经在运行中，不需要再次唤醒
+                prev.next = p.next;
+                needWake = false;
+            } else { // 同步屏障消息位于消息队列第一个，从消息队列中移除同步屏障
+                mMessages = p.next;
+                // 当前消息循环为阻塞状态，如果下一个消息为null，或者下一个消息的 target 不为 null，则唤醒消息循环
+                needWake = mMessages == null || mMessages.target != null;
+            }
+            p.recycleUnchecked(); // 回收 Message 消息，循环利用
+
+            // If the loop is quitting then it is already awake.
+            // We can assume mPtr != 0 when mQuitting is false.
+            if (needWake && !mQuitting) {
+                nativeWake(mPtr);
+            }
+        }
+    }
+```
+
+removeSyncBarrier 就是从消息队列中找到同步屏障消息并移除；
+
+在 MessageQueue.next() 中拿到消息后，会先判断此消息是否同步屏障消息，如果是，则从消息队列中跳过同步消息，找出异步消息进行处理，知道移除同步屏障后同步消息才会被处理；
+
+## runWithScissors()
+
+`runWithScissors()`作用是同步运行指定的任务；
+
+``` java
+// Handler.java
+    public final boolean runWithScissors(@NonNull Runnable r, long timeout) {
+        if (r == null) {
+            throw new IllegalArgumentException("runnable must not be null");
+        }
+        if (timeout < 0) {
+            throw new IllegalArgumentException("timeout must be non-negative");
+        }
+
+        if (Looper.myLooper() == mLooper) { // Looper.myLooper 是当前线程 looper
+            r.run();
+            return true;
+        }
+
+        BlockingRunnable br = new BlockingRunnable(r);
+        return br.postAndWait(this, timeout);
+    }
+```
+
+如果当前线程与 Handler 所在线程相同，则 runnable 立即运行。否则把 runnable 包装成 BlockingRunnable，再调用其 `postAndWait()`；
+
+``` java
+// Handler.java
+    private static final class BlockingRunnable implements Runnable {
+        private final Runnable mTask;
+        private boolean mDone;
+
+        public BlockingRunnable(Runnable task) {
+            mTask = task; // 把要运行的任务传递给 BlockingRunnable 的 mTask，等待后续被调用
+        }
+
+        @Override
+        public void run() {
+            try {
+                mTask.run();
+            } finally {
+                synchronized (this) {
+                    mDone = true;
+                    notifyAll();
+                }
+            }
+        }
+
+        public boolean postAndWait(Handler handler, long timeout) {
+            // 把封装了 runnable 的 BlockingRunnable 通过 Handler.post() 加入到消息队列
+            if (!handler.post(this)) {
+                return false; // 如果 post 失败，表明 Looper 出问题了，返回 false
+            }
+
+            synchronized (this) {
+                if (timeout > 0) {
+                    final long expirationTime = SystemClock.uptimeMillis() + timeout;
+                    while (!mDone) {
+                        long delay = expirationTime - SystemClock.uptimeMillis();
+                        if (delay <= 0) {
+                            return false; // timeout 超时了，任务执行失败
+                        }
+                        try {
+                            wait(delay); // 进入阻塞
+                        } catch (InterruptedException ex) {
+                        }
+                    }
+                } else {
+                    while (!mDone) {
+                        try {
+                            wait();
+                        } catch (InterruptedException ex) {
+                        }
+                    }
+                }
+            }
+            return true;
+        }
+    }
+```
+
+在 `postAndWait()`中首先通过 `Handler.post()` 把封装一层 runnable 的 BlockingRunnable 加入到消息队列，如果 post 失败，则说明 Looper 出问题了，返回 false；
+
+随后如果 `timeout > 0`，则阻塞等待，如果超时被唤醒，则返回 false；
+
+再看 `BlockingRunnable.run()`方法，当任务加入到消息队列成功，`BlockingRunnable.run()` 被 Handler 调度并在其线程执行，在其中调用 `mTask.run()`，即我们需要执行的 Runnable 任务，执行结束后配置 `mDone = true`并通过 `notifyAll()`唤醒 `postAndWait()` 中的阻塞等待，任务发起线程被唤醒后判断 mDone，如果为 true 则在结尾处返回 true 退出；
+
+### 可能存在的问题
+
+当 timeout 超时时是直接返回 false 退出的，需要执行的 Runnable 任务还在目标线程的 MessageQueue 中，没有被移除掉，最终还是会被 Handler 线程调度执行，但是此时的执行已经不符合业务预期了；
+
+而更严重的是使用 runWithScissors() 可能造成调用线程进入阻塞，而得不到唤醒，因为如果线程 Looper() 通过 `quit()`退出时，会清理掉还未执行的任务，那么此时发送线程就永远得不到唤醒了，所以要求 Handler 所在线程 Looper 不会退出，或者使用 `quitSafely()`方式退出，因为 `quitSafely()`只会清理掉当前时间点之后的任务；
+
+如果当前持有别的锁，还会造成死锁；
+
+## 总结
+
+Handler 使用的整体流程：
+
+- 子线程通过 `Handler.sendMessage(Message)`调用 `MessageQueue.enqueueMessage()` 把消息插入到主线程 Looper 的 MessageQueue 中；
+- 然后主线程 Looper 通过 `loop()`中的死循环不断的从 MessageQueue 中通过 `MessageQueue.next()`取出消息
+- 通过 `Handler.dispatchMessage()` 分发消息，再调用 `Handler.handleMessage()` 处理消息，最后回收 Message；
+
+Handler 不仅仅能用于子线程向主线程发送消息，也能用于主线程向子线程、子线程向子线程发送消息，如果需要在子线程处理消息，就要先 `Looper.prepare()`，然后 `Looper.loop()` 才可以，之所以主线程不需要是因为在 APP 启动的时候，在 `ActivityThread.main()` 中已经做了这些工作；
 
