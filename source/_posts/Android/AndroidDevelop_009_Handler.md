@@ -5,6 +5,7 @@ tags:
 categories: Android
 copyright: true
 password:
+
 ---
 
 
@@ -800,3 +801,36 @@ Handler 使用的整体流程：
 
 Handler 不仅仅能用于子线程向主线程发送消息，也能用于主线程向子线程、子线程向子线程发送消息，如果需要在子线程处理消息，就要先 `Looper.prepare()`，然后 `Looper.loop()` 才可以，之所以主线程不需要是因为在 APP 启动的时候，在 `ActivityThread.main()` 中已经做了这些工作；
 
+## 常见问题
+
+### 子线程真的不能更新 UI 吗？
+
+任何线程都可以更新 UI，但是要满足如下 2 个条件之一：
+
+- 在 ViewRootImpl 还没创建出来之前：此时 UI 更新的操作没有线程限制，因为 checkThread 方法不会执行；
+- 如果 ViewRootImpl 已经创建：
+  - 保证**创建 ViewRootImpl** 和 **UI 更新的操作**在**同一个线程**即可，也就是说要在同一个线程调用 `ViewManager#addView` 和 `ViewManager#updateViewLayout` 方法（ViewManager 是一个接口，WindowManger 接口继承了这个接口，通常都是同过 WindowManager(具体实现为 WindowManagerImpl) 进行 View 的 add/remove/update 操作）；
+  - 对应的线程需要 Looper.prepare() 创建 Looper 并且调用 `Looper.loop()` 方法开启消息循环；
+
+### 如何在主线程中访问网络？
+
+Android 4.0 之后为防止 ANR 主线程不再允许访问网络，否则抛出 NetworkOnMainThreadException 异常，解决办法：
+
+``` java
+StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitNetwork().build();
+StrictMode.setThreadPolicy(policy);
+```
+
+把严苛模式的网络检测关闭即可，但是最好不要这么做；
+
+### 主线程 Looper.loop() 死循环为什么不会导致 ANR？
+
+主线程负责 UI 更新，必须循环处理消息，否则应用就退出了；
+
+主线程如果没有消息需要处理，会在 MessageQueue.next()#nativePollonce 中休眠，只有收到消息才会被唤醒然后处理，所以也不会占用太多系统资源；
+
+ANR 是对主线程循环处理消息过程的监控机制，目的是避免某个消息处理时间太长导致阻塞其他消息的处理，而 `loop()` 死循环是主线程消息处理机制的组成环节，没有消息要处理时是休眠状态，并不是消息处理超时；
+
+
+
+https://www.bilibili.com/read/cv8323046/
