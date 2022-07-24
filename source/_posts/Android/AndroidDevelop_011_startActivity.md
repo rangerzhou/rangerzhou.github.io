@@ -1142,7 +1142,7 @@ fork 成功后 zygote 进程通过 socket 返回数据；
     }
 // ActivityThread.java
     final ApplicationThread mAppThread = new ApplicationThread();
-	private void attach(boolean system, long startSeq) {
+    private void attach(boolean system, long startSeq) {
             RuntimeInit.setApplicationObject(mAppThread.asBinder());
             final IActivityManager mgr = ActivityManager.getService();
             try {
