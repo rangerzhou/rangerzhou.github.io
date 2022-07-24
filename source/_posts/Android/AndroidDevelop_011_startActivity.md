@@ -479,7 +479,7 @@ mH 是 H 类，调用 ActivityThread.handleMessage() 处理；
         ...
         // 该方法中通过遍历 transaction#callbacks 获取到 LaunchActivityItem，然后调用 onCreate 方法
         executeCallbacks(transaction);
-		// 将请求的事务转为最终的生命周期
+        // 将请求的事务转为最终的生命周期
         executeLifecycleState(transaction);
         mPendingActions.clear();
         if (DEBUG_RESOLVER) Slog.d(TAG, tId(transaction) + "End resolving transaction");
@@ -495,6 +495,7 @@ mH 是 H 类，调用 ActivityThread.handleMessage() 处理；
         ...      
         final int size = callbacks.size();
         for (int i = 0; i < size; ++i) { // 遍历 ClientTransactionItem
+            final ClientTransactionItem item = callbacks.get(i);
             // 执行具体动作
             item.execute(mTransactionHandler, token, mPendingActions);
             item.postExecute(mTransactionHandler, token, mPendingActions);
@@ -526,20 +527,7 @@ mH 是 H 类，调用 ActivityThread.handleMessage() 处理；
     }
 ```
 
-也是调用到 lifecycleItem.execute()
-
-``` java
-// LaunchActivityItem.java
-    public void execute(ClientTransactionHandler client, IBinder token,
-            PendingTransactionActions pendingActions) {
-        Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "activityStart");
-        ActivityClientRecord r = client.getLaunchingActivity(token);
-        client.handleLaunchActivity(r, pendingActions, null /* customIntent */);
-        Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
-    }
-```
-
-回到 ActivityThread.handleLaunchActivity()
+先来看一下 `cycleToPath()`：
 
 ``` java
 // TransactionExecutor.java
@@ -567,7 +555,20 @@ mH 是 H 类，调用 ActivityThread.handleMessage() 处理；
                     break;
 ```
 
-回到 ActivityThread.handleLaunchActivity()
+调用到 `ClientTransactionHandler.handleLaunchActivity()`，继续看 `cycleToPath()`后面的代码 `lifecycleItem.execute()`：
+
+``` java
+// LaunchActivityItem.java
+    public void execute(ClientTransactionHandler client, IBinder token,
+            PendingTransactionActions pendingActions) {
+        Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "activityStart");
+        ActivityClientRecord r = client.getLaunchingActivity(token);
+        client.handleLaunchActivity(r, pendingActions, null /* customIntent */);
+        Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
+    }
+```
+
+也是调用到 `ClientTransactionHandler.handleLaunchActivity()`（<font color=red>**没明白为什么要和 cycleToPath() 重复调用**</font>），ActivityClientRecord 是 ActivityThread 的内部类，ActivityThread 继承了 ClientTransactionHandler，实现了抽象方法 `getLaunchingActivity()`，回到 ActivityThread.handleLaunchActivity()；
 
 ### 4.6 handleLaunchActivity()
 
