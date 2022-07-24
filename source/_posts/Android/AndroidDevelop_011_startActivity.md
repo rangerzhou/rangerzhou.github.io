@@ -112,7 +112,7 @@ public ActivityResult execStartActivity(
 
 ``` java
 // ActivityTaskManager.java
-	public static IActivityTaskManager getService() {
+    public static IActivityTaskManager getService() {
         return IActivityTaskManagerSingleton.get();
     }
 
@@ -197,7 +197,7 @@ int execute() {
 
 ``` java
 // ActivityStarter.java
-	private int executeRequest(Request request) {
+    private int executeRequest(Request request) {
         ...
         final ActivityRecord r = new ActivityRecord.Builder(mService)
                 ...      
@@ -213,7 +213,7 @@ int execute() {
 
 ``` java
 // ActiviyStarter.java
-	private int startActivityUnchecked(final ActivityRecord r, ActivityRecord sourceRecord,
+    private int startActivityUnchecked(final ActivityRecord r, ActivityRecord sourceRecord,
             IVoiceInteractionSession voiceSession, IVoiceInteractor voiceInteractor,
             int startFlags, boolean doResume, ActivityOptions options, Task inTask,
             TaskFragment inTaskFragment, boolean restrictedBgActivity,
@@ -231,7 +231,7 @@ int execute() {
 
 ``` java
 // ActivityStarter.java
-	int startActivityInner(final ActivityRecord r, ActivityRecord sourceRecord,
+    int startActivityInner(final ActivityRecord r, ActivityRecord sourceRecord,
             IVoiceInteractionSession voiceSession, IVoiceInteractor voiceInteractor,
             int startFlags, boolean doResume, ActivityOptions options, Task inTask,
             TaskFragment inTaskFragment, boolean restrictedBgActivity,
@@ -256,7 +256,7 @@ resumeFocusedTasksTopActivities()：将所有聚焦的 Task 的所有 Activity �
 
 ``` java
 // RootWindowContainer.java
-	boolean resumeFocusedTasksTopActivities(
+    boolean resumeFocusedTasksTopActivities(
             Task targetRootTask, ActivityRecord target, ActivityOptions targetOptions,
             boolean deferPause) {
         ...
@@ -273,7 +273,7 @@ resumeFocusedTasksTopActivities()：将所有聚焦的 Task 的所有 Activity �
 
 ``` java
 // Task.java
-	boolean resumeTopActivityUncheckedLocked(ActivityRecord prev, ActivityOptions options) {
+    boolean resumeTopActivityUncheckedLocked(ActivityRecord prev, ActivityOptions options) {
         return resumeTopActivityUncheckedLocked(prev, options, false /* skipPause */);
     }
     boolean resumeTopActivityUncheckedLocked(ActivityRecord prev, ActivityOptions options,
@@ -297,7 +297,7 @@ resumeFocusedTasksTopActivities()：将所有聚焦的 Task 的所有 Activity �
 
 ``` java
 // Task.java
-	private boolean resumeTopActivityInnerLocked(ActivityRecord prev, ActivityOptions options,
+    private boolean resumeTopActivityInnerLocked(ActivityRecord prev, ActivityOptions options,
             boolean deferPause) {
         ...
         final boolean[] resumed = new boolean[1];
@@ -311,7 +311,7 @@ resumeFocusedTasksTopActivities()：将所有聚焦的 Task 的所有 Activity �
 
 ``` java
 // TaskFragment.java    
-	final boolean resumeTopActivity(ActivityRecord prev, ActivityOptions options,
+    final boolean resumeTopActivity(ActivityRecord prev, ActivityOptions options,
             boolean deferPause) {
         ...
         // 将发起者置为 pause 状态，也就是 mainactivity 置为 onPause 状态
@@ -353,7 +353,7 @@ resumeFocusedTasksTopActivities()：将所有聚焦的 Task 的所有 Activity �
 
 ``` java
 // ActivityTaskSupervisor.java
-	boolean realStartActivityLocked(ActivityRecord r, WindowProcessController proc,
+    boolean realStartActivityLocked(ActivityRecord r, WindowProcessController proc,
             boolean andResume, boolean checkConfig) throws RemoteException {
         ...
                 // 创建 Activity 启动事务
@@ -416,7 +416,7 @@ ActivityThread 继承 ClientTransactionHandler，最后对应的实现在 Client
 
 ``` java
 // ClientTransactionHandler.java
-	void scheduleTransaction(ClientTransaction transaction) {
+    void scheduleTransaction(ClientTransaction transaction) {
         transaction.preExecute(this);
         sendMessage(ActivityThread.H.EXECUTE_TRANSACTION, transaction);
     }
@@ -472,7 +472,7 @@ mH 是 H 类，调用 ActivityThread.handleMessage() 处理；
 
 ``` java
 // TransactionExecutor.java
-	public void execute(ClientTransaction transaction) {
+    public void execute(ClientTransaction transaction) {
         if (DEBUG_RESOLVER) Slog.d(TAG, tId(transaction) + "Start resolving transaction");
 
         final IBinder token = transaction.getActivityToken();
@@ -490,7 +490,7 @@ mH 是 H 类，调用 ActivityThread.handleMessage() 处理；
 
 ``` java
 // TransactionExecutor.java
-	public void executeCallbacks(ClientTransaction transaction) {
+    public void executeCallbacks(ClientTransaction transaction) {
         final List<ClientTransactionItem> callbacks = transaction.getCallbacks();
         ...      
         final int size = callbacks.size();
@@ -509,7 +509,7 @@ mH 是 H 类，调用 ActivityThread.handleMessage() 处理；
 
 ``` java
 // TransactionExecutor.java
-	private void executeLifecycleState(ClientTransaction transaction) {
+    private void executeLifecycleState(ClientTransaction transaction) {
         final ActivityLifecycleItem lifecycleItem = transaction.getLifecycleStateRequest();
         ...
         final IBinder token = transaction.getActivityToken();
@@ -543,7 +543,7 @@ mH 是 H 类，调用 ActivityThread.handleMessage() 处理；
 
 ``` java
 // TransactionExecutor.java
-	private void cycleToPath(ActivityClientRecord r, int finish, boolean excludeLastState,
+    private void cycleToPath(ActivityClientRecord r, int finish, boolean excludeLastState,
             ClientTransaction transaction) {
         final int start = r.getLifecycleState();
         // 计算活动的主要生命周期状态的路径，并使用从初始状态之后的状态开始的值填充
@@ -645,7 +645,7 @@ performLaunchActivity() 主要是负责创建 activity，最终是通过反射�
 
 ``` java
 // ActivityTaskManagerService.java
-	void startProcessAsync(ActivityRecord activity, boolean knownToBeDead, boolean isTop,
+    void startProcessAsync(ActivityRecord activity, boolean knownToBeDead, boolean isTop,
             String hostingType) {
         try {
             if (Trace.isTagEnabled(TRACE_TAG_WINDOW_MANAGER)) {
@@ -678,7 +678,7 @@ public abstract class ActivityManagerInternal {
 
 ``` java
 // ActivityManagerService.java
-	public final class LocalService extends ActivityManagerInternal
+    public final class LocalService extends ActivityManagerInternal
             implements ActivityManagerLocal {
         ...
         public void startProcess(String processName, ApplicationInfo info, boolean knownToBeDead,
@@ -698,7 +698,7 @@ public abstract class ActivityManagerInternal {
 
 ``` java
 // ActivityManagerService.java Line: 2702
-	final ProcessRecord startProcessLocked(String processName,
+    final ProcessRecord startProcessLocked(String processName,
             ApplicationInfo info, boolean knownToBeDead, int intentFlags,
             HostingRecord hostingRecord, int zygotePolicyFlags, boolean allowWhileBooting,
             boolean isolated) {
@@ -713,7 +713,7 @@ public abstract class ActivityManagerInternal {
 
 ``` java
 // ProcessList.java Line: 2462
-	ProcessRecord startProcessLocked(String processName, ApplicationInfo info,
+    ProcessRecord startProcessLocked(String processName, ApplicationInfo info,
             boolean knownToBeDead, int intentFlags, HostingRecord hostingRecord,
             int zygotePolicyFlags, boolean allowWhileBooting, boolean isolated, int isolatedUid,
             String abiOverride, String entryPoint, String[] entryPointArgs, Runnable crashHandler) {
@@ -764,7 +764,7 @@ public abstract class ActivityManagerInternal {
 
 ``` java
 // ProcessList.java Line: 2318
-	private Process.ProcessStartResult startProcess(HostingRecord hostingRecord, String entryPoint,
+    private Process.ProcessStartResult startProcess(HostingRecord hostingRecord, String entryPoint,
             ProcessRecord app, int uid, int[] gids, int runtimeFlags, int zygotePolicyFlags,
             int mountExternal, String seInfo, String requiredAbi, String instructionSet,
             String invokeWith, long startTime) {
@@ -807,7 +807,7 @@ public abstract class ActivityManagerInternal {
 
 ``` java
 // ZygoteProcess.java
-	public final Process.ProcessStartResult start(...) {
+    public final Process.ProcessStartResult start(...) {
         ...
             return startViaZygote(processClass, niceName, uid, gid, gids,
                     runtimeFlags, mountExternal, targetSdkVersion, seInfo,
@@ -848,7 +848,7 @@ openZygoteSocketIfNeeded() 是根据当前的 abi 来选择与 zygote 还是 zyg
 
 ``` java
 // ZygoteProcess.java
-	private Process.ProcessStartResult zygoteSendArgsAndGetResult(
+    private Process.ProcessStartResult zygoteSendArgsAndGetResult(
             ZygoteState zygoteState, int zygotePolicyFlags, @NonNull ArrayList<String> args)
             throws ZygoteStartFailedEx {
         ...
@@ -862,7 +862,7 @@ ZygoteState 是用于与 Zygote 通信的状态，
 
 ``` java
 // ZygoteProcess.java 这是一个阻塞函数
-	private Process.ProcessStartResult attemptZygoteSendArgsAndGetResult(
+    private Process.ProcessStartResult attemptZygoteSendArgsAndGetResult(
             ZygoteState zygoteState, String msgStr) throws ZygoteStartFailedEx {
         try {
             final BufferedWriter zygoteWriter = zygoteState.mZygoteOutputWriter;
@@ -1067,7 +1067,7 @@ fork 成功后 zygote 进程通过 socket 返回数据；
 
 ``` java
 // ZygoteConnection.java
-	private Runnable handleChildProc(ZygoteArguments parsedArgs,
+    private Runnable handleChildProc(ZygoteArguments parsedArgs,
             FileDescriptor pipeFd, boolean isZygote) {
         closeSocket(); // 关闭 zygote 的 socket 两端的连接
         Zygote.setAppProcessName(parsedArgs, TAG); // 设置进程名
@@ -1283,7 +1283,7 @@ thread 是 app 进程传过来的 binder 对象，所以会调用 ActivityThread
 
 ``` java
 // RootWindowContainer.java
-	boolean attachApplication(WindowProcessController app) throws RemoteException {
+    boolean attachApplication(WindowProcessController app) throws RemoteException {
         boolean didSomething = false;
         ...
                 final PooledFunction c = PooledLambda.obtainFunction(
@@ -1297,7 +1297,8 @@ thread 是 app 进程传过来的 binder 对象，所以会调用 ActivityThread
 
 ``` java
 // RootWindowContainer.java
-	private boolean startActivityForAttachedApplicationIfNeeded(ActivityRecord r,
+    ActivityTaskSupervisor mTaskSupervisor;
+    private boolean startActivityForAttachedApplicationIfNeeded(ActivityRecord r,
             WindowProcessController app, ActivityRecord top) {
         ...
             if (mTaskSupervisor.realStartActivityLocked(r, app,
