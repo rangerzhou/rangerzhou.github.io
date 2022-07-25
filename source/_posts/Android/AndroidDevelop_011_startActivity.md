@@ -359,8 +359,8 @@ resumeFocusedTasksTopActivities()：将所有聚焦的 Task 的所有 Activity �
                 // 创建 Activity 启动事务
                 final ClientTransaction clientTransaction = ClientTransaction.obtain(
                         proc.getThread(), r.appToken);
-                ...
-                clientTransaction.addCallback(...); // 这里会给客户端用于创建 activity
+                // 这里会给客户端用于创建 activity
+                clientTransaction.addCallback(LaunchActivityItem.obtain(new Intent(r.intent),...); 
                 // Set desired final state.
                 final ActivityLifecycleItem lifecycleItem; // 设置所需的最终状态
                 if (andResume) { // 这里创建的是 ResumeActivityItem
@@ -377,6 +377,12 @@ resumeFocusedTasksTopActivities()：将所有聚焦的 Task 的所有 Activity �
         return true;
     }
 ```
+
+CLientTransaction 类是一种容器，用于保存可发送给客户端的消息序列，包括一个回调列表和一个最终生命周期状态；
+
+消息分为 5 种，包括 LaunchActivityItem / ResumeActivityItem / PauseActivityItem / StopActivityItem / DestroyActivityItem；
+
+上述代码主要就是添加 LaunchActivityItem 到回调列表中以及通过 `setLifecycleStateRequest()` 设置最终的生命周期状态，最后调用 `ClientTransaction.schedule()`；
 
 ### 4.2 CLM.scheduleTransaction()
 
@@ -401,7 +407,7 @@ resumeFocusedTasksTopActivities()：将所有聚焦的 Task 的所有 Activity �
     }
 ```
 
-mCLient 是 IApplicationThread 对象，IApplicationThread 是一个 AIDL 接口，ApplicationThread 继承 IApplicationThread.Stub，所以会调用到服务端 ApplicationThread 的 scheduleTransaction() 中，此时我们是在 system_server 进程，所以对应的服务端就是 app 进程， 实现在 ActivityThread.ApplicationThread 中：
+mCLient 是 IApplicationThread 对象，IApplicationThread 是一个 AIDL 接口，ApplicationThread 是ActivityThread 的内部类，继承 IApplicationThread.Stub，所以会调用到服务端 ApplicationThread 的 scheduleTransaction() 中，此时我们是在 system_server 进程，所以对应的服务端就是 app 进程， 实现在 ActivityThread.ApplicationThread 中：
 
 ### 4.4 APP Binder 线程向主线程发送 EXECUTE_TRANSACTION[Handler]
 
@@ -423,7 +429,7 @@ ActivityThread 继承 ClientTransactionHandler，最后对应的实现在 Client
     abstract void sendMessage(int what, Object obj);
 ```
 
-通过 handler 发送 EXECUTE_TRANSACTION 消息
+通过 handler 发送 EXECUTE_TRANSACTION 消息给 ActivityThread；
 
 ``` java
 // ActivityThread.java
@@ -486,7 +492,9 @@ mH 是 H 类，调用 ActivityThread.handleMessage() 处理；
     }
 ```
 
-**executeCallbacks**
+TransactionExecutor 类的功能就是以正确顺序管理事务执行，即前面 **[4.1 小节]**添加的消息在这个类里会按照一定的顺序去执行；
+
+#### 4.5.1 executeCallbacks()
 
 ``` java
 // TransactionExecutor.java
@@ -504,13 +512,27 @@ mH 是 H 类，调用 ActivityThread.handleMessage() 处理；
     }
 ```
 
-在服务端提交事务的时候，通过 `clientTransaction.addCallback`方式将 LaunchActivityItem 添加到 mActivityCallbacks 里面，所以通过遍历  transaction#callbacks 获取到 LaunchActivityItem，然后调用 execute 方法。
+在服务端提交事务的时候，通过 `clientTransaction.addCallback`方式将 LaunchActivityItem 添加到 mActivityCallbacks 里面，所以通过遍历  transaction#callbacks 获取到 LaunchActivityItem，然后调用 execute 方法：
 
-**executeLifecycleState**
+``` java
+// LaunchActivityItem.java
+    public void execute(ClientTransactionHandler client, IBinder token,
+            PendingTransactionActions pendingActions) {
+        Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "activityStart");
+        ActivityClientRecord r = client.getLaunchingActivity(token);
+        client.handleLaunchActivity(r, pendingActions, null /* customIntent */);
+        Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
+    }
+```
+
+调用到 `ClientTransactionHandler.handleLaunchActivity()`，ActivityClientRecord 是 ActivityThread 的内部类，ActivityThread 继承了 ClientTransactionHandler，实现了抽象方法 `getLaunchingActivity()`和`handleLaunchActivity()`，进入到 ActivityThread；
+
+#### 4.5.2 executeLifecycleState()
 
 ``` java
 // TransactionExecutor.java
     private void executeLifecycleState(ClientTransaction transaction) {
+        // 获取事务的最终生命周期状态
         final ActivityLifecycleItem lifecycleItem = transaction.getLifecycleStateRequest();
         ...
         final IBinder token = transaction.getActivityToken();
@@ -527,7 +549,7 @@ mH 是 H 类，调用 ActivityThread.handleMessage() 处理；
     }
 ```
 
-先来看一下 `cycleToPath()`：
+这里通过 `getLifecycleStateRequest()` 获取事务的最终生命周期状态，即在 **[4.1 小节]**中通过 `setLifecycleStateRequest()` 添加的 ResumeActivityItem，所以此处的 lifecycleItem 就是 ResumeActivityItem，先来看一下 `cycleToPath()`：
 
 ``` java
 // TransactionExecutor.java
@@ -547,28 +569,33 @@ mH 是 H 类，调用 ActivityThread.handleMessage() 处理；
 // TransactionExecutor.java
     private void performLifecycleSequence(ActivityClientRecord r, IntArray path,
             ClientTransaction transaction) {
-        ...
+        final int size = path.size();
+        for (int i = 0, state; i < size; i++) {
+            state = path.get(i);
             switch (state) {
-                case ON_CREATE:
-                    mTransactionHandler.handleLaunchActivity(r, mPendingActions,
-                            null /* customIntent */);
+                case ON_CREATE: mTransactionHandler.handleLaunchActivity(...);
                     break;
+                case ON_START: mTransactionHandler.handleStartActivity(...);
+                case ON_RESUME: mTransactionHandler.handleResumeActivity(...);
+                case ON_PAUSE: mTransactionHandler.handlePauseActivity(...);
+                case ON_STOP: mTransactionHandler.handleStopActivity(...);
+                case ON_DESTROY: mTransactionHandler.handleDestroyActivity(...);
+                case ON_RESTART: mTransactionHandler.performRestartActivity(...);
 ```
 
-调用到 `ClientTransactionHandler.handleLaunchActivity()`，继续看 `cycleToPath()`后面的代码 `lifecycleItem.execute()`：
+按照状态执行对应的操作，然后继续看 `cycleToPath()`后面的代码 `lifecycleItem.execute()`，即 `ResumeActivityItem.execute()`：
 
 ``` java
-// LaunchActivityItem.java
-    public void execute(ClientTransactionHandler client, IBinder token,
+// ResumeActivityItem.java
+    public void execute(ClientTransactionHandler client, ActivityClientRecord r,
             PendingTransactionActions pendingActions) {
-        Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "activityStart");
-        ActivityClientRecord r = client.getLaunchingActivity(token);
-        client.handleLaunchActivity(r, pendingActions, null /* customIntent */);
+        Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "activityResume");
+        client.handleResumeActivity(r, true /* finalStateRequest */, mIsForward, "RESUME_ACTIVITY");
         Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
     }
 ```
 
-也是调用到 `ClientTransactionHandler.handleLaunchActivity()`（<font color=red>**没明白为什么要和 cycleToPath() 重复调用**</font>），ActivityClientRecord 是 ActivityThread 的内部类，ActivityThread 继承了 ClientTransactionHandler，实现了抽象方法 `getLaunchingActivity()`，回到 ActivityThread.handleLaunchActivity()；
+和 `LaunchActivityItem.execute()` 一样，调用到 `ActivityThread.handleResumeActivity()`；
 
 ### 4.6 handleLaunchActivity()
 
@@ -636,9 +663,9 @@ performLaunchActivity() 主要是负责创建 activity，最终是通过反射�
         ...
 ```
 
-最终调用到 Activity.onCreate() 方法，开始执行 APP 的代码，app 进程已启动的情况流程完结，startActivity() 成功，接下来看 app 进程未启动的情况。
+最终调用到 Activity.onCreate() 方法，开始执行 APP 的代码，app 进程已启动的情况流程完结，startActivity() 成功；
 
-
+`handleResumeActivity()` 的流程也和上面一样，`handleResumeActivity() -> performResumeActivity() -> Activity.performResume() -> Instrumentation.callActivityOnResume() -> Activity.onResume()`，不再展开，接下来看 app 进程未启动的情况。
 
 ## 5. App 进程不存在，请求 Zygote 创建新进程(Socket)
 
