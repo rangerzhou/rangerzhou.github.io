@@ -612,15 +612,21 @@ TransactionExecutor 类的功能就是以正确顺序管理事务执行，即前
 ``` java
 // ActivityThread.java
     private Activity performLaunchActivity(ActivityClientRecord r, Intent customIntent) {
+        // Activity 中的 getContext 函数返回的就是这个 ContextImpl 对象
+        ContextImpl appContext = createBaseContextForActivity(r);
+        Activity activity = null;
+        try {
             java.lang.ClassLoader cl = appContext.getClassLoader();
             activity = mInstrumentation.newActivity(
-                    cl, component.getClassName(), r.intent);
+                    cl, component.getClassName(), r.intent); // 根据类名使用反射机制获取 Activity
+            ......
                 r.activity = activity;
-                if (r.isPersistable()) {
+                if (r.isPersistable()) { // 调用 Activity 的 onCreate()
                     mInstrumentation.callActivityOnCreate(activity, r.state, r.persistentState);
                 } else {
                     mInstrumentation.callActivityOnCreate(activity, r.state);
                 }
+// newActivity()
     public Activity newActivity(ClassLoader cl, String className,
             Intent intent)
             throws InstantiationException, IllegalAccessException,
@@ -637,7 +643,7 @@ TransactionExecutor 类的功能就是以正确顺序管理事务执行，即前
     }
 ```
 
-performLaunchActivity() 主要是负责创建 activity，最终是通过反射机制创建 activity 的。
+performLaunchActivity() 的作用就是在 `Instrumentation.newActivity()` 函数中根据 Activity 的类名通过通过反射机制创建对应的 Activity，然后调用 Activity 的 onCreate() 函数；
 
 ### 4.8 callActivityOnCreate -> performCreate -> onCreate
 
