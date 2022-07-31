@@ -545,6 +545,9 @@ static long binder_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 		ret = -EINVAL;
 		goto err;
 	}
+err:
+    if (thread)
+        thread->looper_need_return = false; // 注意此处又把 looper_need_return 设置为了 true
 	...
 }
 ```
@@ -552,7 +555,79 @@ static long binder_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 - __user：`__user` 是一个宏，它告诉编译器不应该解除这个指针的引用（因为在当前地址空间中它是没有意义的），`(void __user *)arg` 表示 `arg` 是一个用户空间地址，不能直接进行拷贝，必须使用 `copy_from_user/copy_to_user` 等函数拷贝；
 - wait_event_interruptible：也是一个宏，它是用来挂起进程直到满足判断条件的，`binder_stop_on_user_error` 是一个全局变量，它的初始值为 0，`binder_user_error_wait` 是一个等待队列，在正常情况下，`binder_stop_on_user_error < 2` 这个条件是成立的，所以不会进入挂起状态，而当`binder` 因为错误而停止后，调用 `binder_ioctl`，则会挂起进程，直到其他进程通过 `wake_up_interruptible` 来唤醒 `binder_user_error_wait` 队列，并且满足 `binder_stop_on_user_error < 2` 这个条件，`binder_ioctl` 才会继续往后运行；
 
-BINDER_WRITE_READ 这个 case 比较重要，因为应用层使用时是通过 binder_ioctl(BINDER_WRITE_READ) 这样子调用，然后就调用到了 binder_ioctl 的 BINDER_WRITE_READ 这个 case；
+`接着来看一下 binder_get_thread()`；
+
+#### binder_get_thread()
+
+``` c
+// binder.c
+static struct binder_thread *binder_get_thread(struct binder_proc *proc)
+{
+    struct binder_thread *thread;
+    struct binder_thread *new_thread;
+    binder_inner_proc_lock(proc);
+    thread = binder_get_thread_ilocked(proc, NULL);
+    binder_inner_proc_unlock(proc);
+    if (!thread) {
+        new_thread = kzalloc(sizeof(*thread), GFP_KERNEL);
+        if (new_thread == NULL)
+            return NULL;
+        binder_inner_proc_lock(proc);
+        thread = binder_get_thread_ilocked(proc, new_thread);
+        binder_inner_proc_unlock(proc);
+        if (thread != new_thread)
+            kfree(new_thread);
+    }
+    return thread;
+}
+```
+
+先调用 `binder_get_thread_ilocked()` 获取线程，如果获取不到，则通过 `kzalloc()` 分配内存并把所分配内存对象的引用传递给 new_thread，然后再次通过`binder_get_thread_ilocked(proc, new_thread)`来获取 thread，
+
+``` c
+// binder.c
+static struct binder_thread *binder_get_thread_ilocked(
+        struct binder_proc *proc, struct binder_thread *new_thread)
+{
+    struct binder_thread *thread = NULL;
+    struct rb_node *parent = NULL;
+    struct rb_node **p = &proc->threads.rb_node;
+    while (*p) {
+        parent = *p;
+        thread = rb_entry(parent, struct binder_thread, rb_node);
+        if (current->pid < thread->pid)
+            p = &(*p)->rb_left;
+        else if (current->pid > thread->pid)
+            p = &(*p)->rb_right;
+        else
+            return thread;
+    }
+    if (!new_thread)
+        return NULL;
+    thread = new_thread;
+    binder_stats_created(BINDER_STAT_THREAD);
+    thread->proc = proc;
+    thread->pid = current->pid;
+    get_task_struct(current);
+    thread->task = current;
+    atomic_set(&thread->tmp_ref, 0);
+    init_waitqueue_head(&thread->wait);
+    INIT_LIST_HEAD(&thread->todo);
+    rb_link_node(&thread->rb_node, parent, p);
+    rb_insert_color(&thread->rb_node, &proc->threads);
+    thread->looper_need_return = true; // 此处配置了 looper_need_return 为 true
+    thread->return_error.work.type = BINDER_WORK_RETURN_ERROR;
+    thread->return_error.cmd = BR_OK;
+    thread->reply_error.work.type = BINDER_WORK_RETURN_ERROR;
+    thread->reply_error.cmd = BR_OK;
+    INIT_LIST_HEAD(&new_thread->waiting_thread_node); // 初始化链表（next/prev 指针都指向自己）
+    return thread;
+}
+```
+
+可以看到函数先是根据 proc 获取对应红黑树上的节点，如果获取不到则返回 thread（为 NULL），分配内存后再次进入此函数，执行 `while()` 循环后面的代码，把 new_thread 传递给 thread，并初始化了一些参数，<font color=red>**注意此处 `looper_need_return = true`**</font>，这个参数在 `binder_thread_read()`判断是否休眠时会用到，不过<font color=red>**在 `binder_ioctl()` 的结尾处又把 looper_need_return 配置为了 false**</font>，所以应用程序在刚启动创建 binder 线程池时，先启动了一个 binder 主线程，在主线程第一次调用 binder_ioctl 时是不会阻塞在 binder_thread_read() 的，另外也初始化了 todo 和 waiting_thread_node 这两个链表；
+
+继续回到 `binder_ioctl()` 函数中，BINDER_WRITE_READ 这个 case 比较重要，因为应用程序是通过 `ioctl(mDriverFD, BINDER_WRITE_READ, &bwr)` 这样调用，然后就调用到了 binder_ioctl 的 BINDER_WRITE_READ 这个 case；
 
 ``` c
 static int binder_ioctl_write_read(struct file *filp,
