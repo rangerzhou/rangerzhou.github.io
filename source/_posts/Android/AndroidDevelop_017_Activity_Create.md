@@ -1,5 +1,5 @@
 ---
-title: Android - Activity 创建
+title: Android - Activity 的显示
 date: 2022-02-20 22:16:06
 tags:
 categories: Android
@@ -22,7 +22,7 @@ password: zr.
 
 但是 `handleResumeActivity()` 除了调用 `performResumeActivity()` 之外，还有其他重要工作，接下来开始分析；
 
-## handleResumeActivity() 分析
+## 1. handleResumeActivity() 分析
 
 ``` java
 // ActivityThread.java
@@ -37,41 +37,50 @@ password: zr.
         ...
         if (r.window == null && !a.mFinished && willBeVisible) {
             r.window = r.activity.getWindow();
-            // 1.获得一个 View 对象，实际上是 DecorView，setContentView把 view 添加到 mContentParent，
+            // 1.获得一个 View 对象，实际上是 DecorView，setContentView 把 view 添加到 mContentParent，
             // mContentParent 是 PhoneWindow.mDecor 的一部分，
             View decor = r.window.getDecorView();
             decor.setVisibility(View.INVISIBLE);
             ViewManager wm = a.getWindowManager(); // 2.获得 ViewManager 对象，实际上是 WindowManagerImpl 对象
             WindowManager.LayoutParams l = r.window.getAttributes();
             a.mDecor = decor;
-            l.type = WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
-            l.softInputMode |= forwardBit;
-            if (r.mPreserveWindow) {
-                a.mWindowAdded = true;
-                r.mPreserveWindow = false;
-                // Normally the ViewRoot sets up callbacks with the Activity
-                // in addView->ViewRootImpl#setView. If we are instead reusing
-                // the decor view we have to notify the view root that the
-                // callbacks may have changed.
-                ViewRootImpl impl = decor.getViewRootImpl();
-                if (impl != null) {
-                    impl.notifyChildRebuilt();
-                }
-            }
+            ...
             if (a.mVisibleFromClient) {
                 if (!a.mWindowAdded) {
                     a.mWindowAdded = true;
                     wm.addView(decor, l); // 3.把上面获取的 decor 对象添加到 ViewManager 中，调用 WindowManagerImpl.addView
                 } else {
-                    // The activity will get a callback for this {@link LayoutParams} change
-                    // earlier. However, at that time the decor will not be set (this is set
-                    // in this method), so no action will be taken. This call ensures the
-                    // callback occurs with the decor set.
-                    a.onWindowAttributesChanged(l);
-                }
-            }
             ...
         Looper.myQueue().addIdleHandler(new Idler());
     }
 ```
 
+以上有 3 个主要工作：
+
+-   getDecorView()：获取一个 View 对象 decor，其实是一个 DecorView，我们知道在 onCreate() 中会 setContentView()，是把一个 View 添加到 mContentParent，而 mContentParent 是 PhoneWindow.mDecor 的一部分；
+-   getWindowManager()：获得一个 ViewManager 对象，实际上是 WindowManagerImpl 对象；
+-   addView()：把上面获取的 decor 对象添加到 ViewManager 中，实际上调用的是 WindowManagerImpl.addView()；
+
+## 2. setContentView() 分析
+
+Activity 中有 3 个 setContentView() 方法，选取其中一个：
+
+``` java
+// Activity.java
+    public void setContentView(View view) {
+        getWindow().setContentView(view);
+        initWindowDecorActionBar(); // 初始化 ActionBar
+    }
+```
+
+先来看一下 `getWindow()` 返回什么：
+
+``` java
+// Activity.java
+    private Window mWindow;
+    public Window getWindow() {
+        return mWindow;
+    }
+```
+
+返回了一个 Window 对象，
