@@ -1,15 +1,15 @@
 ---
-title: Android - Activity 的显示
+title: Android - Activity 创建及窗口显示
 date: 2022-02-20 22:16:06
 tags:
 categories: Android
 copyright: true
-password: zr.
+password:
 ---
 
 
 
->Activity 创建分析；
+>Activity 创建及窗口显示分析；
 
 <!--more-->
 
@@ -17,8 +17,6 @@ password: zr.
 
 - performLaunchActivity()：作用是在 `Instrumentation.newActivity()` 函数中根据 Activity 的类名通过通过反射机制创建对应的 Activity，然后通过 `Instrumentation.callActivityOnCreate() -> Activity.performCreate() -> Activity.onCreate()` 调用 Activity 的 onCreate () 函数；
 - performResumeActivity()：通过 `Activity.performResume() -> Instrumentation.callActivityOnResume() -> Activity.onResume()` 调用 Activity 的 onResume() 函数；
-
-
 
 但是 `handleResumeActivity()` 除了调用 `performResumeActivity()` 之外，还有其他重要工作，接下来开始分析；
 
@@ -31,6 +29,7 @@ password: zr.
     public void handleResumeActivity(ActivityClientRecord r, boolean finalStateRequest,
             boolean isForward, String reason) {
         ...
+        // 执行 Activity 的 performResume 方法
         if (!performResumeActivity(r, finalStateRequest, reason)) {
             return;
         }
@@ -55,12 +54,17 @@ password: zr.
             ...
         Looper.myQueue().addIdleHandler(new Idler());
     }
+// getWindowManager()
+    private WindowManager mWindowManager;
+    public WindowManager getWindowManager() {
+        return mWindowManager;
+    }
 ```
 
 以上有 3 个主要工作：
 
 -   getDecorView()：获取一个 View 对象 decor，其实是一个 DecorView，我们知道在 onCreate() 中会 setContentView()，是把一个 View 添加到 mContentParent，而 mContentParent 是 DecorView[PhoneWindow.mDecor] 的一部分；
--   getWindowManager()：获得一个 ViewManager 对象，实际上是 WindowManagerImpl 对象；
+-   getWindowManager()：返回一个 WindowManager 对象（继承自 ViewManager），实际上是 WindowManagerImpl 对象；
 -   addView()：把上面获取的 decor 对象添加到 ViewManager 中，实际上调用的是 WindowManagerImpl.addView()；
 
 ### 1.1 setContentView() - Window 来源
@@ -96,7 +100,8 @@ public abstract class Window {
     private Activity performLaunchActivity(ActivityClientRecord r, Intent customIntent) {
         ActivityInfo aInfo = r.activityInfo;
         ...
-        ContextImpl appContext = createBaseContextForActivity(r); // Activity 中的 getContext 函数返回的就是这个 ContextImpl 对象
+        // Activity 中的 getContext 函数返回的就是这个 ContextImpl 对象
+        ContextImpl appContext = createBaseContextForActivity(r);
         Activity activity = null;
         try {
             java.lang.ClassLoader cl = appContext.getClassLoader(); // 获取  ClassLoader
@@ -108,7 +113,7 @@ public abstract class Window {
             ...
                 Window window = null;
                 if (r.mPendingRemoveWindow != null && r.mPreserveWindow) {
-                    window = r.mPendingRemoveWindow;
+                    window = r.mPendingRemoveWindow; // 待删除的窗口
                     r.mPendingRemoveWindow = null;
                     r.mPendingRemoveWindowManager = null;
                 }
@@ -119,13 +124,23 @@ public abstract class Window {
                         r.referrer, r.voiceInteractor, window, r.configCallback,
                         r.assistToken, r.shareableActivityToken);
                 ...
+            synchronized (mResourcesManager) {
+                mActivities.put(r.token, r);
+            }...
                     mInstrumentation.callActivityOnCreate(activity, r.state); // 最终调用 Activity.onCreate()
                 }
                 ...
         return activity;
 ```
 
-先是通过反射创建 Activity，然后 `makeApplication()` 获取 Application 对象，调用 `activity.attach()`，最后调用 `Instrumentation.callActivityOnCreate()` 执行到 `Activity.onCreate()` 方法；
+主要工作：
+
+- 创建 Activity 对应的 ContextImpl 对象；
+- 获取应用所使用的 ClassLoader 对象，用于创建 Activity 对象；
+- 调用 Instrumentation.newActivity() 通过反射机制创建 Activity 对象；
+- **调用 Activity.attach() 方法**；
+- 通过 Instrumentation.callActivityOnCreate() 调用 Activity.onCreate() 方法；
+- 将当前 Activity 所对应的 ActivityClientRecord 对象添加到 mActivities 数组；
 
 其他流程在 [APP 启动流程分析](http://rangerzhou.top/2021/11/05/Android/AndroidDevelop_011_startActivity/) 中已经分析过了，这里重点看一下 `attach()` 函数：
 
@@ -133,7 +148,8 @@ public abstract class Window {
 // Activity.java
     private Window mWindow;
     final void attach(...) {
-        attachBaseContext(context); // 保存当前 ContextImpl
+        // 保存上一步创建的 ContextImpl 到属性 mBase 中，这样 ContextImpl 就可以调用 Activity 了
+        attachBaseContext(context);
 
         mFragments.attachHost(null /*parent*/);
         // 创建 PhoneWindow
@@ -143,7 +159,7 @@ public abstract class Window {
         mWindow.setOnWindowDismissedCallback(this);
         mWindow.getLayoutInflater().setPrivateFactory(this);
         ...
-        // 设置 PhoneWindow 的 WindowManager
+        // 设置 PhoneWindow 的 WindowManager，关联 WindowManager
         mWindow.setWindowManager(
                 (WindowManager)context.getSystemService(Context.WINDOW_SERVICE),
                 mToken, mComponent.flattenToString(),
@@ -208,6 +224,10 @@ PhoneWindow 继承自 Window，`setWindowManager()` 是在父类 Window 中定�
             installDecor(); // 1.创建 PhoneWindow.mDecor(DecorView类型)，获取 mContentParent
         } else if (!hasFeature(FEATURE_CONTENT_TRANSITIONS)) {}
         ...
+        if (hasFeature(FEATURE_CONTENT_TRANSITIONS)) {
+        } else {
+            mLayoutInflater.inflate(layoutResID, mContentParent); // 使用 LayoutInflater 工具解析并生成视图
+        }
             mContentParent.addView(view, params); // 2.把 view 添加到 ViewGroup 中
         mContentParent.requestApplyInsets();
         final Callback cb = getCallback();
@@ -221,11 +241,12 @@ PhoneWindow 继承自 Window，`setWindowManager()` 是在父类 Window 中定�
 mContentParent 是一个 ViewGroup，继承自 View，从名字可知它除了是一个 View，还是一个 Group，里面包含了其他 View，上面代码主要有 2 个工作：
 
 - installDecor()：创建 DecorView[PhoneWindow.mDecor]，加载布局到 DecorView，获取 mContentParent；
+- 使用 LayoutInflater 工具解析并生成视图；
 - addView()：把传入的 view 添加到 mContentParent 这个 ViewGroup 中；
 
 先来看一下 installDecor()；
 
-#### 1.2.1 installDecor() -安装 DecorView
+#### 1.2.1 installDecor() -创建安装 DecorView
 
 ``` java
 // PhoneWindow.java
@@ -244,8 +265,8 @@ mContentParent 是一个 ViewGroup，继承自 View，从名字可知它除了�
                 mTitleView = findViewById(R.id.title); // 获取标题栏
 ```
 
--   首先通过 `generateDecor()` <font color=red>**创建 DecorView**</font>；
--   然后通过 `generateLayout()` <font color=red>**加载布局文件到 DecorView 中，从 DecorView 中获取并返回 mContentParent**</font>；
+-   首先通过 `generateDecor()` <font color=red>**创建 DecorView**</font>，它是 Activity 的跟视图，并把 PhoneWindow 对象传递给 DecorView；
+-   然后通过 `generateLayout()` <font color=red>**加载布局文件到 DecorView 中，从 DecorView 中获取并返回 mContentParent**</font>，比如 LinearLayout/RelativeLayout/FrameLayout 等，是 DecorView 的子视图；
 
 先来看一下创建 DecorView；
 
@@ -271,7 +292,7 @@ mContentParent 是一个 ViewGroup，继承自 View，从名字可知它除了�
         ...
 ```
 
-**创建 DecorView**，并通过 `setWindow()` 把 PhoneWindow 对象传递给 DecorView.mWindow，如果已经存在 DecorView，则直接通过 `setWindow()` 把 PhoneWindow 传递过去，  这里虽然创建了 DecorView，但是此时的 DecorView 还是一个空白的 FrameLayout（DecorView 继承自 FrameLayout）；
+**创建 DecorView**，并通过 `setWindow()` **把 PhoneWindow 对象传递给 DecorView.mWindow**，如果已经存在 DecorView，则直接通过 `setWindow()` 把 PhoneWindow 传递过去，  这里虽然创建了 DecorView，但是此时的 DecorView 还是一个空白的 FrameLayout（DecorView 继承自 FrameLayout）；
 
 继续看 `generateLayout()` 获取 ViewGropu 对象；
 
@@ -377,7 +398,7 @@ DecorCaptionView 的注释意思是 DecorCaptionView 是窗口的标题视图，
         if (mDecor == null || mForceDecorInstall) {
             installDecor();
         }
-        return mDecor;
+        return mDecor; // 返回 DecorView
     }
 ```
 
@@ -405,7 +426,7 @@ DecorCaptionView 的注释意思是 DecorCaptionView 是窗口的标题视图，
 
 这里就不详细分析了，继续回到 `handleResumeActivity()` 中；
 
-## 2. WMI.addView()
+## 2. WMI.addView(DecorView)
 
 先回忆一下为什么分析 setContentView()，因为在分析 `handleResumeActivity()` 时遇到了 DecorView、Window、WindowManager 等不熟悉的对象，但是这些对象的来源和 `setContentView()` 有关，所以就转而分析 `setContentView()` 了；
 
@@ -455,21 +476,21 @@ DecorCaptionView 的注释意思是 DecorCaptionView 是窗口的标题视图，
 
             view.setLayoutParams(wparams);
 
-            mViews.add(view);
+            mViews.add(view); // 保存 DecorView 实例
             mRoots.add(root); // 保存 root 到 mRoots 这个 ArrayList 中
-            mParams.add(wparams);
+            mParams.add(wparams); // 保存布局配置信息
 
             // do this last because it fires off messages to start doing things
             try {
                 // 传入的 view 是 PhoneWindow.mDecor(DecorView 对象)，从 ActivityThread.handleResumeActivity 中的 addView 传过来的
-                root.setView(view, wparams, panelParentView, userId);
+                root.setView(view, wparams, panelParentView, userId); // 把视图添加到窗口
             } catch (RuntimeException e) {
                 ...
 ```
 
-new 了一个 ViewRootImpl 对象，来看看 ViewRootImpl 的构造函数：
+new 了一个 ViewRootImpl 对象，来看看 ViewRootImpl 的构造函数；
 
-### 2.1 ViewRootImpl 构造
+### 2.1 ViewRootImpl 构造函数
 
 ``` java
 // ViewRootImpl.java
@@ -479,27 +500,16 @@ new 了一个 ViewRootImpl 对象，来看看 ViewRootImpl 的构造函数：
     public ViewRootImpl(@UiContext Context context, Display display, IWindowSession session,
             boolean useSfChoreographer) {
         mContext = context;
+        // Session 负责 Activity 到 WMS 的通信，和 W 对象反向
         mWindowSession = session; // 把 WMS.openSession 返回的 IWindowSession 对象传递给 ViewRootImpl.mWindowSession
         mDisplay = display;
         mBasePackageName = context.getBasePackageName();
         mThread = Thread.currentThread(); // 把当前创建 ViewRootImpl 的线程传递给 ViewRootImpl.mThread
-        mLocation = new WindowLeaked(null);
-        mLocation.fillInStackTrace();
+        ...
         mWidth = -1;
         mHeight = -1;
-        mDirty = new Rect();
-        mTempRect = new Rect();
-        mVisRect = new Rect();
-        mWinFrame = new Rect();
-        mWindow = new W(this); // W extends IWindow.Stub
-        mLeashToken = new Binder();
-        mTargetSdkVersion = context.getApplicationInfo().targetSdkVersion;
-        mViewVisibility = View.GONE;
-        mTransparentRegion = new Region();
-        mPreviousTransparentRegion = new Region();
-        mFirst = true; // true for the first time the view is added
-        mPerformContentCapture = true; // also true for the first time the view is added
-        mAdded = false;
+        ...
+        mWindow = new W(this); // W extends IWindow.Stub，负责 WMS 到 Activity 的通信
         mAttachInfo = new View.AttachInfo(mWindowSession, mWindow, display, this, mHandler, this,
                 context);
         ...
@@ -510,7 +520,7 @@ new 了一个 ViewRootImpl 对象，来看看 ViewRootImpl 的构造函数：
         ...
 ```
 
-构造函数传递了一个 WindowManagerGlobal.getWindowSession() 参数，
+构造函数传递了一个 `WindowManagerGlobal.getWindowSession()` 作为参数，
 
 ``` java
 // WindowManagerGlobal.java
@@ -540,7 +550,7 @@ new 了一个 ViewRootImpl 对象，来看看 ViewRootImpl 的构造函数：
             return sWindowManagerService;
 ```
 
-`getWindowManagerService()` 获取 WMS 的 binder 代理 windowManager，所以 `openSession()` 的实现在 WMS 中：
+`getWindowManagerService()` 获取 WMS 的 binder 代理 sWindowManagerService，所以 `openSession()` 的实现在 WMS 中：
 
 ``` java
 // WindowManagerService.java
@@ -556,8 +566,9 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
 总结 ViewRootImpl 构造函数：
 
 -   ViewRootImpl 通过 `WindowManagerGlobal.getWindowSession()` 先通过 binder 通信 **获取 WMS 的代理**；
--   然后调用 WMS.openSession() 得到一个 IWindowSession 对象（Session 继承自 IWindowSession.Stub），支持 Binder 通信，且属于服务端；
--   并把这个 IWindowSession 传递给 `ViewRootImpl.mWindowSession` ，Session 持有 WMS 对象，这样 ViewRootImpl 就可以通过 mWindowSession 和 WMS 通信了（为什么不直接使用 WMS 的代理通信呢？）；
+-   调用 WMS.openSession() 得到一个 IWindowSession 对象（Session 继承自 IWindowSession.Stub），支持 Binder 通信，且属于服务端；
+-   把 IWindowSession 传递给 `ViewRootImpl.mWindowSession` ，Session 持有 WMS 对象，这样 Activity 就可以<font color=red>**通过 mWindowSession 和 WMS 通信**</font>（为什么不直接使用 WMS 的代理通信呢？）；
+-   创建 W 对象，W 继承 IWindow.Stub，会通过 `ViewRootImpl.setView()` 传递到 WMS 中以创建 Activity 对应的 WindowState，<font color=red>**W 也负责 WMS 到 Activity 的通信**</font>；
 
 ### 2.2 ViewRootImpl.setView()
 
@@ -569,22 +580,26 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
             if (mView == null) {
                 mView = view; // 1. 保存传入的 view 参数到 ViewRootImpl.mView，view 指向 PhoneWindow.mDecor(DecorView)
                 ...
-                // 2. 使用 ViewRootImpl.mChoreographer 的 Handler 发送一个 MSG_DO_SCHEDULE_CALLBACK 消息，所以消息还是在 ViewRootImpl 中处理
+                // 2. 使用 ViewRootImpl.mChoreographer 的 Handler 发送一个 MSG_DO_SCHEDULE_CALLBACK 消息
                 requestLayout();
                 ...
                 try {
                     ...
-                    // 3.
+                    // 3. 把 W 对象 mWindow 传递到 WMS 以创建 WindowState
                     res = mWindowSession.addToDisplayAsUser(mWindow, mWindowAttributes,
                             getHostVisibility(), mDisplay.getDisplayId(), userId,
                             mInsetsController.getRequestedVisibilities(), inputChannel, mTempInsets,
-                            mTempControls); // 3.
+                            mTempControls);
                     ...
+                view.assignParent(this); // 其中会设置 mParent，在 View.requestLayout() 时会用到
 ```
 
-传入的 View 就是 DecorView，保存到 ViewRootImpl.mView；
+传入的参数 view 就是 DecorView，保存到 ViewRootImpl.mView；
 
-#### 2.2.1 ViewRootImpl.requestLayout()
+- requestLayout()：Activity 视图首次显示之前，调用请求重新布局；
+- addToDisplayAsUser()：
+
+#### 2.2.1 VRI.requestLayout() - 请求布局
 
 ``` java
 // ViewRootImpl.java
@@ -607,10 +622,12 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
 
 ``` java
 // ViewRootImpl.java
+    final TraversalRunnable mTraversalRunnable = new TraversalRunnable();
     void scheduleTraversals() {
         if (!mTraversalScheduled) {
             mTraversalScheduled = true;
             mTraversalBarrier = mHandler.getLooper().getQueue().postSyncBarrier(); // 设置同步屏障
+            // 向 Choreographer 注册一个 VSYNC 信号回调处理，以执行视图的 Traversal 相关逻辑
             mChoreographer.postCallback(
                     Choreographer.CALLBACK_TRAVERSAL, mTraversalRunnable, null);
             notifyRendererOfFramePending();
@@ -619,24 +636,24 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
     }
 ```
 
+主要工作：
 
+- 发送同步消息屏障，保障异步消息优先执行，后续会对消息添加异步标志；
+- 向 Choreographer 注册一个 VSYNC 信号回调处理，以执行视图的 Traversal 相关逻辑；
+- 当回调时，会执行类型为 TraversalRunnable 的 run() 方法；
 
 ``` java
 // Choreographer.java
     public void postCallback(int callbackType, Runnable action, Object token) { // 发送回调事件
         postCallbackDelayed(callbackType, action, token, 0);
     }
+
     public void postCallbackDelayed(int callbackType,
             Runnable action, Object token, long delayMillis) {
-        if (action == null) {
-            throw new IllegalArgumentException("action must not be null");
-        }
-        if (callbackType < 0 || callbackType > CALLBACK_LAST) {
-            throw new IllegalArgumentException("callbackType is invalid");
-        }
-
+        ...
         postCallbackDelayedInternal(callbackType, action, token, delayMillis);
     }
+
     private void postCallbackDelayedInternal(int callbackType,
             Object action, Object token, long delayMillis) {
         ...
@@ -651,14 +668,41 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
             } else { // 异步回调延迟执行
                 Message msg = mHandler.obtainMessage(MSG_DO_SCHEDULE_CALLBACK, action);
                 msg.arg1 = callbackType;
-                msg.setAsynchronous(true);
+                msg.setAsynchronous(true); // 把消息设置为异步
                 mHandler.sendMessageAtTime(msg, dueTime);
             }
         }
     }
 ```
 
-最终都是执行到 scheduleFrameLocked()；
+根据传入的 Runnable 构建 CallbackRecord 对象：
+
+``` java
+// Choreographer.java
+        public void addCallbackLocked(long dueTime, Object action, Object token) {
+            CallbackRecord callback = obtainCallbackLocked(dueTime, action, token);
+            CallbackRecord entry = mHead;
+            if (entry == null) {
+                mHead = callback;
+                return;
+            }
+            if (dueTime < entry.dueTime) {
+                callback.next = entry;
+                mHead = callback;
+                return;
+            }
+            while (entry.next != null) {
+                if (dueTime < entry.next.dueTime) {
+                    callback.next = entry.next;
+                    break;
+                }
+                entry = entry.next;
+            }
+            entry.next = callback;
+        }
+```
+
+最终都是执行到 `scheduleFrameLocked()`；
 
 ``` java
 // Choreographer.java
@@ -719,6 +763,20 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
 
 ``` java
 // Choreographer.java
+    void doFrame(long frameTimeNanos, int frame,
+            DisplayEventReceiver.VsyncEventData vsyncEventData) {
+            // 顺序执行几种类型的事件回调处理
+            doCallbacks(Choreographer.CALLBACK_INPUT, frameTimeNanos, frameIntervalNanos);
+            doCallbacks(Choreographer.CALLBACK_ANIMATION, frameTimeNanos, frameIntervalNanos);
+            doCallbacks(Choreographer.CALLBACK_INSETS_ANIMATION, frameTimeNanos, frameIntervalNanos);
+            doCallbacks(Choreographer.CALLBACK_TRAVERSAL, frameTimeNanos, frameIntervalNanos);
+            doCallbacks(Choreographer.CALLBACK_COMMIT, frameTimeNanos, frameIntervalNanos);
+```
+
+按照顺序执行几种类型的事件回调，这里我们要分析的是 CALLBACK_TRAVERSAL 类型，在 `scheduleTraversals()` 中传入；
+
+``` java
+// Choreographer.java
     void doCallbacks(int callbackType, long frameTimeNanos, long frameIntervalNanos) {
         CallbackRecord callbacks;
         synchronized (mLock) {
@@ -733,9 +791,26 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
                 c.run(frameTimeNanos);
             }
         }
+
+// Choreographer.java
+    private static final class CallbackRecord {
+        public CallbackRecord next;
+        public long dueTime;
+        public Object action; // Runnable or FrameCallback
+        public Object token;
+
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+        public void run(long frameTimeNanos) {
+            if (token == FRAME_CALLBACK_TOKEN) {
+                ((FrameCallback)action).doFrame(frameTimeNanos);
+            } else {
+                ((Runnable)action).run();
+            }
+        }
+    }
 ```
 
-
+`CallbackRecord.run()` 直接运行封装的 `Runnable.run()`，而 `scheduleTraversals()` 中传入的 Runnable 是 TraversalRunnable，所以这里回调执行到 `TraversalRunnable.run()`；
 
 ``` java
 // ViewRootImpl.java
@@ -748,14 +823,14 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
     final TraversalRunnable mTraversalRunnable = new TraversalRunnable();
 ```
 
-
+调用 `doTraversal()`；
 
 ``` java
 // ViewRootImpl.java
     void doTraversal() {
         if (mTraversalScheduled) {
             mTraversalScheduled = false;
-            mHandler.getLooper().getQueue().removeSyncBarrier(mTraversalBarrier);
+            mHandler.getLooper().getQueue().removeSyncBarrier(mTraversalBarrier); // 移除同步屏障
 
             if (mProfile) {
                 Debug.startMethodTracing("ViewAncestor");
@@ -771,19 +846,23 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
     }
 ```
 
+做了两件事：
 
+- 移除同步消息屏障；
+- 调用 `performTraversals()` ；
 
 ``` java
 // ViewRootImpl.java
     private void performTraversals() {
 ```
 
-
+`performTraversals()` 方法执行了测量（measure）、布局（layout）、绘制（draw）三大流程，此文暂不分析；
 
 #### 2.2.2 Session.addToDisplayAsUser()
 
 ``` java
 // Session.java
+    final WindowManagerService mService;
     public int addToDisplayAsUser(IWindow window, WindowManager.LayoutParams attrs,
             int viewVisibility, int displayId, int userId, InsetsVisibilities requestedVisibilities,
             InputChannel outInputChannel, InsetsState outInsetsState,
@@ -793,10 +872,11 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
     }
 ```
 
-直接调用 `WMS.addWindow()`；
+mService 是 WMS 对象，直接调用 `WMS.addWindow()`；
 
 ``` java
 // WindowManagerService.java
+    final HashMap<IBinder, WindowState> mWindowMap = new HashMap<>();
     public int addWindow(Session session, IWindow client, ...) {
         ...
         WindowState parentWindow = null; // WindowState 对象
@@ -824,12 +904,16 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
                     session.mCanAddInternalSystemWindow);
             ...
             win.attach(); // 3. 调用 attach
+            mWindowMap.put(client.asBinder(), win);
             ...
         return res;
     }
 ```
 
+主要工作：
 
+- 创建 WindowState 对象，用来描述与 W 对象所关联的 Activity 的窗口状态，并且以后会通过这个 W 对象来控制对应的 Activity 的窗口状态；
+- 调用 WindowState.attach() ；
 
 ``` java
 // WindowState.java
@@ -839,7 +923,7 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
     }
 ```
 
-
+继续调用 `Session.windowAddedLocked()` ；
 
 ``` java
 // Session.java
@@ -855,3 +939,31 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
     }
 ```
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+AMS、Activity、WMS建立连接的过程如下：
+
+Activity 启动时，AMS 服务会在服务端创建一个 ActivityRecord 对象。
+AMS 使用 ActivityRecord（实现接口 IApplicationToken）为参数请求 WMS，WMS 为 Activity 组件创建一个 AppWindowToken 对象。
+ActivityRecord 对象被保存在 AppWindowToken 对象的成员变量 appToken 中。
+于是，在启动完成该 Activity 组件后，WMS 获得了一个 ActivityRecord 对象和一个对应的 W 对象。
+WMS 会根据 AppWindowToken 对象以及 W 对象，为 Activity 创建一个 WindowState 对象，并且将 AppWindowToken 对象保存在 WindowState 对象的mAppToken中。
+每一个 Activity 组件，在 ActivityManagerService 服务内部都有一个对应的 ActivityRecord 对象，并且在 WindowManagerService 服务内部关联有一个AppWindowToken 对象。
