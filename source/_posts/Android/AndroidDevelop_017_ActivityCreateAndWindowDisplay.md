@@ -943,6 +943,8 @@ mService 是 WMS 对象，直接调用 `WMS.addWindow()`；
 
 ## 3 总结
 
+ ![](https://raw.githubusercontent.com/rangerzhou/ImageHosting/master/blog_resource/2022/Activity_Window_DecorView.png "")
+
 每个 Activity 中有个 Window 对象，用来描述程序窗口，每个窗口又包含一个 View 对象，用来描述程序视图，
 
 performLaunchActivity() 时通过 attach() 方法初始化了这个 mWindow:Window 为 PhoneWindow 对象，并为这个 mWindow 绑定了 WindowManager（其实为 WindowManagerImpl 对象），在 onCreate() 中会 调用 PhoneWindow.setContentView()，
