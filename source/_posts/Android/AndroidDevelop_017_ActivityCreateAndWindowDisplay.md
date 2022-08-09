@@ -1,5 +1,5 @@
 ---
-title: Android - Activity 创建及窗口显示
+title: Android - Activity 创建及窗口显示过程
 date: 2022-02-20 22:16:06
 tags:
 categories: Android
@@ -9,7 +9,7 @@ password:
 
 
 
->Activity 创建及窗口显示分析；
+>Activity 创建及窗口显示过程分析；
 
 <!--more-->
 
@@ -22,7 +22,7 @@ password:
 
 
 
-## 1. handleResumeActivity() 分析
+## 1 handleResumeActivity() 分析
 
 ``` java
 // ActivityThread.java
@@ -265,7 +265,7 @@ mContentParent 是一个 ViewGroup，继承自 View，从名字可知它除了�
                 mTitleView = findViewById(R.id.title); // 获取标题栏
 ```
 
--   首先通过 `generateDecor()` <font color=red>**创建 DecorView**</font>，它是 Activity 的跟视图，并把 PhoneWindow 对象传递给 DecorView；
+-   首先通过 `generateDecor()` <font color=red>**创建 DecorView**</font>，它是 Activity 的根视图，并把 PhoneWindow 对象传递给 DecorView；
 -   然后通过 `generateLayout()` <font color=red>**加载布局文件到 DecorView 中，从 DecorView 中获取并返回 mContentParent**</font>，比如 LinearLayout/RelativeLayout/FrameLayout 等，是 DecorView 的子视图；
 
 先来看一下创建 DecorView；
@@ -426,7 +426,7 @@ DecorCaptionView 的注释意思是 DecorCaptionView 是窗口的标题视图，
 
 这里就不详细分析了，继续回到 `handleResumeActivity()` 中；
 
-## 2. WMI.addView(DecorView)
+## 2 WMI.addView(DecorView)
 
 先回忆一下为什么分析 setContentView()，因为在分析 `handleResumeActivity()` 时遇到了 DecorView、Window、WindowManager 等不熟悉的对象，但是这些对象的来源和 `setContentView()` 有关，所以就转而分析 `setContentView()` 了；
 
@@ -856,7 +856,7 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
     private void performTraversals() {
 ```
 
-`performTraversals()` 方法执行了测量（measure）、布局（layout）、绘制（draw）三大流程，此文暂不分析；
+`performTraversals()` 方法向 WMS 申请了 Surface、测量（measure）、布局（layout）、绘制（draw）三大流程，此文暂不分析；
 
 #### 2.2.2 Session.addToDisplayAsUser()
 
@@ -941,29 +941,30 @@ mService 是 WMS 对象，直接调用 `WMS.addWindow()`；
 
 
 
+## 3 总结
 
+每个 Activity 中有个 Window 对象，用来描述程序窗口，每个窗口又包含一个 View 对象，用来描述程序视图，
 
+performLaunchActivity() 时通过 attach() 方法初始化了这个 mWindow:Window 为 PhoneWindow 对象，并为这个 mWindow 绑定了 WindowManager（其实为 WindowManagerImpl 对象），
 
+在 onCreate() 中会 调用 PhoneWindow.setContentView()，
 
+- 在其中创建了 DecorView，并关联了 PhoneWindow 对象；
+- 然后根据主题获取样式信息，根据样式加载对应的布局到 DecorView；
+- 再从 DecorView 中通过 `findViewById()` 获取并返回 id 为 `R.id.content` 的 View （contentParent ）给到 `PhoneWindow.mContentParent` ；
+- 最后把 setContentView() 传入的 View 添加到 PhoneWindow.mContentParent；
 
+在 performResumeActivity() 阶段通过 addView() 把 DecorView 添加到 WindowManager，真正干活的是 WindowManagerGlobal，在其中创建了 ViewRootImpl，VRI 包含了 mWindowSession:Session 对象用于 Activity 向 WMS 通信，也包含了 mWindow:W 对象用于 WMS 向 Activity 通信，然后通过 setView() 实现 addView()，把视图添加到窗口，
 
-
-
-
-
-
-
-
-
-
+- 在其中通过 requestLayout() 触发第一次绘制，向 WMS 申请 Surface；
+- 然后再通过 WMS.addWindow() 在 WMS 中创建一个与 Window 相关的 WindowState 对象，WMS 管理所有的 Window 的层级、位置、大小，掌管 Surface 的显示顺序、位置、大小，应用端在分配的 Surface 绘制完成后，SurfaceFlinger 把这些 Surface 图像按 WMS 中的层级、位置、大小等进行合成，最终写屏幕的缓冲区显示出来；
 
 
 
 AMS、Activity、WMS建立连接的过程如下：
 
-Activity 启动时，AMS 服务会在服务端创建一个 ActivityRecord 对象。
-AMS 使用 ActivityRecord（实现接口 IApplicationToken）为参数请求 WMS，WMS 为 Activity 组件创建一个 AppWindowToken 对象。
-ActivityRecord 对象被保存在 AppWindowToken 对象的成员变量 appToken 中。
-于是，在启动完成该 Activity 组件后，WMS 获得了一个 ActivityRecord 对象和一个对应的 W 对象。
-WMS 会根据 AppWindowToken 对象以及 W 对象，为 Activity 创建一个 WindowState 对象，并且将 AppWindowToken 对象保存在 WindowState 对象的mAppToken中。
-每一个 Activity 组件，在 ActivityManagerService 服务内部都有一个对应的 ActivityRecord 对象，并且在 WindowManagerService 服务内部关联有一个AppWindowToken 对象。
+- Activity 启动时，AMS 服务会在服务端创建一个 ActivityRecord 对象；
+- AMS 使用 ActivityRecord（实现接口 IApplicationToken）为参数请求 WMS，WMS 为 Activity 组件创建一个 AppWindowToken 对象，ActivityRecord 对象被保存在 AppWindowToken 对象的成员变量 appToken 中；
+- 于是在启动完成该 Activity 组件后，WMS 获得了一个 ActivityRecord 对象和一个对应的 W 对象；
+- WMS 会根据 AppWindowToken 对象以及 W 对象，为 Activity 创建一个 WindowState 对象，并且将 AppWindowToken 对象保存在 WindowState 对象的mAppToken中；
+- 每一个 Activity 组件，在 ActivityManagerService 服务内部都有一个对应的 ActivityRecord 对象，并且在 WindowManagerService 服务内部关联有一个AppWindowToken 对象；
