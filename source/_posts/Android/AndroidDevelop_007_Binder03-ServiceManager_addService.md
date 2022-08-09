@@ -1217,7 +1217,7 @@ static int binder_thread_read(
 - 根据 w->type(BINDER_WORK_TRANSACTION) ，通过 w 获取传输数据 binder_transaction 对象 t；
 - 记录命令 TR_TRANSACTION;
 - 把 t 中的数据放入 binder_transaction_data trd 中，而 trd 是 binder_transaction_data_secctx tr 的一个属性，指向 binder_transaction_data；
-- 把 Binder 实体的地址赋值给 `trd->target.ptr = target_node->ptr;`，这里的 target_node 是 sm 的 binder_node，target_node->ptr 指向的是 binder 实体在宿主进程中的首地址，<font color=red>**sm 在注册为大管家的时候并没有对其赋值，所以此处的 `target_node->ptr`**</font> 其实为空值，尽管客户端在 writeTransactionData 中赋值了一个 `tr.target.ptr = 0`，但是在 `binder_transaction()` 中并未将 `tr.target.ptr` 赋值给 `target_node->ptr`；
+- 把 Binder 实体的地址赋值给 `trd->target.ptr = target_node->ptr;`，这里的 target_node 是 sm 的 binder_node，target_node->ptr 指向的是 binder 实体在宿主进程中的首地址，<font color=red>**sm 在注册为大管家的时候在 `binder_init_node_ilocked()` 通过 `binder_uintptr_t ptr = fp ? fp->binder : 0` 配置了 ptr 为 0，所以此处的 `target_node->ptr` 其实为 0，cookie 也为 0**</font>，尽管客户端在 writeTransactionData 中赋值了一个 `tr.target.ptr = 0`，但是在 `binder_transaction()` 中并未将 `tr.target.ptr` 赋值给 `target_node->ptr`；
 - 把 TR_TRANSACTION 和 tr 传递到用户空间 ptr 地址中；
 
 binder_thread_read() 执行完后回到 sm 进程用户空间。
@@ -1280,12 +1280,12 @@ status_t IPCThreadState::executeCommand(int32_t cmd)
                 }
 
             } else {
-                // 对于 sm 执行此分支，the_context_object 是一个 BBinder 对象
+                // 对于 sm 执行此分支，因为 tr.target.ptr = 0，the_context_object 是一个 BBinder 对象
                 error = the_context_object->transact(tr.code, buffer, &reply, tr.flags);
             }
 ```
 
-这个 tr.target.ptr 指向的是 binder 实体(binder_node)在宿主进程的首地址，由驱动在写回数据时赋值的（`binder_thread_read()` 中），但是此时进程是 sm，sm 在注册为大管家的时候，binder 驱动并没有存储它的首地址（**具体见 binder.c -> binder_ioctl_set_ctx_mgr()**），所以 sm 进程在 binder_thread_read() 中写回数据时写的是个空值，而别的 iBinder 对象则会有值，所以此时进入 else 分支；
+这个 tr.target.ptr 指向的是 binder 实体(binder_node)在宿主进程的首地址，由驱动在写回数据时赋值的（`binder_thread_read()` 中），但是此时进程是 sm，sm 在注册为大管家的时候，在 `binder_init_node_ilocked()` 通过 `binder_uintptr_t ptr = fp ? fp->binder : 0` 配置了 ptr 为 0（**具体见 binder.c -> binder_ioctl_set_ctx_mgr()**），所以 sm 进程在 binder_thread_read() 中写回数据时写的是个 0 值，而别的 iBinder 对象则会有值，所以此时进入 else 分支；
 
 ###### c.4 服务端处理 IPC 数据 - trancact->onTrancact-> TRANSACTION_addService
 

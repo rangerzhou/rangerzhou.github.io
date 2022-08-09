@@ -686,6 +686,12 @@ struct binder_write_read {
 
 
 
+# 12. Binder常见问题
+
+[参考](https://vanelst.site/2020/08/07/binder-question/)
+
+
+
 [ref](https://blog.csdn.net/yangwen123/article/details/9100599)
 
 [Linux 内核 API](https://deepinout.com/linux-kernel-api)

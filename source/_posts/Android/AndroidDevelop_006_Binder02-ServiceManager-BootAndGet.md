@@ -70,22 +70,22 @@ int main(int argc, char** argv) {
     sp<ProcessState> ps = ProcessState::initWithDriver(driver);
     ps->setThreadPoolMaxThreadCount(0);
     ps->setCallRestriction(ProcessState::CallRestriction::FATAL_IF_NOT_ONEWAY);
-	// 实例化 ServiceManager
+    // 实例化 ServiceManager
     sp<ServiceManager> manager = sp<ServiceManager>::make(std::make_unique<Access>());
     // 将自身注册到 ServiceManager 中
     if (!manager->addService("manager", manager, false /*allowIsolated*/, IServiceManager::DUMP_FLAG_PRIORITY_DEFAULT).isOk()) {
         LOG(ERROR) << "Could not self register servicemanager";
     }
-	// 将 ServiceManager 设置给 IPCThreadState 的全局变量
+    // 将 ServiceManager 设置给 IPCThreadState 的全局变量
     IPCThreadState::self()->setTheContextObject(manager);
     // 2. 注册到驱动，成为 Binder 管理员，handle 是 0
     ps->becomeContextManager(nullptr, nullptr);
-	// 准备 looper
+    // 准备 looper
     sp<Looper> looper = Looper::prepare(false /*allowNonCallbacks*/);
-	// 通知驱动 BC_ENTER_LOOPER ，监听驱动 fd ，有消息时回调到 handleEvent 处理 binder 调用
+    // 通知驱动 BC_ENTER_LOOPER ，监听驱动 fd ，有消息时回调到 handleEvent 处理 binder 调用
     BinderCallback::setupTo(looper);
     ClientCallbackCallback::setupTo(looper, manager); // 服务的注册监听相关
-	// 3. 无限循环等消息
+    // 3. 无限循环等消息
     while(true) {
         looper->pollAll(-1);
     }
@@ -108,15 +108,12 @@ int main(int argc, char** argv) {
 **initWithDriver(driver)**
 
 ``` cpp
+// initWithDriver()
 sp<ProcessState> ProcessState::initWithDriver(const char* driver)
 {
     return init(driver, true /*requireDefault*/);
 }
-```
-
-
-
-``` cpp
+// init()
 sp<ProcessState> ProcessState::init(const char *driver, bool requireDefault)
 {
     ...
@@ -219,20 +216,27 @@ open_driver() 主要干了三件事：
 **becomeContextManager()**
 
 ``` cpp
-bool ProcessState::becomeContextManager(context_check_func checkFunc, void* userData)
+void ProcessState::becomeContextManager()
 {
-	...
-    int result = ioctl(mDriverFD, BINDER_SET_CONTEXT_MGR_EXT, &obj);
+    AutoMutex _l(mLock);
+
+    flat_binder_object obj {
+        .flags = FLAT_BINDER_FLAG_TXN_SECURITY_CTX,
+    };
+
+    status_t result = ioctl(mDriverFD, BINDER_SET_CONTEXT_MGR_EXT, &obj);
 
     // fallback to original method
     if (result != 0) {
         android_errorWriteLog(0x534e4554, "121035042");
 
-        int dummy = 0;
-        result = ioctl(mDriverFD, BINDER_SET_CONTEXT_MGR, &dummy);
+        int unused = 0;
+        result = ioctl(mDriverFD, BINDER_SET_CONTEXT_MGR, &unused);
     }
-    ...
-    return result == 0;
+
+    if (result == -1) {
+        ALOGE("Binder ioctl to become context manager failed: %s\n", strerror(errno));
+    }
 }
 ```
 
