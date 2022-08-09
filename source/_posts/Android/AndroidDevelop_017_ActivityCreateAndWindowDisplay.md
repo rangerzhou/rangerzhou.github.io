@@ -9,7 +9,7 @@ password:
 
 
 
->Activity 创建及窗口显示过程分析；
+>Activity 创建及窗口显示过程分析，源码基于 android-12.1.0_r4；
 
 <!--more-->
 
@@ -945,9 +945,7 @@ mService 是 WMS 对象，直接调用 `WMS.addWindow()`；
 
 每个 Activity 中有个 Window 对象，用来描述程序窗口，每个窗口又包含一个 View 对象，用来描述程序视图，
 
-performLaunchActivity() 时通过 attach() 方法初始化了这个 mWindow:Window 为 PhoneWindow 对象，并为这个 mWindow 绑定了 WindowManager（其实为 WindowManagerImpl 对象），
-
-在 onCreate() 中会 调用 PhoneWindow.setContentView()，
+performLaunchActivity() 时通过 attach() 方法初始化了这个 mWindow:Window 为 PhoneWindow 对象，并为这个 mWindow 绑定了 WindowManager（其实为 WindowManagerImpl 对象），在 onCreate() 中会 调用 PhoneWindow.setContentView()，
 
 - 在其中创建了 DecorView，并关联了 PhoneWindow 对象；
 - 然后根据主题获取样式信息，根据样式加载对应的布局到 DecorView；
