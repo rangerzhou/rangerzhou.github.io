@@ -20,9 +20,7 @@ password:
 
 但是 `handleResumeActivity()` 除了调用 `performResumeActivity()` 之外，还有其他重要工作，接下来开始分析；
 
-
-
-## 1 handleResumeActivity() 分析
+# 1 handleResumeActivity() 分析
 
 ``` java
 // ActivityThread.java
@@ -61,39 +59,15 @@ password:
     }
 ```
 
-以上有 3 个主要工作：
+主要工作有 3 个：
 
--   getDecorView()：获取一个 View 对象 decor，其实是一个 DecorView，我们知道在 onCreate() 中会 setContentView()，是把一个 View 添加到 mContentParent，而 mContentParent 是 DecorView[PhoneWindow.mDecor] 的一部分；
--   getWindowManager()：返回一个 WindowManager 对象（继承自 ViewManager），实际上是 WindowManagerImpl 对象；
+-   window.getDecorView()：出现了一个 <font color=red>**Window**</font> 对象，通过 window.getDecorView 获取一个 View 对象 decor，其实是一个 <font color=red>**DecorView**</font>，我们知道在 onCreate() 中会 setContentView()，是把一个 View 添加到 mContentParent，而 mContentParent 是 DecorView[PhoneWindow.mDecor] 的一部分；
+-   getWindowManager()：返回一个 <font color=red>**WindowManager**</font> 对象（继承自 ViewManager），实际上是 <font color=red>**WindowManagerImpl**</font> 对象；
 -   addView()：把上面获取的 decor 对象添加到 ViewManager 中，实际上调用的是 WindowManagerImpl.addView()；
 
-### 1.1 setContentView() - Window 来源
+Window、WindowManager、DecorView 是什么？我们回到 `ActivityThread.performLaunchActivity()`；
 
-Activity 中有 3 个 setContentView() 方法，选取其中一个：
-
-``` java
-// Activity.java
-    public void setContentView(View view) {
-        getWindow().setContentView(view);
-        initWindowDecorActionBar(); // 初始化 ActionBar
-    }
-```
-
-先来看一下 `getWindow()` 返回什么：
-
-``` java
-// Activity.java
-    private Window mWindow;
-    public Window getWindow() {
-        return mWindow;
-    }
-// Window.java
-public abstract class Window {
-```
-
-<font color=red>**返回了一个 Window 对象，属于 Activity**</font>，Window 是一个抽象类，这个 Window 到底是什么需要看 Activity 创建的流程，我们回到 `ActivityThread.performLaunchActivity()`：
-
-#### 1.1.1 performLaunchActivity - Window/WindowManager 是什么
+## 1.1 performLaunchActivity() - Activity 创建
 
 ``` java
 // ActivityThread.java
@@ -142,7 +116,11 @@ public abstract class Window {
 - 通过 Instrumentation.callActivityOnCreate() 调用 Activity.onCreate() 方法；
 - 将当前 Activity 所对应的 ActivityClientRecord 对象添加到 mActivities 数组；
 
-其他流程在 [APP 启动流程分析](http://rangerzhou.top/2021/11/05/Android/AndroidDevelop_011_startActivity/) 中已经分析过了，这里重点看一下 `attach()` 函数：
+其他流程在 [APP 启动流程分析](http://rangerzhou.top/2021/11/05/Android/AndroidDevelop_011_startActivity/) 中已经分析过了，这里重点看一下 `attach()` 函数；
+
+### 1.1.1 attach()
+
+#### 1.1.1.1 Window 创建
 
 ``` java
 // Activity.java
@@ -171,7 +149,9 @@ public abstract class Window {
         ...
 ```
 
-可以看到这个 Window 其实是一个 PhoneWindow 对象，是 Activity 的一个成员变量，<font color=red>**即 Activity.mWindow 是一个 PhoneWindow 对象**</font>，继续看 `setWindowManager()`：
+可以看到这个 Window 其实是一个 PhoneWindow 对象，是 Activity 的一个成员变量，<font color=red>**即 Activity.mWindow 是一个 PhoneWindow 对象**</font>，继续看 `setWindowManager()`；
+
+#### 1.1.1.2 WindowManager 创建
 
 ``` java
 // PhoneWindow.java
@@ -199,9 +179,11 @@ PhoneWindow 继承自 Window，`setWindowManager()` 是在父类 Window 中定�
     }
 ```
 
-<font color=red>**所以 Window.mWindowManager 其实是一个 WindowManagerImpl 对象**</font>，继续回到 `setContentView()`；
+<font color=red>**所以 Window.mWindowManager 其实是一个 WindowManagerImpl 对象**</font>；
 
-### 1.2 setContentView() - DecorView 来源
+### 1.1.2 setContentView()
+
+`performLaunchActivity()` 的最后调用 `callActivityOnCreate()` 启动了 Activity 的子类的 `onCreate()` ，我们都知道在其中会调用 `setContentView()` ，Activity 中有 3 个 setContentView() 方法，选取其中一个：
 
 ``` java
 // Activity.java
@@ -211,7 +193,19 @@ PhoneWindow 继承自 Window，`setWindowManager()` 是在父类 Window 中定�
     }
 ```
 
-通过分析 `performLaunchActivity()` 得知 `getWindow()` 返回的是一个 PhoneWindow 对象，
+先来看一下 `getWindow()` 返回什么：
+
+``` java
+// Activity.java
+    private Window mWindow;
+    public Window getWindow() {
+        return mWindow;
+    }
+// Window.java
+public abstract class Window {
+```
+
+<font color=red>**返回了一个 Window 对象，属于 Activity**</font>，通过分析 `performLaunchActivity()` 得知 `getWindow()` 返回的是一个 PhoneWindow 对象，
 
 ``` java
 // PhoneWindow.java
@@ -246,7 +240,7 @@ mContentParent 是一个 ViewGroup，继承自 View，从名字可知它除了�
 
 先来看一下 installDecor()；
 
-#### 1.2.1 installDecor() -创建安装 DecorView
+#### 1.1.2.1 installDecor() -安装 DecorView
 
 ``` java
 // PhoneWindow.java
@@ -292,7 +286,7 @@ mContentParent 是一个 ViewGroup，继承自 View，从名字可知它除了�
         ...
 ```
 
-**创建 DecorView**，并通过 `setWindow()` **把 PhoneWindow 对象传递给 DecorView.mWindow**，如果已经存在 DecorView，则直接通过 `setWindow()` 把 PhoneWindow 传递过去，  这里虽然创建了 DecorView，但是此时的 DecorView 还是一个空白的 FrameLayout（DecorView 继承自 FrameLayout）；
+**创建 DecorView**，并通过 `setWindow()` **把 PhoneWindow 对象传递给 DecorView.mWindow**，如果已经存在 DecorView，则直接通过 `setWindow()` 把 PhoneWindow 传递过去，  这里虽然创建了 DecorView，但是**此时的 DecorView 还是一个空白的 FrameLayout**（DecorView 继承自 FrameLayout）；
 
 继续看 `generateLayout()` 获取 ViewGropu 对象；
 
@@ -404,7 +398,7 @@ DecorCaptionView 的注释意思是 DecorCaptionView 是窗口的标题视图，
 
 可见 `findViewById()` 都是从 DecorView 中查找 View，所以返回的 contentParent 是 DecorView 的一部分，<font color=red>**即 mContentParent 是 DecorView 的一部分**</font>；
 
-#### 1.2.2 addView - 添加 view 到 ContentParent
+#### 1.1.2.2 ContentParent.addView - 添加 view 到 ContentParent
 
 `installDecor()` 创建 DecorView、加载布局到 DecorView，获取 ContentParent 后，下一步就是调用 `ContentParent.addView()` 把 View 添加到 mContentParent 这个 ViewGroup 中；
 
@@ -426,7 +420,7 @@ DecorCaptionView 的注释意思是 DecorCaptionView 是窗口的标题视图，
 
 这里就不详细分析了，继续回到 `handleResumeActivity()` 中；
 
-## 2 WMI.addView(DecorView)
+# 2 WMI.addView(DecorView)
 
 先回忆一下为什么分析 setContentView()，因为在分析 `handleResumeActivity()` 时遇到了 DecorView、Window、WindowManager 等不熟悉的对象，但是这些对象的来源和 `setContentView()` 有关，所以就转而分析 `setContentView()` 了；
 
@@ -436,7 +430,7 @@ DecorCaptionView 的注释意思是 DecorCaptionView 是窗口的标题视图，
             boolean isForward, String reason) {
         ...
             ViewManager wm = a.getWindowManager();
-                    wm.addView(decor, l); // 把获取的 DecorView 添加到 ViewManager 中，调用 WindowManagerImpl.addView
+                    wm.addView(decor, l); // 把获取的 DecorView 交给 WindowManagerIpml 中进行添加 View 操作
                 } else {
             ...
         Looper.myQueue().addIdleHandler(new Idler());
@@ -455,7 +449,7 @@ DecorCaptionView 的注释意思是 DecorCaptionView 是窗口的标题视图，
     }
 ```
 
-这个 `mGlobal` 是一个 WindowManagerGlobal 对象，
+WindowManagerImpl 又直接交给了 WindowManagerGlobal 处理，这个 `mGlobal` 是一个单例；
 
 ``` java
 // WindowManagerGlobal.java
@@ -482,18 +476,27 @@ DecorCaptionView 的注释意思是 DecorCaptionView 是窗口的标题视图，
 
             // do this last because it fires off messages to start doing things
             try {
-                // 传入的 view 是 PhoneWindow.mDecor(DecorView 对象)，从 ActivityThread.handleResumeActivity 中的 addView 传过来的
-                root.setView(view, wparams, panelParentView, userId); // 把视图添加到窗口
+                // 把 window 对应的 View 传递给 VRI，通过 VRI 来更新界面并完成 Window 的添加过程
+                root.setView(view, wparams, panelParentView, userId);
             } catch (RuntimeException e) {
                 ...
 ```
 
-new 了一个 ViewRootImpl 对象，来看看 ViewRootImpl 的构造函数；
+new 了一个 ViewRootImpl 对象，然后调用 VRI.setView()，来看看 ViewRootImpl 的构造函数；
 
-### 2.1 ViewRootImpl 构造函数
+## 2.1 ViewRootImpl 构造函数
 
 ``` java
 // ViewRootImpl.java
+/**
+ * The top of a view hierarchy, implementing the needed protocol between View
+ * and the WindowManager.  This is for the most part an internal implementation
+ * detail of {@link WindowManagerGlobal}.
+ *
+ * {@hide}
+ */
+@SuppressWarnings({"EmptyCatchBlock", "PointlessBooleanExpression"})
+public final class ViewRootImpl implements ViewParent...{
     public ViewRootImpl(Context context, Display display) {
         this(context, display, WindowManagerGlobal.getWindowSession(), false /* useSfChoreographer */);
     }
@@ -511,7 +514,7 @@ new 了一个 ViewRootImpl 对象，来看看 ViewRootImpl 的构造函数；
         ...
         mWindow = new W(this); // W extends IWindow.Stub，负责 WMS 到 Activity 的通信
         mAttachInfo = new View.AttachInfo(mWindowSession, mWindow, display, this, mHandler, this,
-                context);
+                context); // 创建 AttachInfo，传入 ViewRootImpl，就把 View 和 ViewRootImpl 绑定起来了
         ...
         mChoreographer = useSfChoreographer
                 ? Choreographer.getSfInstance() : Choreographer.getInstance();
@@ -520,7 +523,9 @@ new 了一个 ViewRootImpl 对象，来看看 ViewRootImpl 的构造函数；
         ...
 ```
 
-构造函数传递了一个 `WindowManagerGlobal.getWindowSession()` 作为参数，
+从注释中看出 ViewRootImpl 是 View 中的顶级层级，实现了 View 和 WindowManager 之间需要的协议；
+
+构造函数传递了一个 `WindowManagerGlobal.getWindowSession()` 作为参数，创建了 AttachInfo 对象，AttachInfo 是 View 的内部类，其中有个 mViewRootImpl 属性，构造 AttachInfo 的时候把 ViewRootImpl 作为参数传递给了 mViewRootImpl，这样就把 View 和 ViewRootImpl 绑定起来了，然后 PhoneWindow.getViewRootImpl 获取的也是 AttachInfo.mViewRootImpl；
 
 ``` java
 // WindowManagerGlobal.java
@@ -570,7 +575,7 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
 -   把 IWindowSession 传递给 `ViewRootImpl.mWindowSession` ，Session 持有 WMS 对象，这样 Activity 就可以<font color=red>**通过 mWindowSession 和 WMS 通信**</font>（为什么不直接使用 WMS 的代理通信呢？）；
 -   创建 W 对象，W 继承 IWindow.Stub，会通过 `ViewRootImpl.setView()` 传递到 WMS 中以创建 Activity 对应的 WindowState，<font color=red>**W 也负责 WMS 到 Activity 的通信**</font>；
 
-### 2.2 ViewRootImpl.setView()
+## 2.2 ViewRootImpl.setView()
 
 ``` java
 // ViewRootImpl.java
@@ -596,10 +601,10 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
 
 传入的参数 view 就是 DecorView，保存到 ViewRootImpl.mView；
 
-- requestLayout()：Activity 视图首次显示之前，调用请求重新布局；
-- addToDisplayAsUser()：
+- requestLayout()：Activity 视图首次显示之前，完成第一次 layout 布局过程，以确保在收到任何系统事件后面重新布局，最终调用 performTraversals() 那套 measure/layout/draw 流程；
+- addToDisplayAsUser()：将 view 传递给 WMS；
 
-#### 2.2.1 VRI.requestLayout() - 请求布局
+### 2.2.1 VRI.requestLayout() - 请求布局
 
 ``` java
 // ViewRootImpl.java
@@ -858,7 +863,7 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
 
 `performTraversals()` 方法向 WMS 申请了 Surface、测量（measure）、布局（layout）、绘制（draw）三大流程，此文暂不分析；
 
-#### 2.2.2 Session.addToDisplayAsUser()
+### 2.2.2 Session.addToDisplayAsUser()
 
 ``` java
 // Session.java
@@ -941,20 +946,20 @@ mService 是 WMS 对象，直接调用 `WMS.addWindow()`；
 
 
 
-## 3 总结
+# 3 总结
 
  ![](https://raw.githubusercontent.com/rangerzhou/ImageHosting/master/blog_resource/2022/Activity_Window_DecorView.png "")
 
-每个 Activity 中有个 Window 对象，用来描述程序窗口，每个窗口又包含一个 View 对象，用来描述程序视图，
+每个 Activity 中有个 Window 对象，用来描述程序窗口，每个窗口又包含一个 View 对象，用来描述程序视图；
 
-performLaunchActivity() 时通过 attach() 方法初始化了这个 mWindow:Window 为 PhoneWindow 对象，并为这个 mWindow 绑定了 WindowManager（其实为 WindowManagerImpl 对象），在 onCreate() 中会 调用 PhoneWindow.setContentView()，
+performLaunchActivity() 时<font color=red>**通过 attach() 方法生成 PhoneWindow 对象，生成 WindowManager（其实为 WindowManagerImpl 对象）并和 mWindow 绑定**</font>，在 onCreate() 中会 调用 PhoneWindow.setContentView()，
 
-- 在其中创建了 DecorView，并关联了 PhoneWindow 对象；
+- <font color=red>**在 `setContentView()` 创建了 DecorView**</font>，并关联了 PhoneWindow 对象；
 - 然后根据主题获取样式信息，根据样式加载对应的布局到 DecorView；
 - 再从 DecorView 中通过 `findViewById()` 获取并返回 id 为 `R.id.content` 的 View （contentParent ）给到 `PhoneWindow.mContentParent` ；
-- 最后把 setContentView() 传入的 View 添加到 PhoneWindow.mContentParent；
+- 最后把 setContentView() 传入的 View 添加到 PhoneWindow.mContentParent，只是把需要添加的 View添加保存在了 DecorView 中，但是还没绘制；
 
-在 performResumeActivity() 阶段通过 addView() 把 DecorView 添加到 WindowManager，真正干活的是 WindowManagerGlobal，在其中创建了 ViewRootImpl，VRI 包含了 mWindowSession:Session 对象用于 Activity 向 WMS 通信，也包含了 mWindow:W 对象用于 WMS 向 Activity 通信，然后通过 setView() 实现 addView()，把视图添加到窗口，
+在 performResumeActivity() 阶段通过 addView() 把 DecorView 添加到 WindowManager，真正干活的是 WindowManagerGlobal，在其中创建了 ViewRootImpl，VRI 包含了 mWindowSession:Session 对象用于 Activity 向 WMS 通信，也包含了 mWindow:W 对象用于 WMS 向 Activity 通信，然后通过 setView() 实现 addView()，把视图交给 WindowManager 管理，
 
 - 在其中通过 requestLayout() 触发第一次绘制，向 WMS 申请 Surface；
 - 然后再通过 WMS.addWindow() 在 WMS 中创建一个与 Window 相关的 WindowState 对象，WMS 管理所有的 Window 的层级、位置、大小，掌管 Surface 的显示顺序、位置、大小，应用端在分配的 Surface 绘制完成后，SurfaceFlinger 把这些 Surface 图像按 WMS 中的层级、位置、大小等进行合成，最终写屏幕的缓冲区显示出来；
