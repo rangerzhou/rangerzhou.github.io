@@ -602,7 +602,7 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
 传入的参数 view 就是 DecorView，保存到 ViewRootImpl.mView；
 
 - requestLayout()：Activity 视图首次显示之前，完成第一次 layout 布局过程，以确保在收到任何系统事件后面重新布局，最终调用 performTraversals() 那套 measure/layout/draw 流程；
-- addToDisplayAsUser()：将 view 传递给 WMS；
+- addToDisplayAsUser()：完成 WindowManager 和 WMS 的通信，将 Window 信息传递给 WMS；
 
 ### 2.2.1 VRI.requestLayout() - 请求布局
 
