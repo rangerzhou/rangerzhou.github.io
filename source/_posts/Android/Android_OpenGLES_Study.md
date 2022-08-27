@@ -221,7 +221,6 @@ MatrixState.scale(0.4f, 2f, 0.6f); //x、y、z 3 个方向按各自的缩放因�
 ### mix()：插值
 
 ``` kotlin
-
 genType mix(genType x,genType y,float a)
 ```
 
@@ -229,3 +228,12 @@ genType mix(genType x,genType y,float a)
 
 
 
+## 6 颜色混合模式
+
+https://cloud.tencent.com/developer/article/1132385?from=article.detail.1367494
+
+
+
+## 7 深度测试
+
+https://cloud.tencent.com/developer/article/1367494
