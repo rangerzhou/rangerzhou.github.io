@@ -1,5 +1,5 @@
 ---
-title: Android - SystemUIApplication 创建及 SystemUI 启动
+title: Android - SystemUIApplication 创建、SystemUI 启动以及添加系统窗口
 date: 2022-02-27 14:25:36
 tags:
 categories: Android
@@ -9,7 +9,7 @@ password:
 
 
 
->Android SystemUIApplication 创建及 SystemUI 启动，源码基于 android-12.1.0_r4；
+>Android SystemUIApplication 创建、SystemUI 启动以及系统窗口的添加，源码基于 android-12.1.0_r4；
 
 <!--more-->
 
@@ -377,6 +377,8 @@ public class SystemUIApplication extends Application implements
 
 把传入的 callback 参数传递给了 mContextAvailableCallback，从前面分析 `handleBindApplication()` 得知，先创建 Application 对象，然后执行 `Application.onCreate()`方法，至此已经创建了 SystemUIApplication，接下来看 SystemUIApplication.onCreate() 方法；
 
+##### SystemUIApplication.onCreate()
+
 ``` java
 // SystemUIApplication.java
     @Override
@@ -386,7 +388,7 @@ public class SystemUIApplication extends Application implements
         mContextAvailableCallback.onContextAvailable(this);
 ```
 
-这里回调了 `onContextAvailable()` 方法，在上面传递 ContextAvailableCallback 给 SystemUIApplication 的时候定义了这个方法，此时就执行到了这段代码：
+这里回调了 `onContextAvailable()` 方法，在上面传递 ContextAvailableCallback 给 SystemUIApplication 的时候定义了这个方法，此时则执行到了这段代码：
 
 ``` java
 // SystemUIAppComponentFactory.java
@@ -407,6 +409,8 @@ public class SystemUIAppComponentFactory extends AppComponentFactory {
 
 - SystemUIFactory.createFromConfig()
 - SystemUIFactory.getInstance().getSysUIComponent().inject(SystemUIAppComponentFactory.this)：初始化 depency 中含 @inject 的变量；
+
+###### createFromConfig()
 
 ``` java
 // SystemUIFactory.java
@@ -431,8 +435,12 @@ public class SystemUIFactory {
     private GlobalRootComponent mRootComponent;
     private SysUIComponent mSysUIComponent;
     public void init(Context context, boolean fromTest)... {
-        mRootComponent = buildGlobalRootComponent(context); // 获取 systemui 的 dagger 组件
-        SysUIComponent.Builder builder = mRootComponent.getSysUIComponent();
+        mRootComponent = buildGlobalRootComponent(context); // 获取 dagger 根组件（不仅仅包含 SystemUIComponent）
+        SysUIComponent.Builder builder = mRootComponent.getSysUIComponent(); // 从根组件获取 SystemUIComponent 组件
+        mSysUIComponent = builder.build();
+        if (mInitializeComponents) {
+            mSysUIComponent.init();
+        }
         Dependency dependency = mSysUIComponent.createDependency();
         dependency.start();
     }
@@ -441,7 +449,68 @@ public class SystemUIFactory {
     }
 ```
 
-获取 SystemUI 的 dagger 组件，创建 dependency 对象，执行 Dependency.start() 方法，获取 SystemUIComponent 对象，执行其 inject() 方法初始化 Depency 中含 @inject 的变量，这里涉及到 dagger2 的知识；
+获取 SystemUI 的 dagger 组件，创建 dependency 对象，Dependency 管理各式各样的依赖，被依赖的实例通过 Map 管理，但并不是在初始化的时候就缓存它们。而先将各实例对应的懒加载回调缓存进去。其后在各实例确实需要使用的时候通过注入的懒加载获取和缓存；
+
+``` java
+
+@SysUISingleton
+public class Dependency {
+    private final ArrayMap<Object, Object> mDependencies = new ArrayMap<>(); // 使用 class 作为 key 将对应实例缓存的 Map
+    private final ArrayMap<Object, LazyDependencyCreator> mProviders = new ArrayMap<>(); // 缓存实例的懒加载回调的 Map
+    @Inject DumpManager mDumpManager;
+
+    @Inject Lazy<StatusBarWindowController> mTempStatusBarWindowController;
+    @Inject Lazy<IStatusBarService> mIStatusBarService;
+    @Inject Lazy<StatusBarStateController> mStatusBarStateController;
+    protected void start() {
+        // TODO: Think about ways to push these creation rules out of Dependency to cut down
+        // on imports.
+        mProviders.put(StatusBarWindowController.class, mTempStatusBarWindowController::get);
+        mProviders.put(IStatusBarService.class, mIStatusBarService::get);
+        mProviders.put(StatusBarStateController.class, mStatusBarStateController::get);
+        ...
+    }
+    // 根据 class 查询缓存，尚未缓存的话通过懒加载回调获取注入的实例并缓存
+    private synchronized <T> T getDependencyInner(Object key) {
+        @SuppressWarnings("unchecked")
+        T obj = (T) mDependencies.get(key);
+        if (obj == null) {
+            obj = createDependency(key);
+            mDependencies.put(key, obj);
+        }
+        return obj;
+    }
+    public <T> T createDependency(Object cls) {
+        Preconditions.checkArgument(cls instanceof DependencyKey<?> || cls instanceof Class<?>);
+
+        @SuppressWarnings("unchecked")
+        LazyDependencyCreator<T> provider = mProviders.get(cls);
+        if (provider == null) {
+            throw new IllegalArgumentException("Unsupported dependency " + cls
+                    + ". " + mProviders.size() + " providers known.");
+        }
+        return provider.createDependency();
+    }
+    private interface LazyDependencyCreator<T> {
+        T createDependency();
+    }
+```
+
+执行 Dependency.start() 方法；
+
+###### getSysUIComponent.inject()
+
+``` java
+// SystemUIFactory.java
+    private SysUIComponent mSysUIComponent;
+    public SysUIComponent getSysUIComponent() {
+        return mSysUIComponent;
+    }
+// SysUIComponent.java
+    void inject(SystemUIAppComponentFactory factory);
+```
+
+获取上面得到的 mSysUIComponent，执行其中的 inject() 方法，参数为 SystemUIAppComponentFactory.this，所以是初始化 SystemUIAppComponentFactory 中标注 @Inject 的变量；
 
 Application 创建后，接下来就会执行到 SystemUIService 中的逻辑，进入 SystemUIService.onCreate()；
 
@@ -544,50 +613,20 @@ config_systemUIServiceComponents 定义了 SystemUI 的子类组件，状态栏�
     }
 ```
 
-遍历 SystemUI 子类对象，根据类名通过反射获取子类实例，将实例赋值给 mServices 数组，并执行子类 `start()` 方法，这里以 StatusBar 为例；
+遍历 SystemUI 子类对象，根据类名通过反射获取子类实例，将实例赋值给 mServices 数组，并执行子类 `start()` 方法，这里以 StatusBar 为例，执行 `StatusBar.start()`；
 
 ``` java
 // StatusBar.java
     public void start() {
-        mScreenLifecycle.addObserver(mScreenObserver);
-        mWakefulnessLifecycle.addObserver(mWakefulnessObserver);
-        mUiModeManager = mContext.getSystemService(UiModeManager.class);
-        mBypassHeadsUpNotifier.setUp();
-        if (mBubblesOptional.isPresent()) {
-            mBubblesOptional.get().setExpandListener(mBubbleExpandListener);
-        }
-
-        mStatusBarSignalPolicy.init();
-        mKeyguardIndicationController.init();
-
-        mColorExtractor.addOnColorsChangedListener(mOnColorsChangedListener);
+        ...
         mStatusBarStateController.addCallback(mStateListener,
                 SysuiStatusBarStateController.RANK_STATUS_BAR);
         // 获取 WindowManagerImpl
         mWindowManager = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
-        mDreamManager = IDreamManager.Stub.asInterface(
-                ServiceManager.checkService(DreamService.DREAM_SERVICE));
-
-        mDisplay = mContext.getDisplay();
-        mDisplayId = mDisplay.getDisplayId();
-        updateDisplaySize();
-        mStatusBarHideIconsForBouncerManager.setDisplayId(mDisplayId);
-
+        ...
         // start old BaseStatusBar.start().
         mWindowManagerService = WindowManagerGlobal.getWindowManagerService(); // 获取 IWindowManager.Stub.Proxy
-        mDevicePolicyManager = (DevicePolicyManager) mContext.getSystemService(
-                Context.DEVICE_POLICY_SERVICE);
-
-        mAccessibilityManager = (AccessibilityManager)
-                mContext.getSystemService(Context.ACCESSIBILITY_SERVICE);
-
-        mKeyguardUpdateMonitor.setKeyguardBypassController(mKeyguardBypassController);
-        mBarService = IStatusBarService.Stub.asInterface(
-                ServiceManager.getService(Context.STATUS_BAR_SERVICE));
-
-        mKeyguardManager = (KeyguardManager) mContext.getSystemService(Context.KEYGUARD_SERVICE);
-        mWallpaperSupported = mWallpaperManager.isWallpaperSupported();
-
+        ...
         RegisterStatusBarResult result = null;
         try {
             result = mBarService.registerStatusBar(mCommandQueue);
@@ -598,18 +637,52 @@ config_systemUIServiceComponents 定义了 SystemUI 的子类组件，状态栏�
         createAndAddWindows(result);
 ```
 
-
+调用 createAndAddWindows()；
 
 ``` java
 // StatusBar.java
     // 创建状态栏 View, 并将其添加到 WindowManager
     public void createAndAddWindows(@Nullable RegisterStatusBarResult result) {
-        makeStatusBarView(result); // 根据布局文件 super_status_bar.xml 创建 StatusBarWindowView
+        makeStatusBarView(result);
         mNotificationShadeWindowController.attach();
 
         mStatusBarWindowController.attach(); // 将 StatusBarWindowView 添加到 WindowManager
     }
 ```
 
+在前面 Depency.java 中看到其中有 StatusBarWindowController，在 StatusBarWindowController 构造函数中初始化了 mStatusBarWindowView对象，
 
+``` java
+// StatusBarWindowController.java
+    @Inject
+    public StatusBarWindowController(...) {
+        mContext = context;
+        mWindowManager = windowManager;
+        mIWindowManager = iWindowManager;
+        mContentInsetsProvider = contentInsetsProvider;
+        mStatusBarWindowView = statusBarWindowView; // 初始化 mStatusBarWindowView
+        mLaunchAnimationContainer = mStatusBarWindowView.findViewById(
+                R.id.status_bar_launch_animation_container);
+        mLpChanged = new WindowManager.LayoutParams();
+        mResources = resources;
+
+        if (mBarHeight < 0) {
+            mBarHeight = SystemBarUtils.getStatusBarHeight(mContext);
+        }
+    }
+```
+
+随后调用 attach() 函数把 StatusBarWindowView 添加到 WindowManager 中；
+
+``` java
+// StatusBarWindowController.java
+private final WindowManager mWindowManager;
+public void attach() {
+        ...
+        mWindowManager.addView(mStatusBarWindowView, mLp); // 将 StatusBarWindowView 添加到 WindowManager
+        ...
+    }
+```
+
+后面的工作就和[Activity 窗口添加-第二小节](http://rangerzhou.top/2022/02/20/Android/AndroidDevelop_017_ActivityCreateAndWindowDisplay/) 一样了；
 
