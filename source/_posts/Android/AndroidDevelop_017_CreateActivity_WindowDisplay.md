@@ -378,7 +378,7 @@ mContentParent 是一个 ViewGroup，继承自 View，从名字可知它除了�
 
 DecorCaptionView 的注释意思是 DecorCaptionView 是窗口的标题视图，包含标题和窗口控制按钮，这种 decor 的可见性取决于工作空间和窗口类型，如果窗口类型不需要这样的视图，则 mDecorCaptionView 可能为空，所以要进行判空操作；
 
-可以看到 `onResuourcesLoaded()` 的目的是加载传入的 layoutResource 成为跟视图，然后把跟视图添加到 DecorView 中；
+可以看到 `onResuourcesLoaded()` 的目的是加载传入的 layoutResource 成为根视图，然后把根视图添加到 DecorView 中；
 
 接下来看一下 `findViewById()`；
 

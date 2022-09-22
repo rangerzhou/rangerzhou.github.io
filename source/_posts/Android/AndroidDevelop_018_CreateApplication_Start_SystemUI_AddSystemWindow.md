@@ -1,5 +1,5 @@
 ---
-title: Android - SystemUIApplication 创建、SystemUI 启动以及添加系统窗口
+title: Android - Application 创建流程、SystemUI 启动以及添加系统窗口（Android 12）
 date: 2022-02-27 14:25:36
 tags:
 categories: Android
@@ -9,7 +9,7 @@ password:
 
 
 
->Android SystemUIApplication 创建、SystemUI 启动以及系统窗口的添加，源码基于 android-12.1.0_r4；
+>Android Application 创建、SystemUI 启动以及系统窗口的添加，源码基于 android-12.1.0_r4；
 
 <!--more-->
 
@@ -46,7 +46,7 @@ SystemUI 启动
             >com.android.systemui/com.android.systemui.SystemUIService</string>
 ```
 
-进程启动后会执行到 `ActivityThread.main()` 方法中，然后调用 `thread.attach()`，attach 通过 binder 调用 `AMS.attachApplication() -> attachApplicationLocked() -> thread.bindApplication()`，然后发送 Handler 消息 BIND_APPLICATION，主线程 looper 收到后调用 `handleBinderApplication()`，接下来从这里分析；
+进程启动后会执行到 `ActivityThread.main()` 方法中，然后调用 `thread.attach()`，attach 通过 binder 调用 `AMS.attachApplication() -> attachApplicationLocked() -> thread.bindApplication()/ActivityTaskManagerInternal.attachApplication()`，然后发送 Handler 消息 BIND_APPLICATION/EXECUTE_TRANSACTION，主线程 looper 收到 BIND_APPLICATION 消息后调用 `handleBinderApplication()`，接下来从这里分析；
 
 ## handleBindApplication()
 

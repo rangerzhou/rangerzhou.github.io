@@ -1174,3 +1174,8 @@ git config --global core.safecrlf warn
 ```
 
 如果不想 git 干涉我们的文件换行符格式，则配置 core.autocrlf 为 false；
+
+#### 34. 上下文切换
+
+https://shuyi.tech/archives/os-context-switch
+

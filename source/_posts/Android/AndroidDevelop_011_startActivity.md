@@ -1,5 +1,5 @@
 ---
-title: Android - APP 启动流程分析
+title: Android - Activity 启动流程分析（Android 12）
 date: 2021-11-05 20:52:15
 tags:
 categories: Android
@@ -607,7 +607,7 @@ TransactionExecutor 类的功能就是以正确顺序管理事务执行，即前
         final Activity a = performLaunchActivity(r, customIntent);
 ```
 
-### 4.7 performLaunchActivity()
+#### 4.6.1 performLaunchActivity() - 创建 Activity
 
 ``` java
 // ActivityThread.java
@@ -645,7 +645,7 @@ TransactionExecutor 类的功能就是以正确顺序管理事务执行，即前
 
 performLaunchActivity() 的作用就是在 `Instrumentation.newActivity()` 函数中根据 Activity 的类名通过通过反射机制创建对应的 Activity，然后调用 Activity 的 onCreate() 函数；
 
-### 4.8 callActivityOnCreate -> performCreate -> onCreate
+#### 4.6.2 callActivityOnCreate - 执行 Activity.onCreate
 
 ``` java
 // Instrumentation.java
@@ -1185,11 +1185,11 @@ fork 成功后 zygote 进程通过 socket 返回数据；
 
 通过 Binder 调用 AMS.attachApplication()，并传入 app 的 Binder 对象 mAppThread。
 
-## 8. system_server 请求 APP binderApplication[Binder]
+## 8. system_server 请求 APP bindeApplication[Binder]
+
+system_server 收到请求后向 app binder线程(ApplicationThread) 请求 bindeApplication[Binder 通信]；
 
 ### 8.1 attachApplication()
-
-system_server 收到请求后向 app binder线程(ApplicationThread)请求 binderApplication[Binder]
 
 ``` java
 // ActivityManagerService.java
@@ -1231,14 +1231,14 @@ system_server 收到请求后向 app binder线程(ApplicationThread)请求 binde
         }
 ```
 
-thread 是 app 进程传过来的 binder 对象，所以会调用 ActivityThread.bindApplication() 初始化 app 进程，attachApplicationLocked 做了两件重要的事：
+thread 是 app 进程传过来的 binder 对象，attachApplicationLocked 做了两件重要的事：
 
-- thread.bindApplication：初始化 app 进程并启动；
-- mAtmInternal.attachApplication：启动 Activity；
+- thread.bindApplication：创建 Application 并启动其 onCreate() 方法；
+- mAtmInternal.attachApplication：创建 Activity，并启动其 onCreate()/onResume() 等方法；
 
-## 9. 启动 APP
+## 9. 创建 Application/Activity
 
-### 9.1 初始化 APP 进程并启动 APP
+### 9.1 初始化 Application 进程并启动 onCreate()
 
 ``` java
 // ActivityThread.java
@@ -1275,12 +1275,11 @@ thread 是 app 进程传过来的 binder 对象，所以会调用 ActivityThread
         VMRuntime.setProcessPackageName(data.appInfo.packageName);
         final ContextImpl appContext = ContextImpl.createAppContext(this, data.info); // 创建 app 的上下文
         Application app;
-                // 启动应用
-                mInstrumentation.onCreate(data.instrumentationArgs);
-                mInstrumentation.callApplicationOnCreate(app);
+            app = data.info.makeApplication(data.restrictedBackupMode, null); // 创建 Application
+                mInstrumentation.callApplicationOnCreate(app); // 启动 Application.onCreate() 方法
 ```
 
-通过 Instrumentation 启动 APP；
+创建 Application，然后通过 `callApplicationOnCreate()` 启动 `Application.onCreate()` 方法；
 
 ``` java
 // Instrumentation.java
@@ -1289,9 +1288,9 @@ thread 是 app 进程传过来的 binder 对象，所以会调用 ActivityThread
     }
 ```
 
-终于调到 app 进程的 onCreate() 方法了，
+到这里应用程序的 Application 中的 onCreate() 方法就执行了；
 
-### 9.2 启动 APP 的 Activity
+### 9.2 创建 Activity
 
 ``` java
 // ActivityManagerService.java
@@ -1302,7 +1301,7 @@ thread 是 app 进程传过来的 binder 对象，所以会调用 ActivityThread
     }
 ```
 
-
+调用 ActivityTaskManagerInternal.attachApplication() 方法；
 
 ``` java
 // ActivityTaskManagerService.java
@@ -1313,7 +1312,7 @@ thread 是 app 进程传过来的 binder 对象，所以会调用 ActivityThread
                 ...
 ```
 
-
+调用 RootWindowContainer.attachApplication() 方法；
 
 ``` java
 // RootWindowContainer.java
@@ -1327,7 +1326,7 @@ thread 是 app 进程传过来的 binder 对象，所以会调用 ActivityThread
                 ...
 ```
 
-
+调用 RootWindowContainer.startActivityForAttachedApplicationIfNeeded() 方法；
 
 ``` java
 // RootWindowContainer.java
@@ -1349,16 +1348,17 @@ thread 是 app 进程传过来的 binder 对象，所以会调用 ActivityThread
 
 点击 Launcher 中的 icon 可以启动 APP，APP 启动流程分为如下阶段：
 
-- Launcher 通过 **Binder** 向 system_server 进程发起 startActivity 请求
-- system_server 通过 **socket** 向 zygote 发起创建进程请求
-- zygote 进程 fork 出 app 子进程，通过 **socket** 返回 pid 给 system_server 进程
-- app 子进程通过 **Binder** 向 system_server 进程发起 attachApplication 请求
-- system_server 进程通过 **Binder** 向 app 进程发送 binderApplication 请求
-- app 进程的 binder 线程（ApplicationThread）收到请求后通过 **Handler** 向 app 主线程发送 BIND_APPLICATION 消息
-- system_server 进程通过 **Binder** 向 app 进程发送 scheduleTransaction 请求
-- app 进程的 binder 线程（ApplicationThread）收到请求后通过 **Handler** 向 app 主线程发送 EXECUTE_TRANSACTION 消息
-- app 主线程收到 Message 后通过反射机制创建目标 Activity，并回调 Activity.onCreate() 等方法
-- app 正式启动，进入 Activity 生命周期，执行 onCreate/onStart/onResume，UI 渲染结束进入 app 主界面
+- Launcher 通过 **Binder** 向 system_server 进程发起 startActivity 请求；
+- system_server 通过 **socket** 向 zygote 发起创建进程请求；
+- zygote 进程 fork 出 app 子进程，通过 **socket** 返回 pid 给 system_server 进程；
+- app 子进程通过 **Binder** 向 system_server 进程发起 attachApplication 请求；
+- system_server 进程通过 **Binder** 向 app 进程发送 binderApplication 请求；
+  - app 进程的 binder 线程（ApplicationThread）收到请求后通过 **Handler** 向 app 主线程发送 BIND_APPLICATION 消息，ActivityThread 通过 handleBindApplication() **创建 Application** 并执行其 onCreate() 方法；
+- system_server 进程通过 **Binder** 向 app 进程发送 scheduleTransaction 请求；
+  - app 进程的 binder 线程（ApplicationThread）收到请求后通过 **Handler** 向 app 主线程发送 EXECUTE_TRANSACTION 消息；
+
+- app 主线程收到 Message 后通过反射机制 **创建目标 Activity**；
+- app 正式启动，进入 Activity 生命周期，执行 onCreate/onStart/onResume，UI 渲染结束进入 app 主界面；
 
 
 

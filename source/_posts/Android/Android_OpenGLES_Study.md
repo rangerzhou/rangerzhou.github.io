@@ -85,9 +85,23 @@ OpenGL 渲染管线流程如上图所示，主要包括：**读取顶点数据 -
 
 ![Cartesian_coordinates](https://raw.githubusercontent.com/rangerzhou/ImageHosting/master/blog_resource/2022/Cartesian_coordinates.png "笛卡尔坐标系")
 
+- 世界坐标系内的坐标乘以观察矩阵变换到眼坐标空间 eye.xyzw = viewMatrix * world.xyzw;
+
+- 眼坐标系内的坐标通过乘上投影矩阵变换到裁剪空间 clip.xyzw = projectMatrix * eye.xyzw;
+
+- 裁剪坐标系内的坐标通过透视除法（也就是 w 为 1 化） 到 规范化设备坐标系 ndc.xyz = clip.xyz / clip.w;
+
+- 设备规范化坐标系到窗口坐标系 win.z = (dfar - dnear)/2 * ndc.z + (dfar+dnear)/2;
+
 齐次坐标：齐次坐标简而言之就是用 N+1 维来代表 N 维坐标，在原有2D/3D笛卡尔坐标末尾加上一个额外的变量 w，就形成了 2D/3D 齐次坐标；齐次坐标是用来表示一个点在无穷远处（∞,∞），比如一个点 (1,2) 移动到无穷远处，在笛卡尔坐标下变为 (∞,∞)，那么它的齐次坐标表示为 (1,2,0)，因为 (1/0,2/0) = (∞,∞)，这样就可以不用 ∞ 来表示一个无穷远处的点了，[点击查看齐次坐标参考讲解](https://zhuanlan.zhihu.com/p/373969867)。
 
+
+
+参考1：https://blog.csdn.net/grace_yi/article/details/109341926 —— 如上的转换方式公式
+
 参考2：https://blog.csdn.net/tiandyoin/article/details/106039312
+
+参考3：https://blog.csdn.net/zhongjling/article/details/8488844 —— 坐标转换理解
 
 ## 3. 顶点着色器的输入变量
 
