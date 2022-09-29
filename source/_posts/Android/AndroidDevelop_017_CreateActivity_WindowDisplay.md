@@ -300,11 +300,25 @@ mContentParent 是一个 ViewGroup，继承自 View，从名字可知它除了�
             requestFeature(XXX); // 2.根据样式信息请求 requestFeature
         int layoutResource;
         int features = getLocalFeatures(); // 3.获取当前 window 正在实现的功能
-        // 判断 features，根据主题格式，决定 layoutResource 值
-        ...
-                layoutResource = R.layout.screen_simple;
+        // 判断 features，根据主题格式，决定 layoutResource 值(根据不同 feature 确定不同的布局)
+        if ((features & ((1 << FEATURE_LEFT_ICON) | (1 << FEATURE_RIGHT_ICON))) != 0) {
+            if (mIsFloating) {
+                TypedValue res = new TypedValue();
+                getContext().getTheme().resolveAttribute(
+                        R.attr.dialogTitleIconsDecorLayout, res, true);
+                layoutResource = res.resourceId; // 获取对应标题栏的资源 id
+            } else {
+                layoutResource = R.layout.screen_title_icons;
+            }
+            // XXX Remove this once action bar supports these features.
+            removeFeature(FEATURE_ACTION_BAR);
+            // System.out.println("Title Icons!");
+        }... else {
+            // 默认加载布局
+            layoutResource = R.layout.screen_simple;
+        }
         mDecor.startChanging(); // 开始改变 DecorView
-        mDecor.onResourcesLoaded(mLayoutInflater, layoutResource); // 4.加载布局到 DecorView 中
+        mDecor.onResourcesLoaded(mLayoutInflater, layoutResource); // 4.实例化上面确定的布局并加载到 DecorView 中
         // ID_ANDROID_CONTENT 定义在 Window 中：com.android.internal.R.id.content
         // 5.contentParent 是 PhoneWindow.mDecor 的一部分
         ViewGroup contentParent = (ViewGroup)findViewById(ID_ANDROID_CONTENT);
@@ -318,7 +332,7 @@ mContentParent 是一个 ViewGroup，继承自 View，从名字可知它除了�
 -   根据功能获取对应的资源 ID，然后调用 `onResourcesLoaded()` 根据样式加载对应的布局到 PhoneWindow.mDecor(DecorView) 中；
 -   最后从 DecorView 中通过 `findViewById()` 获取并返回 id 为 `R.id.content` 的 View （contentParent ）给到 `PhoneWindow.mContentParent`；
 
-看一个布局例子：*frameworks/base/core/res/res/layout/screen_simple.xml*
+看一下默认布局：*frameworks/base/core/res/res/layout/screen_simple.xml*
 
 ``` xml
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
@@ -354,7 +368,7 @@ mContentParent 是一个 ViewGroup，继承自 View，从名字可知它除了�
         ...
         // 创建 DecorCaptionView（装饰标题视图）
         mDecorCaptionView = createDecorCaptionView(inflater);
-        // 加载传入的 layoutResource 成为根视图
+        // 实例化布局，加载传入的 layoutResource 成为根视图
         final View root = inflater.inflate(layoutResource, null);
         if (mDecorCaptionView != null) {// 判断 DecorCaptionView 是否为空
             if (mDecorCaptionView.getParent() == null) {
@@ -954,12 +968,12 @@ mService 是 WMS 对象，直接调用 `WMS.addWindow()`；
 
 performLaunchActivity() 时<font color=red>**通过 attach() 方法生成 PhoneWindow 对象，生成 WindowManager（其实为 WindowManagerImpl 对象）并和 mWindow 绑定**</font>，在 onCreate() 中会 调用 PhoneWindow.setContentView()，
 
-- <font color=red>**在 `setContentView()` 创建了 DecorView**</font>，并关联了 PhoneWindow 对象；
+- <font color=red>**在 `setContentView()` 创建了 DecorView**</font>，并关联了 PhoneWindow 对象（PhoneWindow 和 DecorView 互相持有）；
 - 然后根据主题获取样式信息，根据样式加载对应的布局到 DecorView；
 - 再从 DecorView 中通过 `findViewById()` 获取并返回 id 为 `R.id.content` 的 View （contentParent ）给到 `PhoneWindow.mContentParent` ；
 - 最后把 setContentView() 传入的 View 添加到 PhoneWindow.mContentParent，只是把需要添加的 View添加保存在了 DecorView 中，但是还没绘制；
 
-在 performResumeActivity() 阶段通过 addView() 把 DecorView 添加到 WindowManager，真正干活的是 WindowManagerGlobal，在其中创建了 ViewRootImpl，VRI 包含了 mWindowSession:Session 对象用于 Activity 向 WMS 通信，也包含了 mWindow:W 对象用于 WMS 向 Activity 通信，然后通过 setView() 实现 addView()，把视图交给 WindowManager 管理，
+在 performResumeActivity() 阶段通过 WindowManager.addView() 把 DecorView 添加到 Window 里，真正干活的是 WindowManagerGlobal，在其中创建了 ViewRootImpl，VRI 包含了 mWindowSession:Session 对象用于 Activity 向 WMS 通信，也包含了 mWindow:W 对象用于 WMS 向 Activity 通信，然后通过 setView() 实现 addView()，把视图交给 WindowManager 管理，
 
 - 在其中通过 requestLayout() 触发第一次绘制，向 WMS 申请 Surface；
 - 然后再通过 WMS.addWindow() 在 WMS 中创建一个与 Window 相关的 WindowState 对象，WMS 管理所有的 Window 的层级、位置、大小，掌管 Surface 的显示顺序、位置、大小，应用端在分配的 Surface 绘制完成后，SurfaceFlinger 把这些 Surface 图像按 WMS 中的层级、位置、大小等进行合成，最终写屏幕的缓冲区显示出来；
