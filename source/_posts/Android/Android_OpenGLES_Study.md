@@ -188,6 +188,15 @@ Matrix.setLookAtM(
 
 https://cloud.tencent.com/developer/article/1015587
 
+**对应 glm 库函数 API**
+
+``` kotlin
+// pos：摄像机位置向量(X,Y,Z坐标)，target：观察目标点位置向量(X,Y,Z坐标)，UP：摄像机 UP 向量(UP 向量在 X/Y/Z 轴上的分量)
+glm.lookAt(pos, target, UP)
+```
+
+https://blog.csdn.net/weixin_44176696/article/details/110149079 —— 详解参考
+
 ### Matrix.orthoM()：正交投影的设置
 
 正交投影效果是**远处近处看起来一样大**
@@ -202,6 +211,14 @@ Matrix.orthoM(
 );
 ```
 
+**对应 glm 库函数 API**
+
+``` kotlin
+glm.ortho(left, right, bottom, top, near, far)
+```
+
+
+
 ### Matrix.frustumM()：透视投影的设置
 
 透视投影效果是**近大远小**
@@ -215,6 +232,27 @@ Matrix.frustumM(
 	near, far //near 面、far 面与视点的距离
 );
 ```
+
+left，right, bottom,top，这 4 个参数会影响图像左右和上下缩放比，
+
+- 如果 left 和 right 已经设置好缩放 -width/height 和 width/height，则 bottom只需要设置为 -1，top设置为 1，这样就能保持图像不变形；
+- 也可以将 left/right 与 bottom/top 交换比例，即 bottom 和 top 设置为 -height/width 和 height/width, left 和 right 设置为 -1 和 1；
+- 即 (left+right)/(top+bottom) = width/height；
+
+**对应 glm 库函数 API**
+
+``` kotlin
+glm.frustum(left, right, bottom, top, near, far)
+```
+
+不过更加常用的方案是使用视线夹角作为参数来创建投影矩阵，因为我们总是认为相机投影应该四四方方的对称（而使用`frustum` 函数则没有这种限制）；
+
+``` kotlin
+// 第一个参数为视锥上下面之间的夹角(即 y 轴的视线夹角，单位为弧度)，第二个参数为视口宽高比，第三、四个参数分别为近平面和远平面的深度
+glm.perspective(glm.radians(33.0f), aspect, near, far)
+```
+
+<font color=red>**使用 `glm.perspective()` 需要注意的是，第一个参数是视椎体角度，因为 `tan(fov/2) = top / near, aspect = width / height = right / top`，所以真实设置的近平面参数 `top = tan(fov/2) * near,right = aspect * top, left = -right, bottom = -top`，这些参数和使用 `Matrix.frustumM()` 设置的参数才是一致的，在做 3D 物体拾取的时候近平面参数会直接影响射线起始点坐标。**</font>
 
 ### GLES30.glViewport()：设置视口
 
