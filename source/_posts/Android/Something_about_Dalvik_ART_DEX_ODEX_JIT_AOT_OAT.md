@@ -24,7 +24,7 @@ Dalvik 是 Google 公司自己设计用于 Android 平台的虚拟机。DVM 即 
 
    DVM 执行的是 .dex 文件，JVM 执行的是 .class 文件。
 
-   AVM 解释执行的是 dex 字节码 .dex ：.java --> .class --> .dex --> .apk
+   DVM 解释执行的是 dex 字节码 .dex ：.java --> .class --> .dex --> .apk
 
    JVM 运行的是 java 字节码 .class ：.java --> .class --> .jar
 
