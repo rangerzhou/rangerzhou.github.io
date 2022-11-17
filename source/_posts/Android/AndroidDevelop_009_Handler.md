@@ -809,7 +809,7 @@ Handler 不仅仅能用于子线程向主线程发送消息，也能用于主线
 
 - 在 ViewRootImpl 还没创建出来之前：此时 UI 更新的操作没有线程限制，因为 checkThread 方法不会执行；
 - 如果 ViewRootImpl 已经创建：
-  - 保证**创建 ViewRootImpl** 和 **UI 更新的操作**在**同一个线程**即可，也就是说要在同一个线程调用 `ViewManager#addView` 和 `ViewManager#updateViewLayout` 方法（ViewManager 是一个接口，WindowManger 接口继承了这个接口，通常都是同过 WindowManager(具体实现为 WindowManagerImpl) 进行 View 的 add/remove/update 操作）；
+  - 保证**创建 ViewRootImpl** 和 **UI 更新的操作**在**同一个线程**即可，也就是说要在同一个线程调用 `ViewManager#addView` 和 `ViewManager#updateViewLayout` 方法（ViewManager 是一个接口，WindowManger 接口继承了这个接口，通常都是通过 WindowManager(具体实现为 WindowManagerImpl) 进行 View 的 add/remove/update 操作）；
   - 对应的线程需要 Looper.prepare() 创建 Looper 并且调用 `Looper.loop()` 方法开启消息循环；
 
 ### 如何在主线程中访问网络？

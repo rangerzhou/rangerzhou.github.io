@@ -875,7 +875,7 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
     private void performTraversals() {
 ```
 
-`performTraversals()` 方法向 WMS 申请了 Surface、测量（measure）、布局（layout）、绘制（draw）三大流程，此文暂不分析；
+`performTraversals()` 方法向 WMS 申请了 Surface、测量（measure）、布局（layout）、绘制（draw）三大流程，此文暂不分析；[参考](https://blog.csdn.net/qq_41095045/article/details/122510861)
 
 ### 2.2.2 Session.addToDisplayAsUser()
 
