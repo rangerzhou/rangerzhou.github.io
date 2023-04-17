@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
 <meta name="theme-color" content="#222">
-<meta name="generator" content="Hexo 6.2.0">
+<meta name="generator" content="Hexo 6.3.0">
 <!-- pjax：防止跳转页面音乐暂停 -->
 <script src="https://cdn.jsdelivr.net/npm/pjax@0.2.8/pjax.js"></script>
   <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
@@ -27,19 +27,17 @@
     var CONFIG = {"hostname":"rangerzhou.top","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"manual"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":true,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":true,"nav":null,"activeClass":"gitalk"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
   </script>
 
-  <meta name="description" content="Here&#39;s something encrypted, password is required to continue reading.">
-<meta property="og:type" content="article">
-<meta property="og:title" content="Android - WMS系列之启动流程">
-<meta property="og:url" content="http://rangerzhou.top/2022/02/20/Android/AndroidDevelop_017_WMS01_Boot/index.html">
+  <meta name="description" content="我是一个小流氓我从来也不浪，有一天我心血来潮耍了个流氓，我嘴里吹着小口哨我心里好得意，不知怎么哗啦啦啦啦我摔了一身泥">
+<meta property="og:type" content="website">
+<meta property="og:title" content="RangerZhou">
+<meta property="og:url" content="http://rangerzhou.top/archives/2023/03/index.html">
 <meta property="og:site_name" content="RangerZhou">
-<meta property="og:description" content="Here&#39;s something encrypted, password is required to continue reading.">
+<meta property="og:description" content="我是一个小流氓我从来也不浪，有一天我心血来潮耍了个流氓，我嘴里吹着小口哨我心里好得意，不知怎么哗啦啦啦啦我摔了一身泥">
 <meta property="og:locale" content="zh_CN">
-<meta property="article:published_time" content="2022-02-20T14:16:06.000Z">
-<meta property="article:modified_time" content="2022-07-22T15:58:11.491Z">
 <meta property="article:author" content="Ranger Zhou">
 <meta name="twitter:card" content="summary">
 
-<link rel="canonical" href="http://rangerzhou.top/2022/02/20/Android/AndroidDevelop_017_WMS01_Boot/">
+<link rel="canonical" href="http://rangerzhou.top/archives/2023/03/">
 
 
 <script id="page-configurations">
@@ -47,14 +45,14 @@
   CONFIG.page = {
     sidebar: "",
     isHome : false,
-    isPost : true,
+    isPost : false,
     lang   : 'zh-CN'
   };
 </script>
 <script src="//cdn.bootcss.com/pace/1.0.2/pace.min.js"></script>
 <link href="//cdn.bootcss.com/pace/1.0.2/themes/pink/pace-theme-flash.css" rel="stylesheet">
 
-  <title>Android - WMS系列之启动流程 | RangerZhou</title>
+  <title>归档 | RangerZhou</title>
   
     <script async src="https://www.googletagmanager.com/gtag/js?id=UA-138158952-1"></script>
     <script data-pjax>
@@ -242,180 +240,77 @@
         <div class="content-wrap">
           
 
-          <div class="content post posts-expand">
+          <div class="content archive">
             
 
-    
   
   
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://rangerzhou.top/2022/02/20/Android/AndroidDevelop_017_WMS01_Boot/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Ranger Zhou">
-      <meta itemprop="description" content="我是一个小流氓我从来也不浪，有一天我心血来潮耍了个流氓，我嘴里吹着小口哨我心里好得意，不知怎么哗啦啦啦啦我摔了一身泥">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="RangerZhou">
-    </span>
-      <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-          Android - WMS系列之启动流程
-        </h1>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2022-02-20 22:16:06" itemprop="dateCreated datePublished" datetime="2022-02-20T22:16:06+08:00">2022-02-20</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2022-07-22 23:58:11" itemprop="dateModified" datetime="2022-07-22T23:58:11+08:00">2022-07-22</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Android/" itemprop="url" rel="index"><span itemprop="name">Android</span></a>
-                </span>
-            </span>
-
-          
-            <span id="/2022/02/20/Android/AndroidDevelop_017_WMS01_Boot/" class="post-meta-item leancloud_visitors" data-flag-title="Android - WMS系列之启动流程" title="阅读次数">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-eye"></i>
-              </span>
-              <span class="post-meta-item-text">阅读次数：</span>
-              <span class="leancloud-visitors-count"></span>
-            </span>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-        <div class="hbe hbe-container" id="hexo-blog-encrypt" data-wpm="Oh, this is an invalid password. Check and try again, please." data-whm="OOPS, these decrypted content may changed, but you can still have a look.">
-  <script id="hbeData" type="hbeData" data-hmacdigest="40ab8555a2c2138aa3f109a43ec52a23daecbfc539791a717bf903c92b3246e2">8a594f550020b2c4c53139d4c120877c670d47411eb78fc0c4abbfbe587bcfe2cb113c41bfd328c5065f6f2b39026d346a12ba8473dca30b30f240c25870a030489e615608fa9f6e76f98000ee177152e76d6a95c217e988b4d906c34b48bd06c561fecb61502376067f4deb2da17be1dcbae3e86c8e69f0e1e448dfd4040abf79f321fb32109ecc1343fcac9e185e6d4544677b561fc43351e23ea5518574b2139e272c97b707a613cb5296f5b3e348b5c8d88480ff605033b6598baa43b3225d7173fa010cb6f3d7f9524f0af91f4443071921465f954317130cef99ab094885d44414fa40e44effe17f7a3c69c8dbd50e8a7985ceed135d184c0f061dd66cdd5ce7c1470033e87b22bc8db3dfd0e4c4c5869bd579acfdfdad9db03e4d4fb5a835bdd8136c6d9044da70436e7175159ee19c4f4f420767ffdf3ecda374f4dbe9796a3dde3e8b23cf7117dc29041c9ec4f8cc29ecf2b535a13eac25a8dd0c9282fcdc64967ecc65741c56d16b7b9d0115b39cd612c5658568315fc3b9dd2975</script>
-  <div class="hbe hbe-content">
-    <div class="hbe hbe-input hbe-input-default">
-      <input class="hbe hbe-input-field hbe-input-field-default" type="password" id="hbePass">
-      <label class="hbe hbe-input-label hbe-input-label-default" for="hbePass">
-        <span class="hbe hbe-input-label-content hbe-input-label-content-default">Hey, password is required here.</span>
-      </label>
-    </div>
-  </div>
-</div>
-<script data-pjax src="/lib/hbe.js"></script><link href="/css/hbe.style.css" rel="stylesheet" type="text/css">
-    </div>
-
-    
-    
-    
-        <div class="reward-container">
-  <div>Donate comment here.</div>
-  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
-    打赏
-  </button>
-  <div id="qr" style="display: none;">
-      
-      <div style="display: inline-block;">
-        <img src="/images/wechatpay.jpg" alt="Ranger Zhou 微信支付">
-        <p>微信支付</p>
-      </div>
-      
-      <div style="display: inline-block;">
-        <img src="/images/alipay.jpg" alt="Ranger Zhou 支付宝">
-        <p>支付宝</p>
+  
+  <div class="post-block">
+    <div class="posts-collapse">
+      <div class="collection-title">
+        
+        <span class="collection-header">不错! 目前共计 68 篇日志。 继续努力。</span>
       </div>
 
-  </div>
-</div>
-
-        
-
-<div>
-<ul class="post-copyright">
-  <li class="post-copyright-author">
-    <strong>本文作者： </strong>Ranger Zhou
-  </li>
-  <li class="post-copyright-link">
-    <strong>本文链接：</strong>
-    <a href="http://rangerzhou.top/2022/02/20/Android/AndroidDevelop_017_WMS01_Boot/" title="Android - WMS系列之启动流程">http://rangerzhou.top/2022/02/20/Android/AndroidDevelop_017_WMS01_Boot/</a>
-  </li>
-  <li class="post-copyright-license">
-    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
-  </li>
-</ul>
-</div>
-
-
-      <footer class="post-footer">
-
-        
-
-
-        
-    <div class="post-nav">
-      <div class="post-nav-item">
-    <a href="/2022/01/12/Android/AndroidDevelop_016_PKMS/" rel="prev" title="Android - PackageManagerService 简析">
-      <i class="fa fa-chevron-left"></i> Android - PackageManagerService 简析
-    </a></div>
-      <div class="post-nav-item"></div>
+      
+    <div class="collection-year">
+      <span class="collection-header">2023</span>
     </div>
-      </footer>
-    
+
+  <article itemscope itemtype="http://schema.org/Article">
+    <header class="post-header">
+
+      <div class="post-meta">
+        <time itemprop="dateCreated"
+              datetime="2023-03-28T21:46:09+08:00"
+              content="2023-03-28">
+          03-28
+        </time>
+      </div>
+
+      <div class="post-title">
+          <a class="post-title-link" href="/2023/03/28/Android/AndroidDevelop_021_Jetpack_Lifecycle_Mechanism/" itemprop="url">
+            <span itemprop="name">Android - Jetpack套件之 Lifecycle 原理</span>
+          </a>
+      </div>
+
+    </header>
   </article>
+
+  <article itemscope itemtype="http://schema.org/Article">
+    <header class="post-header">
+
+      <div class="post-meta">
+        <time itemprop="dateCreated"
+              datetime="2023-03-20T22:03:22+08:00"
+              content="2023-03-20">
+          03-20
+        </time>
+      </div>
+
+      <div class="post-title">
+          <a class="post-title-link" href="/2023/03/20/Android/AndroidDevelop_020_Jetpack_Lifecycle_Usage/" itemprop="url">
+            <span itemprop="name">Android - Jetpack套件之 Lifecycle 使用</span>
+          </a>
+      </div>
+
+    </header>
+  </article>
+
+
+    </div>
+  </div>
   
   
+  
+
   
 
 
 
           </div>
           
-      <div class="tabs tabs-comment">
-        <ul class="nav-tabs">
-            <li class="tab"><a href="#comment-disqus">disqus</a></li>
-            <li class="tab"><a href="#comment-gitalk">gitalk</a></li>
-            <li class="tab"><a href="#comment-livere">livere</a></li>
-        </ul>
-        <div class="tab-content">
-            <div class="tab-pane disqus" id="comment-disqus">
-              
-  <div class="comments">
-    <div id="disqus_thread">
-      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
-    </div>
-  </div>
-  
-            </div>
-            <div class="tab-pane gitalk" id="comment-gitalk">
-              <div class="comments" id="gitalk-container"></div>
-            </div>
-            <div class="tab-pane livere" id="comment-livere">
-              
-  <div class="comments">
-    <div id="lv-container" data-id="city" data-uid="MTAyMC8yOTcyNS82Mjky"></div>
-  </div>
-  
-            </div>
-        </div>
-      </div>
 
 <script>
   window.addEventListener('tabs:register', () => {
@@ -475,7 +370,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">64</span>
+          <span class="site-state-item-count">68</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -488,7 +383,7 @@
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">16</span>
+        <span class="site-state-item-count">17</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -542,7 +437,7 @@
 <div class="copyright">
   
   &copy; 2016 – 
-  <span itemprop="copyrightYear">2022</span>
+  <span itemprop="copyrightYear">2023</span>
   <span class="with-love">
     <i class="fa fa-heart"></i>
   </span>
@@ -786,62 +681,8 @@ window.addEventListener('pjax:success', () => {
 
   
 
-<script>
-  var disqus_config = function() {
-    this.page.url = "http://rangerzhou.top/2022/02/20/Android/AndroidDevelop_017_WMS01_Boot/";
-    this.page.identifier = "2022/02/20/Android/AndroidDevelop_017_WMS01_Boot/";
-    this.page.title = "Android - WMS系列之启动流程";
-    };
-  NexT.utils.loadComments(document.querySelector('#disqus_thread'), () => {
-    if (window.DISQUS) {
-      DISQUS.reset({
-        reload: true,
-        config: disqus_config
-      });
-    } else {
-      var d = document, s = d.createElement('script');
-      s.src = 'https://rangerzhou.disqus.com/embed.js';
-      s.setAttribute('data-timestamp', '' + +new Date());
-      (d.head || d.body).appendChild(s);
-    }
-  });
-</script>
 
-<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
 
-<script>
-NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
-  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
-    var gitalk = new Gitalk({
-      clientID    : 'b7bb504993135f5a2eab',
-      clientSecret: '6f83aec5c45d75e248e2914be90c4601e2e1dc44',
-      repo        : 'rangerzhou.github.io',
-      owner       : 'rangerzhou',
-      admin       : ['rangerzhou'],
-      id          : '6517b0c52cc310b194d2334ed406ba21',
-        language: 'zh-CN',
-      distractionFreeMode: true
-    });
-    gitalk.render('gitalk-container');
-  }, window.Gitalk);
-});
-</script>
-
-<script>
-NexT.utils.loadComments(document.querySelector('#lv-container'), () => {
-  window.livereOptions = {
-    refer: location.pathname.replace(CONFIG.root, '').replace('index.html', '')
-  };
-  (function(d, s) {
-    var j, e = d.getElementsByTagName(s)[0];
-    if (typeof LivereTower === 'function') { return; }
-    j = d.createElement(s);
-    j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
-    j.async = true;
-    e.parentNode.insertBefore(j, e);
-  })(document, 'script');
-});
-</script>
 
     </div>
 <script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/haru01.model.json"},"display":{"position":"left","width":300,"height":800},"mobile":{"show":false},"log":false});</script></body>

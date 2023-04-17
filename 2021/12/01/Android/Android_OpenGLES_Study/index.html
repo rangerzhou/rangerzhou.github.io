@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
 <meta name="theme-color" content="#222">
-<meta name="generator" content="Hexo 6.2.0">
+<meta name="generator" content="Hexo 6.3.0">
 <!-- pjax：防止跳转页面音乐暂停 -->
 <script src="https://cdn.jsdelivr.net/npm/pjax@0.2.8/pjax.js"></script>
   <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
@@ -41,7 +41,7 @@
 <meta property="og:image" content="https://raw.githubusercontent.com/rangerzhou/ImageHosting/master/blog_resource/2022/OpenGL_Matrix_Transformation_Effect.png">
 <meta property="og:image" content="https://raw.githubusercontent.com/rangerzhou/ImageHosting/master/blog_resource/2022/Cartesian_coordinates.png">
 <meta property="article:published_time" content="2021-12-01T02:35:09.000Z">
-<meta property="article:modified_time" content="2022-07-18T14:46:21.589Z">
+<meta property="article:modified_time" content="2022-10-05T16:51:46.539Z">
 <meta property="article:author" content="Ranger Zhou">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="https://raw.githubusercontent.com/rangerzhou/ImageHosting/master/blog_resource/2022/OpenGL_Render_Pipeline.png">
@@ -286,7 +286,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2022-07-18 22:46:21" itemprop="dateModified" datetime="2022-07-18T22:46:21+08:00">2022-07-18</time>
+                <time title="修改时间：2022-10-06 00:51:46" itemprop="dateModified" datetime="2022-10-06T00:51:46+08:00">2022-10-06</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -374,8 +374,20 @@
 <p><img src="https://raw.githubusercontent.com/rangerzhou/ImageHosting/master/blog_resource/2022/OpenGL_Matrix_Transformation_Effect.png" alt="OpenGL_Matrix_Transformation_Effect" title="矩阵变换效果"></p>
 <p><a target="_blank" rel="noopener" href="https://raw.githubusercontent.com/rangerzhou/ImageHosting/master/blog_resource/2022/Cartesian_coordinates.png">笛卡尔坐标系</a></p>
 <p><img src="https://raw.githubusercontent.com/rangerzhou/ImageHosting/master/blog_resource/2022/Cartesian_coordinates.png" alt="Cartesian_coordinates" title="笛卡尔坐标系"></p>
+<ul>
+<li><p>世界坐标系内的坐标乘以观察矩阵变换到眼坐标空间 eye.xyzw &#x3D; viewMatrix * world.xyzw;</p>
+</li>
+<li><p>眼坐标系内的坐标通过乘上投影矩阵变换到裁剪空间 clip.xyzw &#x3D; projectMatrix * eye.xyzw;</p>
+</li>
+<li><p>裁剪坐标系内的坐标通过透视除法（也就是 w 为 1 化） 到 规范化设备坐标系 ndc.xyz &#x3D; clip.xyz &#x2F; clip.w;</p>
+</li>
+<li><p>设备规范化坐标系到窗口坐标系 win.z &#x3D; (dfar - dnear)&#x2F;2 * ndc.z + (dfar+dnear)&#x2F;2;</p>
+</li>
+</ul>
 <p>齐次坐标：齐次坐标简而言之就是用 N+1 维来代表 N 维坐标，在原有2D&#x2F;3D笛卡尔坐标末尾加上一个额外的变量 w，就形成了 2D&#x2F;3D 齐次坐标；齐次坐标是用来表示一个点在无穷远处（∞,∞），比如一个点 (1,2) 移动到无穷远处，在笛卡尔坐标下变为 (∞,∞)，那么它的齐次坐标表示为 (1,2,0)，因为 (1&#x2F;0,2&#x2F;0) &#x3D; (∞,∞)，这样就可以不用 ∞ 来表示一个无穷远处的点了，<a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/373969867">点击查看齐次坐标参考讲解</a>。</p>
+<p>参考1：<a target="_blank" rel="noopener" href="https://blog.csdn.net/grace_yi/article/details/109341926">https://blog.csdn.net/grace_yi/article/details/109341926</a> —— 如上的转换方式公式</p>
 <p>参考2：<a target="_blank" rel="noopener" href="https://blog.csdn.net/tiandyoin/article/details/106039312">https://blog.csdn.net/tiandyoin/article/details/106039312</a></p>
+<p>参考3：<a target="_blank" rel="noopener" href="https://blog.csdn.net/zhongjling/article/details/8488844">https://blog.csdn.net/zhongjling/article/details/8488844</a> —— 坐标转换理解</p>
 <h2 id="3-顶点着色器的输入变量"><a href="#3-顶点着色器的输入变量" class="headerlink" title="3. 顶点着色器的输入变量"></a>3. 顶点着色器的输入变量</h2><p>顶点着色器中只能使用 in 限定符来修饰全局变量，其变量用来接收渲染管线传递进顶点着色器的当前待处理顶点的各种属性值，如顶点坐标、法向量、颜色、纹理坐标等。</p>
 <h3 id="1-1-将顶点属性值送入缓冲"><a href="#1-1-将顶点属性值送入缓冲" class="headerlink" title="1.1 将顶点属性值送入缓冲"></a>1.1 将顶点属性值送入缓冲</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// java</span></span><br><span class="line"><span class="type">float</span> vertices[]=<span class="keyword">new</span> <span class="title class_">float</span>[] &#123;                                 <span class="comment">// 首先将顶点此项属性数据依次放入数组，这里是顶点坐标</span></span><br><span class="line">    -<span class="number">4</span>*UNIT_SIZE,<span class="number">0</span>,                                            <span class="comment">// 第 1 个顶点的 X、Y、Z 坐标值</span></span><br><span class="line">    <span class="number">0</span>,<span class="number">0</span>,-<span class="number">4</span>*UNIT_SIZE,                                          <span class="comment">// 第 2 个顶点的 X、Y、Z 坐标值</span></span><br><span class="line">    <span class="number">0</span>,<span class="number">4</span>*UNIT_SIZE,<span class="number">0</span>,<span class="number">0</span>                                          <span class="comment">// 第 3 个顶点的 X、Y、Z 坐标值</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="type">ByteBuffer</span> <span class="variable">vbb</span> <span class="operator">=</span> ByteBuffer.allocateDirect(vertices.length*<span class="number">4</span>)  <span class="comment">// 开辟对应容量的缓冲</span></span><br><span class="line">vbb.order(ByteOrder.nativeOrder())                             <span class="comment">// 设置字节顺序为本地操作系统顺序</span></span><br><span class="line">mVertexBuffer = vbb.asFloatBuffer()                            <span class="comment">// 浮点(Float)型缓冲</span></span><br><span class="line">mVertexBuffer.put(vertices)                                    <span class="comment">// 将数组中的顶点数据送入缓冲</span></span><br><span class="line">mVertexBuffer.position(<span class="number">0</span>)                                      <span class="comment">// 设置缓冲起始位置</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
 
@@ -408,9 +420,11 @@
 
 <h3 id="平移、旋转、缩放"><a href="#平移、旋转、缩放" class="headerlink" title="平移、旋转、缩放"></a>平移、旋转、缩放</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">MatrixState.translate(<span class="number">3.5f</span>, <span class="number">0</span>, <span class="number">0</span>); <span class="comment">//沿x 方向平移3.5f</span></span><br><span class="line">MatrixState.rotate(<span class="number">30</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">1</span>); <span class="comment">//绕z 轴旋转30°</span></span><br><span class="line">MatrixState.scale(<span class="number">0.4f</span>, <span class="number">2f</span>, <span class="number">0.6f</span>); <span class="comment">//x、y、z 3 个方向按各自的缩放因子进行缩放</span></span><br></pre></td></tr></table></figure>
 
-<h3 id="mix-：插值"><a href="#mix-：插值" class="headerlink" title="mix()：插值"></a>mix()：插值</h3><figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">genType mix(genType x,genType y,float a)</span><br></pre></td></tr></table></figure>
+<h3 id="mix-：插值"><a href="#mix-：插值" class="headerlink" title="mix()：插值"></a>mix()：插值</h3><figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">genType mix(genType x,genType y,float a)</span><br></pre></td></tr></table></figure>
 
 <p><code>mix()</code>是一个特殊线性插值函数，前两个参数值基于第三个参数插值，即<code>(x * (1-a) + y * a)</code>，简单理解就是 a 的值决定了 x 和 y 的强弱关系，a 的取值范围在 [0,1] 之间，a 值越大，结果值中 y 占比会越大；a 值越小，结果值中 y 占比会越小；</p>
+<h2 id="6-颜色混合模式"><a href="#6-颜色混合模式" class="headerlink" title="6 颜色混合模式"></a>6 颜色混合模式</h2><p><a target="_blank" rel="noopener" href="https://cloud.tencent.com/developer/article/1132385?from=article.detail.1367494">https://cloud.tencent.com/developer/article/1132385?from=article.detail.1367494</a></p>
+<h2 id="7-深度测试"><a href="#7-深度测试" class="headerlink" title="7 深度测试"></a>7 深度测试</h2><p><a target="_blank" rel="noopener" href="https://cloud.tencent.com/developer/article/1367494">https://cloud.tencent.com/developer/article/1367494</a></p>
 
     </div>
 
@@ -556,7 +570,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-OpenGL-%E6%B8%B2%E6%9F%93%E6%B5%81%E7%A8%8B"><span class="nav-text">1. OpenGL 渲染流程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-1-%E9%A1%B6%E7%82%B9%E7%9D%80%E8%89%B2%E5%99%A8%E5%8E%9F%E7%90%86"><span class="nav-text">1.1 顶点着色器原理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-2-%E7%89%87%E5%85%83%E7%9D%80%E8%89%B2%E5%99%A8%E5%8E%9F%E7%90%86"><span class="nav-text">1.2 片元着色器原理</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-OpenGL-%E7%9F%A9%E9%98%B5%E5%8F%98%E6%8D%A2%E6%B5%81%E7%A8%8B"><span class="nav-text">2. OpenGL 矩阵变换流程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-%E9%A1%B6%E7%82%B9%E7%9D%80%E8%89%B2%E5%99%A8%E7%9A%84%E8%BE%93%E5%85%A5%E5%8F%98%E9%87%8F"><span class="nav-text">3. 顶点着色器的输入变量</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-1-%E5%B0%86%E9%A1%B6%E7%82%B9%E5%B1%9E%E6%80%A7%E5%80%BC%E9%80%81%E5%85%A5%E7%BC%93%E5%86%B2"><span class="nav-text">1.1 将顶点属性值送入缓冲</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-2-%E5%B0%86%E9%A1%B6%E7%82%B9%E5%B1%9E%E6%80%A7%E6%95%B0%E6%8D%AE%E9%80%81%E5%85%A5%E6%B8%B2%E6%9F%93%E7%AE%A1%E7%BA%BF"><span class="nav-text">1.2 将顶点属性数据送入渲染管线</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-%E7%89%87%E5%85%83%E7%9D%80%E8%89%B2%E5%99%A8%E7%9A%84%E8%BE%93%E5%85%A5%E5%8F%98%E9%87%8F"><span class="nav-text">4. 片元着色器的输入变量</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-%E5%B8%B8%E7%94%A8%E5%87%BD%E6%95%B0%E6%8E%A5%E5%8F%A3"><span class="nav-text">5. 常用函数接口</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Matrix-setLookAtM-%EF%BC%9A%E6%91%84%E5%83%8F%E6%9C%BA%E7%9A%84%E8%AE%BE%E7%BD%AE"><span class="nav-text">Matrix.setLookAtM()：摄像机的设置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Matrix-orthoM-%EF%BC%9A%E6%AD%A3%E4%BA%A4%E6%8A%95%E5%BD%B1%E7%9A%84%E8%AE%BE%E7%BD%AE"><span class="nav-text">Matrix.orthoM()：正交投影的设置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Matrix-frustumM-%EF%BC%9A%E9%80%8F%E8%A7%86%E6%8A%95%E5%BD%B1%E7%9A%84%E8%AE%BE%E7%BD%AE"><span class="nav-text">Matrix.frustumM()：透视投影的设置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#GLES30-glViewport-%EF%BC%9A%E8%AE%BE%E7%BD%AE%E8%A7%86%E5%8F%A3"><span class="nav-text">GLES30.glViewport()：设置视口</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B9%B3%E7%A7%BB%E3%80%81%E6%97%8B%E8%BD%AC%E3%80%81%E7%BC%A9%E6%94%BE"><span class="nav-text">平移、旋转、缩放</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#mix-%EF%BC%9A%E6%8F%92%E5%80%BC"><span class="nav-text">mix()：插值</span></a></li></ol></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-OpenGL-%E6%B8%B2%E6%9F%93%E6%B5%81%E7%A8%8B"><span class="nav-text">1. OpenGL 渲染流程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-1-%E9%A1%B6%E7%82%B9%E7%9D%80%E8%89%B2%E5%99%A8%E5%8E%9F%E7%90%86"><span class="nav-text">1.1 顶点着色器原理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-2-%E7%89%87%E5%85%83%E7%9D%80%E8%89%B2%E5%99%A8%E5%8E%9F%E7%90%86"><span class="nav-text">1.2 片元着色器原理</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-OpenGL-%E7%9F%A9%E9%98%B5%E5%8F%98%E6%8D%A2%E6%B5%81%E7%A8%8B"><span class="nav-text">2. OpenGL 矩阵变换流程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-%E9%A1%B6%E7%82%B9%E7%9D%80%E8%89%B2%E5%99%A8%E7%9A%84%E8%BE%93%E5%85%A5%E5%8F%98%E9%87%8F"><span class="nav-text">3. 顶点着色器的输入变量</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-1-%E5%B0%86%E9%A1%B6%E7%82%B9%E5%B1%9E%E6%80%A7%E5%80%BC%E9%80%81%E5%85%A5%E7%BC%93%E5%86%B2"><span class="nav-text">1.1 将顶点属性值送入缓冲</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-2-%E5%B0%86%E9%A1%B6%E7%82%B9%E5%B1%9E%E6%80%A7%E6%95%B0%E6%8D%AE%E9%80%81%E5%85%A5%E6%B8%B2%E6%9F%93%E7%AE%A1%E7%BA%BF"><span class="nav-text">1.2 将顶点属性数据送入渲染管线</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-%E7%89%87%E5%85%83%E7%9D%80%E8%89%B2%E5%99%A8%E7%9A%84%E8%BE%93%E5%85%A5%E5%8F%98%E9%87%8F"><span class="nav-text">4. 片元着色器的输入变量</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-%E5%B8%B8%E7%94%A8%E5%87%BD%E6%95%B0%E6%8E%A5%E5%8F%A3"><span class="nav-text">5. 常用函数接口</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Matrix-setLookAtM-%EF%BC%9A%E6%91%84%E5%83%8F%E6%9C%BA%E7%9A%84%E8%AE%BE%E7%BD%AE"><span class="nav-text">Matrix.setLookAtM()：摄像机的设置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Matrix-orthoM-%EF%BC%9A%E6%AD%A3%E4%BA%A4%E6%8A%95%E5%BD%B1%E7%9A%84%E8%AE%BE%E7%BD%AE"><span class="nav-text">Matrix.orthoM()：正交投影的设置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Matrix-frustumM-%EF%BC%9A%E9%80%8F%E8%A7%86%E6%8A%95%E5%BD%B1%E7%9A%84%E8%AE%BE%E7%BD%AE"><span class="nav-text">Matrix.frustumM()：透视投影的设置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#GLES30-glViewport-%EF%BC%9A%E8%AE%BE%E7%BD%AE%E8%A7%86%E5%8F%A3"><span class="nav-text">GLES30.glViewport()：设置视口</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B9%B3%E7%A7%BB%E3%80%81%E6%97%8B%E8%BD%AC%E3%80%81%E7%BC%A9%E6%94%BE"><span class="nav-text">平移、旋转、缩放</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#mix-%EF%BC%9A%E6%8F%92%E5%80%BC"><span class="nav-text">mix()：插值</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#6-%E9%A2%9C%E8%89%B2%E6%B7%B7%E5%90%88%E6%A8%A1%E5%BC%8F"><span class="nav-text">6 颜色混合模式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#7-%E6%B7%B1%E5%BA%A6%E6%B5%8B%E8%AF%95"><span class="nav-text">7 深度测试</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
@@ -570,7 +584,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">64</span>
+          <span class="site-state-item-count">68</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -583,7 +597,7 @@
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">16</span>
+        <span class="site-state-item-count">17</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -637,7 +651,7 @@
 <div class="copyright">
   
   &copy; 2016 – 
-  <span itemprop="copyrightYear">2022</span>
+  <span itemprop="copyrightYear">2023</span>
   <span class="with-love">
     <i class="fa fa-heart"></i>
   </span>

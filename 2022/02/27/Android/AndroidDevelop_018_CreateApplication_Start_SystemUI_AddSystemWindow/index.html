@@ -1,0 +1,967 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.3.0">
+<!-- pjax：防止跳转页面音乐暂停 -->
+<script src="https://cdn.jsdelivr.net/npm/pjax@0.2.8/pjax.js"></script>
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/desert.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/desert.jpg">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <meta name="google-site-verification" content="OJnYjbr3wdT22qLrZSzyD9lAyBcXiXlEQ7-5wAnaWoQ">
+  <meta name="baidu-site-verification" content="vr4n4JeXgB">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-minimal.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"rangerzhou.top","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"manual"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":true,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":true,"nav":null,"activeClass":"gitalk"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="Android Application 创建、SystemUI 启动以及系统窗口的添加，源码基于 android-12.1.0_r4；">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android - Application 创建流程、SystemUI 启动以及添加系统窗口（Android 12）">
+<meta property="og:url" content="http://rangerzhou.top/2022/02/27/Android/AndroidDevelop_018_CreateApplication_Start_SystemUI_AddSystemWindow/index.html">
+<meta property="og:site_name" content="RangerZhou">
+<meta property="og:description" content="Android Application 创建、SystemUI 启动以及系统窗口的添加，源码基于 android-12.1.0_r4；">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2022-02-27T06:25:36.000Z">
+<meta property="article:modified_time" content="2022-10-05T16:51:46.537Z">
+<meta property="article:author" content="Ranger Zhou">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://rangerzhou.top/2022/02/27/Android/AndroidDevelop_018_CreateApplication_Start_SystemUI_AddSystemWindow/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+<script src="//cdn.bootcss.com/pace/1.0.2/pace.min.js"></script>
+<link href="//cdn.bootcss.com/pace/1.0.2/themes/pink/pace-theme-flash.css" rel="stylesheet">
+
+  <title>Android - Application 创建流程、SystemUI 启动以及添加系统窗口（Android 12） | RangerZhou</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-138158952-1"></script>
+    <script data-pjax>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-138158952-1');
+      }
+    </script>
+
+
+  <script data-pjax>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?24a6d3c4c0f292c5f682d26414c3994b";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+
+<!-- 加入APlayer音乐播放器 -->
+<link rel="stylesheet" href="/dist/APlayer.min.css">
+<div id="aplayer"></div>
+<script type="text/javascript" src="/dist/APlayer.min.js"></script>
+<script type="text/javascript" src="/dist/music.js"></script>
+
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">RangerZhou</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">Read the fucking source code</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-playlist">
+
+    <a href="/playlist/" rel="section"><i class="fa fa-music fa-fw"></i>歌单</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-commonweal">
+
+    <a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a>
+
+  </li>
+        <li class="menu-item menu-item-official">
+
+    <a href="/official" rel="section"><i class="fa fa-user fa-fw"></i>official</a>
+
+  </li>
+        <li class="menu-item menu-item-shop">
+
+    <a href="http://rangerzhou.taobao.com/" rel="noopener" target="_blank"><i class="fa fa-user fa-fw"></i>shop</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://rangerzhou.top/2022/02/27/Android/AndroidDevelop_018_CreateApplication_Start_SystemUI_AddSystemWindow/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Ranger Zhou">
+      <meta itemprop="description" content="我是一个小流氓我从来也不浪，有一天我心血来潮耍了个流氓，我嘴里吹着小口哨我心里好得意，不知怎么哗啦啦啦啦我摔了一身泥">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="RangerZhou">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Android - Application 创建流程、SystemUI 启动以及添加系统窗口（Android 12）
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2022-02-27 14:25:36" itemprop="dateCreated datePublished" datetime="2022-02-27T14:25:36+08:00">2022-02-27</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-10-06 00:51:46" itemprop="dateModified" datetime="2022-10-06T00:51:46+08:00">2022-10-06</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Android/" itemprop="url" rel="index"><span itemprop="name">Android</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/2022/02/27/Android/AndroidDevelop_018_CreateApplication_Start_SystemUI_AddSystemWindow/" class="post-meta-item leancloud_visitors" data-flag-title="Android - Application 创建流程、SystemUI 启动以及添加系统窗口（Android 12）" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <blockquote>
+<p>Android Application 创建、SystemUI 启动以及系统窗口的添加，源码基于 android-12.1.0_r4；</p>
+</blockquote>
+<span id="more"></span>
+
+<p>SystemUI 启动</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// SystemServer.java</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">void</span> <span class="title function_">startOtherServices</span><span class="params">(<span class="meta">@NonNull</span> TimingsTraceAndSlog t)</span> &#123;</span><br><span class="line">        t.traceBegin(<span class="string">&quot;StartSystemUI&quot;</span>);</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            startSystemUi(context, windowManagerF);</span><br><span class="line">        &#125;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">startSystemUi</span><span class="params">(Context context, WindowManagerService windowManager)</span> &#123;</span><br><span class="line">        <span class="type">PackageManagerInternal</span> <span class="variable">pm</span> <span class="operator">=</span> LocalServices.getService(PackageManagerInternal.class);</span><br><span class="line">        <span class="type">Intent</span> <span class="variable">intent</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Intent</span>();</span><br><span class="line">        intent.setComponent(pm.getSystemUiServiceComponent()); <span class="comment">// 设置 SystemUIService Component</span></span><br><span class="line">        intent.addFlags(Intent.FLAG_DEBUG_TRIAGED_MISSING);</span><br><span class="line">        <span class="comment">//Slog.d(TAG, &quot;Starting service: &quot; + intent);</span></span><br><span class="line">        context.startServiceAsUser(intent, UserHandle.SYSTEM); <span class="comment">// 启动服务</span></span><br><span class="line">        windowManager.onSystemUiStarted();</span><br><span class="line">    &#125;</span><br><span class="line">        <span class="keyword">public</span> ComponentName <span class="title function_">getSystemUiServiceComponent</span><span class="params">()</span> &#123;</span><br><span class="line">            <span class="comment">// 根据 config_systemUIServiceComponent 获取服务组件</span></span><br><span class="line">            <span class="keyword">return</span> ComponentName.unflattenFromString(mContext.getResources().getString(</span><br><span class="line">                    com.android.internal.R.string.config_systemUIServiceComponent));</span><br><span class="line">        &#125;</span><br></pre></td></tr></table></figure>
+
+<p>根据 config_systemUIServiceComponent 获取 SystemUIService 服务，并通过 <code>startServiceAsUser()</code> 启动服务；</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">// frameworks/base/core/res/res/values/config.xml</span><br><span class="line">    <span class="tag">&lt;<span class="name">string</span> <span class="attr">name</span>=<span class="string">&quot;config_systemUIServiceComponent&quot;</span> <span class="attr">translatable</span>=<span class="string">&quot;false&quot;</span></span></span><br><span class="line"><span class="tag">            &gt;</span>com.android.systemui/com.android.systemui.SystemUIService<span class="tag">&lt;/<span class="name">string</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>进程启动后会执行到 <code>ActivityThread.main()</code> 方法中，然后调用 <code>thread.attach()</code>，attach 通过 binder 调用 <code>AMS.attachApplication() -&gt; attachApplicationLocked() -&gt; thread.bindApplication()/ActivityTaskManagerInternal.attachApplication()</code>，然后发送 Handler 消息 BIND_APPLICATION&#x2F;EXECUTE_TRANSACTION，主线程 looper 收到 BIND_APPLICATION 消息后调用 <code>handleBinderApplication()</code>，接下来从这里分析；</p>
+<h2 id="handleBindApplication"><a href="#handleBindApplication" class="headerlink" title="handleBindApplication()"></a>handleBindApplication()</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// ActivityThread.java</span></span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">class</span> <span class="title class_">AppBindData</span> &#123;</span><br><span class="line">        LoadedApk info;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">void</span> <span class="title function_">handleBindApplication</span><span class="params">(AppBindData data)</span> &#123;</span><br><span class="line">        <span class="comment">// 创建 LoadedApk</span></span><br><span class="line">        data.info = getPackageInfoNoCheck(data.appInfo, data.compatInfo);</span><br><span class="line">        Application app;</span><br><span class="line">            app = data.info.makeApplication(data.restrictedBackupMode, <span class="literal">null</span>); <span class="comment">// 创建 Application</span></span><br><span class="line">            <span class="keyword">if</span> (!data.restrictedBackupMode) &#123;</span><br><span class="line">                <span class="keyword">if</span> (!ArrayUtils.isEmpty(data.providers)) &#123;</span><br><span class="line">                    installContentProviders(app, data.providers); <span class="comment">// 创建 COntentProvider</span></span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                mInstrumentation.callApplicationOnCreate(app); <span class="comment">// 调用 Application.onCreate() 方法</span></span><br><span class="line">            &#125;</span><br></pre></td></tr></table></figure>
+
+<p>data 是 AppBindData 对象，所以 data.info 则是 LoadedApk 对象，主要工作：</p>
+<ul>
+<li>getPackageInfoNoCheck()：创建 LoadedApk；</li>
+<li>makeApplication()：创建 Application；</li>
+<li>调用 Application.onCreate()；</li>
+</ul>
+<h3 id="创建-LoadedApk"><a href="#创建-LoadedApk" class="headerlink" title="创建 LoadedApk"></a>创建 LoadedApk</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// ActivityThread.java</span></span><br><span class="line">    <span class="keyword">final</span> ArrayMap&lt;String, WeakReference&lt;LoadedApk&gt;&gt; mPackages = <span class="keyword">new</span> <span class="title class_">ArrayMap</span>&lt;&gt;();</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">final</span> LoadedApk <span class="title function_">getPackageInfoNoCheck</span><span class="params">(ApplicationInfo ai,</span></span><br><span class="line"><span class="params">            CompatibilityInfo compatInfo)</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> getPackageInfo(ai, compatInfo, <span class="literal">null</span>, <span class="literal">false</span>, <span class="literal">true</span>, <span class="literal">false</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">private</span> LoadedApk <span class="title function_">getPackageInfo</span><span class="params">(ApplicationInfo aInfo, CompatibilityInfo compatInfo,</span></span><br><span class="line"><span class="params">            ClassLoader baseLoader, <span class="type">boolean</span> securityViolation, <span class="type">boolean</span> includeCode,</span></span><br><span class="line"><span class="params">            <span class="type">boolean</span> registerPackage)</span> &#123;</span><br><span class="line">        <span class="keyword">final</span> <span class="type">boolean</span> <span class="variable">differentUser</span> <span class="operator">=</span> (UserHandle.myUserId() != UserHandle.getUserId(aInfo.uid));</span><br><span class="line">        <span class="keyword">synchronized</span> (mResourcesManager) &#123;</span><br><span class="line">            WeakReference&lt;LoadedApk&gt; ref;</span><br><span class="line">            ...</span><br><span class="line">            <span class="type">LoadedApk</span> <span class="variable">packageInfo</span> <span class="operator">=</span> ref != <span class="literal">null</span> ? ref.get() : <span class="literal">null</span>;</span><br><span class="line">            ...</span><br><span class="line">            packageInfo = <span class="comment">// 创建 LoadedApk 对象</span></span><br><span class="line">                    <span class="keyword">new</span> <span class="title class_">LoadedApk</span>(<span class="built_in">this</span>, aInfo, compatInfo, baseLoader,</span><br><span class="line">                            securityViolation, includeCode</span><br><span class="line">                            &amp;&amp; (aInfo.flags &amp; ApplicationInfo.FLAG_HAS_CODE) != <span class="number">0</span>, registerPackage);</span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> (mSystemThread &amp;&amp; <span class="string">&quot;android&quot;</span>.equals(aInfo.packageName)) &#123;</span><br><span class="line">                packageInfo.installSystemApplicationInfo(aInfo,</span><br><span class="line">                        getSystemContext().mPackageInfo.getClassLoader());</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> (differentUser) &#123;</span><br><span class="line">                <span class="comment">// Caching not supported across users</span></span><br><span class="line">            &#125; <span class="keyword">else</span> <span class="keyword">if</span> (includeCode) &#123; <span class="comment">// 传入的参数为 true</span></span><br><span class="line">                mPackages.put(aInfo.packageName,</span><br><span class="line">                        <span class="keyword">new</span> <span class="title class_">WeakReference</span>&lt;LoadedApk&gt;(packageInfo)); <span class="comment">// 把 LoadedApk 的弱引用添加到 mPackages 中</span></span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;...&#125;</span><br><span class="line">            <span class="keyword">return</span> packageInfo;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>创建 LoadedApk 对象，并把它的弱引用添加到 mPackages 这个 ArrayMap 中，最后返回 pacakgeInfo；</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// LoadedApk.java</span></span><br><span class="line">    <span class="keyword">public</span> <span class="title function_">LoadedApk</span><span class="params">(ActivityThread activityThread, ApplicationInfo aInfo,</span></span><br><span class="line"><span class="params">            CompatibilityInfo compatInfo, ClassLoader baseLoader,</span></span><br><span class="line"><span class="params">            <span class="type">boolean</span> securityViolation, <span class="type">boolean</span> includeCode, <span class="type">boolean</span> registerPackage)</span> &#123;</span><br><span class="line"></span><br><span class="line">        mActivityThread = activityThread;</span><br><span class="line">        setApplicationInfo(aInfo);</span><br><span class="line">        mPackageName = aInfo.packageName;</span><br><span class="line">        mBaseClassLoader = baseLoader;</span><br><span class="line">        mSecurityViolation = securityViolation;</span><br><span class="line">        mIncludeCode = includeCode;</span><br><span class="line">        mRegisterPackage = registerPackage;</span><br><span class="line">        mDisplayAdjustments.setCompatibilityInfo(compatInfo);</span><br><span class="line">        mAppComponentFactory = createAppFactory(mApplicationInfo, mBaseClassLoader); <span class="comment">// 创建 AppComponentFactory 对象</span></span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>LoadedApk 对象构造函数中创建了 AppComponentFactory 对象；</p>
+<h3 id="创建-SystemUIApplication-makeApplication"><a href="#创建-SystemUIApplication-makeApplication" class="headerlink" title="创建 SystemUIApplication - makeApplication()"></a>创建 SystemUIApplication - makeApplication()</h3><p>接下来看一下 makeApplication()；</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// LoadedApk.java</span></span><br><span class="line">    <span class="keyword">public</span> Application <span class="title function_">makeApplication</span><span class="params">(<span class="type">boolean</span> forceDefaultAppClass,</span></span><br><span class="line"><span class="params">            Instrumentation instrumentation)</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> (mApplication != <span class="literal">null</span>) &#123;</span><br><span class="line">            <span class="keyword">return</span> mApplication;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="type">Application</span> <span class="variable">app</span> <span class="operator">=</span> <span class="literal">null</span>;</span><br><span class="line">        <span class="type">String</span> <span class="variable">appClass</span> <span class="operator">=</span> mApplicationInfo.className;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="keyword">final</span> java.lang.<span class="type">ClassLoader</span> <span class="variable">cl</span> <span class="operator">=</span> getClassLoader();</span><br><span class="line">            ...</span><br><span class="line">            <span class="comment">// 创建 Application 的 Context</span></span><br><span class="line">            <span class="type">ContextImpl</span> <span class="variable">appContext</span> <span class="operator">=</span> ContextImpl.createAppContext(mActivityThread, <span class="built_in">this</span>);</span><br><span class="line">            ...</span><br><span class="line">            <span class="comment">// 通过 Instrumentation 创建 Application</span></span><br><span class="line">            app = mActivityThread.mInstrumentation.newApplication(cl, appClass, appContext);</span><br><span class="line">            appContext.setOuterContext(app);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (Exception e) &#123;...&#125;</span><br><span class="line">        mActivityThread.mAllApplications.add(app);</span><br><span class="line">        mApplication = app;</span><br><span class="line">        ...</span><br><span class="line">        <span class="keyword">return</span> app;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>又调用了 Instrumentation.newApplication()；</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Instrumentation.java</span></span><br><span class="line">    <span class="keyword">public</span> Application <span class="title function_">newApplication</span><span class="params">(ClassLoader cl, String className, Context context)</span></span><br><span class="line">            <span class="keyword">throws</span> InstantiationException, IllegalAccessException, </span><br><span class="line">            ClassNotFoundException &#123;</span><br><span class="line">        <span class="comment">// getFactory 返回 AppComponentFactory 对象（在 AndroidManifest.xml 中配置，如未配置则返回 AppComponentFactory.DEFAULT）</span></span><br><span class="line">        <span class="comment">// 随后调用 androidx.core.app.AppComponentFactory.instantiateApplication 创建 Application 对象</span></span><br><span class="line">        <span class="type">Application</span> <span class="variable">app</span> <span class="operator">=</span> getFactory(context.getPackageName())</span><br><span class="line">                .instantiateApplication(cl, className);</span><br><span class="line">        app.attach(context);</span><br><span class="line">        <span class="keyword">return</span> app;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>先执行 <code>getFactory()</code> 获取 AppComponentFactory 对象；</li>
+<li>再执行 <code>instantiateApplication()</code> 获取 SystemUIApplication 对象；</li>
+</ul>
+<h4 id="获取-AppComponentFactory-对象"><a href="#获取-AppComponentFactory-对象" class="headerlink" title="获取 AppComponentFactory 对象"></a>获取 AppComponentFactory 对象</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Instrumentation.java</span></span><br><span class="line">    <span class="keyword">private</span> AppComponentFactory <span class="title function_">getFactory</span><span class="params">(String pkg)</span> &#123;</span><br><span class="line">        ...</span><br><span class="line">        <span class="type">LoadedApk</span> <span class="variable">apk</span> <span class="operator">=</span> mThread.peekPackageInfo(pkg, <span class="literal">true</span>);</span><br><span class="line">        <span class="comment">// This is in the case of starting up &quot;android&quot;.</span></span><br><span class="line">        <span class="keyword">if</span> (apk == <span class="literal">null</span>) apk = mThread.getSystemContext().mPackageInfo;</span><br><span class="line">        <span class="keyword">return</span> apk.getAppFactory();</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>getFactory() 通过 LoadedApk.getAppFactory() 来获取 AppComponentFactory 对象；</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// LoadedApk.java</span></span><br><span class="line">    <span class="keyword">private</span> AppComponentFactory mAppComponentFactory;</span><br><span class="line">    <span class="keyword">public</span> AppComponentFactory <span class="title function_">getAppFactory</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> mAppComponentFactory;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>getAppFactory() 返回 AppComponentFactory 对象，前面讲到在 LoadedApk 的构造函数中通过 <code>LoadedApk.createAppFactory()</code> 创建了 AppComponentFactory 这个对象；</p>
+<h5 id="创建-AppComponentFactory-对象"><a href="#创建-AppComponentFactory-对象" class="headerlink" title="创建 AppComponentFactory 对象"></a>创建 AppComponentFactory 对象</h5><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// LoadedApk.java</span></span><br><span class="line">    <span class="keyword">private</span> AppComponentFactory <span class="title function_">createAppFactory</span><span class="params">(ApplicationInfo appInfo, ClassLoader cl)</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> (mIncludeCode &amp;&amp; appInfo.appComponentFactory != <span class="literal">null</span> &amp;&amp; cl != <span class="literal">null</span>) &#123;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                <span class="keyword">return</span> (AppComponentFactory)</span><br><span class="line">                        cl.loadClass(appInfo.appComponentFactory).newInstance();</span><br><span class="line">            &#125; <span class="keyword">catch</span> (InstantiationException | IllegalAccessException | ClassNotFoundException e) &#123;</span><br><span class="line">                Slog.e(TAG, <span class="string">&quot;Unable to instantiate appComponentFactory&quot;</span>, e);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> AppComponentFactory.DEFAULT;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>如果 appInfo.appComponentFactory 不等于 null，通过 ClassLoader 加载对应的类创建实例，否则返回 AppComponentFactory.DEFAULT，那么 AppComponentFactory 是什么呢？</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * Interface used to control the instantiation of manifest elements.</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@see</span> #instantiateApplication</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@see</span> #instantiateActivity</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@see</span> #instantiateClassLoader</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@see</span> #instantiateService</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@see</span> #instantiateReceiver</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@see</span> #instantiateProvider</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">AppComponentFactory</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="meta">@NonNull</span> ClassLoader <span class="title function_">instantiateClassLoader</span><span class="params">(...)</span> <span class="comment">// 实例化类加载器</span></span><br><span class="line">    <span class="keyword">public</span> <span class="meta">@NonNull</span> Application <span class="title function_">instantiateApplication</span><span class="params">(<span class="meta">@NonNull</span> ClassLoader cl,</span></span><br><span class="line"><span class="params">            <span class="meta">@NonNull</span> String className)</span>... &#123; <span class="comment">// 实例化 Application</span></span><br><span class="line">        <span class="keyword">return</span> (Application) cl.loadClass(className).newInstance();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">public</span> <span class="meta">@NonNull</span> Activity <span class="title function_">instantiateActivity</span><span class="params">(...)</span> <span class="comment">// 实例化 Activity</span></span><br><span class="line">    <span class="keyword">public</span> <span class="meta">@NonNull</span> BroadcastReceiver <span class="title function_">instantiateReceiver</span><span class="params">(...)</span> <span class="comment">// 实例化 Receiver</span></span><br><span class="line">    <span class="keyword">public</span> <span class="meta">@NonNull</span> ContentProvider <span class="title function_">instantiateProvider</span><span class="params">(...)</span> <span class="comment">// 实例化 Provider</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">AppComponentFactory</span> <span class="variable">DEFAULT</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">AppComponentFactory</span>();</span><br></pre></td></tr></table></figure>
+
+<p>从注释可以看出，这个类是用于控制清单元素（AndroidManifest.xml）实例化的接口，简单说就是允许应用内部创建 AppComponentFactory 实现类，重写 AppComponentFactory 类中的方法，<font color=red><strong>用来执行诸如依赖注入或者对这些类进行类加载器修改</strong></font>，插件化就是用到了这里；</p>
+<h5 id="SystemUIAppComponentFactory"><a href="#SystemUIAppComponentFactory" class="headerlink" title="SystemUIAppComponentFactory"></a>SystemUIAppComponentFactory</h5><p>看一下 SystemUI 的 AndroidManifest.xml</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">application</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:name</span>=<span class="string">&quot;.SystemUIApplication&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">...</span></span></span><br><span class="line"><span class="tag">    <span class="attr">tools:replace</span>=<span class="string">&quot;android:appComponentFactory&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">android:appComponentFactory</span>=<span class="string">&quot;.SystemUIAppComponentFactory&quot;</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>这样配置以后，PKMS 会将 android:appComponentFactory 解析到 appInfo.appComponentFactory，系统在创建 Application 和四大组件的时候就会调用到这里配置的类，如果没有配置，就会直接使用 AppComponentFactory.DEFAULT 变量，<strong>所以前面 <code>createAppFactory()</code> 返回的就是这里配置的类</strong>；</p>
+<p>先看一下这个 SystemUIAppComponentFactory；</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// SystemUIAppComponentFactory.java</span></span><br><span class="line"><span class="keyword">import</span> androidx.core.app.AppComponentFactory;</span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">SystemUIAppComponentFactory</span> <span class="keyword">extends</span> <span class="title class_">AppComponentFactory</span> &#123;</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>需要注意的是这里 SystemUIAppComponentFactory 继承的是 <a target="_blank" rel="noopener" href="https://cs.android.com/androidx/platform/frameworks/support/+/androidx-main:core/core/src/main/java/androidx/core/app/AppComponentFactory.java">androidx.core.app.AppComponentFactory</a>，不是 <a target="_blank" rel="noopener" href="https://cs.android.com/android/platform/superproject/+/master:frameworks/base/core/java/android/app/AppComponentFactory.java">android.app.AppComponentFactory</a>，前者继承了后者；</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// core/core/src/main/java/androidx/core/app/AppComponentFactory.java</span></span><br><span class="line"><span class="keyword">package</span> androidx.core.app;</span><br><span class="line"><span class="meta">@RequiresApi(28)</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">AppComponentFactory</span> <span class="keyword">extends</span> <span class="title class_">android</span>.app.AppComponentFactory &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">final</span> Application <span class="title function_">instantiateApplication</span><span class="params">(</span></span><br><span class="line"><span class="params">            <span class="meta">@NonNull</span> ClassLoader cl, <span class="meta">@NonNull</span> String className)</span></span><br><span class="line">            <span class="keyword">throws</span> InstantiationException, IllegalAccessException, ClassNotFoundException &#123;</span><br><span class="line">        <span class="comment">// 调用子类的 instantiateApplicationCompat() 函数</span></span><br><span class="line">        <span class="keyword">return</span> checkCompatWrapper(instantiateApplicationCompat(cl, className));</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">public</span> <span class="meta">@NonNull</span> Application <span class="title function_">instantiateApplicationCompat</span><span class="params">(<span class="meta">@NonNull</span> ClassLoader cl, <span class="meta">@NonNull</span> String className)</span>...&#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> Class.forName(className, <span class="literal">false</span>, cl).asSubclass(Application.class)</span><br><span class="line">                    .getDeclaredConstructor().newInstance();</span><br><span class="line">        &#125; ...</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>在 instantiateApplication() 内部调用了 <code>instantiateApplicationCompat()</code>，这里其实是调用 <code>SystemUIAppComponentFactory.instantiateApplicationCompat()</code>，因为 SystemUIAppComponentFactory 重写了 <code>AppComponentFactory.instantiateApplicationCompat()</code>，最后创建并返回了 Application 实例;</p>
+<p><font color=red><strong>所以最终 <code>getFactory()</code> 根据包名得到了在 AndroidManifest.xml 中定义的继承自 AppComponentFactory 的 SystemUIAPpComponentFactory 对象；</strong></font></p>
+<h5 id="获取-SystemUIApplication-对象"><a href="#获取-SystemUIApplication-对象" class="headerlink" title="获取 SystemUIApplication 对象"></a>获取 SystemUIApplication 对象</h5><p>接下来回到 Instrumentation.newApplication() 中；</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Instrumentation.java</span></span><br><span class="line">    <span class="keyword">public</span> Application <span class="title function_">newApplication</span><span class="params">(ClassLoader cl, String className, Context context)</span>... &#123;</span><br><span class="line">        <span class="type">Application</span> <span class="variable">app</span> <span class="operator">=</span> getFactory(context.getPackageName())</span><br><span class="line">                .instantiateApplication(cl, className);</span><br><span class="line">        app.attach(context);</span><br><span class="line">        <span class="keyword">return</span> app;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>获取到 SystemUIAppComponentFactory 对象后，调用 <code>instantiateApplication()</code> 方法，这里调用到父类 AppComponentFactory 的 <code>instantiateApplication()</code> 方法，前面分析得知其中又调用到子类 <code>SystemUIAppComponentFactory.instantiateApplicationCompat()</code>方法，</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// SystemUIAppComponentFactory.java</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">SystemUIAppComponentFactory</span> <span class="keyword">extends</span> <span class="title class_">AppComponentFactory</span> &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> Application <span class="title function_">instantiateApplicationCompat</span><span class="params">(</span></span><br><span class="line"><span class="params">            <span class="meta">@NonNull</span> ClassLoader cl, <span class="meta">@NonNull</span> String className)</span></span><br><span class="line">            <span class="keyword">throws</span> InstantiationException, IllegalAccessException, ClassNotFoundException &#123;</span><br><span class="line">        <span class="comment">// 调用父类方法实例化 Application</span></span><br><span class="line">        <span class="type">Application</span> <span class="variable">app</span> <span class="operator">=</span> <span class="built_in">super</span>.instantiateApplicationCompat(cl, className);</span><br><span class="line">        <span class="keyword">if</span> (app <span class="keyword">instanceof</span> ContextInitializer) &#123;</span><br><span class="line">            <span class="comment">// 注册 Context 成功取得的回调</span></span><br><span class="line">            ((ContextInitializer) app).setContextAvailableCallback(</span><br><span class="line">                    context -&gt; &#123;</span><br><span class="line">                        SystemUIFactory.createFromConfig(context);</span><br><span class="line">                        SystemUIFactory.getInstance().getSysUIComponent().inject(</span><br><span class="line">                                SystemUIAppComponentFactory.<span class="built_in">this</span>);</span><br><span class="line">                    &#125;</span><br><span class="line">            );</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> app; <span class="comment">// 返回 Application 实例</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">interface</span> <span class="title class_">ContextAvailableCallback</span> &#123;</span><br><span class="line">        <span class="keyword">void</span> <span class="title function_">onContextAvailable</span><span class="params">(Context context)</span>; <span class="comment">// SystemUIApplication.onCreate() 中回调</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">interface</span> <span class="title class_">ContextInitializer</span> &#123; <span class="comment">// SystemUIApplication 实现了这个接口</span></span><br><span class="line">        <span class="keyword">void</span> <span class="title function_">setContextAvailableCallback</span><span class="params">(ContextAvailableCallback callback)</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这里做了三件事：</p>
+<ul>
+<li>调用父类的 <code>instantiateApplicationCompat()</code> 方法实例化 Application 对象；</li>
+<li>调用 <code>SystemUIApplication.setContextAvailableCallback()</code>；</li>
+<li>返回 Application 实例；</li>
+</ul>
+<p>SystemUIApplication 实现了 <code>SystemUIAppComponentFactory.ContextInitializer</code> 接口，</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// SystemUIApplication.java</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">SystemUIApplication</span> <span class="keyword">extends</span> <span class="title class_">Application</span> <span class="keyword">implements</span></span><br><span class="line">        <span class="title class_">SystemUIAppComponentFactory</span>.ContextInitializer &#123;</span><br><span class="line">    <span class="keyword">private</span> SystemUIAppComponentFactory.ContextAvailableCallback mContextAvailableCallback;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">setContextAvailableCallback</span><span class="params">(</span></span><br><span class="line"><span class="params">            SystemUIAppComponentFactory.ContextAvailableCallback callback)</span> &#123;</span><br><span class="line">        mContextAvailableCallback = callback;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>把传入的 callback 参数传递给了 mContextAvailableCallback，从前面分析 <code>handleBindApplication()</code> 得知，先创建 Application 对象，然后执行 <code>Application.onCreate()</code>方法，至此已经创建了 SystemUIApplication，接下来看 SystemUIApplication.onCreate() 方法；</p>
+<h5 id="SystemUIApplication-onCreate"><a href="#SystemUIApplication-onCreate" class="headerlink" title="SystemUIApplication.onCreate()"></a>SystemUIApplication.onCreate()</h5><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// SystemUIApplication.java</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">onCreate</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="built_in">super</span>.onCreate();</span><br><span class="line">        ...</span><br><span class="line">        mContextAvailableCallback.onContextAvailable(<span class="built_in">this</span>);</span><br></pre></td></tr></table></figure>
+
+<p>这里回调了 <code>onContextAvailable()</code> 方法，在上面传递 ContextAvailableCallback 给 SystemUIApplication 的时候定义了这个方法，此时则执行到了这段代码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// SystemUIAppComponentFactory.java</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">SystemUIAppComponentFactory</span> <span class="keyword">extends</span> <span class="title class_">AppComponentFactory</span> &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> Application <span class="title function_">instantiateApplicationCompat</span><span class="params">(...)</span>...&#123;</span><br><span class="line">        ...</span><br><span class="line">        <span class="keyword">if</span> (app <span class="keyword">instanceof</span> ContextInitializer) &#123;</span><br><span class="line">            <span class="comment">// 注册 Context 成功取得的回调</span></span><br><span class="line">            ((ContextInitializer) app).setContextAvailableCallback(</span><br><span class="line">                    context -&gt; &#123;</span><br><span class="line">                        SystemUIFactory.createFromConfig(context);</span><br><span class="line">                        SystemUIFactory.getInstance().getSysUIComponent().inject(</span><br><span class="line">                                SystemUIAppComponentFactory.<span class="built_in">this</span>);</span><br></pre></td></tr></table></figure>
+
+<p>做了两个工作：</p>
+<ul>
+<li>SystemUIFactory.createFromConfig()</li>
+<li>SystemUIFactory.getInstance().getSysUIComponent().inject(SystemUIAppComponentFactory.this)：初始化 depency 中含 @inject 的变量；</li>
+</ul>
+<h6 id="createFromConfig"><a href="#createFromConfig" class="headerlink" title="createFromConfig()"></a>createFromConfig()</h6><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// SystemUIFactory.java</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">SystemUIFactory</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">createFromConfig</span><span class="params">(Context context, <span class="type">boolean</span> fromTest)</span> &#123;</span><br><span class="line">        ...</span><br><span class="line">        <span class="keyword">final</span> <span class="type">String</span> <span class="variable">clsName</span> <span class="operator">=</span> context.getString(R.string.config_systemUIFactoryComponent);</span><br><span class="line">        ...</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            Class&lt;?&gt; cls = <span class="literal">null</span>;</span><br><span class="line">            cls = context.getClassLoader().loadClass(clsName);</span><br><span class="line">            mFactory = (SystemUIFactory) cls.newInstance(); <span class="comment">// 创建 SystemUIFactory 实例</span></span><br><span class="line">            mFactory.init(context, fromTest);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (Throwable t) &#123;...&#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>创建 SystemUIFactory 实例，执行其 init() 方法，context 是 SystemUIApplication 对象；</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// SystemUIFactory.java</span></span><br><span class="line">    <span class="keyword">private</span> GlobalRootComponent mRootComponent;</span><br><span class="line">    <span class="keyword">private</span> SysUIComponent mSysUIComponent;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">init</span><span class="params">(Context context, <span class="type">boolean</span> fromTest)</span>... &#123;</span><br><span class="line">        mRootComponent = buildGlobalRootComponent(context); <span class="comment">// 获取 dagger 根组件（不仅仅包含 SystemUIComponent）</span></span><br><span class="line">        SysUIComponent.<span class="type">Builder</span> <span class="variable">builder</span> <span class="operator">=</span> mRootComponent.getSysUIComponent(); <span class="comment">// 从根组件获取 SystemUIComponent 组件</span></span><br><span class="line">        mSysUIComponent = builder.build();</span><br><span class="line">        <span class="keyword">if</span> (mInitializeComponents) &#123;</span><br><span class="line">            mSysUIComponent.init();</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="type">Dependency</span> <span class="variable">dependency</span> <span class="operator">=</span> mSysUIComponent.createDependency();</span><br><span class="line">        dependency.start();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">public</span> SysUIComponent <span class="title function_">getSysUIComponent</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> mSysUIComponent;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>获取 SystemUI 的 dagger 组件，创建 dependency 对象，Dependency 管理各式各样的依赖，被依赖的实例通过 Map 管理，但并不是在初始化的时候就缓存它们。而先将各实例对应的懒加载回调缓存进去。其后在各实例确实需要使用的时候通过注入的懒加载获取和缓存；</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="meta">@SysUISingleton</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Dependency</span> &#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> ArrayMap&lt;Object, Object&gt; mDependencies = <span class="keyword">new</span> <span class="title class_">ArrayMap</span>&lt;&gt;(); <span class="comment">// 使用 class 作为 key 将对应实例缓存的 Map</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> ArrayMap&lt;Object, LazyDependencyCreator&gt; mProviders = <span class="keyword">new</span> <span class="title class_">ArrayMap</span>&lt;&gt;(); <span class="comment">// 缓存实例的懒加载回调的 Map</span></span><br><span class="line">    <span class="meta">@Inject</span> DumpManager mDumpManager;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Inject</span> Lazy&lt;StatusBarWindowController&gt; mTempStatusBarWindowController;</span><br><span class="line">    <span class="meta">@Inject</span> Lazy&lt;IStatusBarService&gt; mIStatusBarService;</span><br><span class="line">    <span class="meta">@Inject</span> Lazy&lt;StatusBarStateController&gt; mStatusBarStateController;</span><br><span class="line">    <span class="keyword">protected</span> <span class="keyword">void</span> <span class="title function_">start</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="comment">// <span class="doctag">TODO:</span> Think about ways to push these creation rules out of Dependency to cut down</span></span><br><span class="line">        <span class="comment">// on imports.</span></span><br><span class="line">        mProviders.put(StatusBarWindowController.class, mTempStatusBarWindowController::get);</span><br><span class="line">        mProviders.put(IStatusBarService.class, mIStatusBarService::get);</span><br><span class="line">        mProviders.put(StatusBarStateController.class, mStatusBarStateController::get);</span><br><span class="line">        ...</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 根据 class 查询缓存，尚未缓存的话通过懒加载回调获取注入的实例并缓存</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">synchronized</span> &lt;T&gt; T <span class="title function_">getDependencyInner</span><span class="params">(Object key)</span> &#123;</span><br><span class="line">        <span class="meta">@SuppressWarnings(&quot;unchecked&quot;)</span></span><br><span class="line">        <span class="type">T</span> <span class="variable">obj</span> <span class="operator">=</span> (T) mDependencies.get(key);</span><br><span class="line">        <span class="keyword">if</span> (obj == <span class="literal">null</span>) &#123;</span><br><span class="line">            obj = createDependency(key);</span><br><span class="line">            mDependencies.put(key, obj);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> obj;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">public</span> &lt;T&gt; T <span class="title function_">createDependency</span><span class="params">(Object cls)</span> &#123;</span><br><span class="line">        Preconditions.checkArgument(cls <span class="keyword">instanceof</span> DependencyKey&lt;?&gt; || cls <span class="keyword">instanceof</span> Class&lt;?&gt;);</span><br><span class="line"></span><br><span class="line">        <span class="meta">@SuppressWarnings(&quot;unchecked&quot;)</span></span><br><span class="line">        LazyDependencyCreator&lt;T&gt; provider = mProviders.get(cls);</span><br><span class="line">        <span class="keyword">if</span> (provider == <span class="literal">null</span>) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">IllegalArgumentException</span>(<span class="string">&quot;Unsupported dependency &quot;</span> + cls</span><br><span class="line">                    + <span class="string">&quot;. &quot;</span> + mProviders.size() + <span class="string">&quot; providers known.&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> provider.createDependency();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">interface</span> <span class="title class_">LazyDependencyCreator</span>&lt;T&gt; &#123;</span><br><span class="line">        T <span class="title function_">createDependency</span><span class="params">()</span>;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>执行 Dependency.start() 方法；</p>
+<h6 id="getSysUIComponent-inject"><a href="#getSysUIComponent-inject" class="headerlink" title="getSysUIComponent.inject()"></a>getSysUIComponent.inject()</h6><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// SystemUIFactory.java</span></span><br><span class="line">    <span class="keyword">private</span> SysUIComponent mSysUIComponent;</span><br><span class="line">    <span class="keyword">public</span> SysUIComponent <span class="title function_">getSysUIComponent</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> mSysUIComponent;</span><br><span class="line">    &#125;</span><br><span class="line"><span class="comment">// SysUIComponent.java</span></span><br><span class="line">    <span class="keyword">void</span> <span class="title function_">inject</span><span class="params">(SystemUIAppComponentFactory factory)</span>;</span><br></pre></td></tr></table></figure>
+
+<p>获取上面得到的 mSysUIComponent，执行其中的 inject() 方法，参数为 SystemUIAppComponentFactory.this，所以是初始化 SystemUIAppComponentFactory 中标注 @Inject 的变量；</p>
+<p>Application 创建后，接下来就会执行到 SystemUIService 中的逻辑，进入 SystemUIService.onCreate()；</p>
+<h2 id="SystemUIService-onCreate"><a href="#SystemUIService-onCreate" class="headerlink" title="SystemUIService.onCreate()"></a>SystemUIService.onCreate()</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// SystemUIService.java</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">onCreate</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="built_in">super</span>.onCreate();</span><br><span class="line"></span><br><span class="line">        <span class="comment">// Start all of SystemUI</span></span><br><span class="line">        ((SystemUIApplication) getApplication()).startServicesIfNeeded(); <span class="comment">// 1</span></span><br></pre></td></tr></table></figure>
+
+<p>调用 SystemUIApplication#startServicesIfNeeded()</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// SystemUIApplication.java</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">startServicesIfNeeded</span><span class="params">()</span> &#123; <span class="comment">// SystemUIService.onCreate() 中调用</span></span><br><span class="line">        <span class="comment">// 获取 SystemUI 中所有服务类名</span></span><br><span class="line">        String[] names = SystemUIFactory.getInstance().getSystemUIServiceComponents(getResources());</span><br><span class="line">        startServicesIfNeeded(<span class="comment">/* metricsPrefix= */</span> <span class="string">&quot;StartServices&quot;</span>, names);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>获取所有 SystemUI 中的服务组件，并在后续依次启动；</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// SystemUIFactory.java</span></span><br><span class="line">    <span class="keyword">public</span> String[] getSystemUIServiceComponents(Resources resources) &#123;</span><br><span class="line">        <span class="keyword">return</span> resources.getStringArray(R.array.config_systemUIServiceComponents);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>config_systemUIServiceComponents 定义了 SystemUI 的子类组件，状态栏对应 StatusBar 这个；</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">&lt;!--frameworks/base/packages/SystemUI/res/values/config.xml--&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">string-array</span> <span class="attr">name</span>=<span class="string">&quot;config_systemUIServiceComponents&quot;</span> <span class="attr">translatable</span>=<span class="string">&quot;false&quot;</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">item</span>&gt;</span>com.android.systemui.util.NotificationChannels<span class="tag">&lt;/<span class="name">item</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">item</span>&gt;</span>com.android.systemui.keyguard.KeyguardViewMediator<span class="tag">&lt;/<span class="name">item</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">item</span>&gt;</span>com.android.systemui.recents.Recents<span class="tag">&lt;/<span class="name">item</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">item</span>&gt;</span>com.android.systemui.volume.VolumeUI<span class="tag">&lt;/<span class="name">item</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">item</span>&gt;</span>com.android.systemui.statusbar.phone.StatusBar<span class="tag">&lt;/<span class="name">item</span>&gt;</span> <span class="comment">&lt;!--状态栏--&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">item</span>&gt;</span>com.android.systemui.usb.StorageNotification<span class="tag">&lt;/<span class="name">item</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">item</span>&gt;</span>com.android.systemui.power.PowerUI<span class="tag">&lt;/<span class="name">item</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">item</span>&gt;</span>com.android.systemui.media.RingtonePlayer<span class="tag">&lt;/<span class="name">item</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">item</span>&gt;</span>com.android.systemui.keyboard.KeyboardUI<span class="tag">&lt;/<span class="name">item</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">item</span>&gt;</span>com.android.systemui.shortcut.ShortcutKeyDispatcher<span class="tag">&lt;/<span class="name">item</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">item</span>&gt;</span>@string/config_systemUIVendorServiceComponent<span class="tag">&lt;/<span class="name">item</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">item</span>&gt;</span>com.android.systemui.util.leak.GarbageMonitor$Service<span class="tag">&lt;/<span class="name">item</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">item</span>&gt;</span>com.android.systemui.LatencyTester<span class="tag">&lt;/<span class="name">item</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">item</span>&gt;</span>com.android.systemui.globalactions.GlobalActionsComponent<span class="tag">&lt;/<span class="name">item</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">item</span>&gt;</span>com.android.systemui.ScreenDecorations<span class="tag">&lt;/<span class="name">item</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">item</span>&gt;</span>com.android.systemui.biometrics.AuthController<span class="tag">&lt;/<span class="name">item</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">item</span>&gt;</span>com.android.systemui.SliceBroadcastRelayHandler<span class="tag">&lt;/<span class="name">item</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">item</span>&gt;</span>com.android.systemui.statusbar.notification.InstantAppNotifier<span class="tag">&lt;/<span class="name">item</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">item</span>&gt;</span>com.android.systemui.theme.ThemeOverlayController<span class="tag">&lt;/<span class="name">item</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">item</span>&gt;</span>com.android.systemui.accessibility.WindowMagnification<span class="tag">&lt;/<span class="name">item</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">item</span>&gt;</span>com.android.systemui.accessibility.SystemActions<span class="tag">&lt;/<span class="name">item</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">item</span>&gt;</span>com.android.systemui.toast.ToastUI<span class="tag">&lt;/<span class="name">item</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">item</span>&gt;</span>com.android.systemui.wmshell.WMShell<span class="tag">&lt;/<span class="name">item</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">string-array</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>根据 config_systemUIServiceComponents 获取<strong>包含继承自 SystemUI 的子类名</strong>的数组，作为参数传入 startServicesIfNeeded()；</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// SystemUIApplication.java</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">void</span> <span class="title function_">startServicesIfNeeded</span><span class="params">(String metricsPrefix, String[] services)</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> (mServicesStarted) &#123;</span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        mServices = <span class="keyword">new</span> <span class="title class_">SystemUI</span>[services.length];</span><br><span class="line">        ...</span><br><span class="line">        <span class="keyword">final</span> <span class="type">int</span> <span class="variable">N</span> <span class="operator">=</span> services.length;</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; N; i++) &#123;</span><br><span class="line">            <span class="type">String</span> <span class="variable">clsName</span> <span class="operator">=</span> services[i];</span><br><span class="line">            <span class="keyword">if</span> (DEBUG) Log.d(TAG, <span class="string">&quot;loading: &quot;</span> + clsName);</span><br><span class="line">            log.traceBegin(metricsPrefix + clsName);</span><br><span class="line">            <span class="type">long</span> <span class="variable">ti</span> <span class="operator">=</span> System.currentTimeMillis();</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                <span class="type">SystemUI</span> <span class="variable">obj</span> <span class="operator">=</span> mComponentHelper.resolveSystemUI(clsName); <span class="comment">// 将类名转换为类的实例</span></span><br><span class="line">                <span class="keyword">if</span> (obj == <span class="literal">null</span>) &#123; <span class="comment">// 如果为空则利用反射获取服务类的实例</span></span><br><span class="line">                    <span class="type">Constructor</span> <span class="variable">constructor</span> <span class="operator">=</span> Class.forName(clsName).getConstructor(Context.class);</span><br><span class="line">                    obj = (SystemUI) constructor.newInstance(<span class="built_in">this</span>);</span><br><span class="line">                &#125;</span><br><span class="line">                mServices[i] = obj;</span><br><span class="line">            &#125; <span class="keyword">catch</span> (...) &#123;</span><br><span class="line">                <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">RuntimeException</span>(ex);</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> (DEBUG) Log.d(TAG, <span class="string">&quot;running: &quot;</span> + mServices[i]);</span><br><span class="line">            mServices[i].start(); <span class="comment">// 启动服务</span></span><br><span class="line">            <span class="keyword">if</span> (mBootCompleteCache.isBootComplete()) &#123;</span><br><span class="line">                mServices[i].onBootCompleted();</span><br><span class="line">            &#125;</span><br><span class="line">            ...</span><br><span class="line">        mServicesStarted = <span class="literal">true</span>;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>遍历 SystemUI 子类对象，根据类名通过反射获取子类实例，将实例赋值给 mServices 数组，并执行子类 <code>start()</code> 方法，这里以 StatusBar 为例，执行 <code>StatusBar.start()</code>；</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// StatusBar.java</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">start</span><span class="params">()</span> &#123;</span><br><span class="line">        ...</span><br><span class="line">        mStatusBarStateController.addCallback(mStateListener,</span><br><span class="line">                SysuiStatusBarStateController.RANK_STATUS_BAR);</span><br><span class="line">        <span class="comment">// 获取 WindowManagerImpl</span></span><br><span class="line">        mWindowManager = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);</span><br><span class="line">        ...</span><br><span class="line">        <span class="comment">// start old BaseStatusBar.start().</span></span><br><span class="line">        mWindowManagerService = WindowManagerGlobal.getWindowManagerService(); <span class="comment">// 获取 IWindowManager.Stub.Proxy</span></span><br><span class="line">        ...</span><br><span class="line">        <span class="type">RegisterStatusBarResult</span> <span class="variable">result</span> <span class="operator">=</span> <span class="literal">null</span>;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            result = mBarService.registerStatusBar(mCommandQueue);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (RemoteException ex) &#123;</span><br><span class="line">            ex.rethrowFromSystemServer();</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// 创建状态栏 View，并将其添加到 WindowManager</span></span><br><span class="line">        createAndAddWindows(result);</span><br></pre></td></tr></table></figure>
+
+<p>调用 createAndAddWindows()；</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// StatusBar.java</span></span><br><span class="line">    <span class="comment">// 创建状态栏 View, 并将其添加到 WindowManager</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">createAndAddWindows</span><span class="params">(<span class="meta">@Nullable</span> RegisterStatusBarResult result)</span> &#123;</span><br><span class="line">        makeStatusBarView(result);</span><br><span class="line">        mNotificationShadeWindowController.attach();</span><br><span class="line"></span><br><span class="line">        mStatusBarWindowController.attach(); <span class="comment">// 将 StatusBarWindowView 添加到 WindowManager</span></span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>在前面 Depency.java 中看到其中有 StatusBarWindowController，在 StatusBarWindowController 构造函数中初始化了 mStatusBarWindowView对象，</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// StatusBarWindowController.java</span></span><br><span class="line">    <span class="meta">@Inject</span></span><br><span class="line">    <span class="keyword">public</span> <span class="title function_">StatusBarWindowController</span><span class="params">(...)</span> &#123;</span><br><span class="line">        mContext = context;</span><br><span class="line">        mWindowManager = windowManager;</span><br><span class="line">        mIWindowManager = iWindowManager;</span><br><span class="line">        mContentInsetsProvider = contentInsetsProvider;</span><br><span class="line">        mStatusBarWindowView = statusBarWindowView; <span class="comment">// 初始化 mStatusBarWindowView</span></span><br><span class="line">        mLaunchAnimationContainer = mStatusBarWindowView.findViewById(</span><br><span class="line">                R.id.status_bar_launch_animation_container);</span><br><span class="line">        mLpChanged = <span class="keyword">new</span> <span class="title class_">WindowManager</span>.LayoutParams();</span><br><span class="line">        mResources = resources;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (mBarHeight &lt; <span class="number">0</span>) &#123;</span><br><span class="line">            mBarHeight = SystemBarUtils.getStatusBarHeight(mContext);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>随后调用 attach() 函数把 StatusBarWindowView 添加到 WindowManager 中；</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// StatusBarWindowController.java</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">final</span> WindowManager mWindowManager;</span><br><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">attach</span><span class="params">()</span> &#123;</span><br><span class="line">        ...</span><br><span class="line">        mWindowManager.addView(mStatusBarWindowView, mLp); <span class="comment">// 将 StatusBarWindowView 添加到 WindowManager</span></span><br><span class="line">        ...</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>后面的工作就和<a href="http://rangerzhou.top/2022/02/20/Android/AndroidDevelop_017_ActivityCreateAndWindowDisplay/">Activity 窗口添加-第二小节</a> 一样了；</p>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div>Donate comment here.</div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechatpay.jpg" alt="Ranger Zhou 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.jpg" alt="Ranger Zhou 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>Ranger Zhou
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://rangerzhou.top/2022/02/27/Android/AndroidDevelop_018_CreateApplication_Start_SystemUI_AddSystemWindow/" title="Android - Application 创建流程、SystemUI 启动以及添加系统窗口（Android 12）">http://rangerzhou.top/2022/02/27/Android/AndroidDevelop_018_CreateApplication_Start_SystemUI_AddSystemWindow/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2022/02/20/Android/AndroidDevelop_017_CreateActivity_WindowDisplay/" rel="prev" title="Android - Activity 创建及窗口显示过程">
+      <i class="fa fa-chevron-left"></i> Android - Activity 创建及窗口显示过程
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2023/03/20/Android/AndroidDevelop_020_Jetpack_Lifecycle_Usage/" rel="next" title="Android - Jetpack套件之 Lifecycle 使用">
+      Android - Jetpack套件之 Lifecycle 使用 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+      <div class="tabs tabs-comment">
+        <ul class="nav-tabs">
+            <li class="tab"><a href="#comment-disqus">disqus</a></li>
+            <li class="tab"><a href="#comment-gitalk">gitalk</a></li>
+            <li class="tab"><a href="#comment-livere">livere</a></li>
+        </ul>
+        <div class="tab-content">
+            <div class="tab-pane disqus" id="comment-disqus">
+              
+  <div class="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
+            </div>
+            <div class="tab-pane gitalk" id="comment-gitalk">
+              <div class="comments" id="gitalk-container"></div>
+            </div>
+            <div class="tab-pane livere" id="comment-livere">
+              
+  <div class="comments">
+    <div id="lv-container" data-id="city" data-uid="MTAyMC8yOTcyNS82Mjky"></div>
+  </div>
+  
+            </div>
+        </div>
+      </div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#handleBindApplication"><span class="nav-text">handleBindApplication()</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%9B%E5%BB%BA-LoadedApk"><span class="nav-text">创建 LoadedApk</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%9B%E5%BB%BA-SystemUIApplication-makeApplication"><span class="nav-text">创建 SystemUIApplication - makeApplication()</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%8E%B7%E5%8F%96-AppComponentFactory-%E5%AF%B9%E8%B1%A1"><span class="nav-text">获取 AppComponentFactory 对象</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%88%9B%E5%BB%BA-AppComponentFactory-%E5%AF%B9%E8%B1%A1"><span class="nav-text">创建 AppComponentFactory 对象</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#SystemUIAppComponentFactory"><span class="nav-text">SystemUIAppComponentFactory</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E8%8E%B7%E5%8F%96-SystemUIApplication-%E5%AF%B9%E8%B1%A1"><span class="nav-text">获取 SystemUIApplication 对象</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#SystemUIApplication-onCreate"><span class="nav-text">SystemUIApplication.onCreate()</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#createFromConfig"><span class="nav-text">createFromConfig()</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#getSysUIComponent-inject"><span class="nav-text">getSysUIComponent.inject()</span></a></li></ol></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SystemUIService-onCreate"><span class="nav-text">SystemUIService.onCreate()</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Ranger Zhou</p>
+  <div class="site-description" itemprop="description">我是一个小流氓我从来也不浪，有一天我心血来潮耍了个流氓，我嘴里吹着小口哨我心里好得意，不知怎么哗啦啦啦啦我摔了一身泥</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">68</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">8</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">17</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/rangerzhou" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;rangerzhou" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:rangero_o@qq.com" title="E-Mail → mailto:rangero_o@qq.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://rangerzhou.taobao.com/" title="Taobao → http:&#x2F;&#x2F;rangerzhou.taobao.com&#x2F;" rel="noopener" target="_blank"><i class="fab fa-youtube fa-fw"></i>Taobao</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="/images/wechat.jpg" title="WeChat → &#x2F;images&#x2F;wechat.jpg"><i class="fab fa-youtube fa-fw"></i>WeChat</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://blog.csdn.net/ranger0220?viewmode=contents" title="CSDN → http:&#x2F;&#x2F;blog.csdn.net&#x2F;ranger0220?viewmode&#x3D;contents" rel="noopener" target="_blank"><i class="fab fa-youtube fa-fw"></i>CSDN</a>
+      </span>
+  </div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      墙裂推荐
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="http://rangerzhou.taobao.com/" title="http:&#x2F;&#x2F;rangerzhou.taobao.com" rel="noopener" target="_blank">Taobao</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2016 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Ranger Zhou</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+<script data-pjax>
+  (function() {
+    function leancloudSelector(url) {
+      url = encodeURI(url);
+      return document.getElementById(url).querySelector('.leancloud-visitors-count');
+    }
+
+    function addCount(Counter) {
+      var visitors = document.querySelector('.leancloud_visitors');
+      var url = decodeURI(visitors.id);
+      var title = visitors.dataset.flagTitle;
+
+      Counter('get', '/classes/Counter?where=' + encodeURIComponent(JSON.stringify({ url })))
+        .then(response => response.json())
+        .then(({ results }) => {
+          if (results.length > 0) {
+            var counter = results[0];
+            leancloudSelector(url).innerText = counter.time + 1;
+            Counter('put', '/classes/Counter/' + counter.objectId, { time: { '__op': 'Increment', 'amount': 1 } })
+              .catch(error => {
+                console.error('Failed to save visitor count', error);
+              });
+          } else {
+              Counter('post', '/classes/Counter', { title, url, time: 1 })
+                .then(response => response.json())
+                .then(() => {
+                  leancloudSelector(url).innerText = 1;
+                })
+                .catch(error => {
+                  console.error('Failed to create', error);
+                });
+          }
+        })
+        .catch(error => {
+          console.error('LeanCloud Counter Error', error);
+        });
+    }
+
+    function showTime(Counter) {
+      var visitors = document.querySelectorAll('.leancloud_visitors');
+      var entries = [...visitors].map(element => {
+        return decodeURI(element.id);
+      });
+
+      Counter('get', '/classes/Counter?where=' + encodeURIComponent(JSON.stringify({ url: { '$in': entries } })))
+        .then(response => response.json())
+        .then(({ results }) => {
+          for (let url of entries) {
+            let target = results.find(item => item.url === url);
+            leancloudSelector(url).innerText = target ? target.time : 0;
+          }
+        })
+        .catch(error => {
+          console.error('LeanCloud Counter Error', error);
+        });
+    }
+
+    let { app_id, app_key, server_url } = {"enable":true,"app_id":"U9g4mWmsQg8FjOE3xsqUy9Df-gzGzoHsz","app_key":"24cDno14OiDhAreVmoEjzqns","server_url":"https://u9g4mwms.lc-cn-n1-shared.com","security":false};
+    function fetchData(api_server) {
+      var Counter = (method, url, data) => {
+        return fetch(`${api_server}/1.1${url}`, {
+          method,
+          headers: {
+            'X-LC-Id'     : app_id,
+            'X-LC-Key'    : app_key,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(data)
+        });
+      };
+      if (CONFIG.page.isPost) {
+        if (CONFIG.hostname !== location.hostname) return;
+        addCount(Counter);
+      } else if (document.querySelectorAll('.post-title-link').length >= 1) {
+        showTime(Counter);
+      }
+    }
+
+    let api_server = app_id.slice(-9) !== '-MdYXbMMI' ? server_url : `https://${app_id.slice(0, 8).toLowerCase()}.api.lncldglobal.com`;
+
+    if (api_server) {
+      fetchData(api_server);
+    } else {
+      fetch('https://app-router.leancloud.cn/2/route?appId=' + app_id)
+        .then(response => response.json())
+        .then(({ api_server }) => {
+          fetchData('https://' + api_server);
+        });
+    }
+  })();
+</script>
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/pjax/pjax.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/pangu@4/dist/browser/pangu.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '#page-configurations',
+    '.content-wrap',
+    '.post-toc-wrap',
+    '.languages',
+    '#pjax'
+  ],
+  switches: {
+    '.post-toc-wrap': Pjax.switches.innerHTML
+  },
+  analytics: false,
+  cacheBust: false,
+  scrollTo : !CONFIG.bookmark.enable
+});
+
+window.addEventListener('pjax:success', () => {
+  document.querySelectorAll('script[data-pjax], script#page-configurations, #pjax script').forEach(element => {
+    var code = element.text || element.textContent || element.innerHTML || '';
+    var parent = element.parentNode;
+    parent.removeChild(element);
+    var script = document.createElement('script');
+    if (element.id) {
+      script.id = element.id;
+    }
+    if (element.className) {
+      script.className = element.className;
+    }
+    if (element.type) {
+      script.type = element.type;
+    }
+    if (element.src) {
+      script.src = element.src;
+      // Force synchronous loading of peripheral JS.
+      script.async = false;
+    }
+    if (element.dataset.pjax !== undefined) {
+      script.dataset.pjax = '';
+    }
+    if (code !== '') {
+      script.appendChild(document.createTextNode(code));
+    }
+    parent.appendChild(script);
+  });
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+
+
+  
+  <script data-pjax>
+    (function(){
+      var canonicalURL, curProtocol;
+      //Get the <link> tag
+      var x=document.getElementsByTagName("link");
+		//Find the last canonical URL
+		if(x.length > 0){
+			for (i=0;i<x.length;i++){
+				if(x[i].rel.toLowerCase() == 'canonical' && x[i].href){
+					canonicalURL=x[i].href;
+				}
+			}
+		}
+    //Get protocol
+	    if (!canonicalURL){
+	    	curProtocol = window.location.protocol.split(':')[0];
+	    }
+	    else{
+	    	curProtocol = canonicalURL.split(':')[0];
+	    }
+      //Get current URL if the canonical URL does not exist
+	    if (!canonicalURL) canonicalURL = window.location.href;
+	    //Assign script content. Replace current URL with the canonical URL
+      !function(){var e=/([http|https]:\/\/[a-zA-Z0-9\_\.]+\.baidu\.com)/gi,r=canonicalURL,t=document.referrer;if(!e.test(r)){var n=(String(curProtocol).toLowerCase() === 'https')?"https://sp0.baidu.com/9_Q4simg2RQJ8t7jm9iCKT-xh_/s.gif":"//api.share.baidu.com/s.gif";t?(n+="?r="+encodeURIComponent(document.referrer),r&&(n+="&l="+r)):r&&(n+="?l="+r);var i=new Image;i.src=n}}(window);})();
+  </script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <div id="pjax">
+  
+
+  
+
+<script>
+  var disqus_config = function() {
+    this.page.url = "http://rangerzhou.top/2022/02/27/Android/AndroidDevelop_018_CreateApplication_Start_SystemUI_AddSystemWindow/";
+    this.page.identifier = "2022/02/27/Android/AndroidDevelop_018_CreateApplication_Start_SystemUI_AddSystemWindow/";
+    this.page.title = "Android - Application 创建流程、SystemUI 启动以及添加系统窗口（Android 12）";
+    };
+  NexT.utils.loadComments(document.querySelector('#disqus_thread'), () => {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: disqus_config
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://rangerzhou.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  });
+</script>
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : 'b7bb504993135f5a2eab',
+      clientSecret: '6f83aec5c45d75e248e2914be90c4601e2e1dc44',
+      repo        : 'rangerzhou.github.io',
+      owner       : 'rangerzhou',
+      admin       : ['rangerzhou'],
+      id          : 'a258e1e51fef8e228b485f556b7038a8',
+        language: 'zh-CN',
+      distractionFreeMode: true
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
+
+<script>
+NexT.utils.loadComments(document.querySelector('#lv-container'), () => {
+  window.livereOptions = {
+    refer: location.pathname.replace(CONFIG.root, '').replace('index.html', '')
+  };
+  (function(d, s) {
+    var j, e = d.getElementsByTagName(s)[0];
+    if (typeof LivereTower === 'function') { return; }
+    j = d.createElement(s);
+    j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+    j.async = true;
+    e.parentNode.insertBefore(j, e);
+  })(document, 'script');
+});
+</script>
+
+    </div>
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/haru01.model.json"},"display":{"position":"left","width":300,"height":800},"mobile":{"show":false},"log":false});</script></body>
+</html>
