@@ -24,7 +24,7 @@
 
 <script id="hexo-configurations">
     var NexT = window.NexT || {};
-    var CONFIG = {"hostname":"rangerzhou.top","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"manual"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":true,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":true,"nav":null,"activeClass":"gitalk"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+    var CONFIG = {"hostname":"rangerzhou.top","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"always","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"manual"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":true,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":true,"nav":null,"activeClass":"gitalk"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
   </script>
 
   <meta name="description" content="Android OpenGL ES 开发学习。">
@@ -41,7 +41,7 @@
 <meta property="og:image" content="https://raw.githubusercontent.com/rangerzhou/ImageHosting/master/blog_resource/2022/OpenGL_Matrix_Transformation_Effect.png">
 <meta property="og:image" content="https://raw.githubusercontent.com/rangerzhou/ImageHosting/master/blog_resource/2022/Cartesian_coordinates.png">
 <meta property="article:published_time" content="2021-12-01T02:35:09.000Z">
-<meta property="article:modified_time" content="2022-10-05T16:51:46.539Z">
+<meta property="article:modified_time" content="2023-04-17T15:24:15.480Z">
 <meta property="article:author" content="Ranger Zhou">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="https://raw.githubusercontent.com/rangerzhou/ImageHosting/master/blog_resource/2022/OpenGL_Render_Pipeline.png">
@@ -286,7 +286,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2022-10-06 00:51:46" itemprop="dateModified" datetime="2022-10-06T00:51:46+08:00">2022-10-06</time>
+                <time title="修改时间：2023-04-17 23:24:15" itemprop="dateModified" datetime="2023-04-17T23:24:15+08:00">2023-04-17</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -409,12 +409,34 @@
 <li>upX, upY, upZ：头的方向，头朝上（upY &#x3D; 1），倒立（upY &#x3D; -1），向右歪头90°看（upX &#x3D; 1），向左歪头90°看（upX &#x3D; -1），仰头看（upZ &#x3D; 1，up 方向和观察方向平行，看不到东西），低头看（upZ &#x3D; -1，up 方向和观察方向平行，看不到东西）</li>
 </ul>
 <p><a target="_blank" rel="noopener" href="https://cloud.tencent.com/developer/article/1015587">https://cloud.tencent.com/developer/article/1015587</a></p>
+<p><strong>对应 glm 库函数 API</strong></p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// pos：摄像机位置向量(X,Y,Z坐标)，target：观察目标点位置向量(X,Y,Z坐标)，UP：摄像机 UP 向量(UP 向量在 X/Y/Z 轴上的分量)</span></span><br><span class="line">glm.lookAt(pos, target, UP)</span><br></pre></td></tr></table></figure>
+
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_44176696/article/details/110149079">https://blog.csdn.net/weixin_44176696/article/details/110149079</a> —— 详解参考</p>
 <h3 id="Matrix-orthoM-：正交投影的设置"><a href="#Matrix-orthoM-：正交投影的设置" class="headerlink" title="Matrix.orthoM()：正交投影的设置"></a>Matrix.orthoM()：正交投影的设置</h3><p>正交投影效果是<strong>远处近处看起来一样大</strong></p>
 <figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">Matrix.orthoM(</span><br><span class="line">	mProjMatrix, <span class="comment">// 存储生成矩阵元素的 float[4*4] 类型数组，即生成的投影矩阵</span></span><br><span class="line">	<span class="number">0</span>, <span class="comment">// 填充起始偏移量</span></span><br><span class="line">	left, right, <span class="comment">// 近平面 left、right 边的 x 坐标</span></span><br><span class="line">	bottom, top, <span class="comment">// 近平面 bottom、top 边的 y 坐标</span></span><br><span class="line">	near, far <span class="comment">// 近平面、远平面距离摄像机（视点）的距离</span></span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+
+<p><strong>对应 glm 库函数 API</strong></p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">glm.ortho(left, right, bottom, top, near, far)</span><br></pre></td></tr></table></figure>
+
+
 
 <h3 id="Matrix-frustumM-：透视投影的设置"><a href="#Matrix-frustumM-：透视投影的设置" class="headerlink" title="Matrix.frustumM()：透视投影的设置"></a>Matrix.frustumM()：透视投影的设置</h3><p>透视投影效果是<strong>近大远小</strong></p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">Matrix.frustumM(</span><br><span class="line">	mProjMatrix, <span class="comment">// 存储生成矩阵元素的 float[4*4] 类型数组，即生成的投影矩阵</span></span><br><span class="line">	<span class="number">0</span>, <span class="comment">//填充起始偏移量</span></span><br><span class="line">	left, right, <span class="comment">//near 面的left、right</span></span><br><span class="line">	bottom, top, <span class="comment">//near 面的bottom、top</span></span><br><span class="line">	near, far <span class="comment">//near 面、far 面与视点的距离</span></span><br><span class="line">);</span><br></pre></td></tr></table></figure>
 
+<p>left，right, bottom,top，这 4 个参数会影响图像左右和上下缩放比，</p>
+<ul>
+<li>如果 left 和 right 已经设置好缩放 -width&#x2F;height 和 width&#x2F;height，则 bottom只需要设置为 -1，top设置为 1，这样就能保持图像不变形；</li>
+<li>也可以将 left&#x2F;right 与 bottom&#x2F;top 交换比例，即 bottom 和 top 设置为 -height&#x2F;width 和 height&#x2F;width, left 和 right 设置为 -1 和 1；</li>
+<li>即 (left+right)&#x2F;(top+bottom) &#x3D; width&#x2F;height；</li>
+</ul>
+<p><strong>对应 glm 库函数 API</strong></p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">glm.frustum(left, right, bottom, top, near, far)</span><br></pre></td></tr></table></figure>
+
+<p>不过更加常用的方案是使用视线夹角作为参数来创建投影矩阵，因为我们总是认为相机投影应该四四方方的对称（而使用<code>frustum</code> 函数则没有这种限制）；</p>
+<figure class="highlight kotlin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 第一个参数为视锥上下面之间的夹角(即 y 轴的视线夹角，单位为弧度)，第二个参数为视口宽高比，第三、四个参数分别为近平面和远平面的深度</span></span><br><span class="line">glm.perspective(glm.radians(<span class="number">33.0f</span>), aspect, near, far)</span><br></pre></td></tr></table></figure>
+
+<p><font color=red><strong>使用 <code>glm.perspective()</code> 需要注意的是，第一个参数是视椎体角度，因为 <code>tan(fov/2) = top / near, aspect = width / height = right / top</code>，所以真实设置的近平面参数 <code>top = tan(fov/2) * near,right = aspect * top, left = -right, bottom = -top</code>，这些参数和使用 <code>Matrix.frustumM()</code> 设置的参数才是一致的，在做 3D 物体拾取的时候近平面参数会直接影响射线起始点坐标。</strong></font></p>
 <h3 id="GLES30-glViewport-：设置视口"><a href="#GLES30-glViewport-：设置视口" class="headerlink" title="GLES30.glViewport()：设置视口"></a>GLES30.glViewport()：设置视口</h3><p>视口是显示屏上指定的矩形区域，x 和 y 是视口的左下角坐标值（x 轴向右，y 轴向上），后两个参数是矩形的宽高</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">GLES30.glViewport(x, y, width, height);		<span class="comment">// 设置视口</span></span><br></pre></td></tr></table></figure>
 
@@ -498,14 +520,11 @@
           
       <div class="tabs tabs-comment">
         <ul class="nav-tabs">
-            <li class="tab"><a href="#comment-gitalk">gitalk</a></li>
             <li class="tab"><a href="#comment-disqus">disqus</a></li>
+            <li class="tab"><a href="#comment-gitalk">gitalk</a></li>
             <li class="tab"><a href="#comment-livere">livere</a></li>
         </ul>
         <div class="tab-content">
-            <div class="tab-pane gitalk" id="comment-gitalk">
-              <div class="comments" id="gitalk-container"></div>
-            </div>
             <div class="tab-pane disqus" id="comment-disqus">
               
   <div class="comments">
@@ -514,6 +533,9 @@
     </div>
   </div>
   
+            </div>
+            <div class="tab-pane gitalk" id="comment-gitalk">
+              <div class="comments" id="gitalk-container"></div>
             </div>
             <div class="tab-pane livere" id="comment-livere">
               
@@ -584,7 +606,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">69</span>
+          <span class="site-state-item-count">70</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -895,26 +917,6 @@ window.addEventListener('pjax:success', () => {
 
   
 
-<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
-
-<script>
-NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
-  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
-    var gitalk = new Gitalk({
-      clientID    : 'b7bb504993135f5a2eab',
-      clientSecret: '6f83aec5c45d75e248e2914be90c4601e2e1dc44',
-      repo        : 'rangerzhou.github.io',
-      owner       : 'rangerzhou',
-      admin       : ['rangerzhou'],
-      id          : '82b19b1d686afaaa2d4d50b37c12326a',
-        language: 'zh-CN',
-      distractionFreeMode: true
-    });
-    gitalk.render('gitalk-container');
-  }, window.Gitalk);
-});
-</script>
-
 <script>
   var disqus_config = function() {
     this.page.url = "http://rangerzhou.top/2021/12/01/Android/Android_OpenGLES_Study/";
@@ -934,6 +936,26 @@ NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
       (d.head || d.body).appendChild(s);
     }
   });
+</script>
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : 'b7bb504993135f5a2eab',
+      clientSecret: '6f83aec5c45d75e248e2914be90c4601e2e1dc44',
+      repo        : 'rangerzhou.github.io',
+      owner       : 'rangerzhou',
+      admin       : ['rangerzhou'],
+      id          : '82b19b1d686afaaa2d4d50b37c12326a',
+        language: 'zh-CN',
+      distractionFreeMode: true
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
 </script>
 
 <script>

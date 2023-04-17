@@ -24,7 +24,7 @@
 
 <script id="hexo-configurations">
     var NexT = window.NexT || {};
-    var CONFIG = {"hostname":"rangerzhou.top","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"manual"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":true,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":true,"nav":null,"activeClass":"gitalk"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+    var CONFIG = {"hostname":"rangerzhou.top","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"always","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"manual"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":true,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":true,"nav":null,"activeClass":"gitalk"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
   </script>
 
   <meta name="description" content="Activity 创建及窗口显示过程分析，源码基于 android-12.1.0_r4；">
@@ -36,7 +36,7 @@
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://raw.githubusercontent.com/rangerzhou/ImageHosting/master/blog_resource/2022/Activity_Window_DecorView.png">
 <meta property="article:published_time" content="2022-02-20T14:16:06.000Z">
-<meta property="article:modified_time" content="2022-10-05T16:51:46.537Z">
+<meta property="article:modified_time" content="2023-04-17T15:25:42.643Z">
 <meta property="article:author" content="Ranger Zhou">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="https://raw.githubusercontent.com/rangerzhou/ImageHosting/master/blog_resource/2022/Activity_Window_DecorView.png">
@@ -281,7 +281,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2022-10-06 00:51:46" itemprop="dateModified" datetime="2022-10-06T00:51:46+08:00">2022-10-06</time>
+                <time title="修改时间：2023-04-17 23:25:42" itemprop="dateModified" datetime="2023-04-17T23:25:42+08:00">2023-04-17</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -412,8 +412,7 @@
 <p>WindowManagerImpl 又直接交给了 WindowManagerGlobal 处理，这个 <code>mGlobal</code> 是一个单例；</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// WindowManagerGlobal.java</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> ArrayList&lt;View&gt; mViews = <span class="keyword">new</span> <span class="title class_">ArrayList</span>&lt;View&gt;();</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> ArrayList&lt;ViewRootImpl&gt; mRoots = <span class="keyword">new</span> <span class="title class_">ArrayList</span>&lt;ViewRootImpl&gt;();</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> ArrayList&lt;WindowManager.LayoutParams&gt; mParams =</span><br><span class="line">            <span class="keyword">new</span> <span class="title class_">ArrayList</span>&lt;WindowManager.LayoutParams&gt;();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">addView</span><span class="params">(View view, ViewGroup.LayoutParams params,</span></span><br><span class="line"><span class="params">            Display display, Window parentWindow, <span class="type">int</span> userId)</span> &#123;</span><br><span class="line">        ...</span><br><span class="line">        ViewRootImpl root;</span><br><span class="line">        <span class="type">View</span> <span class="variable">panelParentView</span> <span class="operator">=</span> <span class="literal">null</span>;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">synchronized</span> (mLock) &#123;</span><br><span class="line">            ...</span><br><span class="line">            root = <span class="keyword">new</span> <span class="title class_">ViewRootImpl</span>(view.getContext(), display); <span class="comment">// 创建 ViewRootImpl</span></span><br><span class="line"></span><br><span class="line">            view.setLayoutParams(wparams);</span><br><span class="line"></span><br><span class="line">            mViews.add(view); <span class="comment">// 保存 DecorView 实例</span></span><br><span class="line">            mRoots.add(root); <span class="comment">// 保存 root 到 mRoots 这个 ArrayList 中</span></span><br><span class="line">            mParams.add(wparams); <span class="comment">// 保存布局配置信息</span></span><br><span class="line"></span><br><span class="line">            <span class="comment">// do this last because it fires off messages to start doing things</span></span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                <span class="comment">// 把 window 对应的 View 传递给 VRI，通过 VRI 来更新界面并完成 Window 的添加过程</span></span><br><span class="line">                root.setView(view, wparams, panelParentView, userId);</span><br><span class="line">            &#125; <span class="keyword">catch</span> (RuntimeException e) &#123;</span><br><span class="line">                ...</span><br></pre></td></tr></table></figure>
 
-<p>new 了一个 ViewRootImpl 对象，VRI 实现了一个控件树的根，它负责与 WMS 进行直接的通讯，负责管理 Surface，触发控件的测量与布局；</p>
-<p>然后调用 VRI.setView()，这个函数将作为窗口的控件设置给 ViewRootImpl，这个动作将导致 ViewRootImpl 向 WMS 添加新的窗口、申请 Surface 以及托管控件在 Surface 上的重绘动作，这才是真正意义上完成了窗口的添加操作，来看看 ViewRootImpl 的构造函数；</p>
+<p>new 了一个 ViewRootImpl 对象，然后调用 VRI.setView()，来看看 ViewRootImpl 的构造函数；</p>
 <h2 id="2-1-ViewRootImpl-构造函数"><a href="#2-1-ViewRootImpl-构造函数" class="headerlink" title="2.1 ViewRootImpl 构造函数"></a>2.1 ViewRootImpl 构造函数</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// ViewRootImpl.java</span></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * The top of a view hierarchy, implementing the needed protocol between View</span></span><br><span class="line"><span class="comment"> * and the WindowManager.  This is for the most part an internal implementation</span></span><br><span class="line"><span class="comment"> * detail of &#123;<span class="doctag">@link</span> WindowManagerGlobal&#125;.</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * &#123;<span class="doctag">@hide</span>&#125;</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="meta">@SuppressWarnings(&#123;&quot;EmptyCatchBlock&quot;, &quot;PointlessBooleanExpression&quot;&#125;)</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">class</span> <span class="title class_">ViewRootImpl</span> <span class="keyword">implements</span> <span class="title class_">ViewParent</span>...&#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="title function_">ViewRootImpl</span><span class="params">(Context context, Display display)</span> &#123;</span><br><span class="line">        <span class="built_in">this</span>(context, display, WindowManagerGlobal.getWindowSession(), <span class="literal">false</span> <span class="comment">/* useSfChoreographer */</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">public</span> <span class="title function_">ViewRootImpl</span><span class="params">(<span class="meta">@UiContext</span> Context context, Display display, IWindowSession session,</span></span><br><span class="line"><span class="params">            <span class="type">boolean</span> useSfChoreographer)</span> &#123;</span><br><span class="line">        mContext = context;</span><br><span class="line">        <span class="comment">// Session 负责 Activity 到 WMS 的通信，和 W 对象反向</span></span><br><span class="line">        mWindowSession = session; <span class="comment">// 把 WMS.openSession 返回的 IWindowSession 对象传递给 ViewRootImpl.mWindowSession</span></span><br><span class="line">        mDisplay = display;</span><br><span class="line">        mBasePackageName = context.getBasePackageName();</span><br><span class="line">        mThread = Thread.currentThread(); <span class="comment">// 把当前创建 ViewRootImpl 的线程传递给 ViewRootImpl.mThread</span></span><br><span class="line">        ...</span><br><span class="line">        mWidth = -<span class="number">1</span>;</span><br><span class="line">        mHeight = -<span class="number">1</span>;</span><br><span class="line">        ...</span><br><span class="line">        mWindow = <span class="keyword">new</span> <span class="title class_">W</span>(<span class="built_in">this</span>); <span class="comment">// W extends IWindow.Stub，负责 WMS 到 Activity 的通信</span></span><br><span class="line">        mAttachInfo = <span class="keyword">new</span> <span class="title class_">View</span>.AttachInfo(mWindowSession, mWindow, display, <span class="built_in">this</span>, mHandler, <span class="built_in">this</span>,</span><br><span class="line">                context); <span class="comment">// 创建 AttachInfo，传入 ViewRootImpl，就把 View 和 ViewRootImpl 绑定起来了</span></span><br><span class="line">        ...</span><br><span class="line">        mChoreographer = useSfChoreographer</span><br><span class="line">                ? Choreographer.getSfInstance() : Choreographer.getInstance();</span><br><span class="line">        mDisplayManager = (DisplayManager)context.getSystemService(Context.DISPLAY_SERVICE);</span><br><span class="line">        mInsetsController = <span class="keyword">new</span> <span class="title class_">InsetsController</span>(<span class="keyword">new</span> <span class="title class_">ViewRootInsetsControllerHost</span>(<span class="built_in">this</span>));</span><br><span class="line">        ...</span><br></pre></td></tr></table></figure>
 
 <p>从注释中看出 ViewRootImpl 是 View 中的顶级层级，实现了 View 和 WindowManager 之间需要的协议；</p>
@@ -476,7 +475,7 @@
 </ul>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// ViewRootImpl.java</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">void</span> <span class="title function_">performTraversals</span><span class="params">()</span> &#123;</span><br></pre></td></tr></table></figure>
 
-<p><code>performTraversals()</code> 方法向 WMS 申请了 Surface、测量（measure）、布局（layout）、绘制（draw）三大流程，此文暂不分析；</p>
+<p><code>performTraversals()</code> 方法向 WMS 申请了 Surface、测量（measure）、布局（layout）、绘制（draw）三大流程，此文暂不分析；<a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_41095045/article/details/122510861">参考</a></p>
 <h3 id="2-2-2-Session-addToDisplayAsUser"><a href="#2-2-2-Session-addToDisplayAsUser" class="headerlink" title="2.2.2 Session.addToDisplayAsUser()"></a>2.2.2 Session.addToDisplayAsUser()</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Session.java</span></span><br><span class="line">    <span class="keyword">final</span> WindowManagerService mService;</span><br><span class="line">    <span class="keyword">public</span> <span class="type">int</span> <span class="title function_">addToDisplayAsUser</span><span class="params">(IWindow window, WindowManager.LayoutParams attrs,</span></span><br><span class="line"><span class="params">            <span class="type">int</span> viewVisibility, <span class="type">int</span> displayId, <span class="type">int</span> userId, InsetsVisibilities requestedVisibilities,</span></span><br><span class="line"><span class="params">            InputChannel outInputChannel, InsetsState outInsetsState,</span></span><br><span class="line"><span class="params">            InsetsSourceControl[] outActiveControls)</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> mService.addWindow(<span class="built_in">this</span>, window, attrs, viewVisibility, displayId, userId,</span><br><span class="line">                requestedVisibilities, outInputChannel, outInsetsState, outActiveControls);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
 
 <p>mService 是 WMS 对象，直接调用 <code>WMS.addWindow()</code>；</p>
@@ -589,14 +588,11 @@
           
       <div class="tabs tabs-comment">
         <ul class="nav-tabs">
-            <li class="tab"><a href="#comment-gitalk">gitalk</a></li>
             <li class="tab"><a href="#comment-disqus">disqus</a></li>
+            <li class="tab"><a href="#comment-gitalk">gitalk</a></li>
             <li class="tab"><a href="#comment-livere">livere</a></li>
         </ul>
         <div class="tab-content">
-            <div class="tab-pane gitalk" id="comment-gitalk">
-              <div class="comments" id="gitalk-container"></div>
-            </div>
             <div class="tab-pane disqus" id="comment-disqus">
               
   <div class="comments">
@@ -605,6 +601,9 @@
     </div>
   </div>
   
+            </div>
+            <div class="tab-pane gitalk" id="comment-gitalk">
+              <div class="comments" id="gitalk-container"></div>
             </div>
             <div class="tab-pane livere" id="comment-livere">
               
@@ -675,7 +674,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">69</span>
+          <span class="site-state-item-count">70</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -986,26 +985,6 @@ window.addEventListener('pjax:success', () => {
 
   
 
-<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
-
-<script>
-NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
-  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
-    var gitalk = new Gitalk({
-      clientID    : 'b7bb504993135f5a2eab',
-      clientSecret: '6f83aec5c45d75e248e2914be90c4601e2e1dc44',
-      repo        : 'rangerzhou.github.io',
-      owner       : 'rangerzhou',
-      admin       : ['rangerzhou'],
-      id          : '127ff324bf059966774eb14776d588f5',
-        language: 'zh-CN',
-      distractionFreeMode: true
-    });
-    gitalk.render('gitalk-container');
-  }, window.Gitalk);
-});
-</script>
-
 <script>
   var disqus_config = function() {
     this.page.url = "http://rangerzhou.top/2022/02/20/Android/AndroidDevelop_017_CreateActivity_WindowDisplay/";
@@ -1025,6 +1004,26 @@ NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
       (d.head || d.body).appendChild(s);
     }
   });
+</script>
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : 'b7bb504993135f5a2eab',
+      clientSecret: '6f83aec5c45d75e248e2914be90c4601e2e1dc44',
+      repo        : 'rangerzhou.github.io',
+      owner       : 'rangerzhou',
+      admin       : ['rangerzhou'],
+      id          : '127ff324bf059966774eb14776d588f5',
+        language: 'zh-CN',
+      distractionFreeMode: true
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
 </script>
 
 <script>
