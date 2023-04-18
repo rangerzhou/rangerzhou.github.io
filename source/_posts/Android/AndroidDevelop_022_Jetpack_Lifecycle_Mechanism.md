@@ -35,10 +35,6 @@ getLifecycle().addObserver(myObserver);
     public Lifecycle getLifecycle() {
         return mLifecycleRegistry;
     }
-
-    public Lifecycle getLifecycle() {
-        return this.mLifecycleRegistry;
-    }
 ```
 
 返回了一个 LifecycleRegistry 对象，
