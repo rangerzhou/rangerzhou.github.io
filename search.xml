@@ -4904,7 +4904,7 @@
 <li>将traces信息和 CPU使用情况信息保存到dropbox，即<em>data&#x2F;system&#x2F;dropbox</em>目录；</li>
 <li>根据进程类型，来决定直接后台杀掉（后台ANR），还是弹框告知用户；</li>
 </ul>
-<p>在输出trace的时候，Android 8.1.0新加了一个<code>useTombstonedForJavaTraces</code>属性，Java进程的traces通过<code>kill -3 [pid]</code>获取，Native进程的traces通过<code>debuggerd -b [pid]</code>获取，<code>kill -3</code>命令需要虚拟机的支持，所以无法输出Native进程traces.而<code>debuggerd -b [pid]</code>也可用于Java进程，但信息量远没有kill -3多。 ANR信息最为重要的是dropbox信息（比如<a href="mailto:&#100;&#x61;&#116;&#x61;&#x5f;&#97;&#x70;&#x70;&#x5f;&#x61;&#110;&#114;&#x40;&#49;&#53;&#x32;&#x33;&#52;&#x34;&#x37;&#x37;&#x31;&#54;&#x37;&#50;&#x38;&#x2e;&#x74;&#x78;&#x74;&#x2e;&#103;&#x7a;">&#100;&#x61;&#116;&#x61;&#x5f;&#97;&#x70;&#x70;&#x5f;&#x61;&#110;&#114;&#x40;&#49;&#53;&#x32;&#x33;&#52;&#x34;&#x37;&#x37;&#x31;&#54;&#x37;&#50;&#x38;&#x2e;&#x74;&#x78;&#x74;&#x2e;&#103;&#x7a;</a>）。</p>
+<p>在输出trace的时候，Android 8.1.0新加了一个<code>useTombstonedForJavaTraces</code>属性，Java进程的traces通过<code>kill -3 [pid]</code>获取，Native进程的traces通过<code>debuggerd -b [pid]</code>获取，<code>kill -3</code>命令需要虚拟机的支持，所以无法输出Native进程traces.而<code>debuggerd -b [pid]</code>也可用于Java进程，但信息量远没有kill -3多。 ANR信息最为重要的是dropbox信息（比如<a href="mailto:&#x64;&#97;&#x74;&#97;&#95;&#97;&#x70;&#112;&#95;&#x61;&#110;&#114;&#x40;&#49;&#x35;&#50;&#51;&#x34;&#x34;&#55;&#x37;&#x31;&#x36;&#55;&#50;&#56;&#x2e;&#x74;&#120;&#116;&#x2e;&#x67;&#122;">&#x64;&#97;&#x74;&#97;&#95;&#97;&#x70;&#112;&#95;&#x61;&#110;&#114;&#x40;&#49;&#x35;&#50;&#51;&#x34;&#x34;&#55;&#x37;&#x31;&#x36;&#55;&#50;&#56;&#x2e;&#x74;&#120;&#116;&#x2e;&#x67;&#122;</a>）。</p>
 ]]></content>
       <categories>
         <category>Android</category>
