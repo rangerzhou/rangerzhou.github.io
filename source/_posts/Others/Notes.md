@@ -1179,3 +1179,10 @@ git config --global core.safecrlf warn
 
 https://shuyi.tech/archives/os-context-switch
 
+#### 35. git status 中文乱码（显示八进制字符）
+
+``` shell
+git config --global core.quotepath false
+```
+
+参考：https://www.zhihu.com/tardis/zm/art/452682481?source_id=1005
