@@ -1186,3 +1186,11 @@ git config --global core.quotepath false
 ```
 
 参考：https://www.zhihu.com/tardis/zm/art/452682481?source_id=1005
+
+#### 36. 修复 Picked up _JAVA_OPTIONS: -Xmx2g -Xms2g 提示
+首先注意自己的 .bashrc/.zshrc 里是否定义了 `export _JAVA_OPTIONS="-Xmx2g -Xms2g"`，使用如下命令即可：
+``` shell
+_SILENT_JAVA_OPTIONS="$_JAVA_OPTIONS"
+unset _JAVA_OPTIONS
+alias java='java "$_SILENT_JAVA_OPTIONS"'
+```
