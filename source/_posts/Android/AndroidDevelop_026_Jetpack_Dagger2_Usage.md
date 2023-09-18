@@ -1,13 +1,13 @@
 ---
-title: Android - Jetpack 套件之 LiveData 使用和原理
-date: 2023-06-16 22:55:28
+title: Android - Jetpack 套件之 Dagger2 使用
+date: 2023-08-16 23:06:55
 tags: Jetpack, Dagger2
 categories: Android
 copyright: true
 password:
 ---
 
-> Android Jetpack 套件之 Dagger2 使用和原理解析；
+> Android Jetpack 套件之 Dagger2 使用；
 
 <!--more-->
 
@@ -360,35 +360,256 @@ public @interface MyScope {
 
 
 
-**多个 component 上面的 scope 不能相同**
 
-没有 scope 的组件不能去依赖有 scope 的组件
 
 Lazy 和 Provider 区别：Lazy 是单例（使用 DoubleCheck），Provider 不是单例；
 
 ### 组件依赖
 
+组件依赖与子组件主要解决不同作用域时组件之间的复用问题：
 
+- 在一个组件指定作用域后，就已经确定了该组件创建对象的生命周期，但是有些对象的实例可能生命周期更短，这时就需要定义新的组件；
+- 新组件需要使用原组件的部分资源；
 
-## SubComponent 使用
+两种实现方式：
 
-父 Component 装载 父Module，父Module 创建子Componet（在父Module中指定subcomponents为子Component），子Componet 装载子Module，子Module 创建XXX对象，然后父Component 提供获取子Component 的方法，子Component 提供 inject 方法；
+- 为新组件 `@Component` 添加 `dependencies` 参数，指定该组件依赖的原组件；
+- 直接使用 `@Subcomponent` 注解创建新的组件，并装载到父组件中；
 
-需要注意的是，子Componet 没有单独的 Dagger子Component，而是存在于 Dagger父Component中，所以注入的时候使用 `Dagger父Componet.子Compoent().create().inject(this)` 的方式，
+#### dependencies 方式
 
-组件依赖和子组件主要解决了不同作用域时组件之间复用问题：
+1. 定义新组件的作用域：
 
-- 在一个组件指定作用域后，就已经确定了该组件创建对象的生命周期，但是有些对象实例的生命周期更短，这个时候就需要定义新的组件；
-- 新组件需要使用原组建的部分资源；
-- 两种方式实现：
-  - 为 @Component 添加 dependencies 参数，指定该组件依赖于新的组件；
-  - 直接使用 @Subcomponent 注解创建新的组件，并装载到父组件中；
+   ``` java
+   @Scope
+   @Documented
+   @Retention(RUNTIME)
+   public @interface UserScope {
+   
+   }
+   ```
 
-## @Binds 使用
+2. 定义新组件
+
+   ``` java
+   @UserScope
+   @Component(modules = UserModule.class, dependencies = AppComponent.class)
+   public interface UserComponent {
+       void inject(MainActivity mainActivity);
+   }
+   ```
+
+   
+
+   **多个 component 上面的 scope 不能相同**，没有 scope 的组件不能去依赖有 scope 的组件，新组件 UserComponent 依赖原组件 AppComponent 组件，所以 <font color=red>**指定新组件的作用域 UserScope**</font>，如果不给新组建指定作用域，会报如下错误：
+
+   ``` shell
+   UserComponent(unscoped) cannot depend on scoped components
+   ```
+
+   因为原组件指定了作用域，所以 <font color=red>**新组件需要指定一个不同的作用域，并且对应的 Module 中的 provideXXX() 也需要指定作用域；**</font>
+
+3. 原组件中对应需要注入对象的 Activity 的 inject 就不需要了，并且暴露原组件装载的 NetModule 中想要给新组件使用的对象 Retrofit；
+
+   ``` java
+   @MyScope
+   @Component(modules = NetModule.class)
+   public interface AppComponent {
+       //void inject(MainActivity mainActivity);
+       Retrofit getRetrofit(); // 暴露需要给新组建使用的对象
+   }
+   ```
+
+4. User 对象
+
+   ``` java
+   public class User {
+       //@Inject
+       public User() {
+       }
+   }
+   // 创建 UserModule
+   @Module
+   public class UserModule() {
+       @UserScope// 指定作用域
+       @Provides
+       public User provideUser() {
+           return new User();
+       }
+   }
+   ```
+
+   因为使用 UserModule 提供 User 对象了，所以 User 的构造方法不需要添加 `@Inject` 注解了；
+
+5. 注入对象
+
+   ``` java
+   public class MainActivity extends AppCompatActivity {
+       @Inject
+       User user;
+       @Inject
+       User user2;
+       @Inject
+       Retrofit retrofit;
+       UserComponent userComponent;
+   
+       @Override
+       protected void onCreate(Bundle savedInstanceState) {
+           super.onCreate(savedInstanceState);
+           setContentView(R.layout.activity_main);
+           userComponent = DaggerUserComponent.builder
+               .appComponent(MyApplication.getAppComponent()) // 指定原组件
+               .build();
+           userComponent.inject(this);// 执行注入
+       }
+   }
+   ```
+
+   因为 UserComponent 的生命周期决定了和它同作用域对象的生命周期，所以需要把 UserComponent 定义在 Activity 的变量中，这样那些对象就和 Activity 的生命周期一致了，<font color=red>**必须指定原组件；**</font>
+
+   如此一来 user 和 user2 引用的就是同一个对象了，局部单例，而且原组件装载 Module 中的 Retrofit 对象也注入了；
+
+6. 引入 ApplicationContext
+
+   ``` java
+   @Module
+   public class NetModule {
+       private Application application;
+       public NetModule(Application application) {
+           this.application = application;
+       }
+       @Provides
+       Context provideContext() {
+           return application.getApplicationContext();
+       }
+   }
+   ```
+
+   application 需要通过 NetModule 构造方法传入，
+
+   ``` java
+   public class MyApplication extends Application {
+       static AppComponent appComponent;
+       @Override
+       public void onCreate() {
+           super.onCreate();
+           appComponent = DaggerAppComponent.builder.netModule(new NetModule(this)).build();
+       }
+       public AppComponent getAppComponent() {
+           return appComponent;
+       }
+   }
+   ```
+
+   这里在 `onCreate()` 中指定一个新的 NetModule 给 AppComponent，并且把 Application 传入构造函数，这样 NetModule 就拥有了 Application 对象；
+
+   接着在 MainActivity 中注入 Context：
+
+   ``` java
+   public class MainActivity extends AppCompatActivity {
+       @Inject
+       Context context;
+   
+       @Override
+       protected void onCreate(Bundle savedInstanceState) {
+           super.onCreate(savedInstanceState);
+           setContentView(R.layout.activity_main);
+           userComponent = DaggerUserComponent.builder
+               .appComponent(MyApplication.getAppComponent()) // 指定原组件
+               .build();
+           userComponent.inject(this);// 执行注入
+       }
+   }
+   ```
+
+   Context 是由 NetModule 提供的，NetModule 是属于 AppComponent 的，所以 AppComponent 可以暴露 Context 对象给到依赖 AppComponent 的新组件中，这样就复用了原组件的 ApplicationContext；
+
+#### SubComponent 使用
+
+1. 创建 Student 类：
+
+   ``` java
+   public class Student {
+       
+   }
+   ```
+
+2. 创建 StudentComponent
+
+   ``` java
+   @Subcomponent(modules=StudentModule.class) // 指定为子组件
+   public interface StudentComponent {
+       @Subcomponent.Factory
+       interface Factory { // 用来提供 StudentComponent 的创建
+           StudentComponent create();
+       }
+       void inject(SecondActivity);
+   }
+   ```
+
+   `@Subcomponent` 说明该组件为子组件；
+
+3. 创建子组件 Module
+
+   ``` java
+   @Module(subcomponents = StudentComponent.class)// 指定子组件
+   public class SubComponentModule {
+       
+   }
+   ```
+
+4. 把子组件 Module 装载到 AppComponent 中：
+
+   ``` java
+   @MyScope
+   @Component(modules = SubComponentModule.class)
+   public interface AppComponent {
+       StudenComponent.Factory studentComponent(); // 指定 Factory
+   }
+   ```
+
+   那么子组件就属于父组件 AppComponent 了，那么 就可以共享父组件提供的一些功能；
+
+5. 创建 StudentModule，并装载到 StudentComponent 中：
+
+   ``` java
+   @Module
+   public class StudentModule {
+       @Provides
+       Student provideStudent() {
+           return new Student();
+       }
+   }
+   ```
+
+6. 注入
+
+   ``` java
+   public class SecondActivity extends AppCompatActivity {
+       @Inject
+       Student student;
+       @Override
+       protected void onCreate(@Nullable Bundle savedInstanceState) {
+           super.onCreate(savedInstanceState);
+           MyApplication.getApplicationComponent().studentComponent().create().inject(this);
+           Log.d(TAG, "student: " + student);
+       }
+   }
+   ```
+
+   总结就是：
+
+   父 Component 装载父 Module，父 Module 创建子 Componet（在父 Module 中指定 subcomponents 为子 Component），子Componet 装载子 Module，子 Module 创建XXX对象，然后父 Component 提供获取子 Component 的方法，子 Component 提供 inject 方法；
+
+   需要注意的是，子 Componet 没有单独的 Dagger 子 Component，而是存在于 Dagger 父 Component 中，所以注入的时候使用 `Dagger父Component.子Component().create().inject(this)` 的方式；
+
+和组件依赖相比，子组件如果使用父组件的功能，父组件不需要额外声明想要暴露的方法；
+
+### @Binds 使用
 
 ``` java
 public abstract class TestModule {
-    // 表示告诉 Dagger 此方法刻意返回 AInterface 对象，但是具体的创建是由其实现类 AInterfaceImpl01 完成的
+    // 表示告诉 Dagger 此方法可以返回 AInterface 对象，但是具体的创建是由其实现类 AInterfaceImpl01 完成的
     @Binds
     abstract AInterface bindAinterface(AInterfaceImpl01 impl);
     // 定义如何创建 AInterfaceImpl01 对象
@@ -399,16 +620,39 @@ public abstract class TestModule {
 }
 ```
 
+`@Binds` 表示告诉 Dagger 此方法可以返回 AInterface 对象，但是具体的创建是由其实现类 AInterfaceImpl01 完成的；
+
+把 TestModule 装载到 AppComponent 中：
+
+``` java
+@MyScope
+@Component(modules = SubComponentModule.class, TestModule.class)
+public interface AppComponent {
+    StudenComponent.Factory studentComponent(); // 指定 Factory
+}
+```
+
 注入接口
 
 ``` java
-// 这里可以直接定义一个依赖接口，如果不使用 @Binds，则只能定义一个依赖对象
-@Inject AInterface aInterface;
+
+public class SecondActivity extends AppCompatActivity {
+    @Inject
+    Student student;
+    @Inject
+    AInterface aInterface; // 注入的是一个接口
+    @Override
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        MyApplication.getApplicationComponent().studentComponent().create().inject(this);
+        Log.d(TAG, "aInterface: " + aInterface);
+    }
+}
 ```
 
-------------------------------------------------------------------------------------
+这里可以直接注入一个依赖接口，如果不使用 @Binds，则只能注入一个依赖对象；
 
-
+因为 TestModule 属于 AppComponent 组件，这里直接使用 AppComponent 的子组件来注入，可以直接用到父组件装载的 TestModule 中的对象；
 
 
 
