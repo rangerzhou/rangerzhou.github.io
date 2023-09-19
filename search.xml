@@ -1,6 +1,284 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>Android - Jetpack 套件之 Hilt 使用和原理</title>
+    <url>/2023/06/25/Android/AndroidDevelop_027_Jetpack_Hilt_UsageAndMechanism/</url>
+    <content><![CDATA[<div class="hbe hbe-container" id="hexo-blog-encrypt" data-wpm="Oh, this is an invalid password. Check and try again, please." data-whm="OOPS, these decrypted content may changed, but you can still have a look.">
+  <script id="hbeData" type="hbeData" data-hmacdigest="35c58034c7ab0762ce7f0d38753b2763fc7758b3d01488f233b6f58a0afbf1d9">8a594f550020b2c4c53139d4c120877c670d47411eb78fc0c4abbfbe587bcfe2cb113c41bfd328c5065f6f2b39026d346a12ba8473dca30b30f240c25870a030489e615608fa9f6e76f98000ee177152e76d6a95c217e988b4d906c34b48bd06c561fecb61502376067f4deb2da17be1dcbae3e86c8e69f0e1e448dfd4040abf79f321fb32109ecc1343fcac9e185e6d4544677b561fc43351e23ea5518574b2139e272c97b707a613cb5296f5b3e348b5c8d88480ff605033b6598baa43b3225d7173fa010cb6f3d7f9524f0af91f4443071921465f954317130cef99ab094885d44414fa40e44effe17f7a3c69c8dbd50e8a7985ceed135d184c0f061dd66cdd5ce7c1470033e87b22bc8db3dfd0e4c4c5869bd579acfdfdad9db03e4d4fb5a835bdd8136c6d9044da70436e717515ac77b83cd78b573ed19659cd2c7a58120c5db6ef508cf1fe90b594ff367217b141e4a6705d0526613ee4f79d20fcc549144eb4fdd63e0acca4a23e74c84e885b9a5f6625fc97b6db4795688385d50e71969e1d5a75afebf58e2a2cc67040094bf803afce0c880af2fff5e685484e7f27c4cc76ed4b7a2d81670647befdeba6dd544b1e177326fd0abecbb0d806012791542a68bae812b2103a6affc1cf79e2793e6e23cd21c661fb7c8434f75f2b5b700040c421935271fd1a2797be7bd573cf074097d69df87ad85300a9c9c014405d5f4bdc82dfd1f449aa17562a1fc506400b8144fb690ff88a3b4dff30f805130d69c94fdca4b863dc42fa1b3e001248a4e47336819cbceffa40ad4e1f27ca12fd49f59065e6be76dc9ff623c0b3caa0c4d84d0e844dc02cadc44f7281ce0cf5f7733a79c15329c156f28cb9df0730da0af0e4f53ae8a797fc7b7158a9774e2d54afa8003a92812d475921a1d44dd0f6e621014fccf5c81bc9420049f4dfcbeb22e46d3fd17b043f014be093431fb6fe244ef2abaaac8b7ddf324d7bb8c5b37e35398a1636fe349d9e58c076fd823b8b4de9948b9e52ada16dc039940d7171ab18926ee4d37a0592302db195a6cf46ac025c42d8296cf5cb78b45d4f497cec10138f918e6cd24be48a77885ed820c366a55533d7ff74d9f701cfeafc9cb2c9686839f964bb895d06f833fc62f5a7dc549c59b560eb9c3622806bac01dd5095564b3eeb5cf80cec41d5905a6b32d867bcbdf32545bd0f3a4556a356bdcda39cb242ded11ccac7abb5d17e3104ef918c00d3b5408b3489eca3844dab705f7ab9be976585b1df60441608c3e3bb65d6828ee3973a0d469c29f61bec809cc2651bbdac7ee628f73f132ad6e341c9d3741f9f1dff64eb6d1dc6fb884710bc07df09a5a16eec6d16e5896df120e4c1f56bd091e5dbb28d70ab2d2fbb698f4b02b2f62151a577aa8af16334ef05e32ec66f774791e86e6a4a6ebe8b9cb5a5b5aee1920981bbe886648dcac8814d4b92b40f64143e844c99f4e8452bb7e7b64dee2cb47d8cf4c7577ed6f76c74f886b9368719d3588c001590bdda71f2fc6d853d5a0f6d1f8358b7f4326f0ebe640adbac1c6c201c48c64bebed9756bd0365dca64a4896649fe5055fba5d8c654043237e16b8fc031e5870dec2f31c91670c45c4efd0f5ec1296a5100966e097192517b054e6ad98ca99219b1e08298edb742b593b2ad585259de6dd6afe29924fba441eae229d4b9394034e5577ee81362f39f4d4cb86a7a8a588443c90c9c643d4e2aca44e575c532f777e0ba809dd20905da677386762ed2a0dce6a6d1067de4b58711468cce0e94fb6f6ecbaee3723e08ecdae9cab6105b0883b126acc47e021bb9cd8ef7b1a477f76b57b19ed73858369ed03dfad9064f99d04d8ef46b6fbc15d90b0e24d5d14e1c621f5e15fc8c19a52ce337fe30f4e0be41c788c418001c22a8620f82dd084e9d1ddf629c5718539f250b20095e5d429a405d180793511add600497bc1ab644caafde57adc3a4e8ac4545920796e1ed56fe2765974931ebb15074da3bd05b9995b30b90e3f7bac533508058f7f21cbed90a7d22be7f8d98557212edbb713354cbe07282d50d8f839975a812048c2788e478a535709a9fceeb98f78686ec65c829a469c2a757df2ef781b39c89aeaed1264399b9d126c10da4ddd1dc00eb0</script>
+  <div class="hbe hbe-content">
+    <div class="hbe hbe-input hbe-input-default">
+      <input class="hbe hbe-input-field hbe-input-field-default" type="password" id="hbePass">
+      <label class="hbe hbe-input-label hbe-input-label-default" for="hbePass">
+        <span class="hbe hbe-input-label-content hbe-input-label-content-default">Hey, password is required here.</span>
+      </label>
+    </div>
+  </div>
+</div>
+<script data-pjax src="/lib/hbe.js"></script><link href="/css/hbe.style.css" rel="stylesheet" type="text/css">]]></content>
+      <categories>
+        <category>Android</category>
+      </categories>
+      <tags>
+        <tag>Jetpack, Hilt</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Android - Jetpack 套件之 Dagger2 使用</title>
+    <url>/2023/06/20/Android/AndroidDevelop_026_Jetpack_Dagger2_Usage/</url>
+    <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><blockquote>
+<p>Android Jetpack 套件之 Dagger2 使用；</p>
+</blockquote>
+<span id="more"></span>
+
+<h2 id="什么是依赖注入？"><a href="#什么是依赖注入？" class="headerlink" title="什么是依赖注入？"></a>什么是依赖注入？</h2><p><strong>IOC - Inversion of Control</strong></p>
+<p>控制反转，意思是借助于“第三方” <strong>实现</strong> 具有依赖关系的 <strong>对象之间的解耦</strong>（比如在三个互相接触的小齿轮中间增加一个大的齿轮来接触三个小齿轮，以解除三个小齿轮之间的互相依赖）；</p>
+<p><img src="https://raw.githubusercontent.com/rangerzhou/ImageHosting/master/blog_resource/2023/IOC.png" alt="IOC"></p>
+<p>反转的是对象的创建方式，即获得依赖对象的过程被反转了，获得依赖对象的过程 <strong>由自身管理变为了由IOC 容器主动注入</strong>，于是 IOC 有了一个新名字：依赖注入，实际上“依赖注入” IOC 的一种实现方式，IOC 框架有两种实现方式：</p>
+<ul>
+<li>基于反射的实现方式，比如 Spring IOC（动态的进行依赖关系的建立），在程序运行过程中动态的建立依赖关系；</li>
+<li>静态方式，程序在编译期自动生成代码用于建立依赖关系，dagger2 就属于静态方式；</li>
+</ul>
+<h2 id="手动依赖注入的两种方式"><a href="#手动依赖注入的两种方式" class="headerlink" title="手动依赖注入的两种方式"></a>手动依赖注入的两种方式</h2><ul>
+<li>构造方法注入</li>
+<li>Setter 方法注入（setXXX 方法）</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Car</span> &#123;</span><br><span class="line">    Engine engine;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">start</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="comment">// 主动控制对象的创建</span></span><br><span class="line">        <span class="comment">//engine = new Engine();</span></span><br><span class="line">        engine.start();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 构造方法注入</span></span><br><span class="line">    <span class="keyword">public</span> <span class="title function_">Car</span><span class="params">(Engine engine)</span> &#123;</span><br><span class="line">        <span class="built_in">this</span>.engine = engine;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// Setter 方法注入</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">setEngine</span><span class="params">(Engine engine)</span> &#123;</span><br><span class="line">        <span class="built_in">this</span>.engine = engine;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>主动控制对象的创建，如果 Engine 的构造方法发生了变化，那么 Car 类中也要做出相应的改变，但是如果通过依赖注入，Car 类就不需要再关注 Engine 对象的创建，只关注自己的业务就可以了；</p>
+<p>试想一下，Car 不单单只有 Engine，还包括其他的零部件，比如 Wheel，Gearbox 等，Engine 又包含了自己的零部件，这么多的对象如果通过手动依赖注入就需要大量的调用构造方法或者 Setter 方法进行注入，变得异常繁琐，所以我们需要一个工具可以帮我们注入：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Injector</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">inject</span><span class="params">(Car car)</span> &#123;</span><br><span class="line">        <span class="type">Engine</span> <span class="variable">engine</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Engine</span>();</span><br><span class="line">        car.setEngine(engine);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在外部直接调用 inject 方法即可注入依赖对象了；</p>
+<h2 id="什么是-Dagger？"><a href="#什么是-Dagger？" class="headerlink" title="什么是 Dagger？"></a>什么是 Dagger？</h2><p>Dagger(匕首) 是提供给 Android 快速实现依赖注入的<strong>框架</strong>，Dagger1.0 由 Square 公司开发共享，Dagger2 由 Google 接手并维护；</p>
+<h2 id="Dagger-使用"><a href="#Dagger-使用" class="headerlink" title="Dagger 使用"></a>Dagger 使用</h2><p>首先添加依赖引入 Dagger2：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">// build.gradle(:app)</span></span><br><span class="line">dependencies &#123;</span><br><span class="line">    <span class="comment">// dagger 核心库</span></span><br><span class="line">    implementation <span class="string">&#x27;com.google.dagger:dagger:2.4&#x27;</span></span><br><span class="line">    <span class="comment">// 注解处理器</span></span><br><span class="line">    annotationProcessor <span class="string">&#x27;com.google.dagger:dagger-compiler:2.4&#x27;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="使用构造方法创建对象"><a href="#使用构造方法创建对象" class="headerlink" title="使用构造方法创建对象"></a>使用构造方法创建对象</h3><ol>
+<li>定义对象</li>
+</ol>
+  <figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">User</span> &#123;</span><br><span class="line">    <span class="meta">@Inject</span></span><br><span class="line">    <span class="keyword">public</span> <span class="title function_">User</span><span class="params">()</span> &#123;</span><br><span class="line">        </span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>  <code>@Inject</code> 注解用于告知 Dagger 可以通过构造方法创建并获取对象实例；</p>
+<ol start="2">
+<li>编写 Component 接口用于执行注入</li>
+</ol>
+  <figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Component</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">interface</span> <span class="title class_">AppComponent</span> ｛</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">inject</span><span class="params">(MainActivity mainActivity)</span>;</span><br><span class="line">｝</span><br></pre></td></tr></table></figure>
+
+<p>  Component 可以当成 IOC 容器，IOC 容器则存在一些实例，<code>inject()</code> 方法参数表示把对象注入到 MainActivity 中（或者说这个 Component 中的对象会在哪个类使用）；</p>
+<ol start="3">
+<li>定义依赖对象</li>
+</ol>
+  <figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">MainActivity</span> <span class="keyword">extends</span> <span class="title class_">AppCompatActivity</span> &#123;</span><br><span class="line">    <span class="meta">@Inject</span></span><br><span class="line">    User user;</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>  <code>@Inject</code> 表示这个依赖对象需要注入；</p>
+<ol start="4">
+<li>执行依赖对象注入</li>
+</ol>
+  <figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">MainActivity</span> <span class="keyword">extends</span> <span class="title class_">AppCompatActivity</span> &#123;</span><br><span class="line">    <span class="meta">@Inject</span></span><br><span class="line">    User user;</span><br><span class="line">    </span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">protected</span> <span class="keyword">void</span> <span class="title function_">onCreate</span><span class="params">(Bundle savedInstanceState)</span> &#123;</span><br><span class="line">        <span class="built_in">super</span>.onCreate(savedInstanceState);</span><br><span class="line">        setContentView(R.layout.activity_main);</span><br><span class="line">        DaggerAppComponent.create().inject(<span class="built_in">this</span>); <span class="comment">// 执行注入</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>  要执行 build 后才会生成 DaggerAppComponent，DaggerAppComponent 是 AppComponent 的实现类，调用 AppComponet 中定义的方法执行注入动作；</p>
+<p>通过以上 4 个步骤就完成了一个对象的注入；</p>
+<p>但是如果有些对象的构造是第三方框架提供的，就无法在构造方法上添加 <code>@Inject</code> 注解了，又或者提供依赖的构造函数是带参数的，如果只是简单的使用 <code>@Inject</code> 标记，那么它的参数又如何来的呢？<code>@Module</code> 刻意帮我们解决这些问题；</p>
+<h3 id="使用-Module-的-provideXXX-创建对象"><a href="#使用-Module-的-provideXXX-创建对象" class="headerlink" title="使用 Module 的 provideXXX() 创建对象"></a>使用 Module 的 provideXXX() 创建对象</h3><ol>
+<li><p>定义 Module</p>
+<p><strong>Module 的作用是提供各种功能对象</strong></p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Module</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">NetModule</span>() &#123;</span><br><span class="line">    <span class="meta">@Provides</span></span><br><span class="line">    <span class="keyword">public</span> User <span class="title function_">provideUser</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">User</span>(); <span class="comment">// 或者其他提供对象的方式</span></span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="meta">@Provides</span></span><br><span class="line">    <span class="keyword">public</span> Retrofit <span class="title function_">provideRetrofit</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">Retrofit</span>.Builder(<span class="string">&quot;http://www.baidu.com&quot;</span>).basUrl().build();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>@Module</code> 表示这个类的类型是一个 Dagger 模块，可以注入到容器中；</p>
+<p><code>@Provides</code> 表示告知 Dagger 可以通过下面这种方式来获取到要注入对象的实例；</p>
+</li>
+<li><p>把 Module 装载到 Component 中</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Component(modules = NetModule.class)</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">interface</span> <span class="title class_">AppComponent</span> &#123;</span><br><span class="line">    <span class="keyword">void</span> <span class="title function_">inject</span><span class="params">(MainActivity mainActivity)</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在 <code>@Component</code> 注解后面括号里把 Module 装载到 Component 中，modules 参数接收的类型是一个数组，表示被装入 Component 的 Module 有哪些，如果是多个 module，则写为 <code>modules = &#123;A.class,B.class&#125;</code>；</p>
+</li>
+<li><p>执行注入</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">MainActivity</span> <span class="keyword">extends</span> <span class="title class_">AppCompatActivity</span> &#123;</span><br><span class="line">    <span class="meta">@Inject</span></span><br><span class="line">    User user;</span><br><span class="line">    <span class="meta">@Inject</span></span><br><span class="line">    Retrofit retrofit;</span><br><span class="line">    </span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">protected</span> <span class="keyword">void</span> <span class="title function_">onCreate</span><span class="params">(Bundle savedInstanceState)</span> &#123;</span><br><span class="line">        <span class="built_in">super</span>.onCreate(savedInstanceState);</span><br><span class="line">        setContentView(R.layout.activity_main);</span><br><span class="line">        DaggerAppComponent.create().inject(<span class="built_in">this</span>); <span class="comment">// 执行注入</span></span><br><span class="line">        Log.d(TAG, <span class="string">&quot;user: &quot;</span> + user + <span class="string">&quot;, retrofit: &quot;</span> + retrofit);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>复杂情况使用（引用 Module 中已知的对象）</p>
+<p>创建一个 ApiService 接口</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">interface</span> <span class="title class_">ApiService</span> &#123;&#125;</span><br></pre></td></tr></table></figure>
+
+<p>假如获取 ApiService 对象需要使用到 Retrofit 对象，则直接在参数中引入 Retrofit 对象即可，因为 Module 已经知道如何获取 Module 对象了，所以不需要再重复调用创建 Retrofit 的方法了；</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Module</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">NetModule</span>() &#123;   </span><br><span class="line">    <span class="meta">@Provides</span></span><br><span class="line">    <span class="keyword">public</span> Retrofit <span class="title function_">provideRetrofit</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">Retrofit</span>.Builder(<span class="string">&quot;http://www.baidu.com&quot;</span>).basUrl().build();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Provides</span></span><br><span class="line">    <span class="keyword">public</span> ApiService <span class="title function_">provideApiService</span><span class="params">(Retrofit retrofit)</span>&#123;</span><br><span class="line">        <span class="comment">// 一般使用</span></span><br><span class="line">        <span class="comment">//new Retrofit.Builder(&quot;http://www.baidu.com&quot;).basUrl().build().create(ApiService.class);</span></span><br><span class="line">        retrofit.create(ApiService.class);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>此处想说明的就是如果 Module 中已经知道如何获取一个对象，那么 Module 中的其他对象的创建方法中可以直接使用这个对象；</p>
+</li>
+</ol>
+<h3 id="作用域"><a href="#作用域" class="headerlink" title="作用域"></a>作用域</h3><h4 id="局部单例"><a href="#局部单例" class="headerlink" title="局部单例"></a>局部单例</h4><p>作用域注解可以<strong>将某个对象的生命周期限定为其组件的生命周期（即如果 Module 中的获取实例的方法指定了某个作用域，那么对应的 Component 也需要指定这个作用域）</strong>，在作用域范围内使用到的是同一实例；</p>
+<p>作用域就算用来管理 Component 来获取对象实例的生命周期的；</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Module</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">NetModule</span>() &#123;</span><br><span class="line">    <span class="meta">@Singleton</span></span><br><span class="line">    <span class="meta">@Provides</span></span><br><span class="line">    <span class="keyword">public</span> Retrofit <span class="title function_">provideRetrofit</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">Retrofit</span>.Builder(<span class="string">&quot;http://www.baidu.com&quot;</span>).basUrl().build();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>@Singleton</code> 是 Dagger 提供的一种默认的作用域注解；</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Singleton</span></span><br><span class="line"><span class="meta">@Component(modules = NetModule.class)</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">interface</span> <span class="title class_">AppComponent</span> &#123;</span><br><span class="line">    <span class="keyword">void</span> <span class="title function_">inject</span><span class="params">(MainActivity mainActivity)</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>装载 Module 的 Component 也需要添加 <code>@Singleton</code> 注解；</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">MainActivity</span> <span class="keyword">extends</span> <span class="title class_">AppCompatActivity</span> &#123;</span><br><span class="line">    <span class="meta">@Inject</span></span><br><span class="line">    Retrofit retrofit;</span><br><span class="line">    </span><br><span class="line">    <span class="meta">@Inject</span></span><br><span class="line">    Retrofit retrofit2;</span><br><span class="line">    </span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">protected</span> <span class="keyword">void</span> <span class="title function_">onCreate</span><span class="params">(Bundle savedInstanceState)</span> &#123;</span><br><span class="line">        <span class="built_in">super</span>.onCreate(savedInstanceState);</span><br><span class="line">        setContentView(R.layout.activity_main);</span><br><span class="line">        DaggerAppComponent.create().inject(<span class="built_in">this</span>); <span class="comment">// 执行注入</span></span><br><span class="line">        Log.d(TAG, <span class="string">&quot;retrofit: &quot;</span> + retrofit + <span class="string">&quot;, retrofit2: &quot;</span> + retrofit2);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>如果打印出来就可以看出 retrofit 和 retrofit2 是同一个对象；</p>
+<p>但是假如有另一个 Activity，同样注入了 Retrofit 对象，那么和上面是否是同一个实例呢？</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">SecondActivity</span> <span class="keyword">extends</span> <span class="title class_">AppCompatActivity</span> &#123;</span><br><span class="line">    <span class="meta">@Inject</span></span><br><span class="line">    Retrofit retrofit;</span><br><span class="line">    </span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">protected</span> <span class="keyword">void</span> <span class="title function_">onCreate</span><span class="params">(Bundle savedInstanceState)</span> &#123;</span><br><span class="line">        <span class="built_in">super</span>.onCreate(savedInstanceState);</span><br><span class="line">        DaggerAppComponent.create().inject(<span class="built_in">this</span>);</span><br><span class="line">        Log.d(TAG, <span class="string">&quot;retrofit3: &quot;</span> + retrofit3);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>把依赖对象注入到 SecondActivity 共其使用：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Singleton</span></span><br><span class="line"><span class="meta">@Component(modules = NetModule.class)</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">interface</span> <span class="title class_">AppComponent</span> &#123;</span><br><span class="line">    <span class="keyword">void</span> <span class="title function_">inject</span><span class="params">(MainActivity mainActivity)</span>;</span><br><span class="line">    <span class="keyword">void</span> <span class="title function_">inject</span><span class="params">(SecondActivity secondActivity)</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这里打印出的结果表明 SecondActivity 中的 retrofit3 和 MainActivity 中的两个 Retrofit 对象并非同一个对象，因为在 SecondActivity 中又通过 DaggerAppComponent.create() 创建了一个新的 Component 对象，上面说了，只有同一个 Component 中的对象才是同一个，所以这里就和 MainActivity 中的对象不是同一个了；</p>
+<h4 id="全局单例"><a href="#全局单例" class="headerlink" title="全局单例"></a>全局单例</h4><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">MyApplication</span> <span class="keyword">extends</span> <span class="title class_">Application</span> &#123;</span><br><span class="line">    <span class="keyword">static</span> <span class="type">AppComponent</span> <span class="variable">appComponent</span> <span class="operator">=</span> DaggerAppComponent.create();</span><br><span class="line">    <span class="keyword">public</span> AppComponent <span class="title function_">getAppComponent</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> appComponent;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在 Activity 中使用 Application 中提供的 AppComponent 进行对象注入：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">MainActivity</span> <span class="keyword">extends</span> <span class="title class_">AppCompatActivity</span> &#123;</span><br><span class="line">    <span class="meta">@Inject</span></span><br><span class="line">    Retrofit retrofit;</span><br><span class="line">    </span><br><span class="line">    <span class="meta">@Inject</span></span><br><span class="line">    Retrofit retrofit2;</span><br><span class="line">    </span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">protected</span> <span class="keyword">void</span> <span class="title function_">onCreate</span><span class="params">(Bundle savedInstanceState)</span> &#123;</span><br><span class="line">        <span class="built_in">super</span>.onCreate(savedInstanceState);</span><br><span class="line">        setContentView(R.layout.activity_main);</span><br><span class="line">        <span class="comment">//DaggerAppComponent.create().inject(this); // 执行注入</span></span><br><span class="line">        MyApplication.getAppComponent().inject(<span class="built_in">this</span>); <span class="comment">// 执行注入</span></span><br><span class="line">        Log.d(TAG, <span class="string">&quot;retrofit: &quot;</span> + retrofit + <span class="string">&quot;, retrofit2: &quot;</span> + retrofit2);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>同理 SecondActivity 中也是用同样的方法注入，这样 MainActivity 和 SecondActivity 中的 Retrofit 对象就是同一个对象了，因为使用的是同一个 Component 注入的；</p>
+<h4 id="自定义作用域"><a href="#自定义作用域" class="headerlink" title="自定义作用域"></a>自定义作用域</h4><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Scope</span></span><br><span class="line"><span class="meta">@Documented</span></span><br><span class="line"><span class="meta">@Retention(RUNTIME)</span></span><br><span class="line"><span class="keyword">public</span> <span class="meta">@interface</span> MyScope &#123;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>直接复制 Singleton 的注解，修改为自定义的作用域名称即可；</p>
+<h4 id="使用作用域的规则"><a href="#使用作用域的规则" class="headerlink" title="使用作用域的规则"></a><font color=red>使用作用域的规则</font></h4><ul>
+<li>在没有必要的情况下，尽量使用默认的作用域，即不指定作用域；</li>
+<li>Module 中要么不使用作用域，要么和 Component 中的作用域保持一致；</li>
+<li>开发设计时，一定要有清晰的依赖图，不然容易产生依赖死循环；</li>
+</ul>
+<p>Lazy 和 Provider 区别：Lazy 是单例（使用 DoubleCheck），Provider 不是单例；</p>
+<h3 id="组件依赖和子组件"><a href="#组件依赖和子组件" class="headerlink" title="组件依赖和子组件"></a><font color=red>组件依赖和子组件</font></h3><p>组件依赖与子组件主要解决不同作用域时组件之间的复用问题：</p>
+<ul>
+<li>在一个组件指定作用域后，就已经确定了该组件创建对象的生命周期，但是有些对象的实例可能生命周期更短，这时就需要定义新的组件；</li>
+<li>新组件需要使用原组件的部分资源；</li>
+</ul>
+<p>两种实现方式：</p>
+<ul>
+<li>为新组件 <code>@Component</code> 添加 <code>dependencies</code> 参数，指定该组件依赖的原组件；</li>
+<li>直接使用 <code>@Subcomponent</code> 注解创建新的组件，并装载到父组件中；</li>
+</ul>
+<h4 id="dependencies-方式"><a href="#dependencies-方式" class="headerlink" title="dependencies 方式"></a>dependencies 方式</h4><ol>
+<li><p>定义新组件的作用域：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Scope</span></span><br><span class="line"><span class="meta">@Documented</span></span><br><span class="line"><span class="meta">@Retention(RUNTIME)</span></span><br><span class="line"><span class="keyword">public</span> <span class="meta">@interface</span> UserScope &#123;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>定义新组件</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@UserScope</span></span><br><span class="line"><span class="meta">@Component(modules = UserModule.class, dependencies = AppComponent.class)</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">interface</span> <span class="title class_">UserComponent</span> &#123;</span><br><span class="line">    <span class="keyword">void</span> <span class="title function_">inject</span><span class="params">(MainActivity mainActivity)</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<p><strong>多个 component 上面的 scope 不能相同</strong>，没有 scope 的组件不能去依赖有 scope 的组件，新组件 UserComponent 依赖原组件 AppComponent 组件，所以 <font color=red><strong>指定新组件的作用域 UserScope</strong></font>，如果不给新组建指定作用域，会报如下错误：</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">UserComponent(unscoped) cannot depend on scoped components</span><br></pre></td></tr></table></figure>
+
+<p>因为原组件指定了作用域，所以 <font color=red><strong>新组件需要指定一个不同的作用域，并且对应的 Module 中的 provideXXX() 也需要指定作用域；</strong></font></p>
+</li>
+<li><p>原组件中对应需要注入对象的 Activity 的 inject 就不需要了，并且暴露原组件装载的 NetModule 中想要给新组件使用的对象 Retrofit；</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@MyScope</span></span><br><span class="line"><span class="meta">@Component(modules = NetModule.class)</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">interface</span> <span class="title class_">AppComponent</span> &#123;</span><br><span class="line">    <span class="comment">//void inject(MainActivity mainActivity);</span></span><br><span class="line">    Retrofit <span class="title function_">getRetrofit</span><span class="params">()</span>; <span class="comment">// 暴露需要给新组建使用的对象</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>User 对象</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">User</span> &#123;</span><br><span class="line">    <span class="comment">//@Inject</span></span><br><span class="line">    <span class="keyword">public</span> <span class="title function_">User</span><span class="params">()</span> &#123;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 创建 UserModule</span></span><br><span class="line"><span class="meta">@Module</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">UserModule</span>() &#123;</span><br><span class="line">    <span class="meta">@UserScope</span><span class="comment">// 指定作用域</span></span><br><span class="line">    <span class="meta">@Provides</span></span><br><span class="line">    <span class="keyword">public</span> User <span class="title function_">provideUser</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">User</span>();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>因为使用 UserModule 提供 User 对象了，所以 User 的构造方法不需要添加 <code>@Inject</code> 注解了；</p>
+</li>
+<li><p>注入对象</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">MainActivity</span> <span class="keyword">extends</span> <span class="title class_">AppCompatActivity</span> &#123;</span><br><span class="line">    <span class="meta">@Inject</span></span><br><span class="line">    User user;</span><br><span class="line">    <span class="meta">@Inject</span></span><br><span class="line">    User user2;</span><br><span class="line">    <span class="meta">@Inject</span></span><br><span class="line">    Retrofit retrofit;</span><br><span class="line">    UserComponent userComponent;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">protected</span> <span class="keyword">void</span> <span class="title function_">onCreate</span><span class="params">(Bundle savedInstanceState)</span> &#123;</span><br><span class="line">        <span class="built_in">super</span>.onCreate(savedInstanceState);</span><br><span class="line">        setContentView(R.layout.activity_main);</span><br><span class="line">        userComponent = DaggerUserComponent.builder</span><br><span class="line">            .appComponent(MyApplication.getAppComponent()) <span class="comment">// 指定原组件</span></span><br><span class="line">            .build();</span><br><span class="line">        userComponent.inject(<span class="built_in">this</span>);<span class="comment">// 执行注入</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>因为 UserComponent 的生命周期决定了和它同作用域对象的生命周期，所以需要把 UserComponent 定义在 Activity 的变量中，这样那些对象就和 Activity 的生命周期一致了，<font color=red><strong>必须指定原组件；</strong></font></p>
+<p>如此一来 user 和 user2 引用的就是同一个对象了，局部单例，而且原组件装载 Module 中的 Retrofit 对象也注入了；</p>
+</li>
+<li><p>引入 ApplicationContext</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Module</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">NetModule</span> &#123;</span><br><span class="line">    <span class="keyword">private</span> Application application;</span><br><span class="line">    <span class="keyword">public</span> <span class="title function_">NetModule</span><span class="params">(Application application)</span> &#123;</span><br><span class="line">        <span class="built_in">this</span>.application = application;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="meta">@Provides</span></span><br><span class="line">    Context <span class="title function_">provideContext</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> application.getApplicationContext();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>application 需要通过 NetModule 构造方法传入，</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">MyApplication</span> <span class="keyword">extends</span> <span class="title class_">Application</span> &#123;</span><br><span class="line">    <span class="keyword">static</span> AppComponent appComponent;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">onCreate</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="built_in">super</span>.onCreate();</span><br><span class="line">        appComponent = DaggerAppComponent.builder.netModule(<span class="keyword">new</span> <span class="title class_">NetModule</span>(<span class="built_in">this</span>)).build();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">public</span> AppComponent <span class="title function_">getAppComponent</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> appComponent;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这里在 <code>onCreate()</code> 中指定一个新的 NetModule 给 AppComponent，并且把 Application 传入构造函数，这样 NetModule 就拥有了 Application 对象；</p>
+<p>接着在 MainActivity 中注入 Context：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">MainActivity</span> <span class="keyword">extends</span> <span class="title class_">AppCompatActivity</span> &#123;</span><br><span class="line">    <span class="meta">@Inject</span></span><br><span class="line">    Context context;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">protected</span> <span class="keyword">void</span> <span class="title function_">onCreate</span><span class="params">(Bundle savedInstanceState)</span> &#123;</span><br><span class="line">        <span class="built_in">super</span>.onCreate(savedInstanceState);</span><br><span class="line">        setContentView(R.layout.activity_main);</span><br><span class="line">        userComponent = DaggerUserComponent.builder</span><br><span class="line">            .appComponent(MyApplication.getAppComponent()) <span class="comment">// 指定原组件</span></span><br><span class="line">            .build();</span><br><span class="line">        userComponent.inject(<span class="built_in">this</span>);<span class="comment">// 执行注入</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>Context 是由 NetModule 提供的，NetModule 是属于 AppComponent 的，所以 AppComponent 可以暴露 Context 对象给到依赖 AppComponent 的新组件中，这样就复用了原组件的 ApplicationContext；</p>
+</li>
+</ol>
+<h4 id="SubComponent-使用"><a href="#SubComponent-使用" class="headerlink" title="SubComponent 使用"></a>SubComponent 使用</h4><ol>
+<li><p>创建 Student 类：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Student</span> &#123;</span><br><span class="line">    </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>创建 StudentComponent</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Subcomponent(modules=StudentModule.class)</span> <span class="comment">// 指定为子组件</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">interface</span> <span class="title class_">StudentComponent</span> &#123;</span><br><span class="line">    <span class="meta">@Subcomponent</span>.Factory</span><br><span class="line">    <span class="keyword">interface</span> <span class="title class_">Factory</span> &#123; <span class="comment">// 用来提供 StudentComponent 的创建</span></span><br><span class="line">        StudentComponent <span class="title function_">create</span><span class="params">()</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">void</span> <span class="title function_">inject</span><span class="params">(SecondActivity)</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>@Subcomponent</code> 说明该组件为子组件；</p>
+</li>
+<li><p>创建子组件 Module</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Module(subcomponents = StudentComponent.class)</span><span class="comment">// 指定子组件</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">SubComponentModule</span> &#123;</span><br><span class="line">    </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>把子组件 Module 装载到 AppComponent 中：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@MyScope</span></span><br><span class="line"><span class="meta">@Component(modules = SubComponentModule.class)</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">interface</span> <span class="title class_">AppComponent</span> &#123;</span><br><span class="line">    StudenComponent.Factory <span class="title function_">studentComponent</span><span class="params">()</span>; <span class="comment">// 指定 Factory</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>那么子组件就属于父组件 AppComponent 了，那么 就可以共享父组件提供的一些功能；</p>
+</li>
+<li><p>创建 StudentModule，并装载到 StudentComponent 中：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Module</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">StudentModule</span> &#123;</span><br><span class="line">    <span class="meta">@Provides</span></span><br><span class="line">    Student <span class="title function_">provideStudent</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">Student</span>();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>注入</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">SecondActivity</span> <span class="keyword">extends</span> <span class="title class_">AppCompatActivity</span> &#123;</span><br><span class="line">    <span class="meta">@Inject</span></span><br><span class="line">    Student student;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">protected</span> <span class="keyword">void</span> <span class="title function_">onCreate</span><span class="params">(<span class="meta">@Nullable</span> Bundle savedInstanceState)</span> &#123;</span><br><span class="line">        <span class="built_in">super</span>.onCreate(savedInstanceState);</span><br><span class="line">        MyApplication.getApplicationComponent().studentComponent().create().inject(<span class="built_in">this</span>);</span><br><span class="line">        Log.d(TAG, <span class="string">&quot;student: &quot;</span> + student);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>总结就是：</p>
+<p>父 Component 装载父 Module，父 Module 创建子 Componet（在父 Module 中指定 subcomponents 为子 Component），子Componet 装载子 Module，子 Module 创建XXX对象，然后父 Component 提供获取子 Component 的方法，子 Component 提供 inject 方法；</p>
+<p>需要注意的是，子 Componet 没有单独的 Dagger 子 Component，而是存在于 Dagger 父 Component 中，所以注入的时候使用 <code>Dagger父Component.子Component().create().inject(this)</code> 的方式；</p>
+</li>
+</ol>
+<p>和组件依赖相比，子组件如果使用父组件的功能，父组件不需要额外声明想要暴露的方法；</p>
+<h3 id="Binds-使用"><a href="#Binds-使用" class="headerlink" title="@Binds 使用"></a>@Binds 使用</h3><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">abstract</span> <span class="keyword">class</span> <span class="title class_">TestModule</span> &#123;</span><br><span class="line">    <span class="comment">// 表示告诉 Dagger 此方法可以返回 AInterface 对象，但是具体的创建是由其实现类 AInterfaceImpl01 完成的</span></span><br><span class="line">    <span class="meta">@Binds</span></span><br><span class="line">    <span class="keyword">abstract</span> AInterface <span class="title function_">bindAinterface</span><span class="params">(AInterfaceImpl01 impl)</span>;</span><br><span class="line">    <span class="comment">// 定义如何创建 AInterfaceImpl01 对象</span></span><br><span class="line">    <span class="meta">@Provides</span></span><br><span class="line">    <span class="keyword">static</span> AinterfaceImpl01 <span class="title function_">provideAInterfaceImpl01</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">AInterfaceImpl01</span>();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>@Binds</code> 表示告诉 Dagger 此方法可以返回 AInterface 对象，但是具体的创建是由其实现类 AInterfaceImpl01 完成的；</p>
+<p>把 TestModule 装载到 AppComponent 中：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@MyScope</span></span><br><span class="line"><span class="meta">@Component(modules = SubComponentModule.class, TestModule.class)</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">interface</span> <span class="title class_">AppComponent</span> &#123;</span><br><span class="line">    StudenComponent.Factory <span class="title function_">studentComponent</span><span class="params">()</span>; <span class="comment">// 指定 Factory</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>注入接口</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">SecondActivity</span> <span class="keyword">extends</span> <span class="title class_">AppCompatActivity</span> &#123;</span><br><span class="line">    <span class="meta">@Inject</span></span><br><span class="line">    Student student;</span><br><span class="line">    <span class="meta">@Inject</span></span><br><span class="line">    AInterface aInterface; <span class="comment">// 注入的是一个接口</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">protected</span> <span class="keyword">void</span> <span class="title function_">onCreate</span><span class="params">(<span class="meta">@Nullable</span> Bundle savedInstanceState)</span> &#123;</span><br><span class="line">        <span class="built_in">super</span>.onCreate(savedInstanceState);</span><br><span class="line">        MyApplication.getApplicationComponent().studentComponent().create().inject(<span class="built_in">this</span>);</span><br><span class="line">        Log.d(TAG, <span class="string">&quot;aInterface: &quot;</span> + aInterface);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这里可以直接注入一个依赖接口，如果不使用 @Binds，则只能注入一个依赖对象；</p>
+<p>因为 TestModule 属于 AppComponent 组件，这里直接使用 AppComponent 的子组件来注入，可以直接用到父组件装载的 TestModule 中的对象；</p>
+<h3 id="Qualifier-注解使用"><a href="#Qualifier-注解使用" class="headerlink" title="Qualifier 注解使用"></a>Qualifier 注解使用</h3><p>如果一个类存在多个构造方法，如何注入对象呢？首先可以使用 <code>@Named</code> 注解；</p>
+<p><code>@Named</code> 注解</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Qualifier</span></span><br><span class="line"><span class="meta">@Documented</span></span><br><span class="line"><span class="meta">@Retention(RUNTIME)</span></span><br><span class="line"><span class="keyword">public</span> <span class="meta">@interface</span> Named &#123;</span><br><span class="line">    String <span class="title function_">value</span><span class="params">()</span> <span class="keyword">default</span> <span class="string">&quot;&quot;</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>Student 类有 2 个构造方法：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Student</span> &#123;</span><br><span class="line">    <span class="type">String</span> <span class="variable">name</span> <span class="operator">=</span> <span class="string">&quot;Xiaohong&quot;</span>;</span><br><span class="line">    <span class="keyword">public</span> <span class="title function_">Student</span><span class="params">()</span>&#123;</span><br><span class="line">        </span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">public</span> <span class="title function_">Student</span><span class="params">(String name)</span> &#123;</span><br><span class="line">        <span class="built_in">this</span>.name = name;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">public</span> String <span class="title function_">getName</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> name;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>定义 StudenModule，用 <code>@Named(&quot;XXX&quot;)</code> 注解标识对象不同的创建方法：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Module</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">StudentModule</span> &#123;</span><br><span class="line">    <span class="meta">@Named(&quot;student1&quot;)</span></span><br><span class="line">    <span class="meta">@Provides</span></span><br><span class="line">    Student <span class="title function_">provideStudent1</span><span class="params">()</span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">Student</span>();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Named(&quot;student2&quot;)</span></span><br><span class="line">    <span class="meta">@Provides</span></span><br><span class="line">    Student <span class="title function_">provideStudent2</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">Student</span>(<span class="string">&quot;Xiaoming&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>注入时加上对应的 <code>@Named</code> 注解即可：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Named(&quot;student1&quot;)</span></span><br><span class="line"><span class="meta">@Inject</span></span><br><span class="line">Student student1;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Named(&quot;student2&quot;)</span></span><br><span class="line"><span class="meta">@Inject</span></span><br><span class="line">Student student2;</span><br></pre></td></tr></table></figure>
+
+<p>这样 <em>student1</em> 的名字就是 <code>Xiaohong</code>，<em>student2</em> 的名字就是 <code>Xiaoming</code>；</p>
+<p>我们也可以模仿 <code>@Named</code> 注解定义我们自己的注解，比如：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Qualifier</span></span><br><span class="line"><span class="meta">@Documented</span></span><br><span class="line"><span class="meta">@Retention(RUNTIME)</span></span><br><span class="line"><span class="keyword">public</span> <span class="meta">@interface</span> StudentQualifier1 &#123;</span><br><span class="line">    String <span class="title function_">value</span><span class="params">()</span> <span class="keyword">default</span> <span class="string">&quot;&quot;</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Qualifier</span></span><br><span class="line"><span class="meta">@Documented</span></span><br><span class="line"><span class="meta">@Retention(RUNTIME)</span></span><br><span class="line"><span class="keyword">public</span> <span class="meta">@interface</span> StudentQualifier2 &#123;</span><br><span class="line">    String <span class="title function_">value</span><span class="params">()</span> <span class="keyword">default</span> <span class="string">&quot;&quot;</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这样直接用 <code>StudentQualifier1</code> 或者 <code>StudentQualifier2</code> 代替 <code>@Named(&quot;xxx&quot;)</code> 即可；</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>Dagger 比较重要的就是作用域、组件依赖和子组件，下一篇分析 Dagger 的实现原理；</p>
+]]></content>
+      <categories>
+        <category>Android</category>
+      </categories>
+      <tags>
+        <tag>Jetpack, Dagger2</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Android - Jetpack 套件之 Databinding 使用和原理</title>
+    <url>/2023/06/12/Android/AndroidDevelop_025_Jetpack_Databinding_UsageAndMechanism/</url>
+    <content><![CDATA[<div class="hbe hbe-container" id="hexo-blog-encrypt" data-wpm="Oh, this is an invalid password. Check and try again, please." data-whm="OOPS, these decrypted content may changed, but you can still have a look.">
+  <script id="hbeData" type="hbeData" data-hmacdigest="703e51ac54d302086a606eccb4e11e7a14b479d639ed37a90b08d76ec4898e3c">8a594f550020b2c4c53139d4c120877c670d47411eb78fc0c4abbfbe587bcfe2cb113c41bfd328c5065f6f2b39026d346a12ba8473dca30b30f240c25870a030489e615608fa9f6e76f98000ee177152e76d6a95c217e988b4d906c34b48bd06c561fecb61502376067f4deb2da17be1dcbae3e86c8e69f0e1e448dfd4040abf79f321fb32109ecc1343fcac9e185e6d4544677b561fc43351e23ea5518574b2139e272c97b707a613cb5296f5b3e348b5c8d88480ff605033b6598baa43b3225d7173fa010cb6f3d7f9524f0af91f4443071921465f954317130cef99ab094885d44414fa40e44effe17f7a3c69c8dbd50e8a7985ceed135d184c0f061dd66cdd5ce7c1470033e87b22bc8db3dfd0e4c4c5869bd579acfdfdad9db03e4d4fb5a835bdd8136c6d9044da70436e717515ac77b83cd78b573ed19659cd2c7a58120c5db6ef508cf1fe90b594ff367217b1e582e20abf3bcfdf8281a9678968d5f2dfe7cbd04d9edf8fb50ffb65a75ace005b09b2cae8ee94c8bf99ad41a4ada1372efff72b0c906393a6121d60ba5adaaecfcbf5f9cef4838bd619e9e761f7bf82f205b2cc849abee2fb0333375bf4b692</script>
+  <div class="hbe hbe-content">
+    <div class="hbe hbe-input hbe-input-default">
+      <input class="hbe hbe-input-field hbe-input-field-default" type="password" id="hbePass">
+      <label class="hbe hbe-input-label hbe-input-label-default" for="hbePass">
+        <span class="hbe hbe-input-label-content hbe-input-label-content-default">Hey, password is required here.</span>
+      </label>
+    </div>
+  </div>
+</div>
+<script data-pjax src="/lib/hbe.js"></script><link href="/css/hbe.style.css" rel="stylesheet" type="text/css">]]></content>
+      <categories>
+        <category>Android</category>
+      </categories>
+      <tags>
+        <tag>Jetpack, Databinding</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Android - Jetpack 套件之 LiveData 使用和原理</title>
     <url>/2023/05/26/Android/AndroidDevelop_024_Jetpack_Livedata_UsageAndMechanism/</url>
     <content><![CDATA[<link rel="stylesheet" class="aplayer-secondary-style-marker" href="\assets\css\APlayer.min.css"><script src="\assets\js\APlayer.min.js" class="aplayer-secondary-script-marker"></script><script class="meting-secondary-script-marker" src="\assets\js\Meting.min.js"></script><blockquote>
@@ -5042,7 +5320,7 @@
 <li>将traces信息和 CPU使用情况信息保存到dropbox，即<em>data&#x2F;system&#x2F;dropbox</em>目录；</li>
 <li>根据进程类型，来决定直接后台杀掉（后台ANR），还是弹框告知用户；</li>
 </ul>
-<p>在输出trace的时候，Android 8.1.0新加了一个<code>useTombstonedForJavaTraces</code>属性，Java进程的traces通过<code>kill -3 [pid]</code>获取，Native进程的traces通过<code>debuggerd -b [pid]</code>获取，<code>kill -3</code>命令需要虚拟机的支持，所以无法输出Native进程traces.而<code>debuggerd -b [pid]</code>也可用于Java进程，但信息量远没有kill -3多。 ANR信息最为重要的是dropbox信息（比如<a href="mailto:&#100;&#97;&#116;&#x61;&#x5f;&#97;&#x70;&#112;&#x5f;&#x61;&#110;&#x72;&#64;&#x31;&#x35;&#50;&#x33;&#x34;&#x34;&#55;&#x37;&#49;&#54;&#x37;&#x32;&#x38;&#46;&#x74;&#x78;&#116;&#46;&#x67;&#122;">&#100;&#97;&#116;&#x61;&#x5f;&#97;&#x70;&#112;&#x5f;&#x61;&#110;&#x72;&#64;&#x31;&#x35;&#50;&#x33;&#x34;&#x34;&#55;&#x37;&#49;&#54;&#x37;&#x32;&#x38;&#46;&#x74;&#x78;&#116;&#46;&#x67;&#122;</a>）。</p>
+<p>在输出trace的时候，Android 8.1.0新加了一个<code>useTombstonedForJavaTraces</code>属性，Java进程的traces通过<code>kill -3 [pid]</code>获取，Native进程的traces通过<code>debuggerd -b [pid]</code>获取，<code>kill -3</code>命令需要虚拟机的支持，所以无法输出Native进程traces.而<code>debuggerd -b [pid]</code>也可用于Java进程，但信息量远没有kill -3多。 ANR信息最为重要的是dropbox信息（比如<a href="mailto:&#100;&#x61;&#116;&#97;&#95;&#97;&#x70;&#112;&#x5f;&#97;&#110;&#x72;&#64;&#x31;&#x35;&#x32;&#x33;&#52;&#x34;&#55;&#x37;&#x31;&#54;&#55;&#x32;&#56;&#x2e;&#116;&#x78;&#116;&#x2e;&#103;&#x7a;">&#100;&#x61;&#116;&#97;&#95;&#97;&#x70;&#112;&#x5f;&#97;&#110;&#x72;&#64;&#x31;&#x35;&#x32;&#x33;&#52;&#x34;&#55;&#x37;&#x31;&#54;&#55;&#x32;&#56;&#x2e;&#116;&#x78;&#116;&#x2e;&#103;&#x7a;</a>）。</p>
 ]]></content>
       <categories>
         <category>Android</category>
@@ -6097,6 +6375,8 @@
 <h4 id="35-git-status-中文乱码（显示八进制字符）"><a href="#35-git-status-中文乱码（显示八进制字符）" class="headerlink" title="35. git status 中文乱码（显示八进制字符）"></a>35. git status 中文乱码（显示八进制字符）</h4><figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">git config --global core.quotepath false</span><br></pre></td></tr></table></figure>
 
 <p>参考：<a href="https://www.zhihu.com/tardis/zm/art/452682481?source_id=1005">https://www.zhihu.com/tardis/zm/art/452682481?source_id=1005</a></p>
+<h4 id="36-修复-Picked-up-JAVA-OPTIONS-Xmx2g-Xms2g-提示"><a href="#36-修复-Picked-up-JAVA-OPTIONS-Xmx2g-Xms2g-提示" class="headerlink" title="36. 修复 Picked up _JAVA_OPTIONS: -Xmx2g -Xms2g 提示"></a>36. 修复 Picked up _JAVA_OPTIONS: -Xmx2g -Xms2g 提示</h4><p>首先注意自己的 .bashrc&#x2F;.zshrc 里是否定义了 <code>export _JAVA_OPTIONS=&quot;-Xmx2g -Xms2g&quot;</code>，使用如下命令即可：</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">_SILENT_JAVA_OPTIONS=&quot;$_JAVA_OPTIONS&quot;</span><br><span class="line">unset _JAVA_OPTIONS</span><br><span class="line">alias java=&#x27;java &quot;$_SILENT_JAVA_OPTIONS&quot;&#x27;</span><br></pre></td></tr></table></figure>
 ]]></content>
       <categories>
         <category>Others</category>
