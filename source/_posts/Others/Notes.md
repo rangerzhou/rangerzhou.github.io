@@ -360,7 +360,7 @@ sudo vim /etc/samba/smb.conf
 [share]
     comment = MyShare
     path = /home/range/MyShare/
-    browseable = yes
+    browsable = yes
     writable = yes
     create mask = 0644
     directory mask = 0755
@@ -397,6 +397,31 @@ sudo apt purge samba-common
 #重装
 sudo apt install samba
 ```
+
+**20231020更新**
+
+[官方文档](https://ubuntu.com/tutorials/install-and-configure-samba#3-setting-up-samba)
+
+``` shell
+# To install Samba, we run:
+sudo apt update
+sudo apt install samba
+# We can check if the installation was successful by running:
+whereis samba
+mkdir /home/<username>/sambashare/
+sudo vim /etc/samba/smb.conf
+[sambashare]
+    comment = Samba on Ubuntu
+    path = /home/username/sambashare
+    read only = no
+    browsable = yes
+# Restart Samba 
+sudo service smbd restart
+# Update the firewall rules to allow Samba traffic:
+sudo ufw allow samba
+```
+
+
 
 #### 9. apk签名
 
