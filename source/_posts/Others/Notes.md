@@ -1219,3 +1219,74 @@ _SILENT_JAVA_OPTIONS="$_JAVA_OPTIONS"
 unset _JAVA_OPTIONS
 alias java='java "$_SILENT_JAVA_OPTIONS"'
 ```
+
+#### 37. 安装 Scrcpy 投屏
+
+https://github.com/Genymobile/scrcpy
+
+安装依赖
+
+``` shell
+# for Debian/Ubuntu
+sudo apt install ffmpeg libsdl2-2.0-0 adb wget \
+                 gcc git pkg-config meson ninja-build libsdl2-dev \
+                 libavcodec-dev libavdevice-dev libavformat-dev libavutil-dev \
+                 libswresample-dev libusb-1.0-0 libusb-1.0-0-dev
+```
+
+clone 安装脚本并执行
+
+``` shell
+git clone https://github.com/Genymobile/scrcpy
+cd scrcpy
+./install_release.sh
+```
+
+install_release.sh
+
+``` shell
+# install_release.sh
+#!/usr/bin/env bash
+set -e
+
+BUILDDIR=build-auto
+PREBUILT_SERVER_URL=https://github.com/Genymobile/scrcpy/releases/download/v2.1.1/scrcpy-server-v2.1.1
+PREBUILT_SERVER_SHA256=9558db6c56743a1dc03b38f59801fb40e91cc891f8fc0c89e5b0b067761f148e
+
+echo "[scrcpy] Downloading prebuilt server..."
+wget "$PREBUILT_SERVER_URL" -O scrcpy-server
+echo "[scrcpy] Verifying prebuilt server..."
+echo "$PREBUILT_SERVER_SHA256  scrcpy-server" | sha256sum --check
+
+echo "[scrcpy] Building client..."
+rm -rf "$BUILDDIR"
+meson setup "$BUILDDIR" --buildtype=release --strip -Db_lto=true \
+    -Dprebuilt_server=scrcpy-server
+cd "$BUILDDIR"
+ninja
+
+echo "[scrcpy] Installing (sudo)..."
+sudo ninja install
+
+```
+
+如果报错 wget 失败，则手动下载 [scrcpy-server-v2.1.1](https://github.com/Genymobile/scrcpy/releases/download/v2.1.1/scrcpy-server-v2.1.1)，然后注释掉 wget 那一行再执行安装脚本即可；
+
+安装路径：`/usr/local/bin/scrcpy`
+
+添加快捷方式：
+
+``` shell
+[Desktop Entry]
+Version=1.0
+Type=Application
+Terminal=false
+Exec=/usr/local/bin/scrcpy
+Name=Linux DEL Tool
+Comment=Scrcpy for Android devices
+Icon=/home/xxx/Pictures/icon/Scrcpy.png
+Name[en_US]=Scrcpy
+```
+
+修改对应路径，保存到 Scrcpy.desktop，然后 `sudo cp Scrcpy.desktop /usr/share/applications` 即可；
+
