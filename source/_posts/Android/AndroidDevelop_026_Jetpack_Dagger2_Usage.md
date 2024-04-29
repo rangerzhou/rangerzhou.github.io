@@ -1,6 +1,6 @@
 ---
 title: Android - Jetpack 套件之 Dagger2 使用
-date: 2023-08-16 23:06:55
+date: 2023-06-20 23:06:55
 tags: Jetpack, Dagger2
 categories: Android
 copyright: true
@@ -352,7 +352,7 @@ public @interface MyScope {
 
 直接复制 Singleton 的注解，修改为自定义的作用域名称即可；
 
-#### 使用作用域的规则
+#### <font color=red>使用作用域的规则</font>
 
 - 在没有必要的情况下，尽量使用默认的作用域，即不指定作用域；
 - Module 中要么不使用作用域，要么和 Component 中的作用域保持一致；
@@ -364,7 +364,7 @@ public @interface MyScope {
 
 Lazy 和 Provider 区别：Lazy 是单例（使用 DoubleCheck），Provider 不是单例；
 
-### 组件依赖
+### <font color=red>组件依赖和子组件</font>
 
 组件依赖与子组件主要解决不同作用域时组件之间的复用问题：
 
@@ -654,27 +654,93 @@ public class SecondActivity extends AppCompatActivity {
 
 因为 TestModule 属于 AppComponent 组件，这里直接使用 AppComponent 的子组件来注入，可以直接用到父组件装载的 TestModule 中的对象；
 
+### Qualifier 注解使用
 
+如果一个类存在多个构造方法，如何注入对象呢？首先可以使用 `@Named` 注解；
 
+`@Named` 注解
 
+``` java
+@Qualifier
+@Documented
+@Retention(RUNTIME)
+public @interface Named {
+    String value() default "";
+}
+```
 
+Student 类有 2 个构造方法：
 
+``` java
+public class Student {
+    String name = "Xiaohong";
+    public Student(){
+        
+    }
+    
+    public Student(String name) {
+        this.name = name;
+    }
+    
+    public String getName() {
+        return name;
+    }
+}
+```
 
+定义 StudenModule，用 `@Named("XXX")` 注解标识对象不同的创建方法：
 
+``` java
+@Module
+public class StudentModule {
+    @Named("student1")
+    @Provides
+    Student provideStudent1(){
+        return new Student();
+    }
 
+    @Named("student2")
+    @Provides
+    Student provideStudent2() {
+        return new Student("Xiaoming");
+    }
+}
+```
 
+注入时加上对应的 `@Named` 注解即可：
 
+``` java
+@Named("student1")
+@Inject
+Student student1;
 
+@Named("student2")
+@Inject
+Student student2;
+```
 
+这样 *student1* 的名字就是 `Xiaohong`，*student2* 的名字就是 `Xiaoming`；
 
+我们也可以模仿 `@Named` 注解定义我们自己的注解，比如：
 
+``` java
+@Qualifier
+@Documented
+@Retention(RUNTIME)
+public @interface StudentQualifier1 {
+    String value() default "";
+}
 
+@Qualifier
+@Documented
+@Retention(RUNTIME)
+public @interface StudentQualifier2 {
+    String value() default "";
+}
+```
 
+这样直接用 `StudentQualifier1` 或者 `StudentQualifier2` 代替 `@Named("xxx")` 即可；
 
+## 总结
 
-
-
-
-
-
-
+Dagger 比较重要的就是作用域、组件依赖和子组件，下一篇分析 Dagger 的实现原理；

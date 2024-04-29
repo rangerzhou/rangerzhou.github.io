@@ -398,7 +398,7 @@ sudo apt purge samba-common
 sudo apt install samba
 ```
 
-**20231020更新**
+**20231020更新(Ubuntu 20.04)**
 
 [官方文档](https://ubuntu.com/tutorials/install-and-configure-samba#3-setting-up-samba)
 
@@ -410,7 +410,7 @@ sudo apt install samba
 whereis samba
 mkdir /home/<username>/sambashare/
 sudo vim /etc/samba/smb.conf
-[sambashare]
+[sambashare] # windows 连接的时候写这个名字
     comment = Samba on Ubuntu
     path = /home/username/sambashare
     read only = no
@@ -418,10 +418,16 @@ sudo vim /etc/samba/smb.conf
 # Restart Samba 
 sudo service smbd restart
 # Update the firewall rules to allow Samba traffic:
+# 注意这一步一定要执行，不然防火墙会阻止连接
 sudo ufw allow samba
+# 设置访问用户，这里用户名一定是系统已经存在的用户，设置 samba 密码，比如123456
+$ sudo smbpasswd -a username
+# windows 访问：\\ip-address\sambashare
 ```
 
+**20240117更新(Ubuntu 20.04)**
 
+使用以上配置，Windows 连接的时候，`\\10.148.151.214\sambashare` 这里一定是 smb.conf 中用括号 [] 写的字符，比如写 [sambashare] 连的就是 `\\10.148.151.214\sambashare` ，写 [share] 连的就是 `\\10.148.151.214\share` ；
 
 #### 9. apk签名
 
@@ -1290,3 +1296,29 @@ Name[en_US]=Scrcpy
 
 修改对应路径，保存到 Scrcpy.desktop，然后 `sudo cp Scrcpy.desktop /usr/share/applications` 即可；
 
+#### 38 Ubuntu 20.04 打开 VNC
+
+Ubuntu 开启 VNC
+
+1. Ubuntu 打开Setting - Sharing - 把 ScreenSharing/MediaSharing 设为 Active 状态，并为 ScreenSharing 设置密码
+2. 安装 dconf-editor，`sudo apt install dconf-editor`，安装后打开 dconf-editor，进入 */org/gnome/desktop/remote-access*，关闭 require-encryption
+3. 如果防火墙组织 VNC 连接，打开 VNC 连接的端口，`sudo ufw allow 5900/tcp`
+4. 使用 RealVNC/MobaXterm 输入 ip 和 ScreenSharing 设置的密码即可连接
+
+#### 39 Ubuntu 显示秒
+
+``` shell
+gsettings set org.gnome.desktop.interface clock-show-seconds true
+```
+
+#### 40 Ubuntu20.04 工作区修改
+
+安装 gnome-tweak-tool
+
+``` shell
+$ sudo apt-get install gnome-tweak-tool
+```
+
+打开 tweak，侧边栏选择 Workspaces，选择 Static Workspaces
+
+打开 https://extensions.gnome.org/ ，搜索并安装  Workspace Matrix，打开 Extensions，就能配置 *Workspace Matrix* 了；
