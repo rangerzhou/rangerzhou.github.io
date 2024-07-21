@@ -24,13 +24,13 @@
 
 <script id="hexo-configurations">
     var NexT = window.NexT || {};
-    var CONFIG = {"hostname":"rangerzhou.top","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"always","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"manual"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":true,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":true,"nav":null,"activeClass":"gitalk"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+    var CONFIG = {"hostname":"592988.xyz","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"always","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"manual"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":true,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":true,"nav":null,"activeClass":"gitalk"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
   </script>
 
   <meta name="description" content="Android Application 创建、SystemUI 启动以及系统窗口的添加，源码基于 android-12.1.0_r4；">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Android - Application 创建流程、SystemUI 启动以及添加系统窗口（Android 12）">
-<meta property="og:url" content="http://rangerzhou.top/2022/02/27/Android/AndroidDevelop_018_CreateApplication_Start_SystemUI_AddSystemWindow/index.html">
+<meta property="og:url" content="http://592988.xyz/2022/02/27/Android/AndroidDevelop_018_CreateApplication_Start_SystemUI_AddSystemWindow/index.html">
 <meta property="og:site_name" content="RangerZhou">
 <meta property="og:description" content="Android Application 创建、SystemUI 启动以及系统窗口的添加，源码基于 android-12.1.0_r4；">
 <meta property="og:locale" content="zh_CN">
@@ -39,7 +39,7 @@
 <meta property="article:author" content="Ranger Zhou">
 <meta name="twitter:card" content="summary">
 
-<link rel="canonical" href="http://rangerzhou.top/2022/02/27/Android/AndroidDevelop_018_CreateApplication_Start_SystemUI_AddSystemWindow/">
+<link rel="canonical" href="http://592988.xyz/2022/02/27/Android/AndroidDevelop_018_CreateApplication_Start_SystemUI_AddSystemWindow/">
 
 
 <script id="page-configurations">
@@ -249,7 +249,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://rangerzhou.top/2022/02/27/Android/AndroidDevelop_018_CreateApplication_Start_SystemUI_AddSystemWindow/">
+    <link itemprop="mainEntityOfPage" href="http://592988.xyz/2022/02/27/Android/AndroidDevelop_018_CreateApplication_Start_SystemUI_AddSystemWindow/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -434,7 +434,7 @@
 <p>随后调用 attach() 函数把 StatusBarWindowView 添加到 WindowManager 中；</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// StatusBarWindowController.java</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">final</span> WindowManager mWindowManager;</span><br><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">attach</span><span class="params">()</span> &#123;</span><br><span class="line">        ...</span><br><span class="line">        mWindowManager.addView(mStatusBarWindowView, mLp); <span class="comment">// 将 StatusBarWindowView 添加到 WindowManager</span></span><br><span class="line">        ...</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
 
-<p>后面的工作就和<a href="http://rangerzhou.top/2022/02/20/Android/AndroidDevelop_017_ActivityCreateAndWindowDisplay/">Activity 窗口添加-第二小节</a> 一样了；</p>
+<p>后面的工作就和<a target="_blank" rel="noopener" href="http://rangerzhou.top/2022/02/20/Android/AndroidDevelop_017_ActivityCreateAndWindowDisplay/">Activity 窗口添加-第二小节</a> 一样了；</p>
 
     </div>
 
@@ -470,7 +470,7 @@
   </li>
   <li class="post-copyright-link">
     <strong>本文链接：</strong>
-    <a href="http://rangerzhou.top/2022/02/27/Android/AndroidDevelop_018_CreateApplication_Start_SystemUI_AddSystemWindow/" title="Android - Application 创建流程、SystemUI 启动以及添加系统窗口（Android 12）">http://rangerzhou.top/2022/02/27/Android/AndroidDevelop_018_CreateApplication_Start_SystemUI_AddSystemWindow/</a>
+    <a href="http://592988.xyz/2022/02/27/Android/AndroidDevelop_018_CreateApplication_Start_SystemUI_AddSystemWindow/" title="Android - Application 创建流程、SystemUI 启动以及添加系统窗口（Android 12）">http://592988.xyz/2022/02/27/Android/AndroidDevelop_018_CreateApplication_Start_SystemUI_AddSystemWindow/</a>
   </li>
   <li class="post-copyright-license">
     <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
@@ -487,8 +487,8 @@
         
     <div class="post-nav">
       <div class="post-nav-item">
-    <a href="/2022/02/20/Android/AndroidDevelop_017_CreateActivity_WindowDisplay/" rel="prev" title="Android - Activity 创建及窗口显示过程">
-      <i class="fa fa-chevron-left"></i> Android - Activity 创建及窗口显示过程
+    <a href="/2022/02/20/Android/AndroidDevelop_019_WMS01_Boot/" rel="prev" title="Android - WMS系列之启动流程">
+      <i class="fa fa-chevron-left"></i> Android - WMS系列之启动流程
     </a></div>
       <div class="post-nav-item">
     <a href="/2022/05/20/Android/AndroidDevelop_020_Rendering_Mechanism/" rel="next" title="Android - 渲染机制分析">
@@ -509,8 +509,8 @@
       <div class="tabs tabs-comment">
         <ul class="nav-tabs">
             <li class="tab"><a href="#comment-disqus">disqus</a></li>
-            <li class="tab"><a href="#comment-gitalk">gitalk</a></li>
             <li class="tab"><a href="#comment-livere">livere</a></li>
+            <li class="tab"><a href="#comment-gitalk">gitalk</a></li>
         </ul>
         <div class="tab-content">
             <div class="tab-pane disqus" id="comment-disqus">
@@ -522,15 +522,15 @@
   </div>
   
             </div>
-            <div class="tab-pane gitalk" id="comment-gitalk">
-              <div class="comments" id="gitalk-container"></div>
-            </div>
             <div class="tab-pane livere" id="comment-livere">
               
   <div class="comments">
     <div id="lv-container" data-id="city" data-uid="MTAyMC8yOTcyNS82Mjky"></div>
   </div>
   
+            </div>
+            <div class="tab-pane gitalk" id="comment-gitalk">
+              <div class="comments" id="gitalk-container"></div>
             </div>
         </div>
       </div>
@@ -594,7 +594,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">76</span>
+          <span class="site-state-item-count">77</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -907,7 +907,7 @@ window.addEventListener('pjax:success', () => {
 
 <script>
   var disqus_config = function() {
-    this.page.url = "http://rangerzhou.top/2022/02/27/Android/AndroidDevelop_018_CreateApplication_Start_SystemUI_AddSystemWindow/";
+    this.page.url = "http://592988.xyz/2022/02/27/Android/AndroidDevelop_018_CreateApplication_Start_SystemUI_AddSystemWindow/";
     this.page.identifier = "2022/02/27/Android/AndroidDevelop_018_CreateApplication_Start_SystemUI_AddSystemWindow/";
     this.page.title = "Android - Application 创建流程、SystemUI 启动以及添加系统窗口（Android 12）";
     };
@@ -924,6 +924,22 @@ window.addEventListener('pjax:success', () => {
       (d.head || d.body).appendChild(s);
     }
   });
+</script>
+
+<script>
+NexT.utils.loadComments(document.querySelector('#lv-container'), () => {
+  window.livereOptions = {
+    refer: location.pathname.replace(CONFIG.root, '').replace('index.html', '')
+  };
+  (function(d, s) {
+    var j, e = d.getElementsByTagName(s)[0];
+    if (typeof LivereTower === 'function') { return; }
+    j = d.createElement(s);
+    j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+    j.async = true;
+    e.parentNode.insertBefore(j, e);
+  })(document, 'script');
+});
 </script>
 
 <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
@@ -943,22 +959,6 @@ NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
     });
     gitalk.render('gitalk-container');
   }, window.Gitalk);
-});
-</script>
-
-<script>
-NexT.utils.loadComments(document.querySelector('#lv-container'), () => {
-  window.livereOptions = {
-    refer: location.pathname.replace(CONFIG.root, '').replace('index.html', '')
-  };
-  (function(d, s) {
-    var j, e = d.getElementsByTagName(s)[0];
-    if (typeof LivereTower === 'function') { return; }
-    j = d.createElement(s);
-    j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
-    j.async = true;
-    e.parentNode.insertBefore(j, e);
-  })(document, 'script');
 });
 </script>
 

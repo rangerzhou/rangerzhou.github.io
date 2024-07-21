@@ -10,6 +10,12 @@ const ap = new APlayer({
     listFolded: false, // 列表默认折叠
     //lrcType: 3, // 歌词传递方式
     audio: [{
+        name: "安和桥",
+        artist: '宋冬野',
+        url: '/dist/MusicList/安和桥.mp3',
+        cover: 'http://p2.music.126.net/ggnyubDdMxrhpqYvpZbhEQ==/3302932937412681.jpg?param=130y130',
+    },
+    {
         name: "Five Hundred Miles",
         artist: 'Justin Timberlake',
         url: '/dist/MusicList/FiveHundredMiles.mp3',

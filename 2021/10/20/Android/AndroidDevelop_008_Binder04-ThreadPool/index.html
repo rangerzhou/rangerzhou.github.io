@@ -24,13 +24,13 @@
 
 <script id="hexo-configurations">
     var NexT = window.NexT || {};
-    var CONFIG = {"hostname":"rangerzhou.top","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"always","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"manual"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":true,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":true,"nav":null,"activeClass":"gitalk"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+    var CONFIG = {"hostname":"592988.xyz","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"always","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"manual"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":true,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":true,"nav":null,"activeClass":"gitalk"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
   </script>
 
   <meta name="description" content="Binder 线程池启动分析；">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Android - Binder机制(4)-线程池启动">
-<meta property="og:url" content="http://rangerzhou.top/2021/10/20/Android/AndroidDevelop_008_Binder04-ThreadPool/index.html">
+<meta property="og:url" content="http://592988.xyz/2021/10/20/Android/AndroidDevelop_008_Binder04-ThreadPool/index.html">
 <meta property="og:site_name" content="RangerZhou">
 <meta property="og:description" content="Binder 线程池启动分析；">
 <meta property="og:locale" content="zh_CN">
@@ -39,7 +39,7 @@
 <meta property="article:author" content="Ranger Zhou">
 <meta name="twitter:card" content="summary">
 
-<link rel="canonical" href="http://rangerzhou.top/2021/10/20/Android/AndroidDevelop_008_Binder04-ThreadPool/">
+<link rel="canonical" href="http://592988.xyz/2021/10/20/Android/AndroidDevelop_008_Binder04-ThreadPool/">
 
 
 <script id="page-configurations">
@@ -249,7 +249,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://rangerzhou.top/2021/10/20/Android/AndroidDevelop_008_Binder04-ThreadPool/">
+    <link itemprop="mainEntityOfPage" href="http://592988.xyz/2021/10/20/Android/AndroidDevelop_008_Binder04-ThreadPool/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -318,7 +318,7 @@
 <h1 id="1-zygoteInit"><a href="#1-zygoteInit" class="headerlink" title="1. zygoteInit()"></a>1. zygoteInit()</h1><p>不管是 fork system_server，还是 fork 普通 app，最后都会调用  Zygote.zygoteInit() 函数，我们来看一下：</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// ZygoteInit.java</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> Runnable <span class="title function_">zygoteInit</span><span class="params">(<span class="type">int</span> targetSdkVersion, <span class="type">long</span>[] disabledCompatChanges,</span></span><br><span class="line"><span class="params">            String[] argv, ClassLoader classLoader)</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> (RuntimeInit.DEBUG) &#123;</span><br><span class="line">            Slog.d(RuntimeInit.TAG, <span class="string">&quot;RuntimeInit: Starting application from zygote&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, <span class="string">&quot;ZygoteInit&quot;</span>);</span><br><span class="line">        RuntimeInit.redirectLogStreams();</span><br><span class="line"></span><br><span class="line">        RuntimeInit.commonInit();</span><br><span class="line">        ZygoteInit.nativeZygoteInit();</span><br><span class="line">        <span class="keyword">return</span> RuntimeInit.applicationInit(targetSdkVersion, disabledCompatChanges, argv,</span><br><span class="line">                classLoader);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">native</span> <span class="keyword">void</span> <span class="title function_">nativeZygoteInit</span><span class="params">()</span>;</span><br></pre></td></tr></table></figure>
 
-<p>调用了 nativeZygoteInit() 这个 native 方法，在 <a href="https://rangerzhou.top/2021/11/01/Android/AndroidDevelop_010_SystemServer/#1-4-zygoteInit">SystemServer 启动流程 1.4 小节</a> 已经分析过，最终是调用 AppRuntime.onZygoteInit() 中，</p>
+<p>调用了 nativeZygoteInit() 这个 native 方法，在 <a target="_blank" rel="noopener" href="https://rangerzhou.top/2021/11/01/Android/AndroidDevelop_010_SystemServer/#1-4-zygoteInit">SystemServer 启动流程 1.4 小节</a> 已经分析过，最终是调用 AppRuntime.onZygoteInit() 中，</p>
 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// app_main.cpp</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">AppRuntime</span> : <span class="keyword">public</span> AndroidRuntime</span><br><span class="line">&#123;</span><br><span class="line">    <span class="function"><span class="keyword">virtual</span> <span class="type">void</span> <span class="title">onZygoteInit</span><span class="params">()</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        sp&lt;ProcessState&gt; proc = ProcessState::<span class="built_in">self</span>(); <span class="comment">// 打开驱动</span></span><br><span class="line">        <span class="built_in">ALOGV</span>(<span class="string">&quot;App process: starting thread pool.\n&quot;</span>);</span><br><span class="line">        proc-&gt;<span class="built_in">startThreadPool</span>(); <span class="comment">// 启动线程池</span></span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
 
 <p>ProcessState::self() 主要工作是打开 <em>&#x2F;dev&#x2F;binder</em> 驱动，再使用 mmap() 对把内核空间和用户空间映射到同一块物理内存，最后把 binder 驱动的文件描述符赋值给 ProcessState 的 mDriverFD 变量，ProcessState.startThreadPool() 从函数名可以看出是要启动一个线程池；</p>
@@ -345,7 +345,7 @@
 <p>首先建立并初始化一个等待队列项 wait，然后调用 <code>prepare_to_wait()</code> 把上面创建的 wait 队列的第一个元素添加到 thread-&gt;wait 等待队列的头部，并设置进程状态为 TASK_INTERRUPTIBLE，此时还没有进入睡眠等待，  接下来检查 <code>binder_has_work_ilocked()</code> 是否满足，这里如果不检查，可能条件已经满足，直接去睡眠的话可能再也没有人来唤醒它，如果满足，则跳出循环，如果不满足，则继续往下执行，并在后面的 <code>schedule()</code> 中真正进入睡眠，如果有另外一个和函数开头创建的 wait 相关的线程唤醒了这个睡眠的线程，则回到 for 循环再次调用 <code>binder_has_work_ilocked()</code> 检查是否满足条件，满足则跳出循环，并把上面加入的 wait 从 thread-wait 中移除；</p>
 <h2 id="7-2-binder-has-work-ilocked"><a href="#7-2-binder-has-work-ilocked" class="headerlink" title="7.2 binder_has_work_ilocked()"></a>7.2 binder_has_work_ilocked()</h2><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// binder.c</span></span><br><span class="line"><span class="comment">// binder_has_work_ilocked()</span></span><br><span class="line"><span class="type">static</span> <span class="type">bool</span> <span class="title function_">binder_has_work_ilocked</span><span class="params">(<span class="keyword">struct</span> binder_thread *thread,</span></span><br><span class="line"><span class="params">                    <span class="type">bool</span> do_proc_work)</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="type">int</span> ret = <span class="number">0</span>;</span><br><span class="line">    trace_android_vh_binder_has_work_ilocked(thread, do_proc_work, &amp;ret);</span><br><span class="line">    <span class="keyword">if</span> (ret)</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">    <span class="keyword">return</span> thread-&gt;process_todo ||</span><br><span class="line">        thread-&gt;looper_need_return ||</span><br><span class="line">        (do_proc_work &amp;&amp;</span><br><span class="line">         !binder_worklist_empty_ilocked(&amp;thread-&gt;proc-&gt;todo));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-<p>在学习 <a href="http://rangerzhou.top/2021/10/01/Android/AndroidDevelop_005_Binder01-DriveAndJNI">Android - Binder 机制 (1)- 驱动 &#x2F; JNI</a> 中的 <code>binder_ioctl()</code> 函数时得知应用程序创建 binder 线程池时，主线程第一次调用到 <code>binder_ioctl()</code> 获取 binder_thread 时配置了<code>looper_need_return = true</code>，所以 <code>binder_has_work_ilocked()</code> 返回 true，所以此时 <code>binder_wait_for_work()</code> 通过 break 跳出了 for 循环，也就没有阻塞，同时也跳过了 <code>list_add(&amp;thread-&gt;waiting_thread_node, &amp;proc-&gt;waiting_threads)</code> ，<font color=red><strong>所以 <code>proc-&gt;waiting_threads</code> 还为空</strong></font>（关系到后续是否创建 binder 线程），继续回到 binder_thread_read()，</p>
+<p>在学习 <a target="_blank" rel="noopener" href="http://rangerzhou.top/2021/10/01/Android/AndroidDevelop_005_Binder01-DriveAndJNI">Android - Binder 机制 (1)- 驱动 &#x2F; JNI</a> 中的 <code>binder_ioctl()</code> 函数时得知应用程序创建 binder 线程池时，主线程第一次调用到 <code>binder_ioctl()</code> 获取 binder_thread 时配置了<code>looper_need_return = true</code>，所以 <code>binder_has_work_ilocked()</code> 返回 true，所以此时 <code>binder_wait_for_work()</code> 通过 break 跳出了 for 循环，也就没有阻塞，同时也跳过了 <code>list_add(&amp;thread-&gt;waiting_thread_node, &amp;proc-&gt;waiting_threads)</code> ，<font color=red><strong>所以 <code>proc-&gt;waiting_threads</code> 还为空</strong></font>（关系到后续是否创建 binder 线程），继续回到 binder_thread_read()，</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// binder.c</span></span><br><span class="line"><span class="type">static</span> <span class="type">int</span> <span class="title function_">binder_thread_read</span><span class="params">(...)</span></span><br><span class="line">    ...</span><br><span class="line">        ret = binder_wait_for_work(thread, wait_for_proc_work); <span class="comment">// 进程睡眠的地方</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">while</span> (<span class="number">1</span>) &#123;</span><br><span class="line">        <span class="keyword">if</span> (!binder_worklist_empty_ilocked(&amp;thread-&gt;todo))</span><br><span class="line">            <span class="built_in">list</span> = &amp;thread-&gt;todo; <span class="comment">// 获取线程 todo 队列</span></span><br><span class="line">        <span class="keyword">else</span> <span class="keyword">if</span> (!binder_worklist_empty_ilocked(&amp;proc-&gt;todo) &amp;&amp;</span><br><span class="line">               wait_for_proc_work)</span><br><span class="line">            <span class="built_in">list</span> = &amp;proc-&gt;todo; <span class="comment">// 获取进程 todo 队列</span></span><br><span class="line">        <span class="keyword">else</span> &#123;</span><br><span class="line">            binder_inner_proc_unlock(proc);</span><br><span class="line">            <span class="comment">/* no data added */</span></span><br><span class="line">            <span class="comment">// 若无数据且当前线程 looper_need_return 为false，则重试</span></span><br><span class="line">            <span class="keyword">if</span> (ptr - buffer == <span class="number">4</span> &amp;&amp; !thread-&gt;looper_need_return)</span><br><span class="line">                <span class="keyword">goto</span> retry;</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        &#125;</span><br></pre></td></tr></table></figure>
 
 <p>此时 <code>thread-&gt;todo</code> 和 <code>proc-&gt;todo</code> 都为空，所以进入最后的 else 分支，通过 break 跳出 while 循环，继续往下执行；</p>
@@ -452,7 +452,7 @@
   </li>
   <li class="post-copyright-link">
     <strong>本文链接：</strong>
-    <a href="http://rangerzhou.top/2021/10/20/Android/AndroidDevelop_008_Binder04-ThreadPool/" title="Android - Binder机制(4)-线程池启动">http://rangerzhou.top/2021/10/20/Android/AndroidDevelop_008_Binder04-ThreadPool/</a>
+    <a href="http://592988.xyz/2021/10/20/Android/AndroidDevelop_008_Binder04-ThreadPool/" title="Android - Binder机制(4)-线程池启动">http://592988.xyz/2021/10/20/Android/AndroidDevelop_008_Binder04-ThreadPool/</a>
   </li>
   <li class="post-copyright-license">
     <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
@@ -491,8 +491,8 @@
       <div class="tabs tabs-comment">
         <ul class="nav-tabs">
             <li class="tab"><a href="#comment-disqus">disqus</a></li>
-            <li class="tab"><a href="#comment-gitalk">gitalk</a></li>
             <li class="tab"><a href="#comment-livere">livere</a></li>
+            <li class="tab"><a href="#comment-gitalk">gitalk</a></li>
         </ul>
         <div class="tab-content">
             <div class="tab-pane disqus" id="comment-disqus">
@@ -504,15 +504,15 @@
   </div>
   
             </div>
-            <div class="tab-pane gitalk" id="comment-gitalk">
-              <div class="comments" id="gitalk-container"></div>
-            </div>
             <div class="tab-pane livere" id="comment-livere">
               
   <div class="comments">
     <div id="lv-container" data-id="city" data-uid="MTAyMC8yOTcyNS82Mjky"></div>
   </div>
   
+            </div>
+            <div class="tab-pane gitalk" id="comment-gitalk">
+              <div class="comments" id="gitalk-container"></div>
             </div>
         </div>
       </div>
@@ -576,7 +576,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">76</span>
+          <span class="site-state-item-count">77</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -889,7 +889,7 @@ window.addEventListener('pjax:success', () => {
 
 <script>
   var disqus_config = function() {
-    this.page.url = "http://rangerzhou.top/2021/10/20/Android/AndroidDevelop_008_Binder04-ThreadPool/";
+    this.page.url = "http://592988.xyz/2021/10/20/Android/AndroidDevelop_008_Binder04-ThreadPool/";
     this.page.identifier = "2021/10/20/Android/AndroidDevelop_008_Binder04-ThreadPool/";
     this.page.title = "Android - Binder机制(4)-线程池启动";
     };
@@ -906,6 +906,22 @@ window.addEventListener('pjax:success', () => {
       (d.head || d.body).appendChild(s);
     }
   });
+</script>
+
+<script>
+NexT.utils.loadComments(document.querySelector('#lv-container'), () => {
+  window.livereOptions = {
+    refer: location.pathname.replace(CONFIG.root, '').replace('index.html', '')
+  };
+  (function(d, s) {
+    var j, e = d.getElementsByTagName(s)[0];
+    if (typeof LivereTower === 'function') { return; }
+    j = d.createElement(s);
+    j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+    j.async = true;
+    e.parentNode.insertBefore(j, e);
+  })(document, 'script');
+});
 </script>
 
 <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
@@ -925,22 +941,6 @@ NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
     });
     gitalk.render('gitalk-container');
   }, window.Gitalk);
-});
-</script>
-
-<script>
-NexT.utils.loadComments(document.querySelector('#lv-container'), () => {
-  window.livereOptions = {
-    refer: location.pathname.replace(CONFIG.root, '').replace('index.html', '')
-  };
-  (function(d, s) {
-    var j, e = d.getElementsByTagName(s)[0];
-    if (typeof LivereTower === 'function') { return; }
-    j = d.createElement(s);
-    j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
-    j.async = true;
-    e.parentNode.insertBefore(j, e);
-  })(document, 'script');
 });
 </script>
 

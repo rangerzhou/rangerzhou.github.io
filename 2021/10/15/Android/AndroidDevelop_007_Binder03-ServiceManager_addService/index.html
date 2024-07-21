@@ -24,25 +24,25 @@
 
 <script id="hexo-configurations">
     var NexT = window.NexT || {};
-    var CONFIG = {"hostname":"rangerzhou.top","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"always","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"manual"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":true,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":true,"nav":null,"activeClass":"gitalk"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+    var CONFIG = {"hostname":"592988.xyz","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"always","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"manual"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":true,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":true,"nav":null,"activeClass":"gitalk"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
   </script>
 
   <meta name="description" content="以 AMS 注册到 servicemanager 为例讲解服务注册到 SM 的流程。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Android - Binder机制(3)-addService">
-<meta property="og:url" content="http://rangerzhou.top/2021/10/15/Android/AndroidDevelop_007_Binder03-ServiceManager_addService/index.html">
+<meta property="og:url" content="http://592988.xyz/2021/10/15/Android/AndroidDevelop_007_Binder03-ServiceManager_addService/index.html">
 <meta property="og:site_name" content="RangerZhou">
 <meta property="og:description" content="以 AMS 注册到 servicemanager 为例讲解服务注册到 SM 的流程。">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://raw.githubusercontent.com/rangerzhou/ImageHosting/master/blog_resource/2022/Binder_trancaction_command.png">
 <meta property="og:image" content="https://raw.githubusercontent.com/rangerzhou/ImageHosting/master/blog_resource/2022/Binder_AMS%E6%B3%A8%E5%86%8C%E6%97%B6%E5%BA%8F%E5%9B%BE.png">
 <meta property="article:published_time" content="2021-10-15T13:16:28.000Z">
-<meta property="article:modified_time" content="2022-08-09T15:16:02.851Z">
+<meta property="article:modified_time" content="2024-06-29T16:12:16.475Z">
 <meta property="article:author" content="Ranger Zhou">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="https://raw.githubusercontent.com/rangerzhou/ImageHosting/master/blog_resource/2022/Binder_trancaction_command.png">
 
-<link rel="canonical" href="http://rangerzhou.top/2021/10/15/Android/AndroidDevelop_007_Binder03-ServiceManager_addService/">
+<link rel="canonical" href="http://592988.xyz/2021/10/15/Android/AndroidDevelop_007_Binder03-ServiceManager_addService/">
 
 
 <script id="page-configurations">
@@ -252,7 +252,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://rangerzhou.top/2021/10/15/Android/AndroidDevelop_007_Binder03-ServiceManager_addService/">
+    <link itemprop="mainEntityOfPage" href="http://592988.xyz/2021/10/15/Android/AndroidDevelop_007_Binder03-ServiceManager_addService/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -282,7 +282,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2022-08-09 23:16:02" itemprop="dateModified" datetime="2022-08-09T23:16:02+08:00">2022-08-09</time>
+                <time title="修改时间：2024-06-30 00:12:16" itemprop="dateModified" datetime="2024-06-30T00:12:16+08:00">2024-06-30</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -432,6 +432,8 @@
 <h3 id="1-1-1-BinderInternal-getContextObject-获取封装有-sm-的BpBinder-的-BinderProxy"><a href="#1-1-1-BinderInternal-getContextObject-获取封装有-sm-的BpBinder-的-BinderProxy" class="headerlink" title="1.1.1 BinderInternal.getContextObject() - 获取封装有 sm 的BpBinder 的 BinderProxy"></a>1.1.1 BinderInternal.getContextObject() - 获取封装有 sm 的BpBinder 的 BinderProxy</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// BinderInternal.java</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">native</span> IBinder <span class="title function_">getContextObject</span><span class="params">()</span>;</span><br></pre></td></tr></table></figure>
 
 <p>此处调用的是 native 函数，注册流程在 <a href="">Android_Binder进程间通信机制01</a> 中的第六小结已经讲过，再简单说下注册流程：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">sequenceDiagram</span><br><span class="line">app_main -&gt;&gt; app_main:main()</span><br><span class="line">app_main -&gt;&gt; AndroidRuntime:start()</span><br><span class="line">AndroidRuntime -&gt;&gt; AndroidRuntime:startReg()</span><br><span class="line">AndroidRuntime -&gt;&gt; AndroidRuntime:register_jni_procs()</span><br><span class="line">AndroidRuntime -&gt;&gt; android_util_Binder:register_android_os_Binder()</span><br><span class="line">android_util_Binder -&gt;&gt; android_util_Binder:int_register_android_os_BinderInternal(env)</span><br><span class="line">android_util_Binder -&gt;&gt; android_util_Binder:gBinderInternalMethods</span><br></pre></td></tr></table></figure>
+
 <p>app_main.main() ——&gt; AndroidRuntime.start() ——&gt; AndroidRuntime.startReg() ——&gt; AndroidRuntime.register_jni_procs() ——&gt; android_util_Binder.register_android_os_Binder() ——&gt; android_util_Binder.int_register_android_os_BinderInternal(env) ——&gt; android_util_Binder.gBinderInternalMethods：</p>
 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// android_util_Binder.cpp</span></span><br><span class="line"><span class="type">static</span> <span class="type">const</span> JNINativeMethod gBinderInternalMethods[] = &#123;</span><br><span class="line">     <span class="comment">/* name, signature, funcPtr */</span></span><br><span class="line">    &#123; <span class="string">&quot;getContextObject&quot;</span>, <span class="string">&quot;()Landroid/os/IBinder;&quot;</span>, (<span class="type">void</span>*)android_os_BinderInternal_getContextObject &#125;,</span><br><span class="line">    &#123; <span class="string">&quot;joinThreadPool&quot;</span>, <span class="string">&quot;()V&quot;</span>, (<span class="type">void</span>*)android_os_BinderInternal_joinThreadPool &#125;,</span><br><span class="line">    ...</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
 
@@ -753,7 +755,7 @@
   </li>
   <li class="post-copyright-link">
     <strong>本文链接：</strong>
-    <a href="http://rangerzhou.top/2021/10/15/Android/AndroidDevelop_007_Binder03-ServiceManager_addService/" title="Android - Binder机制(3)-addService">http://rangerzhou.top/2021/10/15/Android/AndroidDevelop_007_Binder03-ServiceManager_addService/</a>
+    <a href="http://592988.xyz/2021/10/15/Android/AndroidDevelop_007_Binder03-ServiceManager_addService/" title="Android - Binder机制(3)-addService">http://592988.xyz/2021/10/15/Android/AndroidDevelop_007_Binder03-ServiceManager_addService/</a>
   </li>
   <li class="post-copyright-license">
     <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
@@ -792,8 +794,8 @@
       <div class="tabs tabs-comment">
         <ul class="nav-tabs">
             <li class="tab"><a href="#comment-disqus">disqus</a></li>
-            <li class="tab"><a href="#comment-gitalk">gitalk</a></li>
             <li class="tab"><a href="#comment-livere">livere</a></li>
+            <li class="tab"><a href="#comment-gitalk">gitalk</a></li>
         </ul>
         <div class="tab-content">
             <div class="tab-pane disqus" id="comment-disqus">
@@ -805,15 +807,15 @@
   </div>
   
             </div>
-            <div class="tab-pane gitalk" id="comment-gitalk">
-              <div class="comments" id="gitalk-container"></div>
-            </div>
             <div class="tab-pane livere" id="comment-livere">
               
   <div class="comments">
     <div id="lv-container" data-id="city" data-uid="MTAyMC8yOTcyNS82Mjky"></div>
   </div>
   
+            </div>
+            <div class="tab-pane gitalk" id="comment-gitalk">
+              <div class="comments" id="gitalk-container"></div>
             </div>
         </div>
       </div>
@@ -877,7 +879,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">76</span>
+          <span class="site-state-item-count">77</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -1190,7 +1192,7 @@ window.addEventListener('pjax:success', () => {
 
 <script>
   var disqus_config = function() {
-    this.page.url = "http://rangerzhou.top/2021/10/15/Android/AndroidDevelop_007_Binder03-ServiceManager_addService/";
+    this.page.url = "http://592988.xyz/2021/10/15/Android/AndroidDevelop_007_Binder03-ServiceManager_addService/";
     this.page.identifier = "2021/10/15/Android/AndroidDevelop_007_Binder03-ServiceManager_addService/";
     this.page.title = "Android - Binder机制(3)-addService";
     };
@@ -1207,6 +1209,22 @@ window.addEventListener('pjax:success', () => {
       (d.head || d.body).appendChild(s);
     }
   });
+</script>
+
+<script>
+NexT.utils.loadComments(document.querySelector('#lv-container'), () => {
+  window.livereOptions = {
+    refer: location.pathname.replace(CONFIG.root, '').replace('index.html', '')
+  };
+  (function(d, s) {
+    var j, e = d.getElementsByTagName(s)[0];
+    if (typeof LivereTower === 'function') { return; }
+    j = d.createElement(s);
+    j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+    j.async = true;
+    e.parentNode.insertBefore(j, e);
+  })(document, 'script');
+});
 </script>
 
 <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
@@ -1226,22 +1244,6 @@ NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
     });
     gitalk.render('gitalk-container');
   }, window.Gitalk);
-});
-</script>
-
-<script>
-NexT.utils.loadComments(document.querySelector('#lv-container'), () => {
-  window.livereOptions = {
-    refer: location.pathname.replace(CONFIG.root, '').replace('index.html', '')
-  };
-  (function(d, s) {
-    var j, e = d.getElementsByTagName(s)[0];
-    if (typeof LivereTower === 'function') { return; }
-    j = d.createElement(s);
-    j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
-    j.async = true;
-    e.parentNode.insertBefore(j, e);
-  })(document, 'script');
 });
 </script>
 
