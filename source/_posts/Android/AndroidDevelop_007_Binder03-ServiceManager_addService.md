@@ -105,6 +105,17 @@ public static final native IBinder getContextObject();
 
 此处调用的是 native 函数，注册流程在 [Android_Binder进程间通信机制01]() 中的第六小结已经讲过，再简单说下注册流程：
 
+``` mermaid
+sequenceDiagram
+app_main ->> app_main:main()
+app_main ->> AndroidRuntime:start()
+AndroidRuntime ->> AndroidRuntime:startReg()
+AndroidRuntime ->> AndroidRuntime:register_jni_procs()
+AndroidRuntime ->> android_util_Binder:register_android_os_Binder()
+android_util_Binder ->> android_util_Binder:int_register_android_os_BinderInternal(env)
+android_util_Binder ->> android_util_Binder:gBinderInternalMethods
+```
+
 app_main.main() ——> AndroidRuntime.start() ——> AndroidRuntime.startReg() ——> AndroidRuntime.register_jni_procs() ——> android_util_Binder.register_android_os_Binder() ——> android_util_Binder.int_register_android_os_BinderInternal(env) ——> android_util_Binder.gBinderInternalMethods：
 
 ``` cpp

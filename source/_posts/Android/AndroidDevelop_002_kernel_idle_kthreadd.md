@@ -326,10 +326,7 @@ kthread_create_on_node 作用就是把需要创建的线程添加到链表中，
 
 ### 4. 总结
 
-​		kthreadd 进程由 idle 通过 kernel_thread 创建，并始终运行在内核空间, 负责所有内核线程的调度和管理，所有的内核线程都是直接或者间接的以 kthreadd 为父进程。
-
-    kthreadd 进程会执行一个 kthreadd 的函数，该函数的作用就是遍历 kthread_create_list 链表，从链表中取出需要创建的内核线程进行创建, 创建成功后会执行 kthread 函数。
-
-    kthread 函数完成一些初始赋值后就让出 CPU，并没有执行新线程的工作函数，因此需要手动  wake up 被唤醒后，新线程才执行自己的真正工作函数。
-
-    当我们调用 kthread_create 和 kthread_run 创建的内核线程会被加入到 kthread_create_list 链表，kthread_create 不会手动 wake up 新线程，kthread_run 创建完成后会手动 wake up 新线程。
+- kthreadd 进程由 idle 通过 kernel_thread 创建，并始终运行在内核空间, 负责所有内核线程的调度和管理，所有的内核线程都是直接或者间接的以 kthreadd 为父进程。
+- kthreadd 进程会执行一个 kthreadd 的函数，该函数的作用就是遍历 kthread_create_list 链表，从链表中取出需要创建的内核线程进行创建, 创建成功后会执行 kthread 函数。
+- kthread 函数完成一些初始赋值后就让出 CPU，并没有执行新线程的工作函数，因此需要手动  wake up 被唤醒后，新线程才执行自己的真正工作函数。
+- 当我们调用 kthread_create 和 kthread_run 创建的内核线程会被加入到 kthread_create_list 链表，kthread_create 不会手动 wake up 新线程，kthread_run 创建完成后会手动 wake up 新线程。

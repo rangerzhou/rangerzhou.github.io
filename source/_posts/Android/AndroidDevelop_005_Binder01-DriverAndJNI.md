@@ -24,7 +24,7 @@ password:
 
 Linux 进程间通信机制有：管道（匿名管道PIPE、命名管道FIFO）、信号、共享内存（无需拷贝，性能最好）、信号量（signal）、消息队列、socket（拷贝2次）；
 
-[更多 IPC 了解](https://blog.csdn.net/tyuiof/article/details/108290327)
+
 
 |        | Binder                               | 共享内存                                 | Socket                                              |
 | ------ | ------------------------------------ | ---------------------------------------- | --------------------------------------------------- |
@@ -876,4 +876,8 @@ Binder 实体和 Binder 引用都是内核（Binder 驱动）中的数据结构�
 
 补充待整理：
 
-BinderProxy 就是 BpBinder，"BpBinder" 中的 "p" 即 Proxy，只不过 BpBinder 是 Native 层的，BinderProxy 是 Java 层的。BinderProxy 和 BpBinder 分别继承自 Java 和 Native 层的 IBinder 接口，即 IBinder.h 和 IBinder.java，它们可以看作同一个接口，都定义了 transact 等方法。
+BinderProxy 就是 BpBinder，"BpBinder" 中的 "p" 即 Proxy，只不过 BpBinder 是 Native 层的，BinderProxy 是 Java 层的。BinderProxy 和 BpBinder 分别继承自 Java 层和 Native 层的 IBinder 接口，即 IBinder.h 和 IBinder.java，它们可以看作同一个接口，都定义了 transact 等方法。
+
+
+
+Ref: [深入理解Android进程间通信机制](https://blog.csdn.net/tyuiof/article/details/108290327)
