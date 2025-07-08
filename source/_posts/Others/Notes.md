@@ -1322,3 +1322,30 @@ $ sudo apt-get install gnome-tweak-tool
 打开 tweak，侧边栏选择 Workspaces，选择 Static Workspaces
 
 打开 https://extensions.gnome.org/ ，搜索并安装  Workspace Matrix，打开 Extensions，就能配置 *Workspace Matrix* 了；
+
+#### 41 Android 刘海屏/打孔屏全屏显示
+
+配置刘海屏/打孔屏隐藏状态栏/导航栏，并且内容扩展到状态栏
+
+``` java
+    private void setFullScreen() {
+        // 获取当前 Activity 的窗口对象
+        Window window = getWindow();
+        // 获取当前窗口的布局参数
+        WindowManager.LayoutParams lp = window.getAttributes();
+        // 设置刘海屏/打孔屏显示模式
+        lp.layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
+        // 将修改后的布局参数应用回窗口
+        window.setAttributes(lp);
+
+        WindowInsetsControllerCompat insetsController = WindowCompat.getInsetsController(window, window.getDecorView());
+        // 隐藏状态栏和导航栏
+        insetsController.hide(WindowInsetsCompat.Type.statusBars() | WindowInsetsCompat.Type.navigationBars());
+        // 设置系统栏的行为：滑动时临时显示，几秒后自动隐藏
+        insetsController.setSystemBarsBehavior(WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
+
+        // 让内容扩展到状态栏和导航栏区域（如不生效，尝试放在 setContentView 之前）
+        WindowCompat.setDecorFitsSystemWindows(window, false);
+    }
+```
+
