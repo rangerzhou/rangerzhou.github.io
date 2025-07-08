@@ -11,7 +11,7 @@ password:
 
 <!--more-->
 
-## 什么是依赖注入？
+## 1 什么是依赖注入？
 
 **IOC - Inversion of Control**
 
@@ -24,7 +24,7 @@ password:
 - 基于反射的实现方式，比如 Spring IOC（动态的进行依赖关系的建立），在程序运行过程中动态的建立依赖关系；
 - 静态方式，程序在编译期自动生成代码用于建立依赖关系，dagger2 就属于静态方式；
 
-## 手动依赖注入的两种方式
+## 2 手动依赖注入的两种方式
 
 - 构造方法注入
 - Setter 方法注入（setXXX 方法）
@@ -63,11 +63,11 @@ public class Injector {
 
 在外部直接调用 inject 方法即可注入依赖对象了；
 
-## 什么是 Dagger？
+## 3 什么是 Dagger？
 
 Dagger(匕首) 是提供给 Android 快速实现依赖注入的**框架**，Dagger1.0 由 Square 公司开发共享，Dagger2 由 Google 接手并维护；
 
-## Dagger 使用
+## 4 Dagger 使用
 
 首先添加依赖引入 Dagger2：
 
@@ -81,7 +81,7 @@ dependencies {
 }
 ```
 
-### 使用构造方法创建对象
+### 4.1 使用构造方法创建对象
 
 1. 定义对象
 
@@ -135,13 +135,13 @@ dependencies {
   }
   ```
 
-  要执行 build 后才会生成 DaggerAppComponent，DaggerAppComponent 是 AppComponent 的实现类，调用 AppComponet 中定义的方法执行注入动作；
+要执行 build 后才会生成 DaggerAppComponent，DaggerAppComponent 是 AppComponent 的实现类，调用 AppComponet 中定义的方法执行注入动作；
 
 通过以上 4 个步骤就完成了一个对象的注入；
 
-但是如果有些对象的构造是第三方框架提供的，就无法在构造方法上添加 `@Inject` 注解了，又或者提供依赖的构造函数是带参数的，如果只是简单的使用 `@Inject` 标记，那么它的参数又如何来的呢？`@Module` 刻意帮我们解决这些问题；
+但是如果有些对象的构造是第三方框架提供的，就无法在构造方法上添加 `@Inject` 注解了，又或者提供依赖的构造函数是带参数的，如果只是简单的使用 `@Inject` 标记，那么它的参数又如何来的呢？`@Module` 可以帮我们解决这些问题；
 
-### 使用 Module 的 provideXXX() 创建对象
+### 4.2 使用 Module 的 provideXXX() 创建对象
 
 1. 定义 Module
 
@@ -225,13 +225,13 @@ dependencies {
 
    此处想说明的就是如果 Module 中已经知道如何获取一个对象，那么 Module 中的其他对象的创建方法中可以直接使用这个对象；
 
-### 作用域
+### 4.3 作用域
 
-#### 局部单例
+#### 4.3.1 局部单例
 
-作用域注解可以**将某个对象的生命周期限定为其组件的生命周期（即如果 Module 中的获取实例的方法指定了某个作用域，那么对应的 Component 也需要指定这个作用域）**，在作用域范围内使用到的是同一实例；
+作用域注解可以**将某个对象的生命周期限定为其组件的生命周期（即如果 Module 中的获取实例的方法指定了某个作用域，那么对应的 Component 也需要指定这个作用域）**，<font color=red>**在作用域范围内使用到的是同一实例**</font>；
 
-作用域就算用来管理 Component 来获取对象实例的生命周期的；
+作用域是用于 **控制依赖对象的生命周期** 和 **复用策略** 的一种机制。它是依赖注入系统中非常关键的一部分，在实际开发中用于防止重复创建对象、提升性能，并在一定程度上帮助构建清晰的架构层级。
 
 ``` java
 @Module
@@ -292,7 +292,7 @@ public class SecondActivity extends AppCompatActivity {
 }
 ```
 
-把依赖对象注入到 SecondActivity 共其使用：
+把依赖对象注入到 SecondActivity 供其使用：
 
 ``` java
 @Singleton
@@ -305,7 +305,7 @@ public interface AppComponent {
 
 这里打印出的结果表明 SecondActivity 中的 retrofit3 和 MainActivity 中的两个 Retrofit 对象并非同一个对象，因为在 SecondActivity 中又通过 DaggerAppComponent.create() 创建了一个新的 Component 对象，上面说了，只有同一个 Component 中的对象才是同一个，所以这里就和 MainActivity 中的对象不是同一个了；
 
-#### 全局单例
+#### 4.3.1 全局单例
 
 ``` java
 public class MyApplication extends Application {
@@ -339,7 +339,7 @@ public class MainActivity extends AppCompatActivity {
 
 同理 SecondActivity 中也是用同样的方法注入，这样 MainActivity 和 SecondActivity 中的 Retrofit 对象就是同一个对象了，因为使用的是同一个 Component 注入的；
 
-#### 自定义作用域
+#### 4.3.3 自定义作用域
 
 ``` java
 @Scope
@@ -352,19 +352,15 @@ public @interface MyScope {
 
 直接复制 Singleton 的注解，修改为自定义的作用域名称即可；
 
-#### <font color=red>使用作用域的规则</font>
+#### <font color=red>4.3.4 使用作用域的规则</font>
 
 - 在没有必要的情况下，尽量使用默认的作用域，即不指定作用域；
 - Module 中要么不使用作用域，要么和 Component 中的作用域保持一致；
 - 开发设计时，一定要有清晰的依赖图，不然容易产生依赖死循环；
 
-
-
-
-
 Lazy 和 Provider 区别：Lazy 是单例（使用 DoubleCheck），Provider 不是单例；
 
-### <font color=red>组件依赖和子组件</font>
+### <font color=red>4.4 组件依赖和子组件</font>
 
 组件依赖与子组件主要解决不同作用域时组件之间的复用问题：
 
@@ -376,7 +372,7 @@ Lazy 和 Provider 区别：Lazy 是单例（使用 DoubleCheck），Provider 不
 - 为新组件 `@Component` 添加 `dependencies` 参数，指定该组件依赖的原组件；
 - 直接使用 `@Subcomponent` 注解创建新的组件，并装载到父组件中；
 
-#### dependencies 方式
+#### 4.4.1 dependencies 方式
 
 1. 定义新组件的作用域：
 
@@ -399,14 +395,12 @@ Lazy 和 Provider 区别：Lazy 是单例（使用 DoubleCheck），Provider 不
    }
    ```
 
-   
-
-   **多个 component 上面的 scope 不能相同**，没有 scope 的组件不能去依赖有 scope 的组件，新组件 UserComponent 依赖原组件 AppComponent 组件，所以 <font color=red>**指定新组件的作用域 UserScope**</font>，如果不给新组建指定作用域，会报如下错误：
+   **多个 component 上面的 scope 不能相同**，没有 scope 的组件不能去依赖有 scope 的组件，新组件 UserComponent 依赖原组件 AppComponent 组件，所以 <font color=red>**指定新组件的作用域 UserScope**</font>，如果不给新组件指定作用域，会报如下错误：
 
    ``` shell
-   UserComponent(unscoped) cannot depend on scoped components
+UserComponent(unscoped) cannot depend on scoped components
    ```
-
+   
    因为原组件指定了作用域，所以 <font color=red>**新组件需要指定一个不同的作用域，并且对应的 Module 中的 provideXXX() 也需要指定作用域；**</font>
 
 3. 原组件中对应需要注入对象的 Activity 的 inject 就不需要了，并且暴露原组件装载的 NetModule 中想要给新组件使用的对象 Retrofit；
@@ -416,7 +410,7 @@ Lazy 和 Provider 区别：Lazy 是单例（使用 DoubleCheck），Provider 不
    @Component(modules = NetModule.class)
    public interface AppComponent {
        //void inject(MainActivity mainActivity);
-       Retrofit getRetrofit(); // 暴露需要给新组建使用的对象
+       Retrofit getRetrofit(); // 暴露需要给新组件使用的对象
    }
    ```
 
@@ -524,7 +518,7 @@ Lazy 和 Provider 区别：Lazy 是单例（使用 DoubleCheck），Provider 不
 
    Context 是由 NetModule 提供的，NetModule 是属于 AppComponent 的，所以 AppComponent 可以暴露 Context 对象给到依赖 AppComponent 的新组件中，这样就复用了原组件的 ApplicationContext；
 
-#### SubComponent 使用
+#### 4.4.2 SubComponent 使用
 
 1. 创建 Student 类：
 
@@ -599,62 +593,274 @@ Lazy 和 Provider 区别：Lazy 是单例（使用 DoubleCheck），Provider 不
 
    总结就是：
 
-   父 Component 装载父 Module，父 Module 创建子 Componet（在父 Module 中指定 subcomponents 为子 Component），子Componet 装载子 Module，子 Module 创建XXX对象，然后父 Component 提供获取子 Component 的方法，子 Component 提供 inject 方法；
+   父 Component 装载父 Module，父 Module 创建子 Component（在父 Module 中指定 subcomponents 为子 Component），子 Componet 装载子 Module，子 Module 创建XXX对象，然后父 Component 提供获取子 Component 的方法，子 Component 提供 inject 方法；
 
    需要注意的是，子 Componet 没有单独的 Dagger 子 Component，而是存在于 Dagger 父 Component 中，所以注入的时候使用 `Dagger父Component.子Component().create().inject(this)` 的方式；
 
 和组件依赖相比，子组件如果使用父组件的功能，父组件不需要额外声明想要暴露的方法；
 
-### @Binds 使用
+#### 4.4.3 子组件完整示例
+
+适合上下级关系明确的常见，比如 App -> Activity -> Fragment
+
+##### 定义作用域
 
 ``` java
-public abstract class TestModule {
-    // 表示告诉 Dagger 此方法可以返回 AInterface 对象，但是具体的创建是由其实现类 AInterfaceImpl01 完成的
-    @Binds
-    abstract AInterface bindAinterface(AInterfaceImpl01 impl);
-    // 定义如何创建 AInterfaceImpl01 对象
-    @Provides
-    static AinterfaceImpl01 provideAInterfaceImpl01() {
-        return new AInterfaceImpl01();
-    }
-}
+@Scope
+@Retention(RetentionPolicy.RUNTIME)
+public @interface ActivityScope {}
+
+@Scope
+@Retention(RetentionPolicy.RUNTIME)
+public @interface FragmentScope {}
 ```
 
-`@Binds` 表示告诉 Dagger 此方法可以返回 AInterface 对象，但是具体的创建是由其实现类 AInterfaceImpl01 完成的；
-
-把 TestModule 装载到 AppComponent 中：
+##### AppComponent（父组件）
 
 ``` java
-@MyScope
-@Component(modules = SubComponentModule.class, TestModule.class)
+@Singleton
+@Component(modules = AppModule.class)
 public interface AppComponent {
-    StudenComponent.Factory studentComponent(); // 指定 Factory
+    ActivityComponent.Factory activityComponent();
+
+    ApiService getApiService(); // 也可以提供给外部
 }
 ```
 
-注入接口
+##### AppModule
 
 ``` java
-
-public class SecondActivity extends AppCompatActivity {
-    @Inject
-    Student student;
-    @Inject
-    AInterface aInterface; // 注入的是一个接口
-    @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        MyApplication.getApplicationComponent().studentComponent().create().inject(this);
-        Log.d(TAG, "aInterface: " + aInterface);
+@Module
+public class AppModule {
+    @Provides
+    @Singleton
+    ApiService provideApiService() {
+        return new ApiService(); // 模拟网络服务
     }
 }
 ```
 
-这里可以直接注入一个依赖接口，如果不使用 @Binds，则只能注入一个依赖对象；
+##### ActivityComponent（子组件）
 
-因为 TestModule 属于 AppComponent 组件，这里直接使用 AppComponent 的子组件来注入，可以直接用到父组件装载的 TestModule 中的对象；
+``` java
+@ActivityScope
+@Subcomponent(modules = ActivityModule.class)
+public interface ActivityComponent {
+    FragmentComponent.Factory fragmentComponent();
 
-### Qualifier 注解使用
+    void inject(MyActivity activity);
+
+    @Subcomponent.Factory
+    interface Factory {
+        ActivityComponent create();
+    }
+}
+```
+
+##### ActivityModule
+
+``` java
+@Module
+public class ActivityModule {
+    @Provides
+    @ActivityScope
+    ActivityHelper provideActivityHelper() {
+        return new ActivityHelper();
+    }
+}
+```
+
+##### FragmentComponent（孙组件）
+
+``` java
+@FragmentScope
+@Subcomponent(modules = FragmentModule.class)
+public interface FragmentComponent {
+    void inject(MyFragment fragment);
+
+    @Subcomponent.Factory
+    interface Factory {
+        FragmentComponent create();
+    }
+}
+```
+
+##### FragmentModule
+
+``` java
+@Module
+public class FragmentModule {
+    @Provides
+    @FragmentScope
+    FragmentHelper provideFragmentHelper() {
+        return new FragmentHelper();
+    }
+}
+```
+
+##### 使用方式
+
+``` java
+// 在 Application 中初始化
+AppComponent appComponent = DaggerAppComponent.create();
+
+// 在 Activity 中
+ActivityComponent activityComponent = appComponent.activityComponent().create();
+activityComponent.inject(this);
+
+// 在 Fragment 中
+FragmentComponent fragmentComponent = activityComponent.fragmentComponent().create();
+fragmentComponent.inject(this);
+```
+
+#### 4.4.4 组件依赖完整示例
+
+适合**跨模块解耦**场景，比如基础层和功能层分离。
+
+##### AppComponent（被依赖组件）
+
+``` java
+@Singleton
+@Component(modules = AppModule.class)
+public interface AppComponent {
+    ApiService getApiService();
+}
+```
+
+##### FeatureComponent（依赖 AppComponent）
+
+``` java
+@ActivityScope
+@Component(
+    dependencies = AppComponent.class,
+    modules = FeatureModule.class
+)
+public interface FeatureComponent {
+    void inject(MyFeatureActivity activity);
+
+    @Component.Factory
+    interface Factory {
+        FeatureComponent create(
+            @BindsInstance Context context,
+            AppComponent appComponent
+        );
+    }
+}
+```
+
+##### FeatureModule
+
+``` java
+@Module
+public class FeatureModule {
+    @Provides
+    @ActivityScope
+    FeatureHelper provideFeatureHelper(ApiService apiService) {
+        return new FeatureHelper(apiService);
+    }
+}
+```
+
+##### 使用方式
+
+``` java
+AppComponent appComponent = DaggerAppComponent.create();
+
+FeatureComponent featureComponent = DaggerFeatureComponent.factory()
+    .create(context, appComponent);
+
+featureComponent.inject(this);
+```
+
+#### 4.4.5 组件依赖和子组件对比总结
+
+| 对比项     | **组件依赖（Component dependencies）**                      | **子组件（Subcomponent）**                |
+| ---------- | ----------------------------------------------------------- | ----------------------------------------- |
+| 关系结构   | 平级组件间依赖（需要显式传入）                              | 父子组件嵌套（由父组件生成）              |
+| 作用域继承 | **不继承**父作用域（需手动管理）                            | **继承**父作用域                          |
+| 实例获取   | 通过接口显式提供依赖                                        | 直接共享父模块提供的依赖                  |
+| 组件构建   | 每个组件需单独 `@Component.Builder` 或 `@Component.Factory` | 由父组件通过 `@Subcomponent.Factory` 创建 |
+| 灵活性     | 更灵活，适合大型模块之间的解耦                              | 由父组件通过 `@Subcomponent.Factory` 创建 |
+| 使用复杂度 | 稍复杂，需要明确接口传递                                    | 简单，自动获取父提供的依赖                |
+
+
+
+### 4.5 @Binds 使用
+
+`@Binds` 是 Dagger 2 中一种非常常见且**高效**的绑定方式，用于将一个实现类绑定为接口的提供者。它是 `@Provides` 的一种简洁替代，用在 **抽象方法中**，不能直接返回实例，而是告诉 Dagger **用某个具体实现来满足某个接口的依赖**。
+
+**使用前提**
+
+- `@Binds` 方法必须是 **`abstract` 抽象方法**
+- 所在的类必须是用 `@Module` 标注的 **抽象类**
+- 参数是实现类，返回类型是接口
+
+**使用示例**
+
+常规写法：
+
+``` java
+@Module
+class AppModule {
+
+    @Provides
+    Animal provideDog() {
+        return new Dog();
+    }
+}
+```
+
+使用 `@Binds` 写法
+
+``` java
+@Module
+abstract class AppModule {
+
+    @Binds
+    abstract Animal bindDog(Dog dog);
+}
+```
+
+等价于告诉 Dagger：
+
+> “当需要 `Animal` 时，就注入 `Dog` 实例”。
+
+**常见应用场景**
+
+- 接口注入：`Repository`、`DataSource`、`Service` 等
+- <font color=red>**多个实现：搭配 `@Named` 或 `@Qualifier`**</font>
+- ViewModel、UseCase、Handler 层抽象绑定
+
+**示例：接口绑定**
+
+``` java
+interface UserRepository {
+    void login(String user, String password);
+}
+
+class UserRepositoryImpl implements UserRepository {
+    public void login(String user, String password) {
+        // 登录逻辑
+    }
+}
+
+@Module
+abstract class RepositoryModule {
+    @Binds
+    abstract UserRepository bindUserRepository(UserRepositoryImpl impl);
+}
+```
+
+然后在依赖方：
+
+``` java
+@Inject
+UserRepository userRepository;
+```
+
+Dagger 会自动注入 `UserRepositoryImpl`。
+
+### 4.6 @Qualifier 使用
 
 如果一个类存在多个构造方法，如何注入对象呢？首先可以使用 `@Named` 注解；
 
@@ -741,6 +947,238 @@ public @interface StudentQualifier2 {
 
 这样直接用 `StudentQualifier1` 或者 `StudentQualifier2` 代替 `@Named("xxx")` 即可；
 
-## 总结
+### 4.7 @BindsInstance 使用
+
+- `@BindsInstance` 的作用是让一个运行时传入的实例成为组件依赖图的一部分；
+
+- <font color=red>**将一个在运行时才确定的对象实例，直接添加到 Dagger Component 的依赖图中，而无需通过 `@Provides` 方法或 `@Inject` 构造函数来提供它。**</font>
+
+- 简而言之，它允许你在**创建 Component 实例的时候**，就把一些“外部”对象“注入”到 Component 中，让 Component 知道如何提供这些对象。
+
+**Dagger 2 的依赖解析机制**
+
+Dagger 2 是一个**编译时**依赖注入框架。这意味着它在代码编译阶段就会构建出一个完整的依赖图。当你在 `@Provides` 方法中声明一个参数时，你并不是在告诉 Dagger **“把这个参数从模块的构造函数里给我传进来”**，而是告诉 Dagger **“我这个方法需要一个指定类型的依赖，请你从**当前的组件依赖图**中给我提供一个！”**
+
+**举例说明**
+
+<font color=red>*我们来思考一个问题：以下例子中为什么 `AppResourceModule` 和 `DomainModule` 中的 `provideXXX(Application application)` 方法可以直接使用 `application` 参数呢？*</font>
+
+1. `AppComponent.Factory` 中的 `@BindsInstance Application application`
+
+   ``` java
+   @Component.Factory
+   interface Factory {
+       AppComponent create(
+               @BindsInstance Application application, // <--- 关键点 1
+               @BindsInstance ParkingHmiHandler parkingHmiHandler,
+               AppResourceModule appResourceModule,
+               DomainModule domainModule
+       );
+   }
+   ```
+   
+   - `@BindsInstance` 注解的作用是：它告诉 Dagger，当调用 `create()` 方法时，传入的 `Application` 对象（以及 `ParkingHmiHandler`）应该被**绑定到 `AppComponent` 的依赖图**中。
+   
+   
+   - 这意味着，一旦 `AppComponent` 被创建，这个特定的 `Application` 实例就会成为该组件能够提供的**可注入依赖**。任何请求 `Application` 类型的 `@Inject` 字段或 `@Provides` 方法参数，Dagger 都会提供这个通过 `@BindsInstance` 绑定的实例。
+   
+2. `applicationInjector()` 中的 `DaggerAppComponent.factory().create(...)` 调用
+
+   ``` java
+   protected AndroidInjector<? extends DaggerApplication> applicationInjector() {
+       return DaggerAppComponent.factory().create(
+               this, // <--- 关键点 2: 传入了 `Application` 实例 (即 `this`)
+               this, // ParkingHmiHandler 假设 `this` 也是
+               new AppResourceModule(), // <--- 关键点 3: 手动实例化模块
+               new DomainModule());     // <--- 关键点 4: 手动实例化模块
+   }
+   ```
+   
+   
+   - 当你在 `create()` 方法中传入 `this`（即 `MyApplication` 的实例）作为第一个参数时，这个 `MyApplication` 实例就被 `AppComponent` 的依赖图**绑定**了。
+   
+   
+   - 同时，你手动 `new` 了 `AppResourceModule()` 和 `new DomainModule()` 的实例，并将它们作为参数传递给了 `create()` 方法。这表示你正在使用**模块实例**来初始化组件，而不是让 Dagger 自动创建模块。
+   
+3. `AppResourceModule` 和 `DomainModule` 中的 `@Provides` 方法
+
+   ``` java
+   // 假设在 AppResourceModule 或 DomainModule 中
+   @Module
+   class SomeModule {
+       @Provides
+       SomeResource provideSomeResource(Application application) { // <-- 关键点 5
+           return new SomeResource(application.getResources());
+       }
+   }
+   ```
+
+   - 当 Dagger 需要提供 `SomeResource` 的实例时，它会查找 `provideSomeResource` 方法。
+
+   - 它发现 `provideSomeResource` 方法需要一个 `Application` 类型的参数。
+
+   - 此时，Dagger 会在**当前组件（`AppComponent`）的依赖图**中查找 `Application` 类型的绑定。
+
+   - 由于你在 `AppComponent.Factory` 的 `create()` 方法中通过 `@BindsInstance` 绑定了一个 `Application` 实例，Dagger 就会**自动将那个已绑定的 `Application` 实例作为参数传递给 `provideSomeResource` 方法**。
+
+4. 总结
+
+   上述问题的核心原因在于：
+
+   - **`@Provides` 方法的参数不是由模块的构造函数传入的。** 它们是由 Dagger **从组件的依赖图中注入的**。
+   - **`@BindsInstance` 的作用是让一个运行时传入的实例成为组件依赖图的一部分。**
+   - 当你 `new AppResourceModule()` 和 `new DomainModule()` 时，你只是提供了**模块本身**的实例给 Dagger。但这些模块内部的 `@Provides` 方法在执行时，它们所需的依赖（如 `Application`）仍然是 Dagger **从已构建的依赖图中智能获取并注入的**。
+
+   所以，即使模块本身是手动实例化的，其 `@Provides` 方法的参数仍然能享受 Dagger 的依赖注入能力，只要这些参数的类型在父级 Component 的依赖图中有对应的绑定（通过 `@BindsInstance`、其他 `@Provides` 方法或 `@Inject` 构造函数）。这正是 Dagger 2 强大而灵活的体现。
+
+### 4.8 Dagger 模块的实例化
+
+Dagger 2 在编译时会生成 Component 的实现代码。这个实现代码负责实例化所有必要的依赖，包括模块本身。关于模块的实例化，Dagger 遵循以下规则：
+
+#### 4.8.1 Dagger 自动实例化模块 (默认且常见方式)
+
+- **前提条件：**
+
+  - 模块类必须有一个 **无参的公共构造函数**
+    - *重要：** 如果你没有显式定义任何构造函数，Java 会**隐式生成**一个无参的公共构造函数。
+  - 模块中的 `@Provides` 方法**可以是静态的，也可以是非静态的**。
+
+- **工作方式：** 当你在 `@Component` 注解中通过 `modules = {MyModule.class}` 引用一个模块时，Dagger 编译器会生成代码来自动创建 `MyModule` 的实例（如果需要）。
+
+  - **如果所有 `@Provides` 方法都是静态的：** Dagger 在生成的代码中甚至不需要创建模块实例，可以直接通过类名调用静态方法来提供依赖。这是一种性能优化。
+  - **如果模块中包含任何非静态的 `@Provides` 方法：** Dagger 将会调用模块的无参构造函数来创建模块的实例，然后通过这个实例调用非静态的 `@Provides` 方法。
+
+- **示例 (正确的自动实例化示例)：**
+
+  ``` java
+  @Module
+  public class NetworkModule { // 隐式存在无参公共构造函数
+      @Provides // 非静态方法，Dagger 会实例化 NetworkModule 来调用它
+      public OkHttpClient provideOkHttpClient() {
+          return new OkHttpClient();
+      }
+  
+      @Provides // 静态方法，Dagger 不需要模块实例也能调用它
+      public static Retrofit provideRetrofit(OkHttpClient client) {
+          return new Retrofit.Builder().client(client).baseUrl("https://api.example.com").build();
+      }
+  }
+  
+  @Component(modules = NetworkModule.class) // Dagger 会自动创建 NetworkModule 的实例（因为有非静态方法）
+  public interface MyComponent {
+      OkHttpClient getOkHttpClient();
+      Retrofit getRetrofit();
+  }
+  
+  // 在使用时：
+  // MyComponent component = DaggerMyComponent.create(); // Dagger 自动处理 NetworkModule 实例化
+  ```
+
+  在这个例子中，`NetworkModule` 包含非静态的 `provideOkHttpClient()` 方法，所以 Dagger 会自动创建 `NetworkModule` 的实例。即使 `provideRetrofit()` 是静态的，Dagger 也会为了 `provideOkHttpClient()` 而创建实例。
+
+- 如果所有 `@Provides` 方法都是静态的，且没有实例状态：
+
+  ``` java
+  @Module
+  public class StaticProvidersModule { // 隐式存在无参公共构造函数
+      @Provides
+      public static String provideAppName() { // 所有 @Provides 方法都是静态的
+          return "My App";
+      }
+  }
+  
+  @Component(modules = StaticProvidersModule.class) // Dagger 可以不创建 StaticProvidersModule 实例
+  public interface MyComponent {
+      String getAppName();
+  }
+  
+  // 在使用时：
+  // MyComponent component = DaggerMyComponent.create();
+  ```
+
+  这种情况下，`StaticProvidersModule` 的实例甚至不会被创建，Dagger 直接调用其静态方法。
+
+#### 4.8.2 手动实例化模块 (Module Instance Provided)
+
+- **前提条件：**
+
+  - 模块类有一个**带参数的构造函数**。
+
+  - 或者，你出于某种特殊目的，希望**手动控制模块实例的创建**（即使它有无参构造函数）。
+
+- **工作方式：** 当你有一个带参数的模块构造函数时，Dagger **无法自动实例化它**，因为它不知道如何获取构造函数所需的参数。你必须在 Component 的 Builder 或 Factory 中明确地提供模块的实例。
+
+- **示例 (带有构造函数参数的模块)：**
+
+  ``` java
+  @Module
+  public class MyConfigModule {
+      private final String configValue;
+  
+      public MyConfigModule(String configValue) { // 模块构造函数需要运行时参数
+          this.configValue = configValue;
+      }
+  
+      @Provides
+      public String provideConfigValue() {
+          return configValue;
+      }
+  }
+  
+  @Component(modules = MyConfigModule.class)
+  public interface MyComponent {
+      String getConfigValue();
+  
+      @Component.Factory
+      interface Factory {
+          MyComponent create(MyConfigModule moduleInstance); // <-- Factory 接收模块实例
+      }
+  }
+  
+  // 在使用时：
+  // MyComponent component = DaggerMyComponent.factory().create(new MyConfigModule("production_config"));
+  ```
+
+  在这个例子中，`MyConfigModule` 必须被手动实例化，因为它有一个带参数的构造函数。
+
+## 5 Dagger2 Android 依赖注入流程图
+
+``` mermaid
+sequenceDiagram
+    participant AppDev as Android应用开发者
+    participant AndroidApp as Android应用(Application/Activity/Fragment)
+    participant DaggerC as Dagger编译器(编译时)
+    participant GeneratedComp as 生成的Dagger Component 实现
+    participant Module as 模块(@Module, @Provides)
+
+    Note over AppDev,AndroidApp: **开发阶段：定义依赖**
+
+    AppDev->>AndroidApp: 1. 在需要依赖的字段上使用 `@Inject` 注解<br/>`@Inject MyDependency myDependency;
+    AppDev->>Module: 2. 定义提供依赖的模块和方法<br/>`@Module`, `@Provides MyDependency provideMyDependency()`
+    AppDev->>GeneratedComp: 3. 定义组件接口，连接模块和注入点<br/>`@Component(modules = MyModule.class)`
+
+    Note over DaggerC: **编译时：生成依赖图**
+
+    DaggerC->>AppDev: 4. Dagger 编译器扫描 `@Inject`, `@Provides`, `@Module`, `@Component`
+    DaggerC->>GeneratedComp: 5. Dagger 编译器生成组件的实现类<br/>(例如 `DaggerAppComponent`)
+    Note over DaggerC: 编译器验证依赖图的完整性
+
+    Note over AndroidApp: **运行时：注入依赖**
+
+    AndroidApp->>GeneratedComp: 6. 在 `Application/Activity/Fragment` 的 `onCreate()` 中<br/>创建 Component 实例：`DaggerAppComponent.builder().build()`
+    AndroidApp->>GeneratedComp: 7. 调用 Component 的注入方法：<br/>`component.inject(this)(将自身传递给 Component)`
+
+    GeneratedComp->>Module: 8. Component 解析 `inject()` 请求，<br/>根据依赖图调用模块中的 `@Provides` 方法<br/>(如果依赖是单例或已缓存，则直接提供)
+
+    Module-->>GeneratedComp: 9. 模块返回依赖实例<br/>(例如 `MyDependency` 的实例)
+
+    GeneratedComp-->>AndroidApp: 10. Component 将依赖实例注入到<br/>Android 应用组件中 `@Inject` 标记的字段
+
+    Note over AndroidApp: 11. Android 应用现在可以使用 `myDependency` 了
+```
+
+
+
+## 6 总结
 
 Dagger 比较重要的就是作用域、组件依赖和子组件，下一篇分析 Dagger 的实现原理；
