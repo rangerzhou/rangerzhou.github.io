@@ -6,7 +6,7 @@ categories: Hexo
 copyright: true
 ---
 
-#### 1. 解决fs.SyncWriteStream报错问题
+# 1. 解决fs.SyncWriteStream报错问题
 
 > 在执行hexo命令的时候，总会显示如下报错：
 
@@ -90,7 +90,7 @@ $ grep -irn "SyncWriteStream" .\node_modules\hexo-deployer-git\
 
 
 
-#### 2. Fastly error: unknown domain: xxx. Please check that this domain has been added to a service.
+# 2. Fastly error: unknown domain: xxx. Please check that this domain has been added to a service.
 
 博客突然无法访问，显示如下错误：
 
@@ -105,3 +105,41 @@ Details: cache-fty21337-FTY
 ![阿里云域名解析](https://raw.githubusercontent.com/rangerzhou/ImageHosting/master/blog_resource/2020/aliyun.png)
 
 参照上图，阿里云控制台 - 域名 - 解析，值改为 185.199.111.153（ [Github Page](https://help.github.com/en/github/working-with-github-pages/managing-a-custom-domain-for-your-github-pages-site) 公布的 IP ，开始改为 185.199.110.153 过了一会儿还是显示错误，就通过电脑 `ping xxx.github.io` 得到的了这个 IP），修改解析 IP 即可。
+
+# 3. 修改新域名
+重新在 spaceship 上购买了新的域名，然后托管在 Cloudflare 上，
+## 3.1 修改源码 CNAME
+修改 [source 目录下的 CNAME 文件](https://github.com/rangerzhou/rangerzhou.github.io/blob/hexo/source/CNAME)，
+
+改为新域名
+
+## 3.2 托管步骤
+直接把 Cloudflare 生成的两个 NS 添加到 spaceship 上就可以了
+
+## 3.3 在 Cloudflare 添加 DNS 记录
+在 Cloudflare 的 DNS 设置里添加：
+
+添加 `CNAME` 记录
+名称：`www`
+目标：`rangerzhou.github.io`
+
+添加 `A` 记录
+名称：`@`（表示你的根域名，例如 example.com）
+IPv4 地址：`185.199.111.153`（试了 `185.199.108.153` 不好使）
+
+
+
+对于这个 A 记录，Chatgpt 说在 Cloudflare 使用 CNAME 也可以，具体是添加 CNAME 记录，名称是 `@`，目标也是 `rangerzhou.github.io`，我试了下没成功
+
+> Cloudflare 提供 CNAME Flattening 技术，它能让你在 @（根域名） 上写 CNAME，看起来像是 CNAME，但实际上会在底层解析成 A/AAAA 记录的 IP。
+所以你会看到两种常见配置方式：
+
+严格遵循 DNS 规范（传统方式）：
+- @ 用 A 记录 指向 GitHub Pages / Vercel 的 IP。
+- www 用 CNAME 指向 xxx.github.io 或者 cname.vercel-dns.com。
+
+Cloudflare Flattening（推荐方式）：
+- @ 也可以写成 CNAME 指向 xxx.github.io（Cloudflare 会自动解析成 IP，规避 DNS 限制）。
+- www 依旧是 CNAME。
+
+
