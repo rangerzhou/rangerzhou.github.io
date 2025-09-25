@@ -120,12 +120,12 @@ Details: cache-fty21337-FTY
 在 Cloudflare 的 DNS 设置里添加：
 
 添加 `CNAME` 记录
-名称：`www`
-目标：`rangerzhou.github.io`
+- 名称：`www`
+- 目标：`rangerzhou.github.io`
 
 添加 `A` 记录
-名称：`@`（表示你的根域名，例如 example.com）
-IPv4 地址：`185.199.111.153`（试了 `185.199.108.153` 不好使）
+- 名称：`@`（表示你的根域名，例如 example.com）
+- IPv4 地址：`185.199.111.153`（试了 `185.199.108.153` 不好使）
 
 
 
@@ -141,5 +141,5 @@ IPv4 地址：`185.199.111.153`（试了 `185.199.108.153` 不好使）
 Cloudflare Flattening（推荐方式）：
 - @ 也可以写成 CNAME 指向 xxx.github.io（Cloudflare 会自动解析成 IP，规避 DNS 限制）。
 - www 依旧是 CNAME。
-
+[官方对此的说明](https://developers.cloudflare.com/dns/cname-flattening/)
 
