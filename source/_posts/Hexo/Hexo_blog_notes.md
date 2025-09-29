@@ -119,26 +119,27 @@ Details: cache-fty21337-FTY
 ## 3.3 在 Cloudflare 添加 DNS 记录
 在 Cloudflare 的 DNS 设置里添加：
 
-添加 `CNAME` 记录
+==添加 `CNAME` 记录==
 - 名称：`www`
 - 目标：`rangerzhou.github.io`
 
-添加 `A` 记录
+==添加 `A` 记录==
 - 名称：`@`（表示你的根域名，例如 example.com）
 - IPv4 地址：`185.199.111.153`（试了 `185.199.108.153` 不好使）
 
-对于这个 A 记录，使用 CNAME 也可以，实测没问题
-添加 CNAME 记录
+对于这个 `A` 记录，使用 CNAME 也可以，实测没问题
+
+==以`CNAME` 类型添加 `A` 记录==
 - 名称是 `@`
 - 目标也是 `rangerzhou.github.io`
 
-> Cloudflare 提供 CNAME Flattening 技术，它能让你在 @（根域名） 上写 CNAME，看起来像是 CNAME，但实际上会在底层解析成 A/AAAA 记录的 IP。
-所以你会看到两种常见配置方式：
-严格遵循 DNS 规范（传统方式）：
+> Cloudflare 提供 CNAME Flattening 技术，它能让你在 @（根域名） 上写 CNAME，看起来像是 CNAME，但实际上会在底层解析成 A/AAAA 记录的 IP。所以你会看到两种常见配置方式：
+
+**严格遵循 DNS 规范（传统方式）**
 - @ 用 A 记录 指向 GitHub Pages / Vercel 的 IP。
 - www 用 CNAME 指向 xxx.github.io 或者 cname.vercel-dns.com。
 
-Cloudflare Flattening（推荐方式）：
+**Cloudflare Flattening（推荐方式）**
 - @ 也可以写成 CNAME 指向 xxx.github.io（Cloudflare 会自动解析成 IP，规避 DNS 限制）。
 - www 依旧是 CNAME。
 [官方对此的说明](https://developers.cloudflare.com/dns/cname-flattening/)
