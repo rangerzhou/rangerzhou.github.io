@@ -21,7 +21,7 @@ password: zr.
 - packages/services/Car/service-builtin：
   - 编译产物是 `system/priv-app/CarService/CarService.apk`
   - 包名是 `com.android.car`，作为单独的进程
-- packages/services/Car/car-lib：编译产物是 `android.car.jar`，是对上层 Application 提供的 sdk
+- packages/services/Car/car-lib：编译产物是 `system/framework/android.car.jar`，是对上层 Application 提供的 sdk
 
 
 
