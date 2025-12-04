@@ -1349,3 +1349,27 @@ $ sudo apt-get install gnome-tweak-tool
     }
 ```
 
+#### 42 把 AAA 项目的 master 推送到 BBB 项目的 bbb 分支
+
+``` shell
+# 进入 A 项目
+git pull
+# 查看当前仓库
+git remote
+# 在本地添加一个新的远程链接
+git remote add BBB bbb
+# 为新加的仓库设置上目标仓库的url地址
+git remote set-url BBB https://gitee.com/greatoak/BBB.git
+# 在 AAA 的本地仓库进行 git push
+git checkout master
+git push BBB master:bbb
+```
+
+#### 43 把 BBB 项目的 bbb 分支的最新提交 merge 到 BBB 项目的 master 分支
+
+``` shell
+git checkout master
+git merge bbb
+git push origin master
+```
+
