@@ -11,15 +11,7 @@ password:
 
 <!--more-->
 
-## 查看当前 Activity
-
-``` shell
-adb shell dumpsys activity activities | grep ResumedActivity
-```
-
-## 1 adb 命令查看当前界面的 Activity / Fragment / 任务栈
-
-### 查看当前 Activity
+# 1 查看当前 Activity
 
 ``` shell
 # 方法1
@@ -32,13 +24,13 @@ adb shell dumpsys activity activities | grep ResumedActivity
 - `grep ACTIVITY`：从上个命令结果中过滤出Activity相关信息
 - `tail -n 1`：从上一步过滤结果中继续过滤出最后一条记录，也就是当前界面(顶层top)activity
 
-### 查看当前 Fragment
+# 2 查看当前 Fragment
 
 ``` shell
 adb shell "dumpsys activity top | grep '#[0-9]: ' | tail -n 1"
 ```
 
-### 查看 Activity 任务栈
+# 3 查看 Activity 任务栈
 
 ``` shell
 adb shell "dumpsys activity activities | grep '* ActivityRecord{'"
@@ -80,5 +72,14 @@ adb wait-for-device
 adb shell "dumpsys activity activities | grep '* ActivityRecord{'"
 echo. & pause
 goto menu
+```
+
+# 4 解锁 AMS 日志
+
+设置 DEBUG_ALL 为 true 即可。
+
+``` java
+// ActivityManagerDebugConfig.java
+static final boolean DEBUG_ALL = true;
 ```
 

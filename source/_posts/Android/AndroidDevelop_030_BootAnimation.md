@@ -177,7 +177,7 @@ void StartThread(const char* name, int mode, int gid, std::thread& t, bool liste
 }
 ```
 
-通过 CreateSocket 创建一个 Unit domain socket（在 /dev/**properties** 下的某个名字，如 PROP_SERVICE_NAME / PROP_SERVICE_FOR_SYSTEM_NAME），监听 fd，使用 std::thread 创建并启动一个线程运行 `PropertyServiceThread`，
+通过 CreateSocket 创建一个 Unit domain socket（在 /dev/**properties** 下的某个名字，如 PROP_SERVICE_NAME / PROP_SERVICE_FOR_SYSTEM_NAME），监听 fd，使用 `std::thread` 创建并启动一个线程运行 `PropertyServiceThread`，
 
 ``` cpp
 // property_service.cpp
