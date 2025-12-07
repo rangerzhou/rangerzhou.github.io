@@ -117,7 +117,7 @@ void SurfaceFlinger::initBootProperties() {
 
 ### 1.2.1 启动属性服务
 
-
+#### 1 startPropertyService()
 
 ``` cpp
 // init.cpp
@@ -154,10 +154,20 @@ void StartPropertyService(int* epoll_socket) {
 
 创建了属性服务和 init 通信的 socket，通过 StartThread 启动了两个线程：
 
-- **property_service_for_system_thread** 对应的 socket 名称是 PROP_SERVICE_FOR_SYSTEM_NAME，CreateSocket 用 mode=0660，gid=AID_SYSTEM → 只有 owner 或 group=AID_SYSTEM 的进程能连接（系统组件专用）
-- **property_service_thread** 对应 PROP_SERVICE_NAME，CreateSocket 用 mode=0666，gid=0 → 对所有进程开放（普通应用/服务可连接，受 SELinux/prop policy 进一步限制）
-- **property_service_for_system_thread** 传入 listen_init = true → 该线程在 epoll 中额外注册 init_socket（来自 init 的内部 socket），会处理 HandleInitSocket 的事件（比如 init 发来的加载持久化属性等消息）。
-- **property_service_thread** 传入 false，不注册 init_socket。
+- **property_service_for_system_thread**
+  - 对应的 socket 名称是 `PROP_SERVICE_FOR_SYSTEM_NAME`，CreateSocket 用 mode=0660，gid=AID_SYSTEM → 只有 owner 或 group=AID_SYSTEM 的进程能连接（系统组件专用）
+  - 传入 listen_init = true → 该线程在 epoll 中额外注册 init_socket（来自 init 的内部 socket），会处理 HandleInitSocket 的事件（比如 init 发来的加载持久化属性等消息）
+
+- **property_service_thread**
+  - 对应的 socket 名称是 `PROP_SERVICE_NAME`，CreateSocket 用 mode=0666，gid=0 → 对所有进程开放（普通应用/服务可连接，受 SELinux/prop policy 进一步限制）
+  - 传入 listen_init = false，不注册 init_socket
+
+
+### 1.2.2 启动属性服务线程
+
+#### 1 StartThread()
+
+创建 UDS 并监听 fd
 
 ``` cpp
 // property_service.cpp
@@ -177,7 +187,9 @@ void StartThread(const char* name, int mode, int gid, std::thread& t, bool liste
 }
 ```
 
-通过 CreateSocket 创建一个 Unit domain socket（在 /dev/**properties** 下的某个名字，如 PROP_SERVICE_NAME / PROP_SERVICE_FOR_SYSTEM_NAME），监听 fd，使用 `std::thread` 创建并启动一个线程运行 `PropertyServiceThread`，
+通过 CreateSocket 创建一个 Unit domain socket（在 */dev/properties* 下的某个名字，如 PROP_SERVICE_NAME / PROP_SERVICE_FOR_SYSTEM_NAME），监听 fd，使用 `std::thread` 创建并启动一个线程运行 `PropertyServiceThread`，再调用 `t.swap()` 调换两个 thread 对象的句柄，操作后 t(property_service_thread) 持有真正创建的线程，而 new_thread 线程变为空；
+
+#### 2 PropertyServiceThread()
 
 ``` cpp
 // property_service.cpp
@@ -207,7 +219,11 @@ static void PropertyServiceThread(int fd, bool listen_init) {
 }
 ```
 
-用 Epoll 打开并把上面那个 listening fd 注册到 epoll，handler 绑定为 std::bind(handle_property_set_fd, fd)，epoll.Wait 阻塞等待事件，事件发生时调用 handle_property_set_fd（**epoll 监视的是 listening socket 的可读（有新连接）事件，不是直接监听单个属性“值变动”**）；
+用 Epoll 打开并把上面那个 listening fd 注册到 epoll，handler 绑定为 `std::bind(handle_property_set_fd, fd)`，epoll.Wait 阻塞等待事件，事件发生时调用 handle_property_set_fd（**epoll 监视的是 listening socket 的可读（有新连接）事件，不是直接监听单个属性“值变动”**）；
+
+### 1.2.3 处理设置属性事件
+
+#### 1 handle_property_set_fd()
 
 ``` cpp
 // property_service.cpp
@@ -230,6 +246,8 @@ static void handle_property_set_fd(int fd) {
     case PROP_MSG_SETPROP2: {
         std::string name;
         std::string value;
+        if (!socket.RecvString(&name, &timeout_ms) ||
+            !socket.RecvString(&value, &timeout_ms)) {
         ...
         // HandlePropertySet takes ownership of the socket if the set is handled asynchronously.
         const auto& cr = socket.cred();
@@ -239,8 +257,10 @@ static void handle_property_set_fd(int fd) {
 ```
 
 - accept4() 接受客户端连接（SurfaceFlinger 或任意进程通过对应 socket 连接）
-- 从连接上读命令（PROP_MSG_SETPROP / PROP_MSG_SETPROP2 等）并解析 name/value
+- 从连接上读命令（PROP_MSG_SETPROP / PROP_MSG_SETPROP2 等）并解析 name/value，<font color=red>**这里 name  就是 start，value 就是 bootanim**</font>
 - 做 SELinux/权限检查，然后调用 HandlePropertySet / PropertySet 处理属性
+
+#### 2 HandlePropertySet()
 
 ``` cpp
 // property_service.cpp
@@ -258,6 +278,8 @@ std::optional<uint32_t> HandlePropertySet(const std::string& name, const std::st
 
 对于 ctl.*（比如 ctl.start=bootanim），HandlePropertySet 会走 SendControlMessage -> QueueControlMessage，把“start bootanim”的控制消息排入 init 的控制队列，由 init 主逻辑实际执行启动/停止服务的动作。
 
+#### 3 SendControlMessage()
+
 ``` cpp
 // property_service.cpp
 static uint32_t SendControlMessage(const std::string& msg, const std::string& name, pid_t pid,
@@ -271,7 +293,9 @@ static uint32_t SendControlMessage(const std::string& msg, const std::string& na
 }
 ```
 
+把控制消息入队并唤醒 `init` 主循环
 
+#### 4 QueueControlMessage()
 
 ``` cpp
 // init.cpp
@@ -288,9 +312,153 @@ bool QueueControlMessage(const std::string& message, const std::string& name, pi
 }
 ```
 
+init 在主循环里会调用 HandleControlMessages()；
+
+#### 5 HandleControlMessages()
+
+``` cpp
+// init.cpp
+static void HandleControlMessages() {
+    ...
+        bool success = HandleControlMessage(control_message.message, control_message.name,
+                                            control_message.pid);
+}
+
+static bool HandleControlMessage(std::string_view message, const std::string& name,
+                                 pid_t from_pid) {
+    ...
+    Service* service = nullptr;
+    if (ConsumePrefix(&action, "interface_")) {
+        service = ServiceList::GetInstance().FindInterface(name);
+    } else {
+        service = ServiceList::GetInstance().FindService(name); // 走到这里
+    }
+    ...
+    const auto& map = GetControlMessageMap();
+    const auto it = map.find(action);
+    ...
+    const auto& function = it->second;
+
+    if (auto result = function(service); !result.ok()) {
+        ...
+    return true;
+}
+```
+
+HandleControlMessage() 调用 function(service)，
+
+- 通过 FindService 从 service list 中查询对应的服务，init 进程在执行 parse_config() 的时候会把 service 添加到 service list 中
+
+- 对 `"start"`，从 control_message_functions 中可以看到对应的`function` 就是 `DoControlStart`，其实现： `return service->Start();`
+
+  ``` cpp
+  // init.cpp
+  static const std::map<std::string, ControlMessageFunction, std::less<>>& GetControlMessageMap() {
+      // clang-format off
+      static const std::map<std::string, ControlMessageFunction, std::less<>> control_message_functions = {
+          ...
+          {"start",             DoControlStart},
+          ...
+      return control_message_functions;
+  }
+  ```
+
+- 因此 `service->Start()` 在 `init` 主线程上被执行（同步调用）。
+
+- `service->Start()` 会做启动流程
+
+## 1.3 bootanimation 启动
+
+### 1 main()
+
+``` cpp
+// bootanimation_main.cpp
+int main()
+{
+    ...
+        sp<ProcessState> proc(ProcessState::self());
+        ProcessState::self()->startThreadPool();
+        sp<BootAnimation> boot = new BootAnimation(audioplay::createAnimationCallbacks());
+        waitForSurfaceFlinger();
+        boot->run("BootAnimation", PRIORITY_DISPLAY);
+        IPCThreadState::self()->joinThreadPool();
+    }
+    return 0;
+}
+
+```
+
+这里主要是创建了 Binder 线程池，然后使用智能指针创建 BootAnimation 对象，在第一次取得强引用时会导致 `RefBase::onFirstRef()` 被调用，
+
+### 2 onFirstRef()
+
+``` cpp
+// BootAnimation.cpp
+void BootAnimation::onFirstRef() {
+    ...
+        preloadAnimation();
+    ...
+}
+```
+
+主要做了预加载动画资源的工作；
+
+再回到 `main()` 中，`boot->run()` 会调用 `readyToRun()` 和 `threadLoop()`；
+
+### 3 readyToRun()
+
+``` cpp
+// BootAnimation.cpp
+status_t BootAnimation::readyToRun() {
+    ATRACE_CALL();
+    mAssets.addDefaultAssets();
+    return initDisplaysAndSurfaces();
+}
 
 
-## 1.3 时序图
+```
+
+`readyToRun()` 主要是初始化显示、EGL、surface 等；
+
+### 4 threadLoop()
+
+``` cpp
+// BootAnimation.cpp
+bool BootAnimation::threadLoop() {
+    ATRACE_CALL();
+    bool result;
+    initShaders();
+
+    // We have no bootanimation file, so we use the stock android logo
+    // animation.
+    if (mZipFileName.empty()) {
+        ALOGD("No animation file");
+        result = android(mDisplays.front());
+    } else {
+        result = movie();
+    }
+    ...
+    return result;
+}
+```
+
+`threadLoop()` 主要工作： 
+
+- 若没有 zip：调用 [android(display)](vscode-file://vscode-app/d:/Program Files/Microsoft VS Code/resources/app/out/vs/code/electron-browser/workbench/workbench.html)，进入显示 stock logo 的循环（会处理显示事件、swap buffers、检查退出），循环直到 [exitPending()](vscode-file://vscode-app/d:/Program Files/Microsoft VS Code/resources/app/out/vs/code/electron-browser/workbench/workbench.html) 或退出条件；最后返回 false。
+- 若有 zip：调用 [movie()](vscode-file://vscode-app/d:/Program Files/Microsoft VS Code/resources/app/out/vs/code/electron-browser/workbench/workbench.html) 做完整的动画播放（[movie()](vscode-file://vscode-app/d:/Program Files/Microsoft VS Code/resources/app/out/vs/code/electron-browser/workbench/workbench.html) 内部完成动画循环逻辑）。
+
+
+
+### 5 总体的快速时序（简化）
+
+1. main: `sp boot = new BootAnimation(...)`
+2. RefBase 在第一次强引用时触发 -> `BootAnimation::onFirstRef()` 执行（预加载资源）
+3. main: `boot->run(...)` -> `Thread::run()` 创建新线程并返回
+4. 新线程启动 -> 调用 `BootAnimation::readyToRun()`（初始化显示/EGL）
+5. 进入 `BootAnimation::threadLoop()` 并执行动画播放（`android()`或 `movie()`）
+6. 播放完成或收到退出 -> `threadLoop()` 返回 -> 清理 -> 线程退出
+
+## 1.4 时序图
 
 ``` mermaid
 sequenceDiagram
@@ -300,6 +468,11 @@ property_service ->> property_service:PropertyServiceThread()
 property_service ->> property_service:handle_property_set_fd()
 property_service ->> property_service:HandlePropertySet()
 property_service ->> property_service:SendControlMessage()
-property_service ->> init:QueueControlMessage
+property_service ->> init:QueueControlMessage()
+init ->> init:HandleControlMessages()
+bootanimation_main -->> BootAnimation:onFirstRef()
+bootanimation_main -->> BootAnimation:readyToRun()
+bootanimation_main -->> BootAnimation:threadLoop()
+BootAnimation ->> BootAnimation:movie()
 ```
 
