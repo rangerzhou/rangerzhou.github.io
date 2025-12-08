@@ -11,15 +11,6 @@ password:
 
 <!--more-->
 
-# 1 Posix 方案
-
-源码路径
-
-| Class       | Path                                        | Note |
-| ----------- | ------------------------------------------- | ---- |
-| Thread.h    | system/core/libutils/include/utils/Thread.h |      |
-| Threads.cpp | system/core/libutils/Threads.h              |      |
-
 基本用法
 
 - 放开 `#define LOG_NDEBUG 1`
