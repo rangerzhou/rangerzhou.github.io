@@ -1373,3 +1373,11 @@ git merge bbb
 git push origin master
 ```
 
+#### 44 AndroidStudio 配置 Gemini 和 Copilot
+
+电脑开启 VPN，比如 V2ray，然后打开 v2rayN 的参数设置，可以看到 `本地socks监听端口`，后面会写 `http端口=socks端口+1`等，在 AndroidStudio 的 Proxy 配置中选择手动配置，选择 `HTTP` 或者 `SOCKS` 都可以，然后填写配置：
+
+- Host name：填写 `127.0.0.1`
+- Port number：填写 v2rayN 中显示的端口，比如默认的 `10808(socks)/10809(http)` 即可
+
+然后点击 `Check Connection`，填写 `https://www.google.com` 进行测试
