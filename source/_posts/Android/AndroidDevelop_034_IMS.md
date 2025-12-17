@@ -15,7 +15,7 @@ password:
 
 ------
 
-# 一、总体架构速览（先给结论）
+# 一、总体架构速览
 
 在 Android 15 中：
 
@@ -234,12 +234,6 @@ static void nativeStart(JNIEnv* env, jobject nativeImplObj) {
 
 前面在构造 NativeInputManager 的时候创建了 InputManager，随后调用 `InptManager->start()` 启动 InputDispatcher/InputReader 线程；
 
-------
-
-
-
-## 9️⃣ NativeInputManager::start()
-
 
 
 ------
@@ -270,8 +264,6 @@ Reader 产生事件 → 立即需要 Dispatcher 投递
 # 六、InputDispatcher 线程启动流程
 
 ## 1️⃣🔟 InputDispatcher::start()
-
-**文件：**
 
 ```cpp
 // frameworks\native\services\inputflinger\dispatcher\InputDispatcher.cpp
@@ -657,3 +649,4 @@ mindmap
       Reader start 失败 停止 Dispatcher
 ```
 
+https://blog.51cto.com/u_13424/13095230
