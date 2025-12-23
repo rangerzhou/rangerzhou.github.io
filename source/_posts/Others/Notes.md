@@ -1390,7 +1390,7 @@ git push origin master
 
 - **WebDAV 服务器地址**：https://webdav.xxxxxx.xxx:8443 (这里的域名是 Lucky 反代后的前端地址，Lucky 中的后端地址可以写 http://192.168.xx.xxx:5005，也可以写 https://192.168.xx.xxx:5006)
   - 或者直接使用 http://192.168.xx.xxx:5005
-  - 不能直接使用 https://192.168.xx.xxx:5006，因为证书问题无法成功，所以要使用 http
+  - 不能直接使用 https://192.168.xx.xxx:5006 ，因为证书问题无法成功，所以要使用 http
 - **WebDAV 账户**：登陆 WebDAV 的用户名（通常和 NAS 的用户名一样）
 - **WebDAV 密码**：登陆 WebDAV 的密码（通常和 NAS 的密码一样）
 - **远程文件夹名称**：备份文件想保存的目录，比如想把 v2rayN 备份到访问 WebDAV 服务器地址后的目录 `/backup/v2rayN`，那么这里就写 `/backup/v2rayN`
