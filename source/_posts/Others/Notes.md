@@ -1381,3 +1381,16 @@ git push origin master
 - Port number：填写 v2rayN 中显示的端口，比如默认的 `10808(socks)/10809(http)` 即可
 
 然后点击 `Check Connection`，填写 `https://www.google.com` 进行测试
+
+> <font color=red>**注意：如果是 v2rayN-SelfContained 或者 v2rayN-Desktop 版本，或者是高版本，v2rayN `设置 - 参数设置 - Core: 基础设置`，要把 `开启第二个本地监听端口` 打开才行， http 端口没有写是多少，经测试依然是 10809**</font>
+
+#### v2rayN 备份到 WebDAV
+
+`v2rayN 设置 - 备份和还原`，配置：
+
+- **WebDAV 服务器地址**：https://webdav.xxxxxx.xxx:8443 (这里的域名是 Lucky 反代后的前端地址，Lucky 中的后端地址可以写 http://192.168.xx.xxx:5005，也可以写 https://192.168.xx.xxx:5006)
+  - 或者直接使用 http://192.168.xx.xxx:5005
+  - 不能直接使用 https://192.168.xx.xxx:5006，因为证书问题无法成功，所以要使用 http
+- **WebDAV 账户**：登陆 WebDAV 的用户名（通常和 NAS 的用户名一样）
+- **WebDAV 密码**：登陆 WebDAV 的密码（通常和 NAS 的密码一样）
+- **远程文件夹名称**：备份文件想保存的目录，比如想把 v2rayN 备份到访问 WebDAV 服务器地址后的目录 `/backup/v2rayN`，那么这里就写 `/backup/v2rayN`
