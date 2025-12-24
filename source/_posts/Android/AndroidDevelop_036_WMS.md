@@ -223,52 +223,73 @@ WindowContainer几个子类结合层级树关系
 
 ``` mermaid
 classDiagram
-    direction LR
-    class WindowContainer
+    direction TB
+    
+    %% 定义类
+    class WindowContainer {
+        +WindowContainer parent
+        +WindowList<E> children
+    }
+    
     class DisplayArea
     class Task
-    class ActivityRecord
     class WindowToken
+    class ActivityRecord
     class WindowState
+    class DisplayContent
+    
+    %% 定义内部类和具体实现类 (使用别名避免语法问题)
+    class DisplayArea_Dimmable["DisplayArea.Dimmable"]
+    class DisplayArea_Tokens["DisplayArea.Tokens"]
+    class RootDisplayArea
+    class TaskDisplayArea
 
+    %% 继承关系 (Inheritance)
     WindowContainer <|-- DisplayArea
     WindowContainer <|-- Task
     WindowContainer <|-- WindowToken
     WindowContainer <|-- WindowState
+    WindowContainer <|-- DisplayContent
 
-    DisplayArea <|-- DisplayArea.Tokens
-    DisplayArea <|-- DisplayArea.Dimmable
-    DisplayArea <|-- RootDisplayArea
-    DisplayArea.Dimmable <|-- TaskDisplayArea
+    DisplayArea <|-- DisplayArea_Dimmable
+    DisplayArea <|-- DisplayArea_Tokens
+    
+    %% RootDisplayArea 和 TaskDisplayArea 通常继承自 Dimmable
+    DisplayArea_Dimmable <|-- RootDisplayArea
+    DisplayArea_Dimmable <|-- TaskDisplayArea
 
     WindowToken <|-- ActivityRecord
 
-    DisplayArea "1" *-- "*" WindowContainer : contains
-    RootDisplayArea "1" -- "1" DisplayContent : root of
-    DisplayContent "1" *-- "*" DisplayArea : contains
+    %% 组合/包含关系 (Composition)
+    
+    %% DisplayContent 持有 RootDisplayArea
+    DisplayContent "1" *-- "1" RootDisplayArea : contains
+    
+    %% RootDisplayArea 可以包含其他的 DisplayArea (如 TaskDisplayArea 或 Tokens)
+    RootDisplayArea "1" *-- "*" DisplayArea_Dimmable : contains
+    RootDisplayArea "1" *-- "*" DisplayArea_Tokens : contains
+    
+    %% TaskDisplayArea 包含 Task
     TaskDisplayArea "1" *-- "*" Task : contains
-    DisplayArea.Tokens "1" *-- "*" WindowToken : contains
+    
+    %% DisplayArea.Tokens 包含 WindowToken (非 Activity 的 token，如 IME, Wallpaper)
+    DisplayArea_Tokens "1" *-- "*" WindowToken : contains
+    
+    %% Task 包含 ActivityRecord (ActivityRecord 是特殊的 WindowToken)
     Task "1" *-- "*" ActivityRecord : contains
+    
+    %% ActivityRecord 包含 WindowState (App 窗口)
     ActivityRecord "1" *-- "*" WindowState : contains
+    
+    %% WindowToken 包含 WindowState (非 App 窗口)
     WindowToken "1" *-- "*" WindowState : contains
 
-
-    class DisplayArea.Dimmable {
-        -Dimmer mDimmer
-    }
-
-    class DisplayArea.Tokens {
-        -Comparator<WindowToken> mWindowComparator
-    }
-
-    note for WindowContainer "基类，提供树状层级结构"
-    note for DisplayArea "管理屏幕上的一个区域"
-    note for TaskDisplayArea "管理Task的特定区域"
-    note for Task "一个App的任务栈"
-    note for ActivityRecord "代表一个Activity"
-    note for WindowToken "窗口令牌，用于分组"
-    note for WindowState "代表一个具体的窗口"
-
+    %% 备注
+    note for WindowContainer "所有窗口容器的基类\n处理层级结构、配置合并等"
+    note for DisplayContent "代表一个物理或虚拟屏幕\n是屏幕上窗口层级的顶端"
+    note for TaskDisplayArea "专门用于放置 Task 的区域\n支持分屏、多窗口等"
+    note for DisplayArea_Tokens "专门用于放置非 Activity 窗口\n(如状态栏、导航栏、壁纸)"
+    note for WindowState "屏幕上实际显示的窗口\n对应一个 Surface"
 ```
 
 
