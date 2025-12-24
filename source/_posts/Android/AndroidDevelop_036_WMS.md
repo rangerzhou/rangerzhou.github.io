@@ -177,19 +177,101 @@ ImeContainer
 ``` scss
 RootWindowContainer
 └── DisplayContent
-    ├── DisplayArea.Root
-    │   ├── SystemUI Area
-    │   ├── TaskDisplayArea
-    │   │   └── Task
-    │   │       └── ActivityRecord
-    │   │           └── WindowState
-    │   └── ImeContainer
-    │       └── WindowState (IME)
-    ├── WallpaperWindowToken
-    │   └── WindowState
-    └── Other WindowToken
-        └── WindowState
+    └── DisplayArea.Root
+        ├── TaskDisplayArea
+        │   └── ActivityRecord (extends WindowToken)
+        │       └── WindowState (应用窗口)
+        │
+        ├── WallpaperDisplayArea
+        │   └── WallpaperWindowToken
+        │       └── WindowState (壁纸)
+        │
+        ├── SystemUIDisplayArea
+        │   └── WindowToken (StatusBar / NavBar)
+        │       └── WindowState
+        │
+        └── ImeContainer
+            └── InputMethodWindowToken
+                └── WindowState (IME)
+
+// Android 16
+RootWindowContainer
+└── DisplayContent
+    └── RootDisplayArea                    (extends DisplayArea.Dimmable)
+        ├── DisplayArea                   (普通 DisplayArea)
+        │   ├── DisplayArea.Dimmable
+        │   │   └── DisplayArea.Tokens
+        │   │       └── WindowToken
+        │   │           └── WindowState
+        │   │
+        │   └── DisplayArea.Tokens
+        │       └── WindowToken
+        │           └── WindowState
+        │
+        └── TaskDisplayArea
+            └── Task
+                └── ActivityRecord        (extends WindowToken)
+                    └── WindowState
+
 ```
+
+WindowContainer几个子类结合层级树关系
+
+![WindowContainer_relation](../../images/2025/WindowContainer_relation.awebp)
+
+
+
+``` mermaid
+classDiagram
+    direction LR
+    class WindowContainer
+    class DisplayArea
+    class Task
+    class ActivityRecord
+    class WindowToken
+    class WindowState
+
+    WindowContainer <|-- DisplayArea
+    WindowContainer <|-- Task
+    WindowContainer <|-- WindowToken
+    WindowContainer <|-- WindowState
+
+    DisplayArea <|-- DisplayArea.Tokens
+    DisplayArea <|-- DisplayArea.Dimmable
+    DisplayArea <|-- RootDisplayArea
+    DisplayArea.Dimmable <|-- TaskDisplayArea
+
+    WindowToken <|-- ActivityRecord
+
+    DisplayArea "1" *-- "*" WindowContainer : contains
+    RootDisplayArea "1" -- "1" DisplayContent : root of
+    DisplayContent "1" *-- "*" DisplayArea : contains
+    TaskDisplayArea "1" *-- "*" Task : contains
+    DisplayArea.Tokens "1" *-- "*" WindowToken : contains
+    Task "1" *-- "*" ActivityRecord : contains
+    ActivityRecord "1" *-- "*" WindowState : contains
+    WindowToken "1" *-- "*" WindowState : contains
+
+
+    class DisplayArea.Dimmable {
+        -Dimmer mDimmer
+    }
+
+    class DisplayArea.Tokens {
+        -Comparator<WindowToken> mWindowComparator
+    }
+
+    note for WindowContainer "基类，提供树状层级结构"
+    note for DisplayArea "管理屏幕上的一个区域"
+    note for TaskDisplayArea "管理Task的特定区域"
+    note for Task "一个App的任务栈"
+    note for ActivityRecord "代表一个Activity"
+    note for WindowToken "窗口令牌，用于分组"
+    note for WindowState "代表一个具体的窗口"
+
+```
+
+
 
 ## 总结
 
