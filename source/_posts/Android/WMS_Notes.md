@@ -1333,7 +1333,7 @@ WallpaperService ->> WMS:remove BbqSurfaceControl
 WallpaperService ->> WMS:removeWallpaperWindowToken
 ```
 
-### Winscope 抓取
+## Winscope 抓取
 
 开发者选项-
 
@@ -1671,19 +1671,50 @@ logcat -b events | grep input_focus
 
 在 dumpsys window 的时候，mFocusedApp 是在 `dumpsys window displays` 信息中输出的，可以在 RootWindowContainer.java 中搜索到 “dumpsys window displays”，查看 mFocused 的赋值
 
+## 15 横竖屏旋转
+
+Surface 旋转（逆时针旋转）
+
+- ROTATION 0
+- ROTATION_90
+- ROTATION_180
+- ROTATION_270
+
+## 16 多屏互动
 
 
 
+### 全局双指移动策略监听
+
+``` java
+
+ValueAnimator animotor = ValueAnimator.ofInt(start, end);
+animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+    @Override
+    public void onAnimationUpdate(ValueAnimator animation) {
+        int currentX = animation.getAnimatedValue();
+    }
+});
+animator.setInterpolator(new AccelerateInterpolator(1.0f));
+animator.setDuration(500);
+animator.start();
+```
 
 
 
+### 问题
 
+#### 黑屏 - 8
 
+#### 松手自动移动 - 9
 
+#### 部分冻屏 - 10
 
+dumpsys SurfaceFlinger 没有看到图层覆盖，继续看 dumpsys input(查看  Input dispatcher state 部分)
 
+查看 Windows 信息看到有我们自己的图层
 
-
+查看 InputDispatcher 的日志，findTouchedWindowTargets() 中的日志
 
 [FWK 面经](https://bbs.csdn.net/topics/616075900)
 
