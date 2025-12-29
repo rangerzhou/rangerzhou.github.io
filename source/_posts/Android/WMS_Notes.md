@@ -1333,9 +1333,84 @@ WallpaperService ->> WMS:remove BbqSurfaceControl
 WallpaperService ->> WMS:removeWallpaperWindowToken
 ```
 
+### 源码跟踪
+
+图层的操作是在 SuraceControl 中有 API，查看 `remove()`，打印堆栈，
+
+WallpaperManagerService.detachWallpaperLocked() 
+
 ## Winscope 抓取
 
-开发者选项-
+https://blog.csdn.net/learnframework/article/details/148973403
+
+### AOSP 13 版本
+
+#### 1.adb 命令方式离线抓取
+
+``` shell
+# 1、启用抓取windows和sf数据
+# WindowManager:
+adb shell cmd window tracing start
+# SurfaceFlinger：
+adb shell su root service call SurfaceFlinger 1025 i32 1
+
+# 2、停用抓取
+# WindowManager: 
+adb shell cmd window tracing stop
+# SurfaceFlinger：
+adb shell su root service call SurfaceFlinger 1025 i32 0
+
+# 3、获取抓取pb文件
+# WindowManager: 
+adb pull /data/misc/wmtrace/wm_trace.pb wm_trace.pb
+
+# SurfaceFlinger：
+adb pull /data/misc/wmtrace/layers_trace.pb layers_trace.pb
+
+```
+
+#### 2.手机上设置开启抓取按钮
+
+开发者选项中打开开关：
+
+``` shell
+# 打开 Show Quick Settings tile
+开发者选项 - System Tracing - Show Quick Settings tile
+# 打开 Winscope Trace
+Quick settings developer tiles - Winscope Trace
+```
+
+打开之后下拉状态栏就有了 Winscope Trace 的图标
+
+#### 3.html 在线抓取
+
+打开 html，基于 AOSP 源码执行对应的 python 命令：
+
+``` shell
+python3 $ANDROID_BUILD_TOP/development/tools/winscope/adb_proxy/winscope_proxy.py
+```
+
+#### 4.查看方式
+
+直接打开 `prebuilts/misc/common/winscope/winscope.html`
+
+### AOSP 14 版本
+
+抓取方式和 AOSP13 完全一致；
+
+AOSP 14 源码不自带 Winscope 的 html 了，需要源码进行编译，编译后可以直接使用；
+
+### AOSP 15 版本
+
+https://blog.csdn.net/learnframework/article/details/144384808
+
+https://mp.weixin.qq.com/s/4suK7-drFenNxiHvIeAokw
+
+adb 抓取方式有较大差异；
+
+
+
+
 
 /data/misc/wmtrace
 
@@ -1360,11 +1435,7 @@ prebuilts/misc/common/winscopewinscope.html 打开网页
 - 找到 remove 或者 hide 的地方
 - 重新规划调整图层显示时许
 
-### 源码跟踪
 
-图层的操作是在 SuraceControl 中有 API，查看 `remove()`，打印堆栈，
-
-WallpaperManagerService.detachWallpaperLocked() 
 
 ## 7 日志经验
 
@@ -1933,9 +2004,9 @@ animator.start();
 
 原因：task 已经移动到了屏幕2，所以会覆盖屏幕2之前的 task，
 
-如果在面试中被问到你描述的“拖动一个 Task/Activity 到另一屏幕时出现半黑屏，`mLaunchTaskBehind` 可以避免”的现象，可以按照 **逻辑清晰、分步骤、突出原理** 的方式回答。下面给你一个示例结构：
+> 如果在面试中被问到“拖动一个 Task/Activity 到另一屏幕时出现半黑屏，`mLaunchTaskBehind` 可以避免”的现象，可以按照 **逻辑清晰、分步骤、突出原理** 的方式回答。下面给你一个示例结构：
 
-### 
+
 
 **问题描述**：
 
@@ -1992,6 +2063,8 @@ void resetState() { //恢复正常状态，让mLaunchTaskBehind变成false
 
 #### 松手自动移动 - 9
 
+
+
 #### 部分冻屏 - 10
 
 dumpsys SurfaceFlinger 没有看到图层覆盖，继续看 dumpsys input(查看  Input dispatcher state 部分)
@@ -2002,7 +2075,61 @@ dumpsys SurfaceFlinger 没有看到图层覆盖，继续看 dumpsys input(查看
 
 
 
+## 冷启动优化
 
+~~starting window 移除~~
+
+点击图标时的 down 和 up
+
+## 面试题
+
+### Activity 启动流程
+
+
+
+### WMS 相关
+
+层级结构树的理解、优点、未来的发展是否会频繁变化
+
+什么情况、分析什么问题会看层级结构树，命令是什么
+
+window的层级结构树和surfaceflinger的层级结构树是完全一样吗，setparent 的会不会在window的层级结构树显示
+
+层级结构树常见类（Windowstate, WindowToken, ActivityRecord, Task, TaskDisplayArea, DisplayContent），这些容器共同的父类
+
+有哪些调试方法及命令
+
+如何在层级结构树中添加一个层级
+
+- 根据类型添加层级，添加一个37
+- 返回最大层级树改大
+
+动画导致的层级错乱如何分析
+
+- 使用 WS 看 SF 图层信息，reparent，setlayer 中的日志打印
+
+``` shell
+# 查看层级结构树
+dumpsys activity containers
+# windowstate 状态
+dumpsys window windows
+```
+
+### Input 模块
+
+Key 事件的流转
+
+IQ/OQ/WQ
+
+事件分发是否会派发给多个进程
+
+### SF 模块
+
+为什么要有 3 个 vsync/vsync-sf/vsync-app
+
+SF 层面可以直接创建一个 Layer 吗
+
+### 黑屏/闪屏/冻屏
 
 
 
