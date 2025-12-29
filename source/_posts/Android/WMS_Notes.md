@@ -1682,7 +1682,226 @@ Surface 旋转（逆时针旋转）
 
 ## 16 多屏互动
 
+### 1 使用命令查看效果
 
+``` shell
+# 移动 task，旧版本中是：am display move-stack taskid displayId
+adb shell am task move 87 1
+
+# 查看 taskid, displayId
+$ adb shell dumpsys activity tasks
+TASK id=87
+  userId=0
+  displayId=1
+  baseActivity=com.xxx.yyy/.MainActivity
+```
+
+
+
+
+
+https://juejin.cn/post/7306043013816860687
+
+### 2 静态移动方案
+
+- 监听手势，当滑动超过设定的 GAP 时开始移动 TASK
+
+### 3 监听手势
+
+新建一个 Listener 监听手指事件
+
+``` java
+// DoubleScreenMovePointerEventListener.java
+package com.android.server.wm;
+
+import android.view.MotionEvent;
+import android.view.WindowManagerPolicyConstants;
+
+public class DoubleScreenMovePointerEventListener implements WindowManagerPolicyConstants.PointerEventListener {
+    boolean shouldBeginMove = false;
+    int mPoint0FirstX = 0;
+    int mPoint1FirstX = 0;
+
+    int mPoint0LastX = 0;
+    int mPoint1LastX = 0;
+    int START_GAP = 20;
+    private final WindowManagerService mService;
+
+    public DoubleScreenMovePointerEventListener(WindowManagerService mService, DisplayContent mDisplayContent) {
+        this.mService = mService;
+        this.mDisplayContent = mDisplayContent;
+    }
+
+    private final DisplayContent mDisplayContent;
+
+    @Override
+    public void onPointerEvent(MotionEvent motionEvent) {
+        switch (motionEvent.getActionMasked()) {
+            case MotionEvent.ACTION_DOWN:
+            case MotionEvent.ACTION_POINTER_DOWN:
+                if (motionEvent.getPointerCount() > 2) {
+                    shouldBeginMove = false;
+                }
+                if (motionEvent.getPointerCount() == 2) {
+                    if (mPoint0FirstX == 0 && mPoint1FirstX == 0) {
+                        mPoint0FirstX = (int)motionEvent.getX(0);
+                        mPoint1FirstX = (int)motionEvent.getX(1);
+                    }
+                }
+                break;
+           case MotionEvent.ACTION_MOVE:
+                // 两个点的移动距离大于 START_GAP 时则开始移动 Task
+               if (motionEvent.getPointerCount() == 2) {
+                   if (!shouldBeginMove && motionEvent.getX(0)  - mPoint0FirstX > START_GAP ||
+                           motionEvent.getX(1)  - mPoint1FirstX > START_GAP) {
+                       shouldBeginMove = true;
+                       mDisplayContent.doTestMoveTaskToOtherDisplay();
+                   }
+
+                   mPoint0LastX = (int)motionEvent.getX(0);
+                   mPoint1LastX = (int)motionEvent.getX(1);
+               }
+               break;
+           case MotionEvent.ACTION_POINTER_UP:
+           case MotionEvent.ACTION_UP:
+               shouldBeginMove = false;
+               mPoint0FirstX = mPoint1FirstX =0;
+               break;
+       }
+    }
+
+}
+```
+
+主要工作：
+
+- 监听手势，按下时，记录两个点的初始坐标
+- 移动时，判断移动距离是否大于 GAP，如果大于 GAP，则开始移动 Task，设置标志位为 true，并记录两个点的最后位置
+- 抬起时，设置标志位为 false，并充值两个点的初始坐标为 0
+
+### 4 移动 Task 到另一块屏幕
+
+``` java
+// frameworks/base/services/core/java/com/android/server/wm/DisplayContent.java
+// 定义 Listener
+final DoubleScreenMovePointerEventListener mDoubleScreenMoveListener;
+// 构造函数中初始化并注册 Listener
+mDoubleScreenMoveListener = new DoubleScreenMovePointerEventListener(mWmService, this);
+registerPointerEventListener(mDoubleScreenMoveListener);
+
+// 执行移动 Task
+public void doTestMoveTaskToOtherDisplay() {
+    DisplayContent otherDisplay = null;
+    if (mRootWindowContainer.getChildCount() == 2) {
+        otherDisplay = (mRootWindowContainer.getChildAt(0) == this) ? mRootWindowContainer.getChildAt(1):mRootWindowContainer.getChildAt(0);
+    }
+    if (otherDisplay!= this && otherDisplay!= null) {
+        int rootTaskId = 0;
+        try {
+            Task rootTask = getTopRootTask();
+            if (rootTask.isActivityTypeHome()) {
+                return;
+            }
+            rootTaskId =rootTask.mTaskId;
+            mRootWindowContainer.moveRootTaskToDisplay(rootTaskId,otherDisplay.mDisplayId,true);
+        }catch (Exception e) {
+            android.util.Log.i("DoubleScreen","doTestMoveTaskToOtherDisplay Exception",e);
+        }
+    }
+}
+```
+
+主要工作：
+
+- 执行移动操作，获取屏幕数，获取置顶的 Task，并调用 API 把 Task 移动到目标屏幕
+
+### 5 创建镜像图层
+
+``` java
+// DisplayContent.java
+SurfaceControl copyTaskRootSc = null;
+SurfaceControl mirrorTaskSc = null;
+SurfaceControl realTaskSc = null;
+DisplayContent mOtherDisplayContent = null;
+
+// 获取 task 的顶部 WindowState
+WindowState windowState = rootTask.getTopActivity(false,false).getTopChild();
+if (windowState!= null) {
+    final SurfaceControl.Transaction t = mWmService.mTransactionFactory.get();
+    //创建一个 copyTaskRootSc 图层主要用来放置镜像 Task 画面
+    if (copyTaskRootSc == null) { 
+        copyTaskRootSc =  makeChildSurface(null)
+            .setName("rootTaskCopy")
+            .setParent(getWindowingLayer()) // 设置父亲，要在状态栏和导航栏下面
+            .build();
+    }
+    if (mirrorTaskSc == null) {
+        mirrorTaskSc = SurfaceControl.mirrorSurface(rootTask.getSurfaceControl());
+    }
+    realTaskSc = rootTask.getSurfaceControl();
+    t.reparent(mirrorTaskSc, copyTaskRootSc);
+    t.show(copyTaskRootSc);
+    t.show(mirrorTaskSc);
+    t.apply();
+}
+ensureOtherDisplayActivityVisible(otherDisplay);
+mCurrentRootTaskId = rootTaskId;
+startMoveCurrentScreenTask(0,0);
+```
+
+主要工作：
+
+- 创建一个在状态栏和导航栏之下的 SurfaceControl 图层 copyTaskRootSc（设置父亲为 getWindowingLayer() 的返回结果，这个图层满足要求）
+- 使用 `mirrorSurface()` 创建当前 task 的镜像图层，并设置父亲为 copyTaskRootSc
+- 显示图层
+
+这段代码之后的结果就是手指移动 task 到另一块 display 后，原 display 还有一个镜像图层
+
+### 6 设置图层偏移
+
+上面做完后，会在两个屏幕都显示同样的画面，现在需要对这两个图层进行偏移
+
+``` java
+// DoubleScreenMovePointerEventListener.java
+case MotionEvent.ACTION_MOVE:
+...
+    mPoint0LastX = (int)motionEvent.getX(0);
+mPoint1LastX = (int)motionEvent.getX(1);
+if (shouldBeginMove) {
+    int deltaX = mPoint0LastX - mPoint0FirstX;
+    mDisplayContent.startMoveCurrentScreenTask(detaX,0);
+}
+
+public void startMoveCurrentScreenTask(int x,int y) { 
+    if (copyTaskBuffer!= null) {//真正调用这个moveCurrentScreenTask相关业务操作
+        moveCurrentScreenTask(mWmService.mTransactionFactory.get(), mirrorTaskSc, x, y);
+    }
+}
+
+void moveCurrentScreenTask(SurfaceControl.Transaction t,SurfaceControl mirrorTaskSc, int x, int y) {
+    // t.setPosition(surfaceControl, x, y);
+    float[] mTmpFloats = new float[9];
+    Matrix outMatrix = new Matrix();
+
+    if (realTaskSc != null) {
+        outMatrix.reset(); 
+        //对屏幕2的新task进行坐标平移操作，对屏幕大小一样的则直接就是在个偏移-（width - offsetX） = offsetX - width，屏幕大小不一样则需要进行对应scale操作
+        outMatrix.postTranslate(x - mOtherDisplayContent.getDisplayInfo().logicalWidth, y);
+        t.show(realTaskSc);
+        t.setMatrix(realTaskSc, outMatrix, mTmpFloats);//给对应的task图层设置对应的matrix
+    }
+    outMatrix.reset();
+    float offsetXMainDisplay = x + (getDisplayInfo().logicalWidth - x );//这个部分属于屏幕1镜像图层偏移坐标，这里为啥会是这样，不是应该只要x这个偏移就行么？
+    //这里其实就和前面说的镜像图层实际挂了task，task再屏幕2进行了坐标改变，当然也会影响屏幕1的镜像图层效果，所以(getDisplayInfo().logicalWidth - x )是为了消除屏幕2 task的坐标偏移带来的影响，最后屏幕1上的镜像图层偏移量就只是x
+    outMatrix.postTranslate(offsetXMainDisplay, y);
+    t.setMatrix(mirrorTaskSc,outMatrix,mTmpFloats);
+    t.show(mirrorTaskSc);
+    t.apply();
+}
+```
+
+- 对 realTaskSc，偏移 width - x
+- 对 mirrorTaskSc，偏移 x，这里要注意，因为 mirrorSurface() 读取的是源 SurfaceControl 已经经过变换的合成输出结果，所以要先补偿前面 realTaskSc 的偏移，再加上 x，那么效果才是在屏幕 1 中真实偏移 x
 
 ### 全局双指移动策略监听
 
@@ -1702,9 +1921,70 @@ animator.start();
 
 
 
-### 问题
+### 7 问题
 
 #### 黑屏 - 8
+
+当屏幕2还没有完全显示的时候，未显示的部分会黑屏
+
+原因：task 已经移动到了屏幕2，所以会覆盖屏幕2之前的 task，
+
+如果在面试中被问到你描述的“拖动一个 Task/Activity 到另一屏幕时出现半黑屏，`mLaunchTaskBehind` 可以避免”的现象，可以按照 **逻辑清晰、分步骤、突出原理** 的方式回答。下面给你一个示例结构：
+
+### 
+
+**问题描述**：
+
+> 当从屏幕1拖动一个 Task/Activity 到屏幕2时，拖动过程中屏幕2一半显示拖动的界面，另一半是黑屏，为什么？设置 `mLaunchTaskBehind=true` 后就不会黑屏了。
+
+**回答步骤**：
+
+1. **现象分析**
+    - 拖动过程中，Task/Activity 的 Surface 正在移动到屏幕2。
+    - 屏幕2上目标 Task Surface 还没有完全覆盖整个显示区域。
+    - 拖动 Surface 覆盖了部分区域，剩余区域没有其他内容显示，因此呈现黑色。
+2. **系统机制原理**
+    - Android WMS/SurfaceFlinger 对 Task/Activity 的显示使用 **Surface 层级合成**。
+    - `moveRootTaskToDisplay()` 只是把 Task 逻辑上移到目标 Display，Surface 还需要通过动画移动到最终位置。
+    - 在移动过程中，未被拖动覆盖的区域没有其他可绘制内容，所以显示黑色。
+3. **mLaunchTaskBehind 的作用**
+    - 设置 `ActivityRecord.mLaunchTaskBehind = true` 时，Task 不会立即覆盖目标 Display。
+    - 屏幕2继续显示原有界面，拖动 Surface 在其上滑动时，不会出现黑色空白。
+    - 从视觉上避免半黑屏现象。
+4. **总结**
+    - 半黑屏是**Surface 合成和 Task 移动顺序导致的视觉效果**，不是绘制延迟。
+    - 解决方法可以是：
+        1. 使用 `mLaunchTaskBehind` 保留原 Task 界面；
+        2. 或者拖动 Surface 覆盖整个目标显示区域。
+
+------
+
+### 答题技巧
+
+- **逻辑清晰**：先现象 → 再原因 → 再原理 → 再解决方案。
+- **突出理解深度**：说明这是 WMS/Surface 层级和 Task 移动顺序的问题，而不是简单的绘制延迟。
+- **可适当画图辅助说明**：如果允许，可以画一个 Task/Surface 层级示意，直观显示拖动 Surface + 黑屏区域的关系。
+
+``` java
+
+ActivityRecord mCurrentRecord = null;
+void ensureOtherDisplayActivityVisible(DisplayContent other) {//注意这个方法很关键，这里会让activity底下的activity也跟着显示出来，即2个activity同时显示不然拖动task时候底部只能黑屏体验很差
+    ActivityRecord otherTopActivity = other.getTopActivity(false,false);
+    if (otherTopActivity != null) {
+        android.util.Log.i("test33","ensureOtherDisplayActivityVisible otherTopActivity = " + otherTopActivity);
+        otherTopActivity.mLaunchTaskBehind = true;
+        mCurrentRecord = otherTopActivity;
+    }
+}
+void resetState() { //恢复正常状态，让mLaunchTaskBehind变成false
+    if (mCurrentRecord != null) {
+        mCurrentRecord.mLaunchTaskBehind =  false;
+        mRootWindowContainer.ensureActivitiesVisible(null, 0, PRESERVE_WINDOWS);
+    }
+}
+```
+
+
 
 #### 松手自动移动 - 9
 
@@ -1715,6 +1995,14 @@ dumpsys SurfaceFlinger 没有看到图层覆盖，继续看 dumpsys input(查看
 查看 Windows 信息看到有我们自己的图层
 
 查看 InputDispatcher 的日志，findTouchedWindowTargets() 中的日志
+
+
+
+
+
+
+
+
 
 [FWK 面经](https://bbs.csdn.net/topics/616075900)
 
