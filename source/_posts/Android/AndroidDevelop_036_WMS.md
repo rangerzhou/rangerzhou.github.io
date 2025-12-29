@@ -64,18 +64,54 @@ DisplayContent
 
 - DisplayArea 的核心子类
 
-  - TaskDisplayArea（App 主区域）：承载 **Task（任务栈）** 的区域，代表了屏幕上一块专门用来存放 App 窗口的区域，每个 Display 至少一个，DefaultTaskDisplay是TaskDisplayArea的别名
+  - TaskDisplayArea（App 主区域）：承载 **Task（任务栈）** 的区域，代表了屏幕上一块专门用来存放 App 窗口的区域，每个 Display 至少一个，DefaultTaskDisplay 是 TaskDisplayArea 的别名
+    
+    - child 是 Task，证据：
+    
+      ``` java
+      final class TaskDisplayArea extends DisplayArea<WindowContainer>
+      class Task extends TaskFragment
+      class TaskFragment extends WindowContainer<WindowContainer>
+      ```
+    
+      - `TaskDisplayArea` 是一个 `DisplayArea<WindowContainer>`
+      - 它允许的 child 类型必须是 `WindowContainer`
+      - `TaskFragment` / `Task` 本身就是 `WindowContainer`
+    
     - **职责**
       - 管理：
         - Task 的 Z-order
         - 分屏 / Freeform / 多窗口
         - Home / Recents Task
+    
+    ``` scss
+    TaskDisplayArea
+     └── Task
+    ```
+    
+  - Tokens：WindowToken 的容器，即 child 是 WindowToken
+  
+  - Dimmable：`DisplayArea.Dimmable` 的直接 child，是 `DisplayArea` 类型，证据如下：
+  
+    ``` java
+    // 1️⃣WindowContainer 的 child 是泛型 E
+    class WindowContainer<E extends WindowContainer> {
+        protected final ArrayList<E> mChildren = new ArrayList<>();
+    
+        void addChild(E child) {
+            ...
+            mChildren.add(child);
+        }
+    }
+    // 2️⃣DisplayArea 的 child 是泛型 T
+    public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
+    // 3️⃣Dimmable 的 child 是 DisplayArea
+    static class Dimmable extends DisplayArea<DisplayArea> {
+    ```
+  
+    
 
 
-  ``` scss
-  TaskDisplayArea
-   └── Task
-  ```
 
   - ImeContainer：输入法（IME）专用容器，继承自 DisplayArea.Tokens，同样是一个 WindowToken 的容器，即孩子也是 WindowToken
     - 职责

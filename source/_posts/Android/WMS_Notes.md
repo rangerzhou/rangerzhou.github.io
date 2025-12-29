@@ -1669,7 +1669,11 @@ logcat -b events | grep input_focus
 
 ### 源码分析
 
-在 dumpsys window 的时候，mFocusedApp 是在 `dumpsys window displays` 信息中输出的，可以在 RootWindowContainer.java 中搜索到 “dumpsys window displays”，查看 mFocused 的赋值
+在 dumpsys window 的时候，mFocusedApp 是在 `dumpsys window displays` 信息中输出的，可以在 RootWindowContainer.java 中搜索到 “dumpsys window displays”，查看 mFocusedApp 的赋值
+
+使用同样方法查看 mCurrentFocus 的赋值
+
+### 总结
 
 ## 15 横竖屏旋转
 
