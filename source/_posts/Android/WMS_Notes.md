@@ -2163,6 +2163,12 @@ dumpsys SurfaceFlinger 没有看到图层覆盖，继续看 dumpsys input(查看
 #### 什么情况、分析什么问题会看层级结构树，命令是什么
 
 > 当问题已经超出单个 Window 或单个 Activity 的范围，而涉及“归属、层级、父子关系、跨 Display 或动画控制”时，就必须看窗口层级结构树。如果问题还能用 View 层、单窗口参数解释，一般**不需要**看层级树。
+>
+> 实际排查时，我通常会同时抓 WMS Trace 和 SF Trace，用 Winscope 对齐两棵树，先确认窗口在逻辑层是否在正确的位置，再确认 SurfaceControl 是否映射到正确的 Layer。
+>
+> 当问题已经涉及窗口的归属、层级、跨 Display 或动画控制，而不是单个窗口的绘制细节时，就必须查看窗口层级结构树；层级树问题往往决定了窗口“在哪里、被谁管理、是否能被正确显示”，这是定位复杂窗口问题的关键入口。
+>
+> 命令：adb shell dumpsys activity containers
 
 核心场景
 
@@ -2181,28 +2187,69 @@ dumpsys SurfaceFlinger 没有看到图层覆盖，继续看 dumpsys input(查看
     - StatusBar / NavigationBar 显示异常
     - 悬浮窗层级不对
     - 车载 HMI 系统窗口被 App 覆盖
+- 多窗口 / 分屏 / PiP 行为异常
+    - 分屏后某个窗口消失
+    - PiP 窗口无法置顶
+    - Freeform 窗口被裁剪
 
-window的层级结构树和surfaceflinger的层级结构树是完全一样吗，setparent 的会不会在window的层级结构树显示
+- 跨 Display 问题
+    - 拖拽到第二块屏出现半黑屏
+    - 窗口跑到错误的屏幕
 
-层级结构树常见类（Windowstate, WindowToken, ActivityRecord, Task, TaskDisplayArea, DisplayContent），这些容器共同的父类
+- 动画 / Transition / RemoteAnimation 异常：动画往往是挂在 **Task / DisplayArea leash** 上，如果层级不对，动画效果就会“断层”。
+    - 动画只动了一半
+    - 动画结束后窗口消失
+    - 画面撕裂或短暂黑屏
+    - leash SurfaceControl 是否存在，leash 是否在正确的父节点
 
-有哪些调试方法及命令
 
-如何在层级结构树中添加一个层级
+#### leash 是什么
+
+leash 层在 WMS 的窗口层级树中，对应的是某个 `WindowContainer` 自身持有的 `SurfaceControl`；
+ 在 SurfaceFlinger 的层级树中，对应的是一个 `ContainerLayer`，用于承载该 WindowContainer 及其子窗口的统一动画与变换。（注意这里说的是 WindowLayer，所以 WindowState 没有 leash）
+
+#### 有哪些调试方法及命令
+
+windowstate 状态，窗口是否存在/可见，焦点
+
+``` shell
+dumpsys window windows
+# 重点关注字段
+mCurrentFocus/mFocusedApp/
+```
+
+查看 Activity / Task 状态，Task 是否存在、是否在前台
+
+``` shell
+adb shell dumpsys activity activities
+adb shell dumpsys activity top
+adb shell dumpsys SurfaceFlinger
+adb shell dumpsys SurfaceFlinger --list
+adb shell dumpsys SurfaceFlinger --display-id
+# 是否有 DisplayContent, Window 是否挂在错误 Display
+adb shell dumpsys display
+adb shell dumpsys window displays
+```
+
+抓取 Winscope
+
+ProtoLog
+
+#### 如何在层级结构树中添加一个层级
 
 - 根据类型添加层级，添加一个37
 - 返回最大层级树改大
 
-动画导致的层级错乱如何分析
+#### 动画导致的层级错乱如何分析
 
-- 使用 WS 看 SF 图层信息，reparent，setlayer 中的日志打印
+当动画导致窗口层级错乱时，我的分析流程是：
 
-``` shell
-# 查看层级结构树
-dumpsys activity containers
-# windowstate 状态
-dumpsys window windows
-```
+1. 首先确认动画目标的 WindowContainer 和对应的 leash SurfaceControl；
+2. 对照 WMS 层级树，确保 Task / Activity / WindowToken 层级正确，leash 挂载在正确父节点；
+3. 对照 SurfaceFlinger 的 ContainerLayer 树，确认动画 Layer 和子 Layer 都在正确 parent 下；
+4. 检查 Transaction 提交是否完整，确保所有窗口的变换、alpha、crop 一次性应用；
+5. 对比动画前后层级快照，排查中间态 reparent 或 leash 错误，找出错乱原因。
+     通过这种方法，可以定位动画错乱究竟是 WMS 层逻辑错误，还是 SF 层渲染顺序问题，或者 Transaction 没提交完全。
 
 ### Input 模块
 
