@@ -1244,9 +1244,17 @@ graph TD
     end
 ```
 
+### 窗口层级树的构建
+
+
+
 ## 2 层级结构树和 SF 映射
 
 从 `SurfaceControl.setName()` 入手
+
+
+
+
 
 ## 3 窗口添加
 
@@ -1277,6 +1285,32 @@ setView 中的 requestLayout() 触发
 performSurfacePlacement()
 
 forAllWindows()
+
+### 创建 Buff 类型的 Surface
+
+
+
+``` mermaid
+sequenceDiagram
+autonumber
+Note over WMS:从 ViewRootImpl 调过来
+WMS ->> WMS:relayoutWindow()
+WMS ->> WMS:createSurfaceControl()
+WMS ->> WindowStateAnimator:createSurfaceLocked()
+Note over WindowStateAnimator:设置窗口状态为 DRAW_PENDING
+WindowStateAnimator ->> WindowStateAnimator:resetDrawState()
+WindowStateAnimator ->> WindowSurfaceController:WindowSurfaceController()
+Note over WindowSurfaceController, WindowState:创建 Surface(还是容器类型)
+WindowSurfaceController ->> WindowState:makeSurface()
+Note over WindowSurfaceController, SurfaceControl:将 Surface 设置为“Buff”类型
+WindowSurfaceController ->> SurfaceControl:setBLASTLayer()
+WMS ->> WindowSurfaceController:getSurfaceControl()
+WindowSurfaceController ->> SurfaceControl:copyFrom()
+```
+
+Surface 创建完成后，WMS 最后通过把 Surface 返回给应用端传递过来的 outSurfaceControl
+
+
 
 ## 5 finishDrawing()
 
@@ -2089,9 +2123,64 @@ dumpsys SurfaceFlinger 没有看到图层覆盖，继续看 dumpsys input(查看
 
 ### WMS 相关
 
-层级结构树的理解、优点、未来的发展是否会频繁变化
+#### 层级结构树的理解
 
-什么情况、分析什么问题会看层级结构树，命令是什么
+[层级结构树博客](https://juejin.cn/post/7339827208086896676)
+
+- 对窗口层级树的理解
+    - Android 的窗口层级树是 system_server 中由 WindowManagerService 维护的一套以 `WindowContainer` 为核心的层级结构，用于描述窗口在系统中的逻辑归属、层级关系和管理策略。
+    - 它并不直接参与图形绘制，而是负责将 Activity、Task、Display、Window 等抽象成一棵统一的管理树，为窗口的 Z-order、动画、转场、多 Display、分屏等行为提供决策基础。
+    - 真正的图形合成发生在 SurfaceFlinger 中，两者通过 SurfaceControl 建立映射，但窗口层级树本身属于逻辑管理层。
+- 解决了什么问题
+    - 逻辑归属问题
+        - Window 属于哪个 Activity / Task / Display
+        - 系统窗口与应用窗口如何区分
+    - 层级与策略问题
+        - Z-order 的统一决策
+        - WindowType + DisplayPolicy 的集中管理
+    - 跨场景一致性问题
+        - 多 Display
+        - Freeform / Split / PiP
+        - 车载多屏、多用户
+- 优点
+    - 统一抽象，避免特例逻辑爆炸：所有窗口相关对象都抽象为 WindowContainer，通过父子关系表达语义，避免为 Task、Activity、SystemWindow 分别写独立逻辑。（统一抽象，可扩展性）
+    -  将“逻辑管理”和“图形合成”彻底解耦：system_server 只关心窗口语义和策略，SurfaceFlinger 只关心 Layer 合成，两者通过 SurfaceControl 解耦。
+    - 天然支持复杂动画和转场：通过在 Task、DisplayArea 等节点引入 SurfaceControl leash，可以在不影响子窗口 buffer 的情况下统一做动画和裁剪
+- 演进方向
+    - 在 Android 10-12 经历了最大的重构，引入了 WindowContainer 统一模型，引入 DisplayArea，Task，Transition 框架等，未来的方向是“能力增强”，而不是“推翻重来”，不会再频繁发生结构性变化
+- 精简回答：
+- Android 的窗口层级树是 system_server 中用于管理窗口逻辑关系的统一模型，以 WindowContainer 为核心，解决了窗口归属、层级决策和多窗口场景的问题。
+- 它与 SurfaceFlinger 的 Layer 树解耦，通过 SurfaceControl 进行映射，从而同时保证了灵活性和性能。
+- 这套模型在 Android 10 之后已经趋于稳定，未来更多是能力增强而不是结构性重构，尤其适合多 Display 和车载场景。
+
+#### system_server 中的窗口层级树和 SF 中的层级树有什么关系
+
+- system_server 中的窗口层级树是“逻辑窗口管理树”，用于决定窗口的归属、层级、策略和生命周期；
+     SurfaceFlinger 中的层级树是“图形合成树”，用于管理 Layer 及其 buffer 的合成与显示。
+- 两者并非一一对应，而是通过 SurfaceControl 建立映射关系，一个窗口容器可能对应多个或零个 SurfaceFlinger Layer。
+- Winscope 中看到的 Task/ActivityRecord/WindowToken 只是 Layer 的名字，因为 system_server 在创建 SurfaceControl/Layer 时将 WindowContainer 的名字传给了 SF。
+
+#### 什么情况、分析什么问题会看层级结构树，命令是什么
+
+> 当问题已经超出单个 Window 或单个 Activity 的范围，而涉及“归属、层级、父子关系、跨 Display 或动画控制”时，就必须看窗口层级结构树。如果问题还能用 View 层、单窗口参数解释，一般**不需要**看层级树。
+
+核心场景
+
+- 窗口显示异常，但并非简单“没绘制”，这类问题往往不是 buffer 问题，而是窗口被放在了**错误的父容器或 DisplayArea** 下，或者 Z-order 不符合预期。
+    - 窗口存在，但不可见
+    - 窗口被遮挡
+    - 窗口只显示一部分
+    - 拖拽或动画过程中出现黑屏 / 空洞
+    - 要看什么：
+        - WindowState 挂在哪个 WindowToken
+        - Task 属于哪个 TaskDisplayArea
+        - DisplayArea 顺序是否正确
+        - 是否被错误 reparent
+- System Window / App Window 层级不符合预期
+    - IME 被应用遮挡
+    - StatusBar / NavigationBar 显示异常
+    - 悬浮窗层级不对
+    - 车载 HMI 系统窗口被 App 覆盖
 
 window的层级结构树和surfaceflinger的层级结构树是完全一样吗，setparent 的会不会在window的层级结构树显示
 
