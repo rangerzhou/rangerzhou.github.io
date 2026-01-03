@@ -1256,6 +1256,38 @@ graph TD
 
 
 
+
+
+## 3 WindowToken 总结
+
+系统窗口通常有如下类型：
+
+| type                       | 窗口   |
+| -------------------------- | ------ |
+| TYPE_STATUS_BAR            | 状态栏 |
+| TYPE_NAVIGATION_BAR        | 导航栏 |
+| TYPE_INPUT_METHOD          | 输入法 |
+| TYPE_WALLPAPER             | 壁纸   |
+| TYPE_ACCESSIBILITY_OVERLAY | 无障碍 |
+| TYPE_TOAST                 | Toast  |
+| TYPE_QS_DIALOG             | QS     |
+
+
+
+| 窗口类型                                    | type 区间 | token 来源                         |
+| ------------------------------------------- | --------- | ---------------------------------- |
+| Activity 主窗口                             | 1–99      | ATMS 通过 ActivityRecord（预注册） |
+| 子窗口                                      | 1000–1999 | parentWindow.mToken                |
+| IME / Wallpaper                             | 系统 type | system_server 系统服务预创建       |
+| Overlay / Alert / StatusBar / NavigationBar | 系统 type | WMS 通过`addWindow()` 中新建       |
+| WindowContext                               | 系统 type | WindowContext Token                |
+
+系统窗口特征：没有 Activity，通常 **没有 parentWindow**，token **不能是 ActivityRecord**
+
+子窗口特征：必须有 parentWindow，复用 parentWindow 的 WindowToken，永远依附于某个 Activity
+
+应用窗口特征：必须使用 ActivityRecord 对应的 WindowToken
+
 ## 3 窗口添加
 
 FLAG_NOT_TOUCH_MODAL
