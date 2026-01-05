@@ -2141,6 +2141,21 @@ dumpsys SurfaceFlinger 没有看到图层覆盖，继续看 dumpsys input(查看
 
 
 
+# 9 Perfetto
+
+``` shell
+# 下载脚本
+https://github.com/google/perfetto/blob/main/tools/record_android_trace
+# 或者
+https://raw.githubusercontent.com/google/perfetto/master/tools/record_android_trace
+# 抓取命令
+record_android_trace -o /h/Android/traces/$(date +%Y%m%d_%H%M%S)_trace_file.perfetto-trace -t 5s -b 32mb sched freq idle am wm gfx view binder_driver hal dalvik camera input res memory gfx view wm am ss video camera hal res sync idle binder_driver binder_lock ss
+```
+
+
+
+
+
 ## 冷启动优化
 
 ~~starting window 移除~~
