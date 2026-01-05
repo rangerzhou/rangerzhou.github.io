@@ -56,7 +56,7 @@ RootWindowContainer -->> RootWindowContainer:addChild(displayContent)
 
 ### 总结：
 
-- `SystemServer.run()` 发起构建层级树
+- `SystemServer.run() - AMS` 发起构建层级树
 - 从 RootWindowContainer 开始创建 DisplayContent
 - DisplayContent 中的构造函数中通过 `instantiate()` 开始构建窗口层级树（<font color=red>**只构建到 DisplayArea 层级**</font>）
    - 创建 TaskDisplayArea
@@ -73,7 +73,7 @@ RootWindowContainer -->> RootWindowContainer:addChild(displayContent)
          - 最终形成完整的 DisplayArea 层级树
 - 通过 `DisplayAreaPolicy:DefaultProvider.instantiate()` 传入了 root 为 this，即把自己（DisplayContent）作为 RootDisplayArea
 - <font color=red>**通过 `DisplayAreaPolicyBuilder.instantiateChildren() - DisplayContent.addChild() - WindowContainer.addChild()`，为 DisplayContent 挂载子节点**</font>
-- DisplayContent 中的构造函数中 <font color=red>**为 DisplayContent 及 DisplayArea 创建 SurfaceControl**</font> (见 **2 SurfaceFlinger 层级树**)
+- DisplayContent 中的构造函数中 <font color=red>**为 DisplayContent 及 DisplayArea 创建 SurfaceControl**</font> (见 [2 SurfaceFlinger 层级树](# 2 SurfaceFlinger 层级树))
 
 ## 1.2 挂载应用窗口
 
@@ -148,7 +148,7 @@ ActivityThread -->> WindowManagerGlobal:addView()
 Note right of WindowManagerGlobal:创建 ViewRootImpl
 WindowManagerGlobal ->> ViewRootImpl:new ViewRootImpl()
 WindowManagerGlobal ->> ViewRootImpl:setView()
-Note over ViewRootImpl:这里比较重要，以后分析
+Note over ViewRootImpl:这里比较重要，包括 relayoutWindow/绘制三部曲
 ViewRootImpl ->> ViewRootImpl:requestLayout()
 Note over ViewRootImpl:创建 InputChannel 空对象，传给 WMS 写入
 ViewRootImpl ->> ViewRootImpl:new InputChannel()
@@ -177,8 +177,8 @@ WindowToken ->> WindowToken:addChild()
 
 #### 总结
 
-- resume() 流程中通过 `addView() -> setView() -> addWindow()`，在 WMS 中创建了  WindowState，并且<font color=red>**通过 `addChild()` 挂载到了 ActivityRecord**</font>；
-- 创建 WindowState 时传入了 IWindow(W 对象，用于 WMS 和 Window 窗口回调之间通信的 binder) 以及 WindowToken(<font color=red>**详见[3.1 Token 相关](# 3.1 Token 相关)**</font>)；
+- resume() 流程中通过 `addView() -> setView() -> addWindow()`，在 WMS 中创建了  WindowState，并且 <font color=red>**通过 `addChild()` 挂载到了 ActivityRecord**</font>；
+- 创建 WindowState 时传入了 IWindow(W 对象，用于 WMS 和 Window 窗口回调之间通信的 binder) 以及 WindowToken(<font color=red>**详见 [3.1 Token 相关](# 3.1 Token 相关)**</font>)；
 - 在 `WMS.addWindow()` 中触发了 InputChannel 的创建；
 
 ## 1.3 挂载系统窗口
@@ -204,7 +204,7 @@ WMS ->> WindowToken:addWindow(win)
 
 
 
-# 2 SurfaceFlinger层级树
+# 2 SurfaceFlinger 层级树
 
 在 [1.1 DisplayArea 层级树构建流程](#1.1 DisplayArea 层级树构建流程) 中已经写明了创建 SurfaceControl 的入口 `DisplayContent.configureSurfaces()`，我们从这里开始。
 
@@ -259,13 +259,12 @@ WindowContainer ->> WindowContainer:setSurfaceControl()
 
 ``` scss
 WindowManagerService::relayoutWindow
-   WindowManagerService::createSurfaceControl
-      WindowStateAnimator::createSurfaceLocked -- 创建“Buff” 类型Surface
-         WindowStateAnimator::resetDrawState   -- 设置窗口状态为DRAW_PENDING
-         WindowSurfaceController::init
-            SurfaceControl.Builder::build
-               SurfaceControl::init
-   WindowSurfaceController::getSurfaceControl  -- 给应用端Surface赋值
+    WindowManagerService::createSurfaceControl
+        WindowStateAnimator::createSurfaceLocked -- 创建 “Buff” 类型 Surface
+            WindowStateAnimator::resetDrawState   -- 设置窗口状态为 DRAW_PENDING
+                WindowState::makeSurface
+                    SurfaceControl.Builder::build
+            WindowStateAnimator::getSurfaceControl  -- 给应用端 SC.mNativeObject 赋值
 ```
 
 
@@ -273,13 +272,13 @@ WindowManagerService::relayoutWindow
 ``` mermaid
 sequenceDiagram
 autonumber
-ViewRootImpl ->> ViewRootImpl:setView()
-ViewRootImpl ->> ViewRootImpl:requestLayout()
-ViewRootImpl ->> ViewRootImpl:scheduleTraversals()
-ViewRootImpl ->> Choreographer:postCallback(CALLBACK_TRAVERSAL)
-ViewRootImpl -->> ViewRootImpl:TraversalRunnable.run()
-ViewRootImpl ->> ViewRootImpl:doTraversal()
-ViewRootImpl ->> ViewRootImpl:performTraversals()
+%%ViewRootImpl ->> ViewRootImpl:setView()
+%%ViewRootImpl ->> ViewRootImpl:requestLayout()
+%%ViewRootImpl ->> ViewRootImpl:scheduleTraversals()
+%%ViewRootImpl ->> Choreographer:postCallback(CALLBACK_TRAVERSAL)
+%%ViewRootImpl -->> ViewRootImpl:TraversalRunnable.run()
+%%ViewRootImpl ->> ViewRootImpl:doTraversal()
+%%ViewRootImpl ->> ViewRootImpl:performTraversals()
 ViewRootImpl ->> ViewRootImpl:relayoutWindow()
 ViewRootImpl ->> Session:relayout()
 Session ->> WMS:relayoutWindow()
@@ -304,7 +303,7 @@ WindowStateAnimator ->> SurfaceControl:copyFrom(mSurfaceControl)
 
 ### 总结
 
-- 在 `WMS.relayoutWindow()` 中开始创建 SurfaceControl，当然真正构建的地方在 WindowState，在真正构建之前，会先把 mDrawState 设置为 DRAW_PENDDING
+- 在 `WMS.relayoutWindow()` 中开始创建 SurfaceControl，当然真正构建的地方在 WindowState，在真正构建之前，会先把 mDrawState 设置为 `DRAW_PENDDING`
 - 创建 SurfaceControl 的时候把 `WindowState.mSurfaceControl` 设置为了 parent
 - 通过 setBLASTLayer() 设置为 Buffer 类型
 - SurfaceControl 的构造函数中通过 `nativeCreate()` 获取 Native 层 Surface 的引用，所以拿到 SurfacControl 就是拿到了 Surface
@@ -507,7 +506,7 @@ Session ->> WMS:relayoutWindow(WindowRelayoutResult, SurfaceControl)
 Note over WMS:创建 Buffer 类型的 Surface
 WMS ->> WMS:createSurfaceControl()
 WMS ->> WindowAnimator:createSurfaceLocked()
-Note over WMS,WindowAnimator:把构建好的 mSurfaceControl 给到 outSurfaceControl
+Note over WMS,WindowAnimator:把构建好的 mSurfaceControl.mNativeObject 给到 outSurfaceControl.mNativeObject
 WMS ->> WindowAnimator:getSurfaceControl()
 
 Note over WMS,WindowPlacerLocked:计算窗口大小
@@ -525,7 +524,7 @@ Note over ViewRootImpl:通过 mWinFrame.set(frame) 为 mWinFrame 赋值
 总结
 
 - relayoutWindow() 传入的 WindowRelayoutResult 和 SurfaceControl 参数会经过处理后返回给应用
-    - 创建 Buffer 类型的 Surface(详见 [2.3 BufferStateLayer 创建](# 2.3 BufferStateLayer 创建))
+    - 创建 Buffer 类型的 Surface(详见 [2.3 BufferStateLayer 创建](# 2.3 BufferStateLayer 创建))，并把构建好的 `mSurfaceControl.mNativeObject` 给到 `outSurfaceControl.mNativeObject`
     - 计算窗口大小
 - 创建 BLASTBufferQueue 并绑定 Surface
 
@@ -601,5 +600,88 @@ WindowState ->> ActivityRecord:onFirstWindowDrawn()
 
 系统 Window 或者 StartWindow 在 `commitFinishDrawingLocked()` 阶段会直接设置 `HAS_DRAWN`
 
+
+
+## 3.5 状态机流转
+
+**mDrawState 用来描述一个 Window 从没有 Surface 到成功显示首帧的完整状态机，用于协调 App 绘制和 WMS 的可见性控制。**
+
+- **NO_SURFACE**：窗口还没有 Surface，App 不具备绘制条件。
+- **DRAW_PENDING**：Surface 已创建，WMS 要求 App 绘制首帧，但还没画。
+- **COMMIT_DRAW_PENDING**：App 已完成 draw 并回调 finishDrawing，但内容尚未提交到 SurfaceFlinger。
+- **READY_TO_SHOW**：绘制内容已成功提交，窗口满足显示条件，可以被 WMS 真正放到屏幕上。
+- **HAS_DRAWN**：窗口至少成功显示过一帧，进入稳定态，后续不再阻塞显示或启动流程。
+
+**这个状态机的核心目的，是解决 App 绘制与系统合成的异步问题，避免启动黑屏，并精确控制窗口“什么时候可以真正显示”，READY_TO_SHOW 只是准备移除 Starting Window，只有当 HAS_DRAWN/动画进度满足 时才会彻底安全移除 Starting Window，所以说启动窗口通常会“被盖住再移除”，而不是瞬间消失。**
+
 # 4 Activity 启动流程
 
+``` scss
+Launcher 点击图标向 AMS 发起启动请求
+	AMS
+AMS 通过 socket 向 Zygote 通信
+```
+
+## App - AMS
+
+
+
+![AppToAMS](../../images/2025/StartActivity_AppToAMS.webp)
+
+- 由 Launcher 进程发起启动 Activity 的请求
+
+- AMS 处理，创建对应的 ActivityRecord 和 Task ，并挂载到窗口层级树中
+
+- AMS 触发 Launcher 的 pause 流程
+
+- AMS 触发"电话"应用进程的创建
+
+
+
+## Launcher pause
+
+
+
+![img](../../images/2025/StartActivity_LauncherPause.webp)
+
+SourceActivity 完成 pause 后，执行 ActivityRecord::activityPaused 流程，AMS 需要显示当前顶层 Activity 所以执行了 RootWindowContainer::resumeFocusedTasksTopActivities 方法，但是这一次是不是真的能显示顶层 Activity 还是要看其进程是否已经创建好了。
+
+在操作了 Activity 的显示逻辑后，为了确保系统 Activity 正常的可见性，所以又执行了一次 ensureActivitiesVisible 流程。
+
+## 启动进程
+
+![框图-阶段三.png](../../images/2025/StartActivity_StartProcess.webp)
+
+- 通过 Socket 和 Zygote 通信创建进程，并启动到 `ActivityThread.main()`
+
+- 应用进程启动后，试图拉起对应的 Activity，要判断是否还有正在 Pause 的 Activity。
+
+## 启动 Activity
+
+![框图-阶段四.png](../../images/2025/StartActivity_StartActivity.webp)
+
+- ActivityRecord.setProcess(WindowProcessController)：链接 ActivityRecord 和创建的进程
+- 执行 handleLaunchActivity() -> performLaunchActivity()：
+    - 创建 Activity
+    - Activity.attach()
+        - 创建 PhoneWindow
+        - 传递 ActivityRecord.token 到 Activity.mToken 以及 Window.mAppToken
+    - 详见 [3.2 Activity/PhoneWindow 创建](# 3.2 Activity/PhoneWindow 创建)
+- 执行 handleResumeActivity() -> performResumeActivity()：
+    - 创建 ViewRootImpl
+    - 创建 WindowState 并挂载到 ActivityRecord
+    - 绑定 WindowState 和 W
+    - 创建 SurfaceControl
+    - 执行绘制三部曲
+    - 提交绘制结果，触发 SF 绘制
+    - 详见 [3.3 Window 显示 - 应用端](# 3.3 Window 显示 - 应用端)
+
+## 总体流程
+
+![activity启动--总流程图.png](../../images/2025/StartActivity_All.webp)
+
+
+
+
+
+Android 系统支持多种显示设备，比如说，输出到手机屏幕，或者通过WiFi 投射到电视屏幕。Android用 DisplayDevice 类来表示这样的设备。不是所有的 Layer 都会输出到所有的Display, 比如说，我们可以只将Video Layer投射到电视， 而非整个屏幕。LayerStack 就是为此设计，LayerStack 是一个Display 对象的一个数值， 而类Layer里成员State结构体也有成员变量mLayerStack， 只有两者的mLayerStack 值相同，Layer才会被输出到给该Display设备。所以LayerStack 决定了每个Display设备上可以显示的Layer数目。 
