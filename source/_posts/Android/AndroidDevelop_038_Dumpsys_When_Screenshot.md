@@ -1,5 +1,5 @@
 ---
-title: Android - 截图触发抓取 Dympsys 信息
+title: Android - 截图触发抓取 Dumpsys 信息
 date: 2024-06-28 23:18:26
 tags:
 categories: Android

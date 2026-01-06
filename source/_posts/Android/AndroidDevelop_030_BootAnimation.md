@@ -95,7 +95,7 @@ void SurfaceFlinger::init() FTL_FAKE_GUARD(kMainThreadContext) {
     });
 ```
 
-init() 为避免在主线程阻塞，把 initBootProperties 用 std::async 在后台启动一次（property_set 可能依赖 property_service，可能慢，第一次调用时会创建并保存一个 future），以后再次 callOnce 不会重复启动。
+init() 为避免在主线程阻塞，把 initBootProperties 用 `std::async` 在后台启动一次（property_set 可能依赖 property_service，可能慢，第一次调用时会创建并保存一个 future），以后再次 callOnce 不会重复启动。
 
 ``` cpp
 // SurfaceFlinger.cpp

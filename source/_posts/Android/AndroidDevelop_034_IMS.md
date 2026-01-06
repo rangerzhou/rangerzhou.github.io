@@ -7,7 +7,7 @@ copyright: true
 password:
 ---
 
-> Android InputManagerService 事件分发机制解析；
+> Android InputManager 事件分发机制解析；
 >
 > 源码版本：android-15-0.0_r23
 

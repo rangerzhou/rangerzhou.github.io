@@ -1,5 +1,5 @@
 ---
-title: Android8.0-App安装时间优化
+title: AutoSar 学习
 copyright: true
 date: 2024-08-30 22:30:11
 tags: AUTOSAR
@@ -7,7 +7,7 @@ categories: AUTOSAR
 password:
 ---
 
-> AutoSar
+> AutoSar 学习
 
 <!--more-->
 
@@ -157,10 +157,6 @@ RTE 功能
 功能
 
 - 提供通信服务的中间层（ECU 内部/间通信）
-
-
-
-
 
 
 

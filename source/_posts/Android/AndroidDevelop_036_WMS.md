@@ -1,10 +1,11 @@
 ---
-title: Android - WMS
+title: Android - WMS 窗口层级树
 date: 2024-06-25 23:26:08
 tags:
 categories: Android
 copyright: true
 password:
+published: false
 ---
 
 > Android WMS 窗口层级树
@@ -110,8 +111,6 @@ DisplayContent
     ```
   
     
-
-
 
   - ImeContainer：输入法（IME）专用容器，继承自 DisplayArea.Tokens，同样是一个 WindowToken 的容器，即孩子也是 WindowToken
     - 职责
@@ -253,7 +252,7 @@ RootWindowContainer
 
 WindowContainer几个子类结合层级树关系
 
-![WindowContainer_relation](../../images/2025/WindowContainer_relation.awebp)
+![WindowContainer_relation](../../images/2025/WindowContainer_relation.webp)
 
 
 
@@ -355,10 +354,6 @@ App 进程
 addWindow **一定发生在 Activity onResume 之后**
 
 不是 AMS 调用，是 **App 主动请求**
-
-
-
-
 
 
 
