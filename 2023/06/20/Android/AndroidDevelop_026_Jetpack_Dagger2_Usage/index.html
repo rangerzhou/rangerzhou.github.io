@@ -720,7 +720,37 @@
 <p>在这个例子中，<code>MyConfigModule</code> 必须被手动实例化，因为它有一个带参数的构造函数。</p>
 </li>
 </ul>
-<h2 id="5-Dagger2-Android-依赖注入流程图"><a href="#5-Dagger2-Android-依赖注入流程图" class="headerlink" title="5 Dagger2 Android 依赖注入流程图"></a>5 Dagger2 Android 依赖注入流程图</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line">sequenceDiagram</span><br><span class="line">    participant AppDev as Android应用开发者</span><br><span class="line">    participant AndroidApp as Android应用(Application/Activity/Fragment)</span><br><span class="line">    participant DaggerC as Dagger编译器(编译时)</span><br><span class="line">    participant GeneratedComp as 生成的Dagger Component 实现</span><br><span class="line">    participant Module as 模块(@Module, @Provides)</span><br><span class="line"></span><br><span class="line">    Note over AppDev,AndroidApp: **开发阶段：定义依赖**</span><br><span class="line"></span><br><span class="line">    AppDev-&gt;&gt;AndroidApp: 1. 在需要依赖的字段上使用 `@Inject` 注解&lt;br/&gt;`@Inject MyDependency myDependency;</span><br><span class="line">    AppDev-&gt;&gt;Module: 2. 定义提供依赖的模块和方法&lt;br/&gt;`@Module`, `@Provides MyDependency provideMyDependency()`</span><br><span class="line">    AppDev-&gt;&gt;GeneratedComp: 3. 定义组件接口，连接模块和注入点&lt;br/&gt;`@Component(modules = MyModule.class)`</span><br><span class="line"></span><br><span class="line">    Note over DaggerC: **编译时：生成依赖图**</span><br><span class="line"></span><br><span class="line">    DaggerC-&gt;&gt;AppDev: 4. Dagger 编译器扫描 `@Inject`, `@Provides`, `@Module`, `@Component`</span><br><span class="line">    DaggerC-&gt;&gt;GeneratedComp: 5. Dagger 编译器生成组件的实现类&lt;br/&gt;(例如 `DaggerAppComponent`)</span><br><span class="line">    Note over DaggerC: 编译器验证依赖图的完整性</span><br><span class="line"></span><br><span class="line">    Note over AndroidApp: **运行时：注入依赖**</span><br><span class="line"></span><br><span class="line">    AndroidApp-&gt;&gt;GeneratedComp: 6. 在 `Application/Activity/Fragment` 的 `onCreate()` 中&lt;br/&gt;创建 Component 实例：`DaggerAppComponent.builder().build()`</span><br><span class="line">    AndroidApp-&gt;&gt;GeneratedComp: 7. 调用 Component 的注入方法：&lt;br/&gt;`component.inject(this)(将自身传递给 Component)`</span><br><span class="line"></span><br><span class="line">    GeneratedComp-&gt;&gt;Module: 8. Component 解析 `inject()` 请求，&lt;br/&gt;根据依赖图调用模块中的 `@Provides` 方法&lt;br/&gt;(如果依赖是单例或已缓存，则直接提供)</span><br><span class="line"></span><br><span class="line">    Module--&gt;&gt;GeneratedComp: 9. 模块返回依赖实例&lt;br/&gt;(例如 `MyDependency` 的实例)</span><br><span class="line"></span><br><span class="line">    GeneratedComp--&gt;&gt;AndroidApp: 10. Component 将依赖实例注入到&lt;br/&gt;Android 应用组件中 `@Inject` 标记的字段</span><br><span class="line"></span><br><span class="line">    Note over AndroidApp: 11. Android 应用现在可以使用 `myDependency` 了</span><br></pre></td></tr></table></figure>
+<h2 id="5-Dagger2-Android-依赖注入流程图"><a href="#5-Dagger2-Android-依赖注入流程图" class="headerlink" title="5 Dagger2 Android 依赖注入流程图"></a>5 Dagger2 Android 依赖注入流程图</h2><pre class="mermaid">sequenceDiagram
+    participant AppDev as Android应用开发者
+    participant AndroidApp as Android应用(Application/Activity/Fragment)
+    participant DaggerC as Dagger编译器(编译时)
+    participant GeneratedComp as 生成的Dagger Component 实现
+    participant Module as 模块(@Module, @Provides)
+
+    Note over AppDev,AndroidApp: **开发阶段：定义依赖**
+
+    AppDev->>AndroidApp: 1. 在需要依赖的字段上使用 `@Inject` 注解<br/>`@Inject MyDependency myDependency;
+    AppDev->>Module: 2. 定义提供依赖的模块和方法<br/>`@Module`, `@Provides MyDependency provideMyDependency()`
+    AppDev->>GeneratedComp: 3. 定义组件接口，连接模块和注入点<br/>`@Component(modules = MyModule.class)`
+
+    Note over DaggerC: **编译时：生成依赖图**
+
+    DaggerC->>AppDev: 4. Dagger 编译器扫描 `@Inject`, `@Provides`, `@Module`, `@Component`
+    DaggerC->>GeneratedComp: 5. Dagger 编译器生成组件的实现类<br/>(例如 `DaggerAppComponent`)
+    Note over DaggerC: 编译器验证依赖图的完整性
+
+    Note over AndroidApp: **运行时：注入依赖**
+
+    AndroidApp->>GeneratedComp: 6. 在 `Application/Activity/Fragment` 的 `onCreate()` 中<br/>创建 Component 实例：`DaggerAppComponent.builder().build()`
+    AndroidApp->>GeneratedComp: 7. 调用 Component 的注入方法：<br/>`component.inject(this)(将自身传递给 Component)`
+
+    GeneratedComp->>Module: 8. Component 解析 `inject()` 请求，<br/>根据依赖图调用模块中的 `@Provides` 方法<br/>(如果依赖是单例或已缓存，则直接提供)
+
+    Module-->>GeneratedComp: 9. 模块返回依赖实例<br/>(例如 `MyDependency` 的实例)
+
+    GeneratedComp-->>AndroidApp: 10. Component 将依赖实例注入到<br/>Android 应用组件中 `@Inject` 标记的字段
+
+    Note over AndroidApp: 11. Android 应用现在可以使用 `myDependency` 了</pre>
 
 
 
@@ -1195,7 +1225,7 @@ window.addEventListener('pjax:success', () => {
 if (document.querySelectorAll('pre.mermaid').length) {
   NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
     mermaid.initialize({
-      theme    : 'forest',
+      theme    : 'default',
       logLevel : 3,
       flowchart: { curve     : 'linear' },
       gantt    : { axisFormat: '%m/%d/%Y' },

@@ -315,11 +315,83 @@
 </blockquote>
 <span id="more"></span>
 
-<h1 id="时序图"><a href="#时序图" class="headerlink" title="时序图"></a>时序图</h1><h2 id="绑定-ImageWallpaper"><a href="#绑定-ImageWallpaper" class="headerlink" title="绑定 ImageWallpaper"></a>绑定 ImageWallpaper</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line">sequenceDiagram</span><br><span class="line">autonumber</span><br><span class="line">box Lavender system_server</span><br><span class="line">participant SystemServer</span><br><span class="line">participant SystemServiceManager</span><br><span class="line">participant WallpaperManagerService.Lifecycle</span><br><span class="line">participant WallpaperManagerService</span><br><span class="line">participant AMS</span><br><span class="line">participant WindowManagerInternal</span><br><span class="line">end</span><br><span class="line"></span><br><span class="line">box LightYellow SystemUI</span><br><span class="line">participant ImageWallpaper</span><br><span class="line">participant WallpaperService</span><br><span class="line">end</span><br><span class="line"></span><br><span class="line">SystemServer -&gt;&gt; SystemServer:startOtherServices()</span><br><span class="line">SystemServer -&gt;&gt; SystemServiceManager:startService()</span><br><span class="line">SystemServiceManager -&gt;&gt; WallpaperManagerService.Lifecycle:onStart()</span><br><span class="line">Note right of WallpaperManagerService.Lifecycle:创建 WallpaperManagerService 对象</span><br><span class="line">WallpaperManagerService.Lifecycle -&gt;&gt; WallpaperManagerService:new WallpaperManagerService()</span><br><span class="line">SystemServer -&gt;&gt; SystemServiceManager:startBootPhase(PHASE_ACTIVITY_MANAGER_READY)</span><br><span class="line">SystemServiceManager -&gt;&gt; WallpaperManagerService.Lifecycle:startBootPhase()</span><br><span class="line">WallpaperManagerService.Lifecycle -&gt;&gt; WallpaperManagerService:startBootPhase()</span><br><span class="line">WallpaperManagerService -&gt;&gt; WallpaperManagerService:systemReady()</span><br><span class="line">WallpaperManagerService -&gt;&gt; WallpaperManagerService:initialize()</span><br><span class="line">WallpaperManagerService -&gt;&gt; WallpaperManagerService:loadSettingsLocked()</span><br><span class="line">WallpaperManagerService -&gt;&gt; WallpaperManagerService:initializeFallbackWallpaper()</span><br><span class="line">WallpaperManagerService -&gt;&gt; WallpaperManagerService:bindWallpaperComponentLocked()</span><br><span class="line">WallpaperManagerService -&gt;&gt; WallpaperManagerService:bindWallpaperDescriptionLocked()</span><br><span class="line">Note right of WallpaperManagerService:绑定 ImageWallpaper 服务</span><br><span class="line">WallpaperManagerService -&gt;&gt; ImageWallpaper:bindServiceAsUser()</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h1 id="时序图"><a href="#时序图" class="headerlink" title="时序图"></a>时序图</h1><h2 id="绑定-ImageWallpaper"><a href="#绑定-ImageWallpaper" class="headerlink" title="绑定 ImageWallpaper"></a>绑定 ImageWallpaper</h2><pre class="mermaid">sequenceDiagram
+autonumber
+box Lavender system_server
+participant SystemServer
+participant SystemServiceManager
+participant WallpaperManagerService.Lifecycle
+participant WallpaperManagerService
+participant AMS
+participant WindowManagerInternal
+end
+
+box LightYellow SystemUI
+participant ImageWallpaper
+participant WallpaperService
+end
+
+SystemServer ->> SystemServer:startOtherServices()
+SystemServer ->> SystemServiceManager:startService()
+SystemServiceManager ->> WallpaperManagerService.Lifecycle:onStart()
+Note right of WallpaperManagerService.Lifecycle:创建 WallpaperManagerService 对象
+WallpaperManagerService.Lifecycle ->> WallpaperManagerService:new WallpaperManagerService()
+SystemServer ->> SystemServiceManager:startBootPhase(PHASE_ACTIVITY_MANAGER_READY)
+SystemServiceManager ->> WallpaperManagerService.Lifecycle:startBootPhase()
+WallpaperManagerService.Lifecycle ->> WallpaperManagerService:startBootPhase()
+WallpaperManagerService ->> WallpaperManagerService:systemReady()
+WallpaperManagerService ->> WallpaperManagerService:initialize()
+WallpaperManagerService ->> WallpaperManagerService:loadSettingsLocked()
+WallpaperManagerService ->> WallpaperManagerService:initializeFallbackWallpaper()
+WallpaperManagerService ->> WallpaperManagerService:bindWallpaperComponentLocked()
+WallpaperManagerService ->> WallpaperManagerService:bindWallpaperDescriptionLocked()
+Note right of WallpaperManagerService:绑定 ImageWallpaper 服务
+WallpaperManagerService ->> ImageWallpaper:bindServiceAsUser()</pre>
 
 
 
-<h2 id="attach-x2F-relayout-x2F-finishDrawing"><a href="#attach-x2F-relayout-x2F-finishDrawing" class="headerlink" title="attach()&#x2F;relayout()&#x2F;finishDrawing()"></a>attach()&#x2F;relayout()&#x2F;finishDrawing()</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line">sequenceDiagram</span><br><span class="line">autonumber</span><br><span class="line">box Lavender system_server</span><br><span class="line">participant WallpaperManagerService</span><br><span class="line">participant AMS</span><br><span class="line">participant WindowManagerInternal</span><br><span class="line">participant Session</span><br><span class="line">participant WindowManagerService</span><br><span class="line">end</span><br><span class="line"></span><br><span class="line">box LightYellow SystemUI</span><br><span class="line">participant ImageWallpaper</span><br><span class="line">participant WallpaperService</span><br><span class="line">end</span><br><span class="line"></span><br><span class="line">AMS --&gt;&gt; WallpaperManagerService:WallpaperConnection:onServiceConnected()</span><br><span class="line">WallpaperManagerService -&gt;&gt; WallpaperManagerService:attachServiceLocked()</span><br><span class="line">WallpaperManagerService -&gt;&gt; WallpaperManagerService:DisplayConnector.connectLocked()</span><br><span class="line">Note over WallpaperManagerService, WindowManagerInternal:创建 WindowToken，并且传入 IWallpaperServiceWrapper/IWallpaperEngineWrapper/Engine</span><br><span class="line">WallpaperManagerService -&gt;&gt; WindowManagerInternal:addWindowToken()</span><br><span class="line">WallpaperManagerService -&gt;&gt; WallpaperService:IWallpaperServiceWrapper.attach()</span><br><span class="line">WallpaperService -&gt;&gt; WallpaperService:IWallpaperEngineWrapper.IWallpaperEngineWrapper()</span><br><span class="line">WallpaperService -&gt;&gt; WallpaperService:IWallpaperEngineWrapper.executeMessage(DO_ATTACH)</span><br><span class="line">WallpaperService -&gt;&gt; WallpaperService:IWallpaperEngineWrapper.doAttachEngine()</span><br><span class="line">WallpaperService --&gt;&gt; WallpaperManagerService:WallpaperConnection.attachEngine()</span><br><span class="line">Note over WallpaperManagerService, WallpaperService:一系列操作</span><br><span class="line">WallpaperManagerService -&gt;&gt; WallpaperService:IWallpaperEngineWrapper.setInAmbientMode()</span><br><span class="line">WallpaperManagerService -&gt;&gt; WallpaperService:IWallpaperEngineWrapper.requestWallpaperColors()</span><br><span class="line">WallpaperManagerService -&gt;&gt; WallpaperService:IWallpaperEngineWrapper.addLocalColorsAreas()</span><br><span class="line">WallpaperManagerService -&gt;&gt; WallpaperService:IWallpaperEngineWrapper.applyDimming()</span><br><span class="line">Note over WallpaperService, WallpaperService:调用 Engine.attach()</span><br><span class="line">WallpaperService -&gt;&gt; WallpaperService:Engine.attach()</span><br><span class="line">WallpaperService -&gt;&gt; WallpaperService:Engine.updateSurface()</span><br><span class="line">Note over WallpaperService, Session:1.创建 WindowState</span><br><span class="line">WallpaperService -&gt;&gt; Session:addToDisplay()</span><br><span class="line">Session -&gt;&gt; WindowManagerService:addWindow()</span><br><span class="line">Note over WallpaperService, Session:2.创建 Surface</span><br><span class="line">WallpaperService -&gt;&gt; Session:relayout()</span><br><span class="line">Session -&gt;&gt; WindowManagerService:relayoutWindow()</span><br><span class="line">Note over WallpaperService, Session:3.客户端告知 WMS 我已经绘制完成</span><br><span class="line">WallpaperService -&gt;&gt; Session:finishDrawing()</span><br><span class="line">Session -&gt;&gt; WindowManagerService:finishDrawingWindow()</span><br></pre></td></tr></table></figure>
+<h2 id="attach-x2F-relayout-x2F-finishDrawing"><a href="#attach-x2F-relayout-x2F-finishDrawing" class="headerlink" title="attach()&#x2F;relayout()&#x2F;finishDrawing()"></a>attach()&#x2F;relayout()&#x2F;finishDrawing()</h2><pre class="mermaid">sequenceDiagram
+autonumber
+box Lavender system_server
+participant WallpaperManagerService
+participant AMS
+participant WindowManagerInternal
+participant Session
+participant WindowManagerService
+end
+
+box LightYellow SystemUI
+participant ImageWallpaper
+participant WallpaperService
+end
+
+AMS -->> WallpaperManagerService:WallpaperConnection:onServiceConnected()
+WallpaperManagerService ->> WallpaperManagerService:attachServiceLocked()
+WallpaperManagerService ->> WallpaperManagerService:DisplayConnector.connectLocked()
+Note over WallpaperManagerService, WindowManagerInternal:创建 WindowToken，并且传入 IWallpaperServiceWrapper/IWallpaperEngineWrapper/Engine
+WallpaperManagerService ->> WindowManagerInternal:addWindowToken()
+WallpaperManagerService ->> WallpaperService:IWallpaperServiceWrapper.attach()
+WallpaperService ->> WallpaperService:IWallpaperEngineWrapper.IWallpaperEngineWrapper()
+WallpaperService ->> WallpaperService:IWallpaperEngineWrapper.executeMessage(DO_ATTACH)
+WallpaperService ->> WallpaperService:IWallpaperEngineWrapper.doAttachEngine()
+WallpaperService -->> WallpaperManagerService:WallpaperConnection.attachEngine()
+Note over WallpaperManagerService, WallpaperService:一系列操作
+WallpaperManagerService ->> WallpaperService:IWallpaperEngineWrapper.setInAmbientMode()
+WallpaperManagerService ->> WallpaperService:IWallpaperEngineWrapper.requestWallpaperColors()
+WallpaperManagerService ->> WallpaperService:IWallpaperEngineWrapper.addLocalColorsAreas()
+WallpaperManagerService ->> WallpaperService:IWallpaperEngineWrapper.applyDimming()
+Note over WallpaperService, WallpaperService:调用 Engine.attach()
+WallpaperService ->> WallpaperService:Engine.attach()
+WallpaperService ->> WallpaperService:Engine.updateSurface()
+Note over WallpaperService, Session:1.创建 WindowState
+WallpaperService ->> Session:addToDisplay()
+Session ->> WindowManagerService:addWindow()
+Note over WallpaperService, Session:2.创建 Surface
+WallpaperService ->> Session:relayout()
+Session ->> WindowManagerService:relayoutWindow()
+Note over WallpaperService, Session:3.客户端告知 WMS 我已经绘制完成
+WallpaperService ->> Session:finishDrawing()
+Session ->> WindowManagerService:finishDrawingWindow()</pre>
 
 
 
@@ -795,7 +867,7 @@ window.addEventListener('pjax:success', () => {
 if (document.querySelectorAll('pre.mermaid').length) {
   NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
     mermaid.initialize({
-      theme    : 'forest',
+      theme    : 'default',
       logLevel : 3,
       flowchart: { curve     : 'linear' },
       gantt    : { axisFormat: '%m/%d/%Y' },

@@ -378,7 +378,21 @@
 <li><p><strong>Stub 调实现类方法</strong></p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> <span class="variable">result</span> <span class="operator">=</span> <span class="built_in">this</span>.add(a, b); <span class="comment">// 调到 MyService.add()</span></span><br></pre></td></tr></table></figure></li>
 </ul>
-<h2 id="4-2-时序图"><a href="#4-2-时序图" class="headerlink" title="4.2 时序图"></a>4.2 时序图</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">sequenceDiagram</span><br><span class="line">    participant Client</span><br><span class="line">    participant Proxy</span><br><span class="line">    participant Binder_Driver</span><br><span class="line">    participant Stub</span><br><span class="line">    participant Service_Impl</span><br><span class="line"></span><br><span class="line">    Client-&gt;&gt;Proxy: 调用 add(3, 5)</span><br><span class="line">    Proxy-&gt;&gt;Binder_Driver: transact(TRANSACTION_add, data, reply)</span><br><span class="line">    Binder_Driver-&gt;&gt;Stub: onTransact(TRANSACTION_add, data, reply)</span><br><span class="line">    Stub-&gt;&gt;Service_Impl: add(3, 5)</span><br><span class="line">    Service_Impl--&gt;&gt;Stub: return 8</span><br><span class="line">    Stub--&gt;&gt;Binder_Driver: reply.writeInt(8)</span><br><span class="line">    Binder_Driver--&gt;&gt;Proxy: 返回 reply</span><br><span class="line">    Proxy--&gt;&gt;Client: 返回结果 8</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h2 id="4-2-时序图"><a href="#4-2-时序图" class="headerlink" title="4.2 时序图"></a>4.2 时序图</h2><pre class="mermaid">sequenceDiagram
+    participant Client
+    participant Proxy
+    participant Binder_Driver
+    participant Stub
+    participant Service_Impl
+
+    Client->>Proxy: 调用 add(3, 5)
+    Proxy->>Binder_Driver: transact(TRANSACTION_add, data, reply)
+    Binder_Driver->>Stub: onTransact(TRANSACTION_add, data, reply)
+    Stub->>Service_Impl: add(3, 5)
+    Service_Impl-->>Stub: return 8
+    Stub-->>Binder_Driver: reply.writeInt(8)
+    Binder_Driver-->>Proxy: 返回 reply
+    Proxy-->>Client: 返回结果 8</pre>
 
 <p>解读</p>
 <ol>
@@ -907,7 +921,7 @@ window.addEventListener('pjax:success', () => {
 if (document.querySelectorAll('pre.mermaid').length) {
   NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
     mermaid.initialize({
-      theme    : 'forest',
+      theme    : 'default',
       logLevel : 3,
       flowchart: { curve     : 'linear' },
       gantt    : { axisFormat: '%m/%d/%Y' },

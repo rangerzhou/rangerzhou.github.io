@@ -504,7 +504,76 @@
 <li>不参与事件循环</li>
 </ul>
 <hr>
-<h2 id="时序图"><a href="#时序图" class="headerlink" title="时序图"></a>时序图</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br></pre></td><td class="code"><pre><span class="line">sequenceDiagram</span><br><span class="line">    participant SystemServer as &quot;SystemServer&quot;</span><br><span class="line">    participant InputManagerService as &quot;InputManagerService (Java)&quot;</span><br><span class="line">    participant NativeImpl as &quot;NativeImpl (Java)&quot;</span><br><span class="line">    participant JNI as &quot;JNI (C++)&quot;</span><br><span class="line">    participant NativeInputManager as &quot;NativeInputManager (C++)&quot;</span><br><span class="line">    participant InputManager as &quot;InputManager (C++)&quot;</span><br><span class="line">    participant InputDispatcher as &quot;InputDispatcher (C++)&quot;</span><br><span class="line">    participant InputReader as &quot;InputReader (C++)&quot;</span><br><span class="line">    participant EventHub as &quot;EventHub (C++)&quot;</span><br><span class="line"></span><br><span class="line">    SystemServer-&gt;&gt;InputManagerService: construct (Injector -&gt; new NativeImpl(service, messageQueue))</span><br><span class="line">    activate InputManagerService</span><br><span class="line">    InputManagerService-&gt;&gt;NativeImpl: new NativeImpl(...)</span><br><span class="line">    activate NativeImpl</span><br><span class="line">    NativeImpl-&gt;&gt;JNI: native long init(serviceObj, messageQueue)</span><br><span class="line">    activate JNI</span><br><span class="line">    JNI-&gt;&gt;JNI: std::call_once -&gt; create NativeInputManager</span><br><span class="line">    JNI-&gt;&gt;NativeInputManager: new NativeInputManager(serviceObj, looper)</span><br><span class="line">    activate NativeInputManager</span><br><span class="line">    NativeInputManager-&gt;&gt;InputManager: new InputManager(this, ...)</span><br><span class="line">    activate InputManager</span><br><span class="line">    InputManager-&gt;&gt;InputDispatcher: createInputDispatcher(...)</span><br><span class="line">    activate InputDispatcher</span><br><span class="line">    InputManager-&gt;&gt;InputReader: createInputReader(... (creates EventHub))</span><br><span class="line">    activate InputReader</span><br><span class="line">    InputReader-&gt;&gt;EventHub: new EventHub()</span><br><span class="line">    deactivate InputReader</span><br><span class="line">    deactivate InputDispatcher</span><br><span class="line">    deactivate InputManager</span><br><span class="line">    NativeInputManager-&gt;&gt;JNI: return pointer (jlong)</span><br><span class="line">    deactivate NativeInputManager</span><br><span class="line">    JNI-&gt;&gt;NativeImpl: init() returns jlong (store in mPtr)</span><br><span class="line">    deactivate JNI</span><br><span class="line">    deactivate NativeImpl</span><br><span class="line">    deactivate InputManagerService</span><br><span class="line"></span><br><span class="line">    %% Later during service start()</span><br><span class="line">    SystemServer-&gt;&gt;InputManagerService: startOtherServices() -&gt; InputManagerService.start()</span><br><span class="line">    activate InputManagerService</span><br><span class="line">    InputManagerService-&gt;&gt;NativeImpl: mNative.start()</span><br><span class="line">    activate NativeImpl</span><br><span class="line">    NativeImpl-&gt;&gt;JNI: nativeStart()</span><br><span class="line">    activate JNI</span><br><span class="line">    JNI-&gt;&gt;NativeInputManager: getNativeInputManager(env, mPtr)</span><br><span class="line">    activate NativeInputManager</span><br><span class="line">    NativeInputManager-&gt;&gt;InputManager: getInputManager()-&gt;start()</span><br><span class="line">    activate InputManager</span><br><span class="line">    InputManager-&gt;&gt;InputDispatcher: mDispatcher-&gt;start()</span><br><span class="line">    activate InputDispatcher</span><br><span class="line">    InputDispatcher-&gt;&gt;InputDispatcher: create InputThread -&gt; run dispatch loop</span><br><span class="line">    InputDispatcher--&gt;&gt;InputManager: start() returns OK</span><br><span class="line">    deactivate InputDispatcher</span><br><span class="line">    InputManager-&gt;&gt;InputReader: mReader-&gt;start()</span><br><span class="line">    activate InputReader</span><br><span class="line">    InputReader-&gt;&gt;InputReader: create InputThread -&gt; run read loop (EventHub-&gt;getEvents())</span><br><span class="line">    InputReader-&gt;&gt;EventHub: poll events</span><br><span class="line">    InputReader--&gt;&gt;InputManager: start() returns OK</span><br><span class="line">    deactivate InputReader</span><br><span class="line">    InputManager--&gt;&gt;NativeInputManager: start() returns OK</span><br><span class="line">    deactivate InputManager</span><br><span class="line">    NativeInputManager--&gt;&gt;JNI: nativeStart() returns</span><br><span class="line">    deactivate NativeInputManager</span><br><span class="line">    JNI--&gt;&gt;NativeImpl: nativeStart() returns</span><br><span class="line">    deactivate JNI</span><br><span class="line">    NativeImpl--&gt;&gt;InputManagerService: start() returns</span><br><span class="line">    deactivate NativeImpl</span><br><span class="line">    deactivate InputManagerService</span><br><span class="line"></span><br><span class="line">    note over InputManager: 启动顺序重要：\n1) 构造时创建 `InputDispatcher` 和 `InputReader`；\n2) `start()` 时先 `mDispatcher-&gt;start()`，再 `mReader-&gt;start()`；若 `mReader-&gt;start()` 失败，会停止 dispatcher 并返回错误。</span><br></pre></td></tr></table></figure>
+<h2 id="时序图"><a href="#时序图" class="headerlink" title="时序图"></a>时序图</h2><pre class="mermaid">sequenceDiagram
+    participant SystemServer as "SystemServer"
+    participant InputManagerService as "InputManagerService (Java)"
+    participant NativeImpl as "NativeImpl (Java)"
+    participant JNI as "JNI (C++)"
+    participant NativeInputManager as "NativeInputManager (C++)"
+    participant InputManager as "InputManager (C++)"
+    participant InputDispatcher as "InputDispatcher (C++)"
+    participant InputReader as "InputReader (C++)"
+    participant EventHub as "EventHub (C++)"
+
+    SystemServer->>InputManagerService: construct (Injector -> new NativeImpl(service, messageQueue))
+    activate InputManagerService
+    InputManagerService->>NativeImpl: new NativeImpl(...)
+    activate NativeImpl
+    NativeImpl->>JNI: native long init(serviceObj, messageQueue)
+    activate JNI
+    JNI->>JNI: std::call_once -> create NativeInputManager
+    JNI->>NativeInputManager: new NativeInputManager(serviceObj, looper)
+    activate NativeInputManager
+    NativeInputManager->>InputManager: new InputManager(this, ...)
+    activate InputManager
+    InputManager->>InputDispatcher: createInputDispatcher(...)
+    activate InputDispatcher
+    InputManager->>InputReader: createInputReader(... (creates EventHub))
+    activate InputReader
+    InputReader->>EventHub: new EventHub()
+    deactivate InputReader
+    deactivate InputDispatcher
+    deactivate InputManager
+    NativeInputManager->>JNI: return pointer (jlong)
+    deactivate NativeInputManager
+    JNI->>NativeImpl: init() returns jlong (store in mPtr)
+    deactivate JNI
+    deactivate NativeImpl
+    deactivate InputManagerService
+
+    %% Later during service start()
+    SystemServer->>InputManagerService: startOtherServices() -> InputManagerService.start()
+    activate InputManagerService
+    InputManagerService->>NativeImpl: mNative.start()
+    activate NativeImpl
+    NativeImpl->>JNI: nativeStart()
+    activate JNI
+    JNI->>NativeInputManager: getNativeInputManager(env, mPtr)
+    activate NativeInputManager
+    NativeInputManager->>InputManager: getInputManager()->start()
+    activate InputManager
+    InputManager->>InputDispatcher: mDispatcher->start()
+    activate InputDispatcher
+    InputDispatcher->>InputDispatcher: create InputThread -> run dispatch loop
+    InputDispatcher-->>InputManager: start() returns OK
+    deactivate InputDispatcher
+    InputManager->>InputReader: mReader->start()
+    activate InputReader
+    InputReader->>InputReader: create InputThread -> run read loop (EventHub->getEvents())
+    InputReader->>EventHub: poll events
+    InputReader-->>InputManager: start() returns OK
+    deactivate InputReader
+    InputManager-->>NativeInputManager: start() returns OK
+    deactivate InputManager
+    NativeInputManager-->>JNI: nativeStart() returns
+    deactivate NativeInputManager
+    JNI-->>NativeImpl: nativeStart() returns
+    deactivate JNI
+    NativeImpl-->>InputManagerService: start() returns
+    deactivate NativeImpl
+    deactivate InputManagerService
+
+    note over InputManager: 启动顺序重要：\n1) 构造时创建 `InputDispatcher` 和 `InputReader`；\n2) `start()` 时先 `mDispatcher->start()`，再 `mReader->start()`；若 `mReader->start()` 失败，会停止 dispatcher 并返回错误。</pre>
 
 
 
@@ -512,15 +581,100 @@
 
 
 
-<h2 id="初始化流程"><a href="#初始化流程" class="headerlink" title="初始化流程"></a>初始化流程</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">sequenceDiagram</span><br><span class="line">    participant SystemServer as &quot;SystemServer.java&quot;</span><br><span class="line">    participant InputManagerService as &quot;InputManagerService.java&quot;</span><br><span class="line">    participant NativeImpl as &quot;InputManagerService.java (NativeImpl)&quot;</span><br><span class="line">    participant JNI as &quot;com_android_server_input_InputManagerService.cpp&quot;</span><br><span class="line">    participant InputManager as &quot;InputManager.cpp&quot;</span><br><span class="line">    participant InputDispatcher as &quot;InputDispatcher.cpp&quot;</span><br><span class="line">    participant InputReader as &quot;InputReader.cpp&quot;</span><br><span class="line">    participant EventHub as &quot;EventHub.cpp&quot;</span><br><span class="line"></span><br><span class="line">    SystemServer-&gt;&gt;InputManagerService: construct (Injector -&gt; new NativeImpl)</span><br><span class="line">    InputManagerService-&gt;&gt;NativeImpl: new NativeImpl(...)</span><br><span class="line">    NativeImpl-&gt;&gt;JNI: native init(serviceObj, messageQueue)</span><br><span class="line">    JNI-&gt;&gt;JNI: std::call_once -&gt; create NativeInputManager</span><br><span class="line">    JNI-&gt;&gt;JNI: return native pointer (jlong)</span><br><span class="line">    JNI-&gt;&gt;NativeImpl: init() returns (mPtr stored)</span><br><span class="line"></span><br><span class="line">    JNI-&gt;&gt;NativeInputManager: (inside ctor) new InputManager(this, ...)</span><br><span class="line">    InputManager-&gt;&gt;InputDispatcher: createInputDispatcher(...)</span><br><span class="line">    InputManager-&gt;&gt;InputReader: createInputReader(...)</span><br><span class="line">    InputReader-&gt;&gt;EventHub: new EventHub()</span><br></pre></td></tr></table></figure>
+<h2 id="初始化流程"><a href="#初始化流程" class="headerlink" title="初始化流程"></a>初始化流程</h2><pre class="mermaid">sequenceDiagram
+    participant SystemServer as "SystemServer.java"
+    participant InputManagerService as "InputManagerService.java"
+    participant NativeImpl as "InputManagerService.java (NativeImpl)"
+    participant JNI as "com_android_server_input_InputManagerService.cpp"
+    participant InputManager as "InputManager.cpp"
+    participant InputDispatcher as "InputDispatcher.cpp"
+    participant InputReader as "InputReader.cpp"
+    participant EventHub as "EventHub.cpp"
 
-<h2 id="启动流程"><a href="#启动流程" class="headerlink" title="启动流程"></a>启动流程</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">sequenceDiagram</span><br><span class="line">    participant SystemServer as &quot;SystemServer.java&quot;</span><br><span class="line">    participant InputManagerService as &quot;InputManagerService.java&quot;</span><br><span class="line">    participant NativeImpl as &quot;InputManagerService.java (NativeImpl)&quot;</span><br><span class="line">    participant JNI as &quot;com_android_server_input_InputManagerService.cpp&quot;</span><br><span class="line">    participant NativeInputManager as &quot;com_android_server_input_InputManagerService.cpp (NativeInputManager)&quot;</span><br><span class="line">    participant InputManager as &quot;InputManager.cpp&quot;</span><br><span class="line">    participant InputDispatcher as &quot;InputDispatcher.cpp&quot;</span><br><span class="line">    participant InputReader as &quot;InputReader.cpp&quot;</span><br><span class="line"></span><br><span class="line">    SystemServer-&gt;&gt;InputManagerService: startOtherServices() -&gt; start()</span><br><span class="line">    InputManagerService-&gt;&gt;NativeImpl: mNative.start()</span><br><span class="line">    NativeImpl-&gt;&gt;JNI: nativeStart()</span><br><span class="line">    JNI-&gt;&gt;NativeInputManager: getNativeInputManager(mPtr)</span><br><span class="line">    NativeInputManager-&gt;&gt;InputManager: getInputManager()-&gt;start()</span><br><span class="line">    InputManager-&gt;&gt;InputDispatcher: mDispatcher-&gt;start()  -- start dispatch thread</span><br><span class="line">    InputManager-&gt;&gt;InputReader: mReader-&gt;start()          -- start reader thread (EventHub polls)</span><br></pre></td></tr></table></figure>
+    SystemServer->>InputManagerService: construct (Injector -> new NativeImpl)
+    InputManagerService->>NativeImpl: new NativeImpl(...)
+    NativeImpl->>JNI: native init(serviceObj, messageQueue)
+    JNI->>JNI: std::call_once -> create NativeInputManager
+    JNI->>JNI: return native pointer (jlong)
+    JNI->>NativeImpl: init() returns (mPtr stored)
 
-<h2 id="架构图"><a href="#架构图" class="headerlink" title="架构图"></a>架构图</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">flowchart LR</span><br><span class="line">    SystemServer[SystemServer.java]</span><br><span class="line">    IMS[InputManagerService.java]</span><br><span class="line">    NativeImpl[NativeImpl]</span><br><span class="line">    JNI[com_android_server_input_InputManagerService.cpp]</span><br><span class="line">    NIM[NativeInputManager]</span><br><span class="line">    IM[InputManager.cpp]</span><br><span class="line">    ID[InputDispatcher.cpp]</span><br><span class="line">    IR[InputReader.cpp]</span><br><span class="line">    EH[EventHub.cpp]</span><br><span class="line"></span><br><span class="line">    SystemServer --&gt; IMS</span><br><span class="line">    IMS --&gt; NativeImpl</span><br><span class="line">    NativeImpl --&gt; JNI</span><br><span class="line">    JNI --&gt; NIM</span><br><span class="line">    NIM --&gt; IM</span><br><span class="line">    IM --&gt; ID</span><br><span class="line">    IM --&gt; IR</span><br><span class="line">    IR --&gt; EH</span><br><span class="line"></span><br><span class="line">    %% 启动简要（复述关系，便于阅读）</span><br><span class="line">    IMS --&gt; NativeImpl</span><br><span class="line">    NativeImpl --&gt; JNI</span><br><span class="line">    JNI --&gt; NIM</span><br><span class="line">    NIM --&gt; IM</span><br><span class="line">    IM --&gt; ID</span><br><span class="line">    IM --&gt; IR</span><br></pre></td></tr></table></figure>
+    JNI->>NativeInputManager: (inside ctor) new InputManager(this, ...)
+    InputManager->>InputDispatcher: createInputDispatcher(...)
+    InputManager->>InputReader: createInputReader(...)
+    InputReader->>EventHub: new EventHub()</pre>
+
+<h2 id="启动流程"><a href="#启动流程" class="headerlink" title="启动流程"></a>启动流程</h2><pre class="mermaid">sequenceDiagram
+    participant SystemServer as "SystemServer.java"
+    participant InputManagerService as "InputManagerService.java"
+    participant NativeImpl as "InputManagerService.java (NativeImpl)"
+    participant JNI as "com_android_server_input_InputManagerService.cpp"
+    participant NativeInputManager as "com_android_server_input_InputManagerService.cpp (NativeInputManager)"
+    participant InputManager as "InputManager.cpp"
+    participant InputDispatcher as "InputDispatcher.cpp"
+    participant InputReader as "InputReader.cpp"
+
+    SystemServer->>InputManagerService: startOtherServices() -> start()
+    InputManagerService->>NativeImpl: mNative.start()
+    NativeImpl->>JNI: nativeStart()
+    JNI->>NativeInputManager: getNativeInputManager(mPtr)
+    NativeInputManager->>InputManager: getInputManager()->start()
+    InputManager->>InputDispatcher: mDispatcher->start()  -- start dispatch thread
+    InputManager->>InputReader: mReader->start()          -- start reader thread (EventHub polls)</pre>
+
+<h2 id="架构图"><a href="#架构图" class="headerlink" title="架构图"></a>架构图</h2><pre class="mermaid">flowchart LR
+    SystemServer[SystemServer.java]
+    IMS[InputManagerService.java]
+    NativeImpl[NativeImpl]
+    JNI[com_android_server_input_InputManagerService.cpp]
+    NIM[NativeInputManager]
+    IM[InputManager.cpp]
+    ID[InputDispatcher.cpp]
+    IR[InputReader.cpp]
+    EH[EventHub.cpp]
+
+    SystemServer --> IMS
+    IMS --> NativeImpl
+    NativeImpl --> JNI
+    JNI --> NIM
+    NIM --> IM
+    IM --> ID
+    IM --> IR
+    IR --> EH
+
+    %% 启动简要（复述关系，便于阅读）
+    IMS --> NativeImpl
+    NativeImpl --> JNI
+    JNI --> NIM
+    NIM --> IM
+    IM --> ID
+    IM --> IR</pre>
 
 
 
-<h2 id="思维导图"><a href="#思维导图" class="headerlink" title="思维导图"></a>思维导图</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">mindmap</span><br><span class="line">  root((Input Stack))</span><br><span class="line">    Java</span><br><span class="line">      SystemServer.java</span><br><span class="line">      InputManagerService.java</span><br><span class="line">      NativeImpl</span><br><span class="line">    JNI</span><br><span class="line">      nativeInit call_once</span><br><span class="line">      mPtr jlong</span><br><span class="line">      nativeStart getNativeInputManager</span><br><span class="line">    Native</span><br><span class="line">      NativeInputManager</span><br><span class="line">      InputManager</span><br><span class="line">        InputDispatcher</span><br><span class="line">        InputReader</span><br><span class="line">          EventHub</span><br><span class="line">    Startup</span><br><span class="line">      init 构造对象</span><br><span class="line">      start 先 Dispatcher 再 Reader</span><br><span class="line">    Threading</span><br><span class="line">      Dispatcher 线程 dispatch loop</span><br><span class="line">      Reader 线程 read loop EventHub poll</span><br><span class="line">    FailureModes</span><br><span class="line">      Reader start 失败 停止 Dispatcher</span><br></pre></td></tr></table></figure>
+<h2 id="思维导图"><a href="#思维导图" class="headerlink" title="思维导图"></a>思维导图</h2><pre class="mermaid">mindmap
+  root((Input Stack))
+    Java
+      SystemServer.java
+      InputManagerService.java
+      NativeImpl
+    JNI
+      nativeInit call_once
+      mPtr jlong
+      nativeStart getNativeInputManager
+    Native
+      NativeInputManager
+      InputManager
+        InputDispatcher
+        InputReader
+          EventHub
+    Startup
+      init 构造对象
+      start 先 Dispatcher 再 Reader
+    Threading
+      Dispatcher 线程 dispatch loop
+      Reader 线程 read loop EventHub poll
+    FailureModes
+      Reader start 失败 停止 Dispatcher</pre>
 
 <p><a target="_blank" rel="noopener" href="https://blog.51cto.com/u_13424/13095230">https://blog.51cto.com/u_13424/13095230</a></p>
 <h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>ViewRootImpl 建立了一个 Java 层面的 InputChannel  对象，InputChannel 本质是一个 Unix domain socket 的一端，由 socketpair 创建。 InputDispatcher 和 ViewRootImpl 各持一端。</p>
@@ -1044,7 +1198,7 @@ window.addEventListener('pjax:success', () => {
 if (document.querySelectorAll('pre.mermaid').length) {
   NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
     mermaid.initialize({
-      theme    : 'forest',
+      theme    : 'default',
       logLevel : 3,
       flowchart: { curve     : 'linear' },
       gantt    : { axisFormat: '%m/%d/%Y' },

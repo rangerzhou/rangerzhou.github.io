@@ -569,7 +569,58 @@
 <td>视具体架构</td>
 </tr>
 </tbody></table>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br></pre></td><td class="code"><pre><span class="line">graph TD</span><br><span class="line">    subgraph High-Bandwidth &amp; Compute Domain [高速计算与信息娱乐域]</span><br><span class="line">        ADAS_ECU[高级驾驶辅助系统 ADAS ECU]</span><br><span class="line">        IVI_ECU[信息娱乐系统 IVI ECU]</span><br><span class="line">        DOMAIN_CTRL[域控制器 / 区域网关]</span><br><span class="line">        ADAS_ECU -- 以太网 (Ethernet) --&gt; CENTRAL_GATEWAY</span><br><span class="line">        IVI_ECU -- 以太网 (Ethernet) --&gt; CENTRAL_GATEWAY</span><br><span class="line">        DOMAIN_CTRL -- 以太网 (Ethernet) --&gt; CENTRAL_GATEWAY</span><br><span class="line">    end</span><br><span class="line"></span><br><span class="line">    subgraph Powertrain &amp; Chassis Domain [动力总成与底盘域]</span><br><span class="line">        ENGINE_ECU[发动机控制单元]</span><br><span class="line">        TRANS_ECU[变速箱控制单元]</span><br><span class="line">        BRAKE_ECU[制动控制单元]</span><br><span class="line">        STEER_ECU[转向系统ECU]</span><br><span class="line">        ENGINE_ECU -- CAN FD --&gt; CENTRAL_GATEWAY</span><br><span class="line">        TRANS_ECU -- CAN FD --&gt; CENTRAL_GATEWAY</span><br><span class="line">        BRAKE_ECU -- CAN FD --&gt; CENTRAL_GATEWAY</span><br><span class="line">        STEER_ECU -- CAN FD --&gt; CENTRAL_GATEWAY</span><br><span class="line">    end</span><br><span class="line"></span><br><span class="line">    subgraph Body &amp; Comfort Domain [车身与舒适域]</span><br><span class="line">        BCM_ECU[车身控制模块 BCM]</span><br><span class="line">        HVAC_ECU[空调控制单元]</span><br><span class="line">        DOOR_ECU_1[车门控制单元 1]</span><br><span class="line">        DOOR_ECU_2[车门控制单元 2]</span><br><span class="line">        BCM_ECU -- CAN FD --&gt; CENTRAL_GATEWAY</span><br><span class="line">        HVAC_ECU -- CAN FD --&gt; CENTRAL_GATEWAY</span><br><span class="line">        BCM_ECU -- LIN 总线 --&gt; DOOR_ECU_1</span><br><span class="line">        BCM_ECU -- LIN 总线 --&gt; DOOR_ECU_2</span><br><span class="line">    end</span><br><span class="line"></span><br><span class="line">    subgraph Diagnostic &amp; External Access [诊断与外部访问]</span><br><span class="line">        OBD_PORT[OBD-II 诊断端口]</span><br><span class="line">        OBD_PORT -- CAN FD / 以太网 --&gt; CENTRAL_GATEWAY</span><br><span class="line">    end</span><br><span class="line"></span><br><span class="line">    CENTRAL_GATEWAY(中央网关ECU)</span><br><span class="line"></span><br><span class="line">    style CENTRAL_GATEWAY fill:#FFD700,stroke:#B8860B,stroke-width:2px,font-weight:bold</span><br><span class="line">    style ADAS_ECU fill:#ADD8E6,stroke:#00008B,stroke-width:1px</span><br><span class="line">    style IVI_ECU fill:#ADD8E6,stroke:#00008B,stroke-width:1px</span><br><span class="line">    style DOMAIN_CTRL fill:#ADD8E6,stroke:#00008B,stroke-width:1px</span><br><span class="line">    style ENGINE_ECU fill:#90EE90,stroke:#228B22,stroke-width:1px</span><br><span class="line">    style TRANS_ECU fill:#90EE90,stroke:#228B22,stroke-width:1px</span><br><span class="line">    style BRAKE_ECU fill:#90EE90,stroke:#228B22,stroke-width:1px</span><br><span class="line">    style STEER_ECU fill:#90EE90,stroke:#228B22,stroke-width:1px</span><br><span class="line">    style BCM_ECU fill:#FFB6C1,stroke:#FF69B4,stroke-width:1px</span><br><span class="line">    style HVAC_ECU fill:#FFB6C1,stroke:#FF69B4,stroke-width:1px</span><br><span class="line">    style DOOR_ECU_1 fill:#DDA0DD,stroke:#9400D3,stroke-width:1px</span><br><span class="line">    style DOOR_ECU_2 fill:#DDA0DD,stroke:#9400D3,stroke-width:1px</span><br><span class="line">    style OBD_PORT fill:#E6E6FA,stroke:#8A2BE2,stroke-width:1px</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<pre class="mermaid">graph TD
+    subgraph High-Bandwidth & Compute Domain [高速计算与信息娱乐域]
+        ADAS_ECU[高级驾驶辅助系统 ADAS ECU]
+        IVI_ECU[信息娱乐系统 IVI ECU]
+        DOMAIN_CTRL[域控制器 / 区域网关]
+        ADAS_ECU -- 以太网 (Ethernet) --> CENTRAL_GATEWAY
+        IVI_ECU -- 以太网 (Ethernet) --> CENTRAL_GATEWAY
+        DOMAIN_CTRL -- 以太网 (Ethernet) --> CENTRAL_GATEWAY
+    end
+
+    subgraph Powertrain & Chassis Domain [动力总成与底盘域]
+        ENGINE_ECU[发动机控制单元]
+        TRANS_ECU[变速箱控制单元]
+        BRAKE_ECU[制动控制单元]
+        STEER_ECU[转向系统ECU]
+        ENGINE_ECU -- CAN FD --> CENTRAL_GATEWAY
+        TRANS_ECU -- CAN FD --> CENTRAL_GATEWAY
+        BRAKE_ECU -- CAN FD --> CENTRAL_GATEWAY
+        STEER_ECU -- CAN FD --> CENTRAL_GATEWAY
+    end
+
+    subgraph Body & Comfort Domain [车身与舒适域]
+        BCM_ECU[车身控制模块 BCM]
+        HVAC_ECU[空调控制单元]
+        DOOR_ECU_1[车门控制单元 1]
+        DOOR_ECU_2[车门控制单元 2]
+        BCM_ECU -- CAN FD --> CENTRAL_GATEWAY
+        HVAC_ECU -- CAN FD --> CENTRAL_GATEWAY
+        BCM_ECU -- LIN 总线 --> DOOR_ECU_1
+        BCM_ECU -- LIN 总线 --> DOOR_ECU_2
+    end
+
+    subgraph Diagnostic & External Access [诊断与外部访问]
+        OBD_PORT[OBD-II 诊断端口]
+        OBD_PORT -- CAN FD / 以太网 --> CENTRAL_GATEWAY
+    end
+
+    CENTRAL_GATEWAY(中央网关ECU)
+
+    style CENTRAL_GATEWAY fill:#FFD700,stroke:#B8860B,stroke-width:2px,font-weight:bold
+    style ADAS_ECU fill:#ADD8E6,stroke:#00008B,stroke-width:1px
+    style IVI_ECU fill:#ADD8E6,stroke:#00008B,stroke-width:1px
+    style DOMAIN_CTRL fill:#ADD8E6,stroke:#00008B,stroke-width:1px
+    style ENGINE_ECU fill:#90EE90,stroke:#228B22,stroke-width:1px
+    style TRANS_ECU fill:#90EE90,stroke:#228B22,stroke-width:1px
+    style BRAKE_ECU fill:#90EE90,stroke:#228B22,stroke-width:1px
+    style STEER_ECU fill:#90EE90,stroke:#228B22,stroke-width:1px
+    style BCM_ECU fill:#FFB6C1,stroke:#FF69B4,stroke-width:1px
+    style HVAC_ECU fill:#FFB6C1,stroke:#FF69B4,stroke-width:1px
+    style DOOR_ECU_1 fill:#DDA0DD,stroke:#9400D3,stroke-width:1px
+    style DOOR_ECU_2 fill:#DDA0DD,stroke:#9400D3,stroke-width:1px
+    style OBD_PORT fill:#E6E6FA,stroke:#8A2BE2,stroke-width:1px</pre>
 
 
     </div>
@@ -1038,7 +1089,7 @@ window.addEventListener('pjax:success', () => {
 if (document.querySelectorAll('pre.mermaid').length) {
   NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
     mermaid.initialize({
-      theme    : 'forest',
+      theme    : 'default',
       logLevel : 3,
       flowchart: { curve     : 'linear' },
       gantt    : { axisFormat: '%m/%d/%Y' },

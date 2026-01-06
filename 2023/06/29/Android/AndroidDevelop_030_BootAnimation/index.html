@@ -436,7 +436,19 @@
 <li>进入 <code>BootAnimation::threadLoop()</code> 并执行动画播放（<code>android()</code>或 <code>movie()</code>）</li>
 <li>播放完成或收到退出 -&gt; <code>threadLoop()</code> 返回 -&gt; 清理 -&gt; 线程退出</li>
 </ol>
-<h2 id="1-4-时序图"><a href="#1-4-时序图" class="headerlink" title="1.4 时序图"></a>1.4 时序图</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">sequenceDiagram</span><br><span class="line">init -&gt;&gt; property_service:StartPropertyService()</span><br><span class="line">property_service -&gt;&gt; property_service:StartThread()</span><br><span class="line">property_service -&gt;&gt; property_service:PropertyServiceThread()</span><br><span class="line">property_service -&gt;&gt; property_service:handle_property_set_fd()</span><br><span class="line">property_service -&gt;&gt; property_service:HandlePropertySet()</span><br><span class="line">property_service -&gt;&gt; property_service:SendControlMessage()</span><br><span class="line">property_service -&gt;&gt; init:QueueControlMessage()</span><br><span class="line">init -&gt;&gt; init:HandleControlMessages()</span><br><span class="line">bootanimation_main --&gt;&gt; BootAnimation:onFirstRef()</span><br><span class="line">bootanimation_main --&gt;&gt; BootAnimation:readyToRun()</span><br><span class="line">bootanimation_main --&gt;&gt; BootAnimation:threadLoop()</span><br><span class="line">BootAnimation -&gt;&gt; BootAnimation:movie()</span><br></pre></td></tr></table></figure>
+<h2 id="1-4-时序图"><a href="#1-4-时序图" class="headerlink" title="1.4 时序图"></a>1.4 时序图</h2><pre class="mermaid">sequenceDiagram
+init ->> property_service:StartPropertyService()
+property_service ->> property_service:StartThread()
+property_service ->> property_service:PropertyServiceThread()
+property_service ->> property_service:handle_property_set_fd()
+property_service ->> property_service:HandlePropertySet()
+property_service ->> property_service:SendControlMessage()
+property_service ->> init:QueueControlMessage()
+init ->> init:HandleControlMessages()
+bootanimation_main -->> BootAnimation:onFirstRef()
+bootanimation_main -->> BootAnimation:readyToRun()
+bootanimation_main -->> BootAnimation:threadLoop()
+BootAnimation ->> BootAnimation:movie()</pre>
 
 
     </div>
@@ -905,7 +917,7 @@ window.addEventListener('pjax:success', () => {
 if (document.querySelectorAll('pre.mermaid').length) {
   NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
     mermaid.initialize({
-      theme    : 'forest',
+      theme    : 'default',
       logLevel : 3,
       flowchart: { curve     : 'linear' },
       gantt    : { axisFormat: '%m/%d/%Y' },

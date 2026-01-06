@@ -330,7 +330,68 @@
 </li>
 <li>packages&#x2F;services&#x2F;Car&#x2F;car-lib：编译产物是 <code>system/framework/android.car.jar</code>，是对上层 Application 提供的 sdk</li>
 </ul>
-<h2 id="CarService-启动流程"><a href="#CarService-启动流程" class="headerlink" title="CarService 启动流程"></a>CarService 启动流程</h2><h3 id="时序图"><a href="#时序图" class="headerlink" title="时序图"></a>时序图</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br></pre></td><td class="code"><pre><span class="line">sequenceDiagram</span><br><span class="line">autonumber</span><br><span class="line">%% zygote 进程</span><br><span class="line">box transparent zygote</span><br><span class="line">participant ZygoteInit</span><br><span class="line">end</span><br><span class="line"></span><br><span class="line">%% system_server 进程</span><br><span class="line">box transparent system_server</span><br><span class="line">participant SystemServer</span><br><span class="line">participant SystemServiceManager</span><br><span class="line">participant CarServiceHelperService</span><br><span class="line">participant CarServiceHelperServiceUpdatableImpl</span><br><span class="line">participant SystemServer</span><br><span class="line">end</span><br><span class="line"></span><br><span class="line">%% com.android.car 进程</span><br><span class="line">%% packages/services/Car/service-builtin</span><br><span class="line">box transparent com.android.car</span><br><span class="line">participant CarService</span><br><span class="line">participant ServiceProxy</span><br><span class="line">end</span><br><span class="line"></span><br><span class="line">%% 同样属于 com.android.car 进程</span><br><span class="line">%% packages/services/Car/service</span><br><span class="line">box transparent com.android.car.updatable</span><br><span class="line">participant CarServiceImpl</span><br><span class="line">participant ICarImpl</span><br><span class="line">participant CarSystemService</span><br><span class="line">participant CarPropertyService</span><br><span class="line">participant PropertyHalService</span><br><span class="line">end</span><br><span class="line"></span><br><span class="line">ZygoteInit --&gt;&gt; SystemServer:main()</span><br><span class="line">SystemServer -&gt;&gt; SystemServer:run()</span><br><span class="line">SystemServer -&gt;&gt; SystemServer:startOtherServices()</span><br><span class="line">%% Note over SystemServiceManager:根据className反射获取Class</span><br><span class="line">SystemServer -&gt;&gt; SystemServiceManager:startService(CAR_SERVICE_HELPER_SERVICE_CLASS)</span><br><span class="line">%% Note over SystemServiceManager:根据Class反射获取构造方法并创建对象</span><br><span class="line">SystemServiceManager -&gt;&gt; SystemServiceManager:startService(Class&lt;T&gt;)</span><br><span class="line">SystemServiceManager -&gt;&gt; SystemServiceManager:startService(CarServiceHelperService)</span><br><span class="line">SystemServiceManager -&gt;&gt; CarServiceHelperService:onStart()</span><br><span class="line">CarServiceHelperService -&gt;&gt; CarServiceHelperServiceUpdatableImpl:onStart()</span><br><span class="line"></span><br><span class="line">%% 根据包名 com.android.car 查找 Action(android.car.ICar)，对应的是 CarService，再通过 bindService 启动 CarService</span><br><span class="line">CarServiceHelperServiceUpdatableImpl -&gt;&gt; CarService:CarService()</span><br><span class="line">%% 调用父类 ServiceProxy 的构造函数并传入参数 &quot;com.android.car.CarServiceImpl&quot;</span><br><span class="line">CarService -&gt;&gt; ServiceProxy:ServiceProxy()</span><br><span class="line">ServiceProxy -&gt;&gt; ServiceProxy:onCreate()</span><br><span class="line"></span><br><span class="line">%% 根据 ClassName 反射获取 CarServiceImpl 对象</span><br><span class="line">ServiceProxy -&gt;&gt; ServiceProxy:init()</span><br><span class="line">ServiceProxy -&gt;&gt; CarServiceImpl:onCreate()</span><br><span class="line">ICarImpl -&gt;&gt; ICarImpl:ICarImpl()</span><br><span class="line">%% 创建各个 CarXXXService 以及 VehicleHal 对象，并添加到 CarSystemService[] mAllServices 中</span><br><span class="line">ICarImpl -&gt;&gt; ICarImpl:constructWithTrace()</span><br><span class="line">CarServiceImpl -&gt;&gt; ICarImpl:init()</span><br><span class="line">Note over ICarImpl,CarSystemService:对 mAllServices 逐个执行 init()</span><br><span class="line">%% 以 CarPropertyService 为例</span><br><span class="line">ICarImpl -&gt;&gt; CarPropertyService:init()</span><br><span class="line">Note over CarPropertyService,PropertyHalService:注册Listener监听属性值变化</span><br><span class="line">CarPropertyService -&gt;&gt; PropertyHalService:setPropertyHalListener()</span><br></pre></td></tr></table></figure>
+<h2 id="CarService-启动流程"><a href="#CarService-启动流程" class="headerlink" title="CarService 启动流程"></a>CarService 启动流程</h2><h3 id="时序图"><a href="#时序图" class="headerlink" title="时序图"></a>时序图</h3><pre class="mermaid">sequenceDiagram
+autonumber
+%% zygote 进程
+box transparent zygote
+participant ZygoteInit
+end
+
+%% system_server 进程
+box transparent system_server
+participant SystemServer
+participant SystemServiceManager
+participant CarServiceHelperService
+participant CarServiceHelperServiceUpdatableImpl
+participant SystemServer
+end
+
+%% com.android.car 进程
+%% packages/services/Car/service-builtin
+box transparent com.android.car
+participant CarService
+participant ServiceProxy
+end
+
+%% 同样属于 com.android.car 进程
+%% packages/services/Car/service
+box transparent com.android.car.updatable
+participant CarServiceImpl
+participant ICarImpl
+participant CarSystemService
+participant CarPropertyService
+participant PropertyHalService
+end
+
+ZygoteInit -->> SystemServer:main()
+SystemServer ->> SystemServer:run()
+SystemServer ->> SystemServer:startOtherServices()
+%% Note over SystemServiceManager:根据className反射获取Class
+SystemServer ->> SystemServiceManager:startService(CAR_SERVICE_HELPER_SERVICE_CLASS)
+%% Note over SystemServiceManager:根据Class反射获取构造方法并创建对象
+SystemServiceManager ->> SystemServiceManager:startService(Class<T>)
+SystemServiceManager ->> SystemServiceManager:startService(CarServiceHelperService)
+SystemServiceManager ->> CarServiceHelperService:onStart()
+CarServiceHelperService ->> CarServiceHelperServiceUpdatableImpl:onStart()
+
+%% 根据包名 com.android.car 查找 Action(android.car.ICar)，对应的是 CarService，再通过 bindService 启动 CarService
+CarServiceHelperServiceUpdatableImpl ->> CarService:CarService()
+%% 调用父类 ServiceProxy 的构造函数并传入参数 "com.android.car.CarServiceImpl"
+CarService ->> ServiceProxy:ServiceProxy()
+ServiceProxy ->> ServiceProxy:onCreate()
+
+%% 根据 ClassName 反射获取 CarServiceImpl 对象
+ServiceProxy ->> ServiceProxy:init()
+ServiceProxy ->> CarServiceImpl:onCreate()
+ICarImpl ->> ICarImpl:ICarImpl()
+%% 创建各个 CarXXXService 以及 VehicleHal 对象，并添加到 CarSystemService[] mAllServices 中
+ICarImpl ->> ICarImpl:constructWithTrace()
+CarServiceImpl ->> ICarImpl:init()
+Note over ICarImpl,CarSystemService:对 mAllServices 逐个执行 init()
+%% 以 CarPropertyService 为例
+ICarImpl ->> CarPropertyService:init()
+Note over CarPropertyService,PropertyHalService:注册Listener监听属性值变化
+CarPropertyService ->> PropertyHalService:setPropertyHalListener()</pre>
 
 <h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p><strong>system_server 进程</strong></p>
 <ul>
@@ -348,7 +409,45 @@
 </ul>
 </li>
 </ul>
-<h2 id="设置车窗示例"><a href="#设置车窗示例" class="headerlink" title="设置车窗示例"></a>设置车窗示例</h2><h3 id="时序图-1"><a href="#时序图-1" class="headerlink" title="时序图"></a>时序图</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line">sequenceDiagram</span><br><span class="line">autonumber</span><br><span class="line">box transparent app</span><br><span class="line">participant app</span><br><span class="line">end</span><br><span class="line"></span><br><span class="line">%% car-lib</span><br><span class="line">box transparent android.car.jar</span><br><span class="line">participant CarPropertyManager</span><br><span class="line">end</span><br><span class="line"></span><br><span class="line">%% CarService</span><br><span class="line">box transparent CarService(com.android.car.updatable)</span><br><span class="line">participant CarPropertyService</span><br><span class="line">participant PropertyHalService</span><br><span class="line">participant VehicleHal</span><br><span class="line">participant AidlVehicleStub</span><br><span class="line">end</span><br><span class="line"></span><br><span class="line">%% HAL</span><br><span class="line">box transparent HAL</span><br><span class="line">participant DefaultVehicleHal</span><br><span class="line">participant IVehicleHardware</span><br><span class="line">end</span><br><span class="line"></span><br><span class="line">app -&gt;&gt; CarPropertyManager:setProperty()</span><br><span class="line">Note over CarPropertyManager, CarPropertyService:---&gt; AIDL</span><br><span class="line">CarPropertyManager -&gt;&gt; CarPropertyService:setProperty()</span><br><span class="line">CarPropertyService -&gt;&gt; PropertyHalService:setProperty()</span><br><span class="line">PropertyHalService -&gt;&gt; VehicleHal:set()</span><br><span class="line">VehicleHal -&gt;&gt; VehicleHal:setValueWithRetry()</span><br><span class="line">VehicleHal -&gt;&gt; AidlVehicleStub:set()</span><br><span class="line">AidlVehicleStub -&gt;&gt; AidlVehicleStub:getOrSetSync()</span><br><span class="line">AidlVehicleStub -&gt;&gt; AidlVehicleStub:AsyncSetRequestsHandler.sendRequestsToVhal()</span><br><span class="line">Note over AidlVehicleStub, DefaultVehicleHal:---&gt; AIDL</span><br><span class="line">AidlVehicleStub -&gt;&gt; DefaultVehicleHal:setValues()</span><br><span class="line">DefaultVehicleHal -&gt;&gt; IVehicleHardware:setValues()</span><br><span class="line">IVehicleHardware -&gt;&gt; Kernel:syscall()</span><br><span class="line">Kernel -&gt;&gt; WindowECU:CAN</span><br></pre></td></tr></table></figure>
+<h2 id="设置车窗示例"><a href="#设置车窗示例" class="headerlink" title="设置车窗示例"></a>设置车窗示例</h2><h3 id="时序图-1"><a href="#时序图-1" class="headerlink" title="时序图"></a>时序图</h3><pre class="mermaid">sequenceDiagram
+autonumber
+box transparent app
+participant app
+end
+
+%% car-lib
+box transparent android.car.jar
+participant CarPropertyManager
+end
+
+%% CarService
+box transparent CarService(com.android.car.updatable)
+participant CarPropertyService
+participant PropertyHalService
+participant VehicleHal
+participant AidlVehicleStub
+end
+
+%% HAL
+box transparent HAL
+participant DefaultVehicleHal
+participant IVehicleHardware
+end
+
+app ->> CarPropertyManager:setProperty()
+Note over CarPropertyManager, CarPropertyService:---> AIDL
+CarPropertyManager ->> CarPropertyService:setProperty()
+CarPropertyService ->> PropertyHalService:setProperty()
+PropertyHalService ->> VehicleHal:set()
+VehicleHal ->> VehicleHal:setValueWithRetry()
+VehicleHal ->> AidlVehicleStub:set()
+AidlVehicleStub ->> AidlVehicleStub:getOrSetSync()
+AidlVehicleStub ->> AidlVehicleStub:AsyncSetRequestsHandler.sendRequestsToVhal()
+Note over AidlVehicleStub, DefaultVehicleHal:---> AIDL
+AidlVehicleStub ->> DefaultVehicleHal:setValues()
+DefaultVehicleHal ->> IVehicleHardware:setValues()
+IVehicleHardware ->> Kernel:syscall()
+Kernel ->> WindowECU:CAN</pre>
 
 
 
@@ -894,7 +993,7 @@ window.addEventListener('pjax:success', () => {
 if (document.querySelectorAll('pre.mermaid').length) {
   NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
     mermaid.initialize({
-      theme    : 'forest',
+      theme    : 'default',
       logLevel : 3,
       flowchart: { curve     : 'linear' },
       gantt    : { axisFormat: '%m/%d/%Y' },

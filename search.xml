@@ -9,11 +9,83 @@
 </blockquote>
 <span id="more"></span>
 
-<h1 id="时序图"><a href="#时序图" class="headerlink" title="时序图"></a>时序图</h1><h2 id="绑定-ImageWallpaper"><a href="#绑定-ImageWallpaper" class="headerlink" title="绑定 ImageWallpaper"></a>绑定 ImageWallpaper</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">sequenceDiagram</span><br><span class="line">autonumber</span><br><span class="line">box Lavender system_server</span><br><span class="line">participant SystemServer</span><br><span class="line">participant SystemServiceManager</span><br><span class="line">participant WallpaperManagerService.Lifecycle</span><br><span class="line">participant WallpaperManagerService</span><br><span class="line">participant AMS</span><br><span class="line">participant WindowManagerInternal</span><br><span class="line">end</span><br><span class="line"></span><br><span class="line">box LightYellow SystemUI</span><br><span class="line">participant ImageWallpaper</span><br><span class="line">participant WallpaperService</span><br><span class="line">end</span><br><span class="line"></span><br><span class="line">SystemServer -&gt;&gt; SystemServer:startOtherServices()</span><br><span class="line">SystemServer -&gt;&gt; SystemServiceManager:startService()</span><br><span class="line">SystemServiceManager -&gt;&gt; WallpaperManagerService.Lifecycle:onStart()</span><br><span class="line">Note right of WallpaperManagerService.Lifecycle:创建 WallpaperManagerService 对象</span><br><span class="line">WallpaperManagerService.Lifecycle -&gt;&gt; WallpaperManagerService:new WallpaperManagerService()</span><br><span class="line">SystemServer -&gt;&gt; SystemServiceManager:startBootPhase(PHASE_ACTIVITY_MANAGER_READY)</span><br><span class="line">SystemServiceManager -&gt;&gt; WallpaperManagerService.Lifecycle:startBootPhase()</span><br><span class="line">WallpaperManagerService.Lifecycle -&gt;&gt; WallpaperManagerService:startBootPhase()</span><br><span class="line">WallpaperManagerService -&gt;&gt; WallpaperManagerService:systemReady()</span><br><span class="line">WallpaperManagerService -&gt;&gt; WallpaperManagerService:initialize()</span><br><span class="line">WallpaperManagerService -&gt;&gt; WallpaperManagerService:loadSettingsLocked()</span><br><span class="line">WallpaperManagerService -&gt;&gt; WallpaperManagerService:initializeFallbackWallpaper()</span><br><span class="line">WallpaperManagerService -&gt;&gt; WallpaperManagerService:bindWallpaperComponentLocked()</span><br><span class="line">WallpaperManagerService -&gt;&gt; WallpaperManagerService:bindWallpaperDescriptionLocked()</span><br><span class="line">Note right of WallpaperManagerService:绑定 ImageWallpaper 服务</span><br><span class="line">WallpaperManagerService -&gt;&gt; ImageWallpaper:bindServiceAsUser()</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h1 id="时序图"><a href="#时序图" class="headerlink" title="时序图"></a>时序图</h1><h2 id="绑定-ImageWallpaper"><a href="#绑定-ImageWallpaper" class="headerlink" title="绑定 ImageWallpaper"></a>绑定 ImageWallpaper</h2><pre class="mermaid">sequenceDiagram
+autonumber
+box Lavender system_server
+participant SystemServer
+participant SystemServiceManager
+participant WallpaperManagerService.Lifecycle
+participant WallpaperManagerService
+participant AMS
+participant WindowManagerInternal
+end
+
+box LightYellow SystemUI
+participant ImageWallpaper
+participant WallpaperService
+end
+
+SystemServer ->> SystemServer:startOtherServices()
+SystemServer ->> SystemServiceManager:startService()
+SystemServiceManager ->> WallpaperManagerService.Lifecycle:onStart()
+Note right of WallpaperManagerService.Lifecycle:创建 WallpaperManagerService 对象
+WallpaperManagerService.Lifecycle ->> WallpaperManagerService:new WallpaperManagerService()
+SystemServer ->> SystemServiceManager:startBootPhase(PHASE_ACTIVITY_MANAGER_READY)
+SystemServiceManager ->> WallpaperManagerService.Lifecycle:startBootPhase()
+WallpaperManagerService.Lifecycle ->> WallpaperManagerService:startBootPhase()
+WallpaperManagerService ->> WallpaperManagerService:systemReady()
+WallpaperManagerService ->> WallpaperManagerService:initialize()
+WallpaperManagerService ->> WallpaperManagerService:loadSettingsLocked()
+WallpaperManagerService ->> WallpaperManagerService:initializeFallbackWallpaper()
+WallpaperManagerService ->> WallpaperManagerService:bindWallpaperComponentLocked()
+WallpaperManagerService ->> WallpaperManagerService:bindWallpaperDescriptionLocked()
+Note right of WallpaperManagerService:绑定 ImageWallpaper 服务
+WallpaperManagerService ->> ImageWallpaper:bindServiceAsUser()</pre>
 
 
 
-<h2 id="attach-x2F-relayout-x2F-finishDrawing"><a href="#attach-x2F-relayout-x2F-finishDrawing" class="headerlink" title="attach()&#x2F;relayout()&#x2F;finishDrawing()"></a>attach()&#x2F;relayout()&#x2F;finishDrawing()</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">sequenceDiagram</span><br><span class="line">autonumber</span><br><span class="line">box Lavender system_server</span><br><span class="line">participant WallpaperManagerService</span><br><span class="line">participant AMS</span><br><span class="line">participant WindowManagerInternal</span><br><span class="line">participant Session</span><br><span class="line">participant WindowManagerService</span><br><span class="line">end</span><br><span class="line"></span><br><span class="line">box LightYellow SystemUI</span><br><span class="line">participant ImageWallpaper</span><br><span class="line">participant WallpaperService</span><br><span class="line">end</span><br><span class="line"></span><br><span class="line">AMS --&gt;&gt; WallpaperManagerService:WallpaperConnection:onServiceConnected()</span><br><span class="line">WallpaperManagerService -&gt;&gt; WallpaperManagerService:attachServiceLocked()</span><br><span class="line">WallpaperManagerService -&gt;&gt; WallpaperManagerService:DisplayConnector.connectLocked()</span><br><span class="line">Note over WallpaperManagerService, WindowManagerInternal:创建 WindowToken，并且传入 IWallpaperServiceWrapper/IWallpaperEngineWrapper/Engine</span><br><span class="line">WallpaperManagerService -&gt;&gt; WindowManagerInternal:addWindowToken()</span><br><span class="line">WallpaperManagerService -&gt;&gt; WallpaperService:IWallpaperServiceWrapper.attach()</span><br><span class="line">WallpaperService -&gt;&gt; WallpaperService:IWallpaperEngineWrapper.IWallpaperEngineWrapper()</span><br><span class="line">WallpaperService -&gt;&gt; WallpaperService:IWallpaperEngineWrapper.executeMessage(DO_ATTACH)</span><br><span class="line">WallpaperService -&gt;&gt; WallpaperService:IWallpaperEngineWrapper.doAttachEngine()</span><br><span class="line">WallpaperService --&gt;&gt; WallpaperManagerService:WallpaperConnection.attachEngine()</span><br><span class="line">Note over WallpaperManagerService, WallpaperService:一系列操作</span><br><span class="line">WallpaperManagerService -&gt;&gt; WallpaperService:IWallpaperEngineWrapper.setInAmbientMode()</span><br><span class="line">WallpaperManagerService -&gt;&gt; WallpaperService:IWallpaperEngineWrapper.requestWallpaperColors()</span><br><span class="line">WallpaperManagerService -&gt;&gt; WallpaperService:IWallpaperEngineWrapper.addLocalColorsAreas()</span><br><span class="line">WallpaperManagerService -&gt;&gt; WallpaperService:IWallpaperEngineWrapper.applyDimming()</span><br><span class="line">Note over WallpaperService, WallpaperService:调用 Engine.attach()</span><br><span class="line">WallpaperService -&gt;&gt; WallpaperService:Engine.attach()</span><br><span class="line">WallpaperService -&gt;&gt; WallpaperService:Engine.updateSurface()</span><br><span class="line">Note over WallpaperService, Session:1.创建 WindowState</span><br><span class="line">WallpaperService -&gt;&gt; Session:addToDisplay()</span><br><span class="line">Session -&gt;&gt; WindowManagerService:addWindow()</span><br><span class="line">Note over WallpaperService, Session:2.创建 Surface</span><br><span class="line">WallpaperService -&gt;&gt; Session:relayout()</span><br><span class="line">Session -&gt;&gt; WindowManagerService:relayoutWindow()</span><br><span class="line">Note over WallpaperService, Session:3.客户端告知 WMS 我已经绘制完成</span><br><span class="line">WallpaperService -&gt;&gt; Session:finishDrawing()</span><br><span class="line">Session -&gt;&gt; WindowManagerService:finishDrawingWindow()</span><br></pre></td></tr></table></figure>
+<h2 id="attach-x2F-relayout-x2F-finishDrawing"><a href="#attach-x2F-relayout-x2F-finishDrawing" class="headerlink" title="attach()&#x2F;relayout()&#x2F;finishDrawing()"></a>attach()&#x2F;relayout()&#x2F;finishDrawing()</h2><pre class="mermaid">sequenceDiagram
+autonumber
+box Lavender system_server
+participant WallpaperManagerService
+participant AMS
+participant WindowManagerInternal
+participant Session
+participant WindowManagerService
+end
+
+box LightYellow SystemUI
+participant ImageWallpaper
+participant WallpaperService
+end
+
+AMS -->> WallpaperManagerService:WallpaperConnection:onServiceConnected()
+WallpaperManagerService ->> WallpaperManagerService:attachServiceLocked()
+WallpaperManagerService ->> WallpaperManagerService:DisplayConnector.connectLocked()
+Note over WallpaperManagerService, WindowManagerInternal:创建 WindowToken，并且传入 IWallpaperServiceWrapper/IWallpaperEngineWrapper/Engine
+WallpaperManagerService ->> WindowManagerInternal:addWindowToken()
+WallpaperManagerService ->> WallpaperService:IWallpaperServiceWrapper.attach()
+WallpaperService ->> WallpaperService:IWallpaperEngineWrapper.IWallpaperEngineWrapper()
+WallpaperService ->> WallpaperService:IWallpaperEngineWrapper.executeMessage(DO_ATTACH)
+WallpaperService ->> WallpaperService:IWallpaperEngineWrapper.doAttachEngine()
+WallpaperService -->> WallpaperManagerService:WallpaperConnection.attachEngine()
+Note over WallpaperManagerService, WallpaperService:一系列操作
+WallpaperManagerService ->> WallpaperService:IWallpaperEngineWrapper.setInAmbientMode()
+WallpaperManagerService ->> WallpaperService:IWallpaperEngineWrapper.requestWallpaperColors()
+WallpaperManagerService ->> WallpaperService:IWallpaperEngineWrapper.addLocalColorsAreas()
+WallpaperManagerService ->> WallpaperService:IWallpaperEngineWrapper.applyDimming()
+Note over WallpaperService, WallpaperService:调用 Engine.attach()
+WallpaperService ->> WallpaperService:Engine.attach()
+WallpaperService ->> WallpaperService:Engine.updateSurface()
+Note over WallpaperService, Session:1.创建 WindowState
+WallpaperService ->> Session:addToDisplay()
+Session ->> WindowManagerService:addWindow()
+Note over WallpaperService, Session:2.创建 Surface
+WallpaperService ->> Session:relayout()
+Session ->> WindowManagerService:relayoutWindow()
+Note over WallpaperService, Session:3.客户端告知 WMS 我已经绘制完成
+WallpaperService ->> Session:finishDrawing()
+Session ->> WindowManagerService:finishDrawingWindow()</pre>
 
 
 
@@ -53,7 +125,68 @@
 </li>
 <li>packages&#x2F;services&#x2F;Car&#x2F;car-lib：编译产物是 <code>system/framework/android.car.jar</code>，是对上层 Application 提供的 sdk</li>
 </ul>
-<h2 id="CarService-启动流程"><a href="#CarService-启动流程" class="headerlink" title="CarService 启动流程"></a>CarService 启动流程</h2><h3 id="时序图"><a href="#时序图" class="headerlink" title="时序图"></a>时序图</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">sequenceDiagram</span><br><span class="line">autonumber</span><br><span class="line">%% zygote 进程</span><br><span class="line">box transparent zygote</span><br><span class="line">participant ZygoteInit</span><br><span class="line">end</span><br><span class="line"></span><br><span class="line">%% system_server 进程</span><br><span class="line">box transparent system_server</span><br><span class="line">participant SystemServer</span><br><span class="line">participant SystemServiceManager</span><br><span class="line">participant CarServiceHelperService</span><br><span class="line">participant CarServiceHelperServiceUpdatableImpl</span><br><span class="line">participant SystemServer</span><br><span class="line">end</span><br><span class="line"></span><br><span class="line">%% com.android.car 进程</span><br><span class="line">%% packages/services/Car/service-builtin</span><br><span class="line">box transparent com.android.car</span><br><span class="line">participant CarService</span><br><span class="line">participant ServiceProxy</span><br><span class="line">end</span><br><span class="line"></span><br><span class="line">%% 同样属于 com.android.car 进程</span><br><span class="line">%% packages/services/Car/service</span><br><span class="line">box transparent com.android.car.updatable</span><br><span class="line">participant CarServiceImpl</span><br><span class="line">participant ICarImpl</span><br><span class="line">participant CarSystemService</span><br><span class="line">participant CarPropertyService</span><br><span class="line">participant PropertyHalService</span><br><span class="line">end</span><br><span class="line"></span><br><span class="line">ZygoteInit --&gt;&gt; SystemServer:main()</span><br><span class="line">SystemServer -&gt;&gt; SystemServer:run()</span><br><span class="line">SystemServer -&gt;&gt; SystemServer:startOtherServices()</span><br><span class="line">%% Note over SystemServiceManager:根据className反射获取Class</span><br><span class="line">SystemServer -&gt;&gt; SystemServiceManager:startService(CAR_SERVICE_HELPER_SERVICE_CLASS)</span><br><span class="line">%% Note over SystemServiceManager:根据Class反射获取构造方法并创建对象</span><br><span class="line">SystemServiceManager -&gt;&gt; SystemServiceManager:startService(Class&lt;T&gt;)</span><br><span class="line">SystemServiceManager -&gt;&gt; SystemServiceManager:startService(CarServiceHelperService)</span><br><span class="line">SystemServiceManager -&gt;&gt; CarServiceHelperService:onStart()</span><br><span class="line">CarServiceHelperService -&gt;&gt; CarServiceHelperServiceUpdatableImpl:onStart()</span><br><span class="line"></span><br><span class="line">%% 根据包名 com.android.car 查找 Action(android.car.ICar)，对应的是 CarService，再通过 bindService 启动 CarService</span><br><span class="line">CarServiceHelperServiceUpdatableImpl -&gt;&gt; CarService:CarService()</span><br><span class="line">%% 调用父类 ServiceProxy 的构造函数并传入参数 &quot;com.android.car.CarServiceImpl&quot;</span><br><span class="line">CarService -&gt;&gt; ServiceProxy:ServiceProxy()</span><br><span class="line">ServiceProxy -&gt;&gt; ServiceProxy:onCreate()</span><br><span class="line"></span><br><span class="line">%% 根据 ClassName 反射获取 CarServiceImpl 对象</span><br><span class="line">ServiceProxy -&gt;&gt; ServiceProxy:init()</span><br><span class="line">ServiceProxy -&gt;&gt; CarServiceImpl:onCreate()</span><br><span class="line">ICarImpl -&gt;&gt; ICarImpl:ICarImpl()</span><br><span class="line">%% 创建各个 CarXXXService 以及 VehicleHal 对象，并添加到 CarSystemService[] mAllServices 中</span><br><span class="line">ICarImpl -&gt;&gt; ICarImpl:constructWithTrace()</span><br><span class="line">CarServiceImpl -&gt;&gt; ICarImpl:init()</span><br><span class="line">Note over ICarImpl,CarSystemService:对 mAllServices 逐个执行 init()</span><br><span class="line">%% 以 CarPropertyService 为例</span><br><span class="line">ICarImpl -&gt;&gt; CarPropertyService:init()</span><br><span class="line">Note over CarPropertyService,PropertyHalService:注册Listener监听属性值变化</span><br><span class="line">CarPropertyService -&gt;&gt; PropertyHalService:setPropertyHalListener()</span><br></pre></td></tr></table></figure>
+<h2 id="CarService-启动流程"><a href="#CarService-启动流程" class="headerlink" title="CarService 启动流程"></a>CarService 启动流程</h2><h3 id="时序图"><a href="#时序图" class="headerlink" title="时序图"></a>时序图</h3><pre class="mermaid">sequenceDiagram
+autonumber
+%% zygote 进程
+box transparent zygote
+participant ZygoteInit
+end
+
+%% system_server 进程
+box transparent system_server
+participant SystemServer
+participant SystemServiceManager
+participant CarServiceHelperService
+participant CarServiceHelperServiceUpdatableImpl
+participant SystemServer
+end
+
+%% com.android.car 进程
+%% packages/services/Car/service-builtin
+box transparent com.android.car
+participant CarService
+participant ServiceProxy
+end
+
+%% 同样属于 com.android.car 进程
+%% packages/services/Car/service
+box transparent com.android.car.updatable
+participant CarServiceImpl
+participant ICarImpl
+participant CarSystemService
+participant CarPropertyService
+participant PropertyHalService
+end
+
+ZygoteInit -->> SystemServer:main()
+SystemServer ->> SystemServer:run()
+SystemServer ->> SystemServer:startOtherServices()
+%% Note over SystemServiceManager:根据className反射获取Class
+SystemServer ->> SystemServiceManager:startService(CAR_SERVICE_HELPER_SERVICE_CLASS)
+%% Note over SystemServiceManager:根据Class反射获取构造方法并创建对象
+SystemServiceManager ->> SystemServiceManager:startService(Class<T>)
+SystemServiceManager ->> SystemServiceManager:startService(CarServiceHelperService)
+SystemServiceManager ->> CarServiceHelperService:onStart()
+CarServiceHelperService ->> CarServiceHelperServiceUpdatableImpl:onStart()
+
+%% 根据包名 com.android.car 查找 Action(android.car.ICar)，对应的是 CarService，再通过 bindService 启动 CarService
+CarServiceHelperServiceUpdatableImpl ->> CarService:CarService()
+%% 调用父类 ServiceProxy 的构造函数并传入参数 "com.android.car.CarServiceImpl"
+CarService ->> ServiceProxy:ServiceProxy()
+ServiceProxy ->> ServiceProxy:onCreate()
+
+%% 根据 ClassName 反射获取 CarServiceImpl 对象
+ServiceProxy ->> ServiceProxy:init()
+ServiceProxy ->> CarServiceImpl:onCreate()
+ICarImpl ->> ICarImpl:ICarImpl()
+%% 创建各个 CarXXXService 以及 VehicleHal 对象，并添加到 CarSystemService[] mAllServices 中
+ICarImpl ->> ICarImpl:constructWithTrace()
+CarServiceImpl ->> ICarImpl:init()
+Note over ICarImpl,CarSystemService:对 mAllServices 逐个执行 init()
+%% 以 CarPropertyService 为例
+ICarImpl ->> CarPropertyService:init()
+Note over CarPropertyService,PropertyHalService:注册Listener监听属性值变化
+CarPropertyService ->> PropertyHalService:setPropertyHalListener()</pre>
 
 <h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p><strong>system_server 进程</strong></p>
 <ul>
@@ -71,7 +204,45 @@
 </ul>
 </li>
 </ul>
-<h2 id="设置车窗示例"><a href="#设置车窗示例" class="headerlink" title="设置车窗示例"></a>设置车窗示例</h2><h3 id="时序图-1"><a href="#时序图-1" class="headerlink" title="时序图"></a>时序图</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">sequenceDiagram</span><br><span class="line">autonumber</span><br><span class="line">box transparent app</span><br><span class="line">participant app</span><br><span class="line">end</span><br><span class="line"></span><br><span class="line">%% car-lib</span><br><span class="line">box transparent android.car.jar</span><br><span class="line">participant CarPropertyManager</span><br><span class="line">end</span><br><span class="line"></span><br><span class="line">%% CarService</span><br><span class="line">box transparent CarService(com.android.car.updatable)</span><br><span class="line">participant CarPropertyService</span><br><span class="line">participant PropertyHalService</span><br><span class="line">participant VehicleHal</span><br><span class="line">participant AidlVehicleStub</span><br><span class="line">end</span><br><span class="line"></span><br><span class="line">%% HAL</span><br><span class="line">box transparent HAL</span><br><span class="line">participant DefaultVehicleHal</span><br><span class="line">participant IVehicleHardware</span><br><span class="line">end</span><br><span class="line"></span><br><span class="line">app -&gt;&gt; CarPropertyManager:setProperty()</span><br><span class="line">Note over CarPropertyManager, CarPropertyService:---&gt; AIDL</span><br><span class="line">CarPropertyManager -&gt;&gt; CarPropertyService:setProperty()</span><br><span class="line">CarPropertyService -&gt;&gt; PropertyHalService:setProperty()</span><br><span class="line">PropertyHalService -&gt;&gt; VehicleHal:set()</span><br><span class="line">VehicleHal -&gt;&gt; VehicleHal:setValueWithRetry()</span><br><span class="line">VehicleHal -&gt;&gt; AidlVehicleStub:set()</span><br><span class="line">AidlVehicleStub -&gt;&gt; AidlVehicleStub:getOrSetSync()</span><br><span class="line">AidlVehicleStub -&gt;&gt; AidlVehicleStub:AsyncSetRequestsHandler.sendRequestsToVhal()</span><br><span class="line">Note over AidlVehicleStub, DefaultVehicleHal:---&gt; AIDL</span><br><span class="line">AidlVehicleStub -&gt;&gt; DefaultVehicleHal:setValues()</span><br><span class="line">DefaultVehicleHal -&gt;&gt; IVehicleHardware:setValues()</span><br><span class="line">IVehicleHardware -&gt;&gt; Kernel:syscall()</span><br><span class="line">Kernel -&gt;&gt; WindowECU:CAN</span><br></pre></td></tr></table></figure>
+<h2 id="设置车窗示例"><a href="#设置车窗示例" class="headerlink" title="设置车窗示例"></a>设置车窗示例</h2><h3 id="时序图-1"><a href="#时序图-1" class="headerlink" title="时序图"></a>时序图</h3><pre class="mermaid">sequenceDiagram
+autonumber
+box transparent app
+participant app
+end
+
+%% car-lib
+box transparent android.car.jar
+participant CarPropertyManager
+end
+
+%% CarService
+box transparent CarService(com.android.car.updatable)
+participant CarPropertyService
+participant PropertyHalService
+participant VehicleHal
+participant AidlVehicleStub
+end
+
+%% HAL
+box transparent HAL
+participant DefaultVehicleHal
+participant IVehicleHardware
+end
+
+app ->> CarPropertyManager:setProperty()
+Note over CarPropertyManager, CarPropertyService:---> AIDL
+CarPropertyManager ->> CarPropertyService:setProperty()
+CarPropertyService ->> PropertyHalService:setProperty()
+PropertyHalService ->> VehicleHal:set()
+VehicleHal ->> VehicleHal:setValueWithRetry()
+VehicleHal ->> AidlVehicleStub:set()
+AidlVehicleStub ->> AidlVehicleStub:getOrSetSync()
+AidlVehicleStub ->> AidlVehicleStub:AsyncSetRequestsHandler.sendRequestsToVhal()
+Note over AidlVehicleStub, DefaultVehicleHal:---> AIDL
+AidlVehicleStub ->> DefaultVehicleHal:setValues()
+DefaultVehicleHal ->> IVehicleHardware:setValues()
+IVehicleHardware ->> Kernel:syscall()
+Kernel ->> WindowECU:CAN</pre>
 
 
 
@@ -576,7 +747,58 @@
 <td>视具体架构</td>
 </tr>
 </tbody></table>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">graph TD</span><br><span class="line">    subgraph High-Bandwidth &amp; Compute Domain [高速计算与信息娱乐域]</span><br><span class="line">        ADAS_ECU[高级驾驶辅助系统 ADAS ECU]</span><br><span class="line">        IVI_ECU[信息娱乐系统 IVI ECU]</span><br><span class="line">        DOMAIN_CTRL[域控制器 / 区域网关]</span><br><span class="line">        ADAS_ECU -- 以太网 (Ethernet) --&gt; CENTRAL_GATEWAY</span><br><span class="line">        IVI_ECU -- 以太网 (Ethernet) --&gt; CENTRAL_GATEWAY</span><br><span class="line">        DOMAIN_CTRL -- 以太网 (Ethernet) --&gt; CENTRAL_GATEWAY</span><br><span class="line">    end</span><br><span class="line"></span><br><span class="line">    subgraph Powertrain &amp; Chassis Domain [动力总成与底盘域]</span><br><span class="line">        ENGINE_ECU[发动机控制单元]</span><br><span class="line">        TRANS_ECU[变速箱控制单元]</span><br><span class="line">        BRAKE_ECU[制动控制单元]</span><br><span class="line">        STEER_ECU[转向系统ECU]</span><br><span class="line">        ENGINE_ECU -- CAN FD --&gt; CENTRAL_GATEWAY</span><br><span class="line">        TRANS_ECU -- CAN FD --&gt; CENTRAL_GATEWAY</span><br><span class="line">        BRAKE_ECU -- CAN FD --&gt; CENTRAL_GATEWAY</span><br><span class="line">        STEER_ECU -- CAN FD --&gt; CENTRAL_GATEWAY</span><br><span class="line">    end</span><br><span class="line"></span><br><span class="line">    subgraph Body &amp; Comfort Domain [车身与舒适域]</span><br><span class="line">        BCM_ECU[车身控制模块 BCM]</span><br><span class="line">        HVAC_ECU[空调控制单元]</span><br><span class="line">        DOOR_ECU_1[车门控制单元 1]</span><br><span class="line">        DOOR_ECU_2[车门控制单元 2]</span><br><span class="line">        BCM_ECU -- CAN FD --&gt; CENTRAL_GATEWAY</span><br><span class="line">        HVAC_ECU -- CAN FD --&gt; CENTRAL_GATEWAY</span><br><span class="line">        BCM_ECU -- LIN 总线 --&gt; DOOR_ECU_1</span><br><span class="line">        BCM_ECU -- LIN 总线 --&gt; DOOR_ECU_2</span><br><span class="line">    end</span><br><span class="line"></span><br><span class="line">    subgraph Diagnostic &amp; External Access [诊断与外部访问]</span><br><span class="line">        OBD_PORT[OBD-II 诊断端口]</span><br><span class="line">        OBD_PORT -- CAN FD / 以太网 --&gt; CENTRAL_GATEWAY</span><br><span class="line">    end</span><br><span class="line"></span><br><span class="line">    CENTRAL_GATEWAY(中央网关ECU)</span><br><span class="line"></span><br><span class="line">    style CENTRAL_GATEWAY fill:#FFD700,stroke:#B8860B,stroke-width:2px,font-weight:bold</span><br><span class="line">    style ADAS_ECU fill:#ADD8E6,stroke:#00008B,stroke-width:1px</span><br><span class="line">    style IVI_ECU fill:#ADD8E6,stroke:#00008B,stroke-width:1px</span><br><span class="line">    style DOMAIN_CTRL fill:#ADD8E6,stroke:#00008B,stroke-width:1px</span><br><span class="line">    style ENGINE_ECU fill:#90EE90,stroke:#228B22,stroke-width:1px</span><br><span class="line">    style TRANS_ECU fill:#90EE90,stroke:#228B22,stroke-width:1px</span><br><span class="line">    style BRAKE_ECU fill:#90EE90,stroke:#228B22,stroke-width:1px</span><br><span class="line">    style STEER_ECU fill:#90EE90,stroke:#228B22,stroke-width:1px</span><br><span class="line">    style BCM_ECU fill:#FFB6C1,stroke:#FF69B4,stroke-width:1px</span><br><span class="line">    style HVAC_ECU fill:#FFB6C1,stroke:#FF69B4,stroke-width:1px</span><br><span class="line">    style DOOR_ECU_1 fill:#DDA0DD,stroke:#9400D3,stroke-width:1px</span><br><span class="line">    style DOOR_ECU_2 fill:#DDA0DD,stroke:#9400D3,stroke-width:1px</span><br><span class="line">    style OBD_PORT fill:#E6E6FA,stroke:#8A2BE2,stroke-width:1px</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<pre class="mermaid">graph TD
+    subgraph High-Bandwidth & Compute Domain [高速计算与信息娱乐域]
+        ADAS_ECU[高级驾驶辅助系统 ADAS ECU]
+        IVI_ECU[信息娱乐系统 IVI ECU]
+        DOMAIN_CTRL[域控制器 / 区域网关]
+        ADAS_ECU -- 以太网 (Ethernet) --> CENTRAL_GATEWAY
+        IVI_ECU -- 以太网 (Ethernet) --> CENTRAL_GATEWAY
+        DOMAIN_CTRL -- 以太网 (Ethernet) --> CENTRAL_GATEWAY
+    end
+
+    subgraph Powertrain & Chassis Domain [动力总成与底盘域]
+        ENGINE_ECU[发动机控制单元]
+        TRANS_ECU[变速箱控制单元]
+        BRAKE_ECU[制动控制单元]
+        STEER_ECU[转向系统ECU]
+        ENGINE_ECU -- CAN FD --> CENTRAL_GATEWAY
+        TRANS_ECU -- CAN FD --> CENTRAL_GATEWAY
+        BRAKE_ECU -- CAN FD --> CENTRAL_GATEWAY
+        STEER_ECU -- CAN FD --> CENTRAL_GATEWAY
+    end
+
+    subgraph Body & Comfort Domain [车身与舒适域]
+        BCM_ECU[车身控制模块 BCM]
+        HVAC_ECU[空调控制单元]
+        DOOR_ECU_1[车门控制单元 1]
+        DOOR_ECU_2[车门控制单元 2]
+        BCM_ECU -- CAN FD --> CENTRAL_GATEWAY
+        HVAC_ECU -- CAN FD --> CENTRAL_GATEWAY
+        BCM_ECU -- LIN 总线 --> DOOR_ECU_1
+        BCM_ECU -- LIN 总线 --> DOOR_ECU_2
+    end
+
+    subgraph Diagnostic & External Access [诊断与外部访问]
+        OBD_PORT[OBD-II 诊断端口]
+        OBD_PORT -- CAN FD / 以太网 --> CENTRAL_GATEWAY
+    end
+
+    CENTRAL_GATEWAY(中央网关ECU)
+
+    style CENTRAL_GATEWAY fill:#FFD700,stroke:#B8860B,stroke-width:2px,font-weight:bold
+    style ADAS_ECU fill:#ADD8E6,stroke:#00008B,stroke-width:1px
+    style IVI_ECU fill:#ADD8E6,stroke:#00008B,stroke-width:1px
+    style DOMAIN_CTRL fill:#ADD8E6,stroke:#00008B,stroke-width:1px
+    style ENGINE_ECU fill:#90EE90,stroke:#228B22,stroke-width:1px
+    style TRANS_ECU fill:#90EE90,stroke:#228B22,stroke-width:1px
+    style BRAKE_ECU fill:#90EE90,stroke:#228B22,stroke-width:1px
+    style STEER_ECU fill:#90EE90,stroke:#228B22,stroke-width:1px
+    style BCM_ECU fill:#FFB6C1,stroke:#FF69B4,stroke-width:1px
+    style HVAC_ECU fill:#FFB6C1,stroke:#FF69B4,stroke-width:1px
+    style DOOR_ECU_1 fill:#DDA0DD,stroke:#9400D3,stroke-width:1px
+    style DOOR_ECU_2 fill:#DDA0DD,stroke:#9400D3,stroke-width:1px
+    style OBD_PORT fill:#E6E6FA,stroke:#8A2BE2,stroke-width:1px</pre>
 
 ]]></content>
       <categories>
@@ -655,7 +877,21 @@
 <li><p><strong>Stub 调实现类方法</strong></p>
 <figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="type">int</span> <span class="variable">result</span> <span class="operator">=</span> <span class="built_in">this</span>.add(a, b); <span class="comment">// 调到 MyService.add()</span></span><br></pre></td></tr></table></figure></li>
 </ul>
-<h2 id="4-2-时序图"><a href="#4-2-时序图" class="headerlink" title="4.2 时序图"></a>4.2 时序图</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">sequenceDiagram</span><br><span class="line">    participant Client</span><br><span class="line">    participant Proxy</span><br><span class="line">    participant Binder_Driver</span><br><span class="line">    participant Stub</span><br><span class="line">    participant Service_Impl</span><br><span class="line"></span><br><span class="line">    Client-&gt;&gt;Proxy: 调用 add(3, 5)</span><br><span class="line">    Proxy-&gt;&gt;Binder_Driver: transact(TRANSACTION_add, data, reply)</span><br><span class="line">    Binder_Driver-&gt;&gt;Stub: onTransact(TRANSACTION_add, data, reply)</span><br><span class="line">    Stub-&gt;&gt;Service_Impl: add(3, 5)</span><br><span class="line">    Service_Impl--&gt;&gt;Stub: return 8</span><br><span class="line">    Stub--&gt;&gt;Binder_Driver: reply.writeInt(8)</span><br><span class="line">    Binder_Driver--&gt;&gt;Proxy: 返回 reply</span><br><span class="line">    Proxy--&gt;&gt;Client: 返回结果 8</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h2 id="4-2-时序图"><a href="#4-2-时序图" class="headerlink" title="4.2 时序图"></a>4.2 时序图</h2><pre class="mermaid">sequenceDiagram
+    participant Client
+    participant Proxy
+    participant Binder_Driver
+    participant Stub
+    participant Service_Impl
+
+    Client->>Proxy: 调用 add(3, 5)
+    Proxy->>Binder_Driver: transact(TRANSACTION_add, data, reply)
+    Binder_Driver->>Stub: onTransact(TRANSACTION_add, data, reply)
+    Stub->>Service_Impl: add(3, 5)
+    Service_Impl-->>Stub: return 8
+    Stub-->>Binder_Driver: reply.writeInt(8)
+    Binder_Driver-->>Proxy: 返回 reply
+    Proxy-->>Client: 返回结果 8</pre>
 
 <p>解读</p>
 <ol>
@@ -730,7 +966,53 @@
 </blockquote>
 <span id="more"></span>
 
-<h1 id="1-窗口层级树"><a href="#1-窗口层级树" class="headerlink" title="1 窗口层级树"></a>1 窗口层级树</h1><h2 id="1-1-DisplayArea-层级树构建流程"><a href="#1-1-DisplayArea-层级树构建流程" class="headerlink" title="1.1 DisplayArea 层级树构建流程"></a>1.1 DisplayArea 层级树构建流程</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">sequenceDiagram</span><br><span class="line">Autonumber</span><br><span class="line">SystemServer -&gt;&gt; SystemServer:run()</span><br><span class="line">SystemServer -&gt;&gt; SystemServer:startOtherServices()</span><br><span class="line">SystemServer -&gt;&gt; WMS:main()</span><br><span class="line">SystemServer -&gt;&gt; AMS(ATMS):AMS-setWindowManager(wms)</span><br><span class="line">AMS(ATMS) -&gt;&gt; AMS(ATMS):ATMS-setWindowManager(wms)</span><br><span class="line">AMS(ATMS) -&gt;&gt; RootWindowContainer:setWindowManager()</span><br><span class="line">Note right of RootWindowContainer:创建 DisplayContent</span><br><span class="line">RootWindowContainer -&gt;&gt; DisplayContent:new DisplayContent()</span><br><span class="line">Note right of DisplayContent:创建 WindowContainer 树</span><br><span class="line">DisplayContent -&gt;&gt; DisplayAreaPolicy:DefaultProvider.instantiate()</span><br><span class="line">Note over DisplayAreaPolicy:创建 TaskDisplayArea</span><br><span class="line">DisplayAreaPolicy --&gt;&gt; DisplayAreaPolicy:new TaskDisplayArea()</span><br><span class="line">Note over DisplayAreaPolicy:创建层级树数据结构，这里传入的 root 是 DisplayContent</span><br><span class="line">DisplayAreaPolicy --&gt;&gt; DisplayAreaPolicyBuilder:new HierarchyBuilder(DisplayContent)</span><br><span class="line">Note over DisplayAreaPolicy:设置输入法容器</span><br><span class="line">DisplayAreaPolicy --&gt;&gt; DisplayAreaPolicy:setImeContainer()</span><br><span class="line">Note over DisplayAreaPolicy,DisplayAreaPolicyBuilder:配置层级的支持的 Feature，配置 6 个 Feature</span><br><span class="line">DisplayAreaPolicy -&gt;&gt; DisplayAreaPolicy:configureTrustedHierarchyBuilder()</span><br><span class="line">DisplayAreaPolicy -&gt;&gt; DisplayAreaPolicyBuilder:addFeature(&quot;WindowedMagnification&quot;)</span><br><span class="line">DisplayAreaPolicy -&gt;&gt; DisplayAreaPolicyBuilder:addFeature(&quot;HideDisplayCutout&quot;)</span><br><span class="line">DisplayAreaPolicy -&gt;&gt; DisplayAreaPolicyBuilder:addFeature(&quot;OneHanded&quot;)</span><br><span class="line">DisplayAreaPolicy -&gt;&gt; DisplayAreaPolicyBuilder:addFeature(&quot;AppZoomOut&quot;)</span><br><span class="line">DisplayAreaPolicy -&gt;&gt; DisplayAreaPolicyBuilder:addFeature(&quot;FullscreenMagnification&quot;)</span><br><span class="line">DisplayAreaPolicy -&gt;&gt; DisplayAreaPolicyBuilder:addFeature(&quot;ImePlaceholder&quot;)</span><br><span class="line"></span><br><span class="line">Note over DisplayAreaPolicy:真正开始构建层级树</span><br><span class="line">DisplayAreaPolicy -&gt;&gt; DisplayAreaPolicy:new DisplayAreaPolicyBuilder(HierarchyBuilder).build()</span><br><span class="line"></span><br><span class="line">DisplayAreaPolicy -&gt;&gt; DisplayAreaPolicyBuilder:build()</span><br><span class="line">Note over DisplayAreaPolicyBuilder:构建 PendingArea 树</span><br><span class="line">DisplayAreaPolicyBuilder -&gt;&gt; DisplayAreaPolicyBuilder:HierarchyBuilder.build()</span><br><span class="line">Note over DisplayAreaPolicyBuilder:构建真正的 DisplayArea 树, 参数 mRoot 为 D</span><br><span class="line">DisplayAreaPolicyBuilder -&gt;&gt; DisplayAreaPolicyBuilder:PendingArea.instantiateChildren(mRoot)</span><br><span class="line">Note over DisplayAreaPolicyBuilder,DisplayContent:为 DisplayContent 挂载子节点，addChild() 真正实现在父类 WindowContainer 中</span><br><span class="line">DisplayAreaPolicyBuilder --&gt;&gt; DisplayContent:addChild()</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">Note over DisplayContent:创建 DC 及 DA 的 SurfaceControl</span><br><span class="line">DisplayContent -&gt;&gt; DisplayContent:configureSurfaces()</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">Note over RootWindowContainer:为 RootWindowContainer 添加 0 号孩子:DisplayContent</span><br><span class="line">RootWindowContainer --&gt;&gt; RootWindowContainer:addChild(displayContent)</span><br><span class="line">%% Note over RootWindowContainer:获取前面创建的 TaskDisplayArea</span><br><span class="line">%% RootWindowContainer -&gt;&gt; RootWindowContainer:getDefaultTaskDisplayArea()</span><br></pre></td></tr></table></figure>
+<h1 id="1-窗口层级树"><a href="#1-窗口层级树" class="headerlink" title="1 窗口层级树"></a>1 窗口层级树</h1><h2 id="1-1-DisplayArea-层级树构建流程"><a href="#1-1-DisplayArea-层级树构建流程" class="headerlink" title="1.1 DisplayArea 层级树构建流程"></a>1.1 DisplayArea 层级树构建流程</h2><pre class="mermaid">sequenceDiagram
+Autonumber
+SystemServer ->> SystemServer:run()
+SystemServer ->> SystemServer:startOtherServices()
+SystemServer ->> WMS:main()
+SystemServer ->> AMS(ATMS):AMS-setWindowManager(wms)
+AMS(ATMS) ->> AMS(ATMS):ATMS-setWindowManager(wms)
+AMS(ATMS) ->> RootWindowContainer:setWindowManager()
+Note right of RootWindowContainer:创建 DisplayContent
+RootWindowContainer ->> DisplayContent:new DisplayContent()
+Note right of DisplayContent:创建 WindowContainer 树
+DisplayContent ->> DisplayAreaPolicy:DefaultProvider.instantiate()
+Note over DisplayAreaPolicy:创建 TaskDisplayArea
+DisplayAreaPolicy -->> DisplayAreaPolicy:new TaskDisplayArea()
+Note over DisplayAreaPolicy:创建层级树数据结构，这里传入的 root 是 DisplayContent
+DisplayAreaPolicy -->> DisplayAreaPolicyBuilder:new HierarchyBuilder(DisplayContent)
+Note over DisplayAreaPolicy:设置输入法容器
+DisplayAreaPolicy -->> DisplayAreaPolicy:setImeContainer()
+Note over DisplayAreaPolicy,DisplayAreaPolicyBuilder:配置层级的支持的 Feature，配置 6 个 Feature
+DisplayAreaPolicy ->> DisplayAreaPolicy:configureTrustedHierarchyBuilder()
+DisplayAreaPolicy ->> DisplayAreaPolicyBuilder:addFeature("WindowedMagnification")
+DisplayAreaPolicy ->> DisplayAreaPolicyBuilder:addFeature("HideDisplayCutout")
+DisplayAreaPolicy ->> DisplayAreaPolicyBuilder:addFeature("OneHanded")
+DisplayAreaPolicy ->> DisplayAreaPolicyBuilder:addFeature("AppZoomOut")
+DisplayAreaPolicy ->> DisplayAreaPolicyBuilder:addFeature("FullscreenMagnification")
+DisplayAreaPolicy ->> DisplayAreaPolicyBuilder:addFeature("ImePlaceholder")
+
+Note over DisplayAreaPolicy:真正开始构建层级树
+DisplayAreaPolicy ->> DisplayAreaPolicy:new DisplayAreaPolicyBuilder(HierarchyBuilder).build()
+
+DisplayAreaPolicy ->> DisplayAreaPolicyBuilder:build()
+Note over DisplayAreaPolicyBuilder:构建 PendingArea 树
+DisplayAreaPolicyBuilder ->> DisplayAreaPolicyBuilder:HierarchyBuilder.build()
+Note over DisplayAreaPolicyBuilder:构建真正的 DisplayArea 树, 参数 mRoot 为 D
+DisplayAreaPolicyBuilder ->> DisplayAreaPolicyBuilder:PendingArea.instantiateChildren(mRoot)
+Note over DisplayAreaPolicyBuilder,DisplayContent:为 DisplayContent 挂载子节点，addChild() 真正实现在父类 WindowContainer 中
+DisplayAreaPolicyBuilder -->> DisplayContent:addChild()
+
+
+Note over DisplayContent:创建 DC 及 DA 的 SurfaceControl
+DisplayContent ->> DisplayContent:configureSurfaces()
+
+
+Note over RootWindowContainer:为 RootWindowContainer 添加 0 号孩子:DisplayContent
+RootWindowContainer -->> RootWindowContainer:addChild(displayContent)
+%% Note over RootWindowContainer:获取前面创建的 TaskDisplayArea
+%% RootWindowContainer ->> RootWindowContainer:getDefaultTaskDisplayArea()</pre>
 
 <h3 id="总结："><a href="#总结：" class="headerlink" title="总结："></a>总结：</h3><ul>
 <li><code>SystemServer.run() - AMS</code> 发起构建层级树</li>
@@ -762,7 +1044,48 @@
 </ul>
 <h2 id="1-2-挂载应用窗口"><a href="#1-2-挂载应用窗口" class="headerlink" title="1.2 挂载应用窗口"></a>1.2 挂载应用窗口</h2><p>包括挂载 Task、ActivityRecord(WindowToken)、WindowState</p>
 <h3 id="1-2-1-创建挂载-Task-x2F-AR"><a href="#1-2-1-创建挂载-Task-x2F-AR" class="headerlink" title="1.2.1 创建挂载 Task&#x2F;AR"></a>1.2.1 创建挂载 Task&#x2F;AR</h3><p>桌面点击应用图标，从 <code>Activity.startActivity()</code> 一路调用到 <code>Instrumentation.execStartActivity()</code>，Instrumentation 又调用到 <code>ATMS.startActivity()</code>，这里从 ATMS 开始整理时序图。</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">sequenceDiagram</span><br><span class="line">autonumber</span><br><span class="line">Note left of ATMS:从 Instrumentation 调用</span><br><span class="line">ATMS -&gt;&gt; ATMS:startActivity()</span><br><span class="line">Note over ATMS:多次调用</span><br><span class="line">ATMS --&gt;&gt; ATMS:startActivityAsUser()</span><br><span class="line">ATMS -&gt;&gt; ActivityStarter:execute()</span><br><span class="line">ActivityStarter -&gt;&gt; ActivityStarter:executeRequest()</span><br><span class="line"></span><br><span class="line">%% 1.创建 ActivityRecord</span><br><span class="line">Note right of ActivityStarter:1.创建 ActivityRecord r 并往下传递</span><br><span class="line">ActivityStarter -&gt;&gt; ActivityRecord:Builder.build()</span><br><span class="line">ActivityStarter -&gt;&gt; ActivityStarter:startActivityUnchecked(ActivityRecord r)</span><br><span class="line">ActivityStarter -&gt;&gt; ActivityStarter:startActivityInner(ActivityRecord r)</span><br><span class="line">Note over ActivityStarter:把创建的 ActivityRecord 赋值给 mStartActivity</span><br><span class="line">ActivityStarter -&gt;&gt; ActivityStarter:setInitialState(ActivityRecord r)</span><br><span class="line"></span><br><span class="line">%% 2.创建 Task</span><br><span class="line">Note over ActivityStarter:2.创建 Task</span><br><span class="line">ActivityStarter -&gt;&gt; ActivityStarter:getOrCreateRootTask()</span><br><span class="line">ActivityStarter -&gt;&gt; RootWindowContainer:getOrCreateRootTask()</span><br><span class="line">RootWindowContainer --&gt;&gt; TaskDisplayArea:getOrCreateRootTask()</span><br><span class="line"></span><br><span class="line">%% 3.挂载 Task 到 DefaultTaskDisplayArea</span><br><span class="line">Note right of TaskDisplayArea:把 TaskDisplayArea 设置为 parent</span><br><span class="line">TaskDisplayArea -&gt;&gt; Task:Builder.setParent(this)</span><br><span class="line">Note right of TaskDisplayArea:2.1 真正创建 Task 的地方</span><br><span class="line">TaskDisplayArea -&gt;&gt; Task:Builder.build()</span><br><span class="line">Task -&gt;&gt; Task:Builder.buildInner()</span><br><span class="line">Note over Task:2.2 直接 new 出 Task 对象</span><br><span class="line">Task -&gt;&gt; Task:new Task()</span><br><span class="line">%% 3.挂载 Task 到 DefaultTaskDisplayArea</span><br><span class="line">Note over Task,TaskDisplayArea:3.挂载 Task 到 TaskDisplayArea</span><br><span class="line">Task -&gt;&gt; TaskDisplayArea:addChild()</span><br><span class="line"></span><br><span class="line">%% 4.挂载 ActivityRecord 到 Task</span><br><span class="line">Note over ActivityStarter:4.开始挂载 ActivityRecord</span><br><span class="line">ActivityStarter -&gt;&gt; ActivityStarter:setNewTask(Task task)</span><br><span class="line">Note over ActivityStarter:Task 作为新的父亲：TaskFragment newParent = task</span><br><span class="line">ActivityStarter -&gt;&gt; ActivityStarter:addOrReparentStartingActivity(Task task)</span><br><span class="line">Note over ActivityStarter,TaskFragment:4.1 挂载 ActivityRecord 到 Task 的顶部(这里的 mStartActivity 就是前面创建传递下来的)</span><br><span class="line">ActivityStarter -&gt;&gt; TaskFragment:addChild(mStartActivity, POSITION_TOP)</span><br></pre></td></tr></table></figure>
+<pre class="mermaid">sequenceDiagram
+autonumber
+Note left of ATMS:从 Instrumentation 调用
+ATMS ->> ATMS:startActivity()
+Note over ATMS:多次调用
+ATMS -->> ATMS:startActivityAsUser()
+ATMS ->> ActivityStarter:execute()
+ActivityStarter ->> ActivityStarter:executeRequest()
+
+%% 1.创建 ActivityRecord
+Note right of ActivityStarter:1.创建 ActivityRecord r 并往下传递
+ActivityStarter ->> ActivityRecord:Builder.build()
+ActivityStarter ->> ActivityStarter:startActivityUnchecked(ActivityRecord r)
+ActivityStarter ->> ActivityStarter:startActivityInner(ActivityRecord r)
+Note over ActivityStarter:把创建的 ActivityRecord 赋值给 mStartActivity
+ActivityStarter ->> ActivityStarter:setInitialState(ActivityRecord r)
+
+%% 2.创建 Task
+Note over ActivityStarter:2.创建 Task
+ActivityStarter ->> ActivityStarter:getOrCreateRootTask()
+ActivityStarter ->> RootWindowContainer:getOrCreateRootTask()
+RootWindowContainer -->> TaskDisplayArea:getOrCreateRootTask()
+
+%% 3.挂载 Task 到 DefaultTaskDisplayArea
+Note right of TaskDisplayArea:把 TaskDisplayArea 设置为 parent
+TaskDisplayArea ->> Task:Builder.setParent(this)
+Note right of TaskDisplayArea:2.1 真正创建 Task 的地方
+TaskDisplayArea ->> Task:Builder.build()
+Task ->> Task:Builder.buildInner()
+Note over Task:2.2 直接 new 出 Task 对象
+Task ->> Task:new Task()
+%% 3.挂载 Task 到 DefaultTaskDisplayArea
+Note over Task,TaskDisplayArea:3.挂载 Task 到 TaskDisplayArea
+Task ->> TaskDisplayArea:addChild()
+
+%% 4.挂载 ActivityRecord 到 Task
+Note over ActivityStarter:4.开始挂载 ActivityRecord
+ActivityStarter ->> ActivityStarter:setNewTask(Task task)
+Note over ActivityStarter:Task 作为新的父亲：TaskFragment newParent = task
+ActivityStarter ->> ActivityStarter:addOrReparentStartingActivity(Task task)
+Note over ActivityStarter,TaskFragment:4.1 挂载 ActivityRecord 到 Task 的顶部(这里的 mStartActivity 就是前面创建传递下来的)
+ActivityStarter ->> TaskFragment:addChild(mStartActivity, POSITION_TOP)</pre>
 
 <h4 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h4><ul>
 <li>ActivityStarter 中创建 ActivityRecord</li>
@@ -770,24 +1093,89 @@
 <li><font color=red><strong>创建 Task 时把 TaskDisplayArea 自身作为 Task 的 parent，然后在 <code>Task.Builder.build()</code> 的时候通过调用 <code>TaskDisplayArea.addChild() - WindowContainer.addChild()</code> 把 Task 挂载到 TaskDisplayArea，也就是窗口层级树中看到的 DefaultTaskDisplayArea</strong></font></li>
 <li><font color=red><strong>挂载 ActivityRecord 到 Task，也是通过 addChild()</strong></font></li>
 </ul>
-<h3 id="1-2-2-创建挂载-WindowState"><a href="#1-2-2-创建挂载-WindowState" class="headerlink" title="1.2.2 创建挂载 WindowState"></a>1.2.2 创建挂载 WindowState</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">sequenceDiagram</span><br><span class="line">autonumber</span><br><span class="line">ActivityThread --&gt;&gt; ActivityThread:handleResumeActivity()</span><br><span class="line">Note over ActivityThread,WindowManagerGlobal:经过 WMI 中转到 WMG</span><br><span class="line">ActivityThread --&gt;&gt; WindowManagerGlobal:addView()</span><br><span class="line">Note right of WindowManagerGlobal:创建 ViewRootImpl</span><br><span class="line">WindowManagerGlobal -&gt;&gt; ViewRootImpl:new ViewRootImpl()</span><br><span class="line">WindowManagerGlobal -&gt;&gt; ViewRootImpl:setView()</span><br><span class="line">Note over ViewRootImpl:这里比较重要，包括 relayoutWindow/绘制三部曲</span><br><span class="line">ViewRootImpl -&gt;&gt; ViewRootImpl:requestLayout()</span><br><span class="line">Note over ViewRootImpl:创建 InputChannel 空对象，传给 WMS 写入</span><br><span class="line">ViewRootImpl -&gt;&gt; ViewRootImpl:new InputChannel()</span><br><span class="line">Note right of ViewRootImpl:通过 binder 到 Session</span><br><span class="line">ViewRootImpl -&gt;&gt; Session:addToDisplayAsUser(W)</span><br><span class="line"></span><br><span class="line">%% WMS 侧操作</span><br><span class="line">Note right of Session:Session 持有 WMS</span><br><span class="line">Session -&gt;&gt; WMS:addWindow(W)</span><br><span class="line">Note right of WMS:通过 attrs.token 获取 WindowToken</span><br><span class="line">WMS -&gt;&gt; DisplayContent:getWindowToken(attrs.token)</span><br><span class="line">Note over WMS:1.创建 WindowState</span><br><span class="line">WMS --&gt;&gt; WMS:new WindowState()</span><br><span class="line">Note over WMS,WindowState:创建 InputChannel</span><br><span class="line">WMS -&gt;&gt; WindowState:openInputChannel(outInputChannel)</span><br><span class="line">Note over WMS:把 W 对象和 WindowState 放入 Map</span><br><span class="line">WMS -&gt;&gt;WMS:mWindowMap.put(W, win)</span><br><span class="line"></span><br><span class="line">WMS -&gt;&gt; WMS:addWindowInner()</span><br><span class="line">Note over WMS,ActivityRecord:win.mToken.addWindow(win)</span><br><span class="line">WMS -&gt;&gt; ActivityRecord:addWindow(WindowState)</span><br><span class="line">ActivityRecord -&gt;&gt; WindowToken:addWindow(WindowState)</span><br><span class="line">Note over WindowToken:2.挂载 WindowState 到 ActivityRecord</span><br><span class="line">WindowToken -&gt;&gt; WindowToken:addChild()</span><br></pre></td></tr></table></figure>
+<h3 id="1-2-2-创建挂载-WindowState"><a href="#1-2-2-创建挂载-WindowState" class="headerlink" title="1.2.2 创建挂载 WindowState"></a>1.2.2 创建挂载 WindowState</h3><pre class="mermaid">sequenceDiagram
+autonumber
+ActivityThread -->> ActivityThread:handleResumeActivity()
+Note over ActivityThread,WindowManagerGlobal:经过 WMI 中转到 WMG
+ActivityThread -->> WindowManagerGlobal:addView()
+Note right of WindowManagerGlobal:创建 ViewRootImpl
+WindowManagerGlobal ->> ViewRootImpl:new ViewRootImpl()
+WindowManagerGlobal ->> ViewRootImpl:setView()
+Note over ViewRootImpl:这里比较重要，包括 relayoutWindow/绘制三部曲
+ViewRootImpl ->> ViewRootImpl:requestLayout()
+Note over ViewRootImpl:创建 InputChannel 空对象，传给 WMS 写入
+ViewRootImpl ->> ViewRootImpl:new InputChannel()
+Note right of ViewRootImpl:通过 binder 到 Session
+ViewRootImpl ->> Session:addToDisplayAsUser(W)
+
+%% WMS 侧操作
+Note right of Session:Session 持有 WMS
+Session ->> WMS:addWindow(W)
+Note right of WMS:通过 attrs.token 获取 WindowToken
+WMS ->> DisplayContent:getWindowToken(attrs.token)
+Note over WMS:1.创建 WindowState
+WMS -->> WMS:new WindowState()
+Note over WMS,WindowState:创建 InputChannel
+WMS ->> WindowState:openInputChannel(outInputChannel)
+Note over WMS:把 W 对象和 WindowState 放入 Map
+WMS ->>WMS:mWindowMap.put(W, win)
+
+WMS ->> WMS:addWindowInner()
+Note over WMS,ActivityRecord:win.mToken.addWindow(win)
+WMS ->> ActivityRecord:addWindow(WindowState)
+ActivityRecord ->> WindowToken:addWindow(WindowState)
+Note over WindowToken:2.挂载 WindowState 到 ActivityRecord
+WindowToken ->> WindowToken:addChild()</pre>
 
 <h4 id="总结-1"><a href="#总结-1" class="headerlink" title="总结"></a>总结</h4><ul>
 <li>resume() 流程中通过 <code>addView() -&gt; setView() -&gt; addWindow()</code>，在 WMS 中创建了  WindowState，并且 <font color=red><strong>通过 <code>addChild()</code> 挂载到了 ActivityRecord</strong></font>；</li>
 <li>创建 WindowState 时传入了 IWindow(W 对象，用于 WMS 和 Window 窗口回调之间通信的 binder) 以及 WindowToken(<font color=red><strong>详见 [3.1 Token 相关](# 3.1 Token 相关)</strong></font>)；</li>
 <li>在 <code>WMS.addWindow()</code> 中触发了 InputChannel 的创建；</li>
 </ul>
-<h2 id="1-3-挂载系统窗口"><a href="#1-3-挂载系统窗口" class="headerlink" title="1.3 挂载系统窗口"></a>1.3 挂载系统窗口</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">sequenceDiagram</span><br><span class="line">autonumber</span><br><span class="line">Session -&gt;&gt; WMS:addWindow()</span><br><span class="line">WMS -&gt;&gt; WindowToken:Builder.build()</span><br><span class="line">WindowToken -&gt;&gt; WindowToken:new WindowToken()</span><br><span class="line">WindowToken -&gt;&gt; DisplayContent:addWindowToken()</span><br><span class="line">DisplayContent -&gt;&gt; DisplayContent:findAreaForToken()</span><br><span class="line">Note right of DisplayContent:挂载 WindowToken 到 DisplayArea</span><br><span class="line">DisplayContent -&gt;&gt; DisplayArea.Tokens:addChild()</span><br><span class="line">WMS -&gt;&gt; WMS:addWindowInner()</span><br><span class="line">Note right of WMS:挂载 WindowState 到 WindowToken</span><br><span class="line">WMS -&gt;&gt; WindowToken:addWindow(win)</span><br></pre></td></tr></table></figure>
+<h2 id="1-3-挂载系统窗口"><a href="#1-3-挂载系统窗口" class="headerlink" title="1.3 挂载系统窗口"></a>1.3 挂载系统窗口</h2><pre class="mermaid">sequenceDiagram
+autonumber
+Session ->> WMS:addWindow()
+WMS ->> WindowToken:Builder.build()
+WindowToken ->> WindowToken:new WindowToken()
+WindowToken ->> DisplayContent:addWindowToken()
+DisplayContent ->> DisplayContent:findAreaForToken()
+Note right of DisplayContent:挂载 WindowToken 到 DisplayArea
+DisplayContent ->> DisplayArea.Tokens:addChild()
+WMS ->> WMS:addWindowInner()
+Note right of WMS:挂载 WindowState 到 WindowToken
+WMS ->> WindowToken:addWindow(win)</pre>
 
 <h3 id="总结-2"><a href="#总结-2" class="headerlink" title="总结"></a>总结</h3><p>系统窗口的创建和挂载和应用窗口一样，区别就是 WindowToken 不是 ActivityRecord，在创建 WindowToken 的时候就把 WindowToken 挂载到 DisplayArea，然后再在<code>WMS.addWindow()</code> 把 WindowState 挂载到 WindowToken。</p>
 <h1 id="2-SurfaceFlinger-层级树"><a href="#2-SurfaceFlinger-层级树" class="headerlink" title="2 SurfaceFlinger 层级树"></a>2 SurfaceFlinger 层级树</h1><p>在 [1.1 DisplayArea 层级树构建流程](#1.1 DisplayArea 层级树构建流程) 中已经写明了创建 SurfaceControl 的入口 <code>DisplayContent.configureSurfaces()</code>，我们从这里开始。</p>
-<h2 id="2-1-DisplayContent-的-Surface-构建"><a href="#2-1-DisplayContent-的-Surface-构建" class="headerlink" title="2.1 DisplayContent 的 Surface 构建"></a>2.1 DisplayContent 的 Surface 构建</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">sequenceDiagram</span><br><span class="line">autonumber</span><br><span class="line">RootWindowContainer -&gt;&gt; DisplayContent:new DisplayContent()</span><br><span class="line">DisplayContent -&gt;&gt; DisplayContent:configureSurfaces()</span><br><span class="line">Note right of DisplayContent:构建 SurfaceControl，设置为 Container 类型、名字</span><br><span class="line">DisplayContent -&gt;&gt; WMS:makeSurfaceBuilder().setContainerLayer().setName</span><br></pre></td></tr></table></figure>
+<h2 id="2-1-DisplayContent-的-Surface-构建"><a href="#2-1-DisplayContent-的-Surface-构建" class="headerlink" title="2.1 DisplayContent 的 Surface 构建"></a>2.1 DisplayContent 的 Surface 构建</h2><pre class="mermaid">sequenceDiagram
+autonumber
+RootWindowContainer ->> DisplayContent:new DisplayContent()
+DisplayContent ->> DisplayContent:configureSurfaces()
+Note right of DisplayContent:构建 SurfaceControl，设置为 Container 类型、名字
+DisplayContent ->> WMS:makeSurfaceBuilder().setContainerLayer().setName</pre>
 
 <h3 id="总结-3"><a href="#总结-3" class="headerlink" title="总结"></a>总结</h3><ul>
 <li>为 DisplayContent 和 DisplayArea 创建层级树的同时，也构建了对应的 Surface；</li>
 </ul>
 <h2 id="2-2-其他容器-包括-DisplayArea-Surface-的构建"><a href="#2-2-其他容器-包括-DisplayArea-Surface-的构建" class="headerlink" title="2.2 其他容器(包括 DisplayArea) Surface 的构建"></a>2.2 其他容器(包括 DisplayArea) Surface 的构建</h2><p>从 [1.1 DisplayArea 层级树构建流程](#1.1 DisplayArea 层级树构建流程) 和 [1.2 挂载应用窗口](1.2 挂载应用窗口) 的分析可以得知，挂载操作都是在 <code>addChild()</code> 操作中，比如 DisplayArea 挂载到 DisplayContent、WindowState 挂载到 WindowToken 都是这样，所以我们从 <code>addChild()</code> 开始分析。</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">sequenceDiagram</span><br><span class="line">autonumber</span><br><span class="line">WindowContainer --&gt;&gt; WindowContainer:addChild()</span><br><span class="line">WindowContainer -&gt;&gt; WindowContainer:setParent()</span><br><span class="line">WindowContainer -&gt;&gt; WindowContainer:onParentChanged()</span><br><span class="line">WindowContainer -&gt;&gt; WindowContainer:createSurfaceControl()</span><br><span class="line">%% WindowContainer -&gt;&gt; WindowContainer:setInitialSurfaceControlProperties(makeSurface())</span><br><span class="line">Note over WindowContainer:makeSurface() 返回一个 SurfaceControl.Builder</span><br><span class="line">WindowContainer -&gt;&gt; WindowContainer:makeSurface()</span><br><span class="line">WindowContainer -&gt;&gt; WindowContainer:makeChildSurface()</span><br><span class="line">Note over WindowContainer,DisplayContent:DC 重写了 makeChildSurface()</span><br><span class="line">WindowContainer -&gt;&gt; DisplayContent:makeChildSurface()</span><br><span class="line">Note right of DisplayContent:同样设置容器类型的 Layer</span><br><span class="line">DisplayContent -&gt;&gt; WMS:makeSurfaceBuilder().setContainerLayer()</span><br><span class="line"></span><br><span class="line">WindowContainer -&gt;&gt; SurfaceControl:Builder.setParent(mSurfaceControl)</span><br><span class="line">WindowContainer -&gt;&gt; WindowContainer:setInitialSurfaceControlProperties(SurfaceControl.Builder)</span><br><span class="line">WindowContainer -&gt;&gt; WindowContainer:setSurfaceControl()</span><br></pre></td></tr></table></figure>
+<pre class="mermaid">sequenceDiagram
+autonumber
+WindowContainer -->> WindowContainer:addChild()
+WindowContainer ->> WindowContainer:setParent()
+WindowContainer ->> WindowContainer:onParentChanged()
+WindowContainer ->> WindowContainer:createSurfaceControl()
+%% WindowContainer ->> WindowContainer:setInitialSurfaceControlProperties(makeSurface())
+Note over WindowContainer:makeSurface() 返回一个 SurfaceControl.Builder
+WindowContainer ->> WindowContainer:makeSurface()
+WindowContainer ->> WindowContainer:makeChildSurface()
+Note over WindowContainer,DisplayContent:DC 重写了 makeChildSurface()
+WindowContainer ->> DisplayContent:makeChildSurface()
+Note right of DisplayContent:同样设置容器类型的 Layer
+DisplayContent ->> WMS:makeSurfaceBuilder().setContainerLayer()
+
+WindowContainer ->> SurfaceControl:Builder.setParent(mSurfaceControl)
+WindowContainer ->> WindowContainer:setInitialSurfaceControlProperties(SurfaceControl.Builder)
+WindowContainer ->> WindowContainer:setSurfaceControl()</pre>
 
 <h3 id="总结-4"><a href="#总结-4" class="headerlink" title="总结"></a>总结</h3><ul>
 <li>当 <code>addChild()</code> 调用的时候，通过如上时序图层层调用，最终 DisplayContent 重写了 <code>makeChildSurface()</code>，所以到了 DC 就结束了 <code>makeChildSurface()</code> 的递归调用，并把父类 SurfaceControl 设置为 parent，比如设置 Task 的 parent 为 TaskDisplayArea</li>
@@ -798,7 +1186,35 @@
 
 
 
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">sequenceDiagram</span><br><span class="line">autonumber</span><br><span class="line">%%ViewRootImpl -&gt;&gt; ViewRootImpl:setView()</span><br><span class="line">%%ViewRootImpl -&gt;&gt; ViewRootImpl:requestLayout()</span><br><span class="line">%%ViewRootImpl -&gt;&gt; ViewRootImpl:scheduleTraversals()</span><br><span class="line">%%ViewRootImpl -&gt;&gt; Choreographer:postCallback(CALLBACK_TRAVERSAL)</span><br><span class="line">%%ViewRootImpl --&gt;&gt; ViewRootImpl:TraversalRunnable.run()</span><br><span class="line">%%ViewRootImpl -&gt;&gt; ViewRootImpl:doTraversal()</span><br><span class="line">%%ViewRootImpl -&gt;&gt; ViewRootImpl:performTraversals()</span><br><span class="line">ViewRootImpl -&gt;&gt; ViewRootImpl:relayoutWindow()</span><br><span class="line">ViewRootImpl -&gt;&gt; Session:relayout()</span><br><span class="line">Session -&gt;&gt; WMS:relayoutWindow()</span><br><span class="line"></span><br><span class="line">Note over WMS:创建 Buffer 类型 Surface</span><br><span class="line">WMS -&gt;&gt; WMS:createSurfaceControl(outSurfaceControl, windowState)</span><br><span class="line">WMS -&gt;&gt; WindowStateAnimator:createSurfaceLocked()</span><br><span class="line">Note over WindowStateAnimator:1.设置 mDrawState 状态为 DRAW_PENDING</span><br><span class="line">WindowStateAnimator -&gt;&gt; WindowStateAnimator:resetDrawState()</span><br><span class="line">Note over WindowStateAnimator,WindowState:2.构建 Surface 并给到 mSurfaceControl</span><br><span class="line">WindowStateAnimator -&gt;&gt; WindowState:makeSurface()</span><br><span class="line">Note over WindowStateAnimator,SurfaceControl:把 WindowState 的 Surface 设为 parent</span><br><span class="line">WindowStateAnimator -&gt;&gt; SurfaceControl:Builder.setParent(mWin.mSurfaceControl)</span><br><span class="line">Note over WindowStateAnimator,SurfaceControl:设置为 Buffer 图层并 build</span><br><span class="line">WindowStateAnimator -&gt;&gt; SurfaceControl:Builder.setBLASTLayer().build()</span><br><span class="line">Note over WindowStateAnimator,SurfaceControl:随后通过 native 创建 Surface</span><br><span class="line"></span><br><span class="line">Note right of WMS:3.把构建好的 mSurfaceControl 给到 outSurfaceControl</span><br><span class="line">WMS -&gt;&gt; WindowStateAnimator:getSurfaceControl(outSurfaceControl)</span><br><span class="line">WindowStateAnimator -&gt;&gt; SurfaceControl:copyFrom(mSurfaceControl)</span><br></pre></td></tr></table></figure>
+<pre class="mermaid">sequenceDiagram
+autonumber
+%%ViewRootImpl ->> ViewRootImpl:setView()
+%%ViewRootImpl ->> ViewRootImpl:requestLayout()
+%%ViewRootImpl ->> ViewRootImpl:scheduleTraversals()
+%%ViewRootImpl ->> Choreographer:postCallback(CALLBACK_TRAVERSAL)
+%%ViewRootImpl -->> ViewRootImpl:TraversalRunnable.run()
+%%ViewRootImpl ->> ViewRootImpl:doTraversal()
+%%ViewRootImpl ->> ViewRootImpl:performTraversals()
+ViewRootImpl ->> ViewRootImpl:relayoutWindow()
+ViewRootImpl ->> Session:relayout()
+Session ->> WMS:relayoutWindow()
+
+Note over WMS:创建 Buffer 类型 Surface
+WMS ->> WMS:createSurfaceControl(outSurfaceControl, windowState)
+WMS ->> WindowStateAnimator:createSurfaceLocked()
+Note over WindowStateAnimator:1.设置 mDrawState 状态为 DRAW_PENDING
+WindowStateAnimator ->> WindowStateAnimator:resetDrawState()
+Note over WindowStateAnimator,WindowState:2.构建 Surface 并给到 mSurfaceControl
+WindowStateAnimator ->> WindowState:makeSurface()
+Note over WindowStateAnimator,SurfaceControl:把 WindowState 的 Surface 设为 parent
+WindowStateAnimator ->> SurfaceControl:Builder.setParent(mWin.mSurfaceControl)
+Note over WindowStateAnimator,SurfaceControl:设置为 Buffer 图层并 build
+WindowStateAnimator ->> SurfaceControl:Builder.setBLASTLayer().build()
+Note over WindowStateAnimator,SurfaceControl:随后通过 native 创建 Surface
+
+Note right of WMS:3.把构建好的 mSurfaceControl 给到 outSurfaceControl
+WMS ->> WindowStateAnimator:getSurfaceControl(outSurfaceControl)
+WindowStateAnimator ->> SurfaceControl:copyFrom(mSurfaceControl)</pre>
 
 <h3 id="总结-5"><a href="#总结-5" class="headerlink" title="总结"></a>总结</h3><ul>
 <li>在 <code>WMS.relayoutWindow()</code> 中开始创建 SurfaceControl，当然真正构建的地方在 WindowState，在真正构建之前，会先把 mDrawState 设置为 <code>DRAW_PENDDING</code></li>
@@ -814,22 +1230,65 @@
 <li><code>Window.mAppToken</code>：位于应用进程，，执行 <code>Activity.attach(ActivityRecord.token)</code> 时创建 PhoneWindow 后调用 Window.setWindowManager() 时传入 <code>ActivityRecord.token</code></li>
 </ul>
 <h3 id="1-ActivityRecord-和-ActivityClientRecord的关联"><a href="#1-ActivityRecord-和-ActivityClientRecord的关联" class="headerlink" title="1 ActivityRecord 和 ActivityClientRecord的关联"></a>1 ActivityRecord 和 ActivityClientRecord的关联</h3><p>ActivityRecord 和 ActivityClientRecord，后续 WMS 创建 WindowState 时传入的 token 就是 以<code>attr.token</code> 为 key 获取到的 WindowToken。</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">sequenceDiagram</span><br><span class="line">autonumber</span><br><span class="line">ActivityTaskSupervisor -&gt;&gt; ActivityTaskSupervisor:realStartActivityLocked()</span><br><span class="line">ActivityTaskSupervisor -&gt;&gt; ActivityTaskSupervisor:tryRealStartActivityInner(ActivityRecord r)</span><br><span class="line">Note over ActivityTaskSupervisor:1.这里把 ActivityRecord.token 传给 LaunchActivityItem.mActivityToken</span><br><span class="line">ActivityTaskSupervisor -&gt;&gt; ActivityTaskSupervisor:new LaunchActivityItem(r.token)</span><br><span class="line"></span><br><span class="line">LaunchActivityItem --&gt;&gt; LaunchActivityItem:execute()</span><br><span class="line">Note over LaunchActivityItem:2.以 mActivityToken 为参数创建 ActivityClientRecord</span><br><span class="line">LaunchActivityItem -&gt;&gt; LaunchActivityItem:new ActivityClientRecord(mActivityToken)</span><br><span class="line">Note right of LaunchActivityItem:ActivityClientRecord 持有 mActivityToken</span><br><span class="line">LaunchActivityItem --&gt;&gt; ActivityThread:handleLaunchActivity(ActivityClientRecord r)</span><br><span class="line"></span><br><span class="line">Note left of ResumeActivityItem:传入参数 ActivityClientRecord</span><br><span class="line">ResumeActivityItem --&gt;&gt; ResumeActivityItem:execute(ActivityClientRecord r)</span><br><span class="line">ResumeActivityItem --&gt;&gt; ActivityThread:handleResumeActivity(r)</span><br></pre></td></tr></table></figure>
+<pre class="mermaid">sequenceDiagram
+autonumber
+ActivityTaskSupervisor ->> ActivityTaskSupervisor:realStartActivityLocked()
+ActivityTaskSupervisor ->> ActivityTaskSupervisor:tryRealStartActivityInner(ActivityRecord r)
+Note over ActivityTaskSupervisor:1.这里把 ActivityRecord.token 传给 LaunchActivityItem.mActivityToken
+ActivityTaskSupervisor ->> ActivityTaskSupervisor:new LaunchActivityItem(r.token)
+
+LaunchActivityItem -->> LaunchActivityItem:execute()
+Note over LaunchActivityItem:2.以 mActivityToken 为参数创建 ActivityClientRecord
+LaunchActivityItem ->> LaunchActivityItem:new ActivityClientRecord(mActivityToken)
+Note right of LaunchActivityItem:ActivityClientRecord 持有 mActivityToken
+LaunchActivityItem -->> ActivityThread:handleLaunchActivity(ActivityClientRecord r)
+
+Note left of ResumeActivityItem:传入参数 ActivityClientRecord
+ResumeActivityItem -->> ResumeActivityItem:execute(ActivityClientRecord r)
+ResumeActivityItem -->> ActivityThread:handleResumeActivity(r)</pre>
 
 <h3 id="2-ActivityClientRecord-和-LayoutParams-的关联"><a href="#2-ActivityClientRecord-和-LayoutParams-的关联" class="headerlink" title="2 ActivityClientRecord 和 LayoutParams 的关联"></a>2 ActivityClientRecord 和 LayoutParams 的关联</h3><p>从 handleResumeActivity(ActivityClientRecord) 调用到 <code>WindowManagerImpl.addView(LayoutParams)</code> 时传入的是 LayoutParams，在 <code>WMS.addWindow()</code> 中通过 <code>LayoutParams.token</code> 获取 WindowToken，我们知道在 ActivityClientRecord 中有 mActivityToken，那么 <code>ActivityClientRecord.mActivityToken</code> 和 <code>LayoutParams.token</code> 是如何关联的呢？</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">sequenceDiagram</span><br><span class="line">autonumber</span><br><span class="line">ActivityThread -&gt;&gt; WindowManagerImpl:addView(LayoutParams)</span><br><span class="line">WindowManagerImpl -&gt;&gt; WindowManagerGlobal:addView(LayoutParams)</span><br><span class="line">WindowManagerGlobal -&gt;&gt; Window:adjustLayoutParamsForSubWindow(LayoutParams)</span><br><span class="line">Note over Window:wp.token = mContainer.mAppToken</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<pre class="mermaid">sequenceDiagram
+autonumber
+ActivityThread ->> WindowManagerImpl:addView(LayoutParams)
+WindowManagerImpl ->> WindowManagerGlobal:addView(LayoutParams)
+WindowManagerGlobal ->> Window:adjustLayoutParamsForSubWindow(LayoutParams)
+Note over Window:wp.token = mContainer.mAppToken</pre>
 
 <p>而这个 <code>mAppToken</code> 则是在 Activity 创建的时候把 <code>ActivityClientRecord.token</code> 赋值给它的。</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">sequenceDiagram</span><br><span class="line">autonumber</span><br><span class="line">ActivityThread -&gt;&gt;ActivityThread:performLaunchActivity()</span><br><span class="line">ActivityThread -&gt;&gt; Activity:attach(ActivityClientRecord.token)</span><br><span class="line">Note over Activity,Window:设置 mToken = token;</span><br><span class="line">Activity -&gt;&gt; Window:setWindowManager(IBinder token)</span><br></pre></td></tr></table></figure>
+<pre class="mermaid">sequenceDiagram
+autonumber
+ActivityThread ->>ActivityThread:performLaunchActivity()
+ActivityThread ->> Activity:attach(ActivityClientRecord.token)
+Note over Activity,Window:设置 mToken = token;
+Activity ->> Window:setWindowManager(IBinder token)</pre>
 
 
 
 <h3 id="3-LayoutParams-和-WindowToken-的关联"><a href="#3-LayoutParams-和-WindowToken-的关联" class="headerlink" title="3 LayoutParams 和 WindowToken 的关联"></a>3 LayoutParams 和 WindowToken 的关联</h3><p>这个 <code>ActivityRecord.token</code> 是 IBinder 对象，定义在 ActivityRecord 中，那么这个 Token 是如何和 WindowToken 关联起来的呢？</p>
 <p>就是在 ActivityRecord 构造的时候，调用父类 WindowToken 的构造方法的时候通过 <code>DisplayContent.addWindowToken()</code> 关联的：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">sequenceDiagram</span><br><span class="line">autonumber</span><br><span class="line">ActivityStarter -&gt;&gt; ActivityRecord:new ActivityRecord()</span><br><span class="line">ActivityRecord -&gt;&gt; WindowToken:new WindowToken(new Token())</span><br><span class="line">Note right of WindowToken:token 是 IBinder 对象，this 就是 ActivityRecord 了</span><br><span class="line">WindowToken -&gt;&gt; DisplayContent:addWindowToken(token, this)</span><br></pre></td></tr></table></figure>
+<pre class="mermaid">sequenceDiagram
+autonumber
+ActivityStarter ->> ActivityRecord:new ActivityRecord()
+ActivityRecord ->> WindowToken:new WindowToken(new Token())
+Note right of WindowToken:token 是 IBinder 对象，this 就是 ActivityRecord 了
+WindowToken ->> DisplayContent:addWindowToken(token, this)</pre>
 
 <p><code>addWindowToken()</code> 时会执行 <code>mTokenMap.put(binder, token)</code>，即把 ActivityRecord.token 为 key，以 ActivityRecord 为 value 添加到 mTokenMap 中，随后在 <code>WMS.addWindow()</code> 中再通过 <code>DisplayContent.getWindowToken(LayoutParams.token)</code> 获取到 WindowToken（也就是 ActivityRecord）；</p>
-<h2 id="3-2-Activity-x2F-PhoneWindow-创建"><a href="#3-2-Activity-x2F-PhoneWindow-创建" class="headerlink" title="3.2 Activity&#x2F;PhoneWindow 创建"></a>3.2 Activity&#x2F;PhoneWindow 创建</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">sequenceDiagram</span><br><span class="line">autonumber</span><br><span class="line">ActivityThread -&gt;&gt; ActivityThread:handleLaunchActivity()</span><br><span class="line">ActivityThread -&gt;&gt; ActivityThread:performLaunchActivity()</span><br><span class="line">Note right of ActivityThread:1.创建 Activity</span><br><span class="line">ActivityThread -&gt;&gt; Instrumentation:newActivity()</span><br><span class="line">ActivityThread -&gt;&gt; Activity:attach()</span><br><span class="line">Note right of Activity:2.创建 PhoneWindow</span><br><span class="line">Activity -&gt;&gt; PhoneWindow:new PhoneWindow()</span><br><span class="line">Note right of Activity:设置回调用于把input事件从Window传递到Activity</span><br><span class="line">Activity -&gt;&gt; PhoneWindow:setCallback()</span><br><span class="line">Note right of Activity:设置 mToken = token;</span><br><span class="line">Activity -&gt;&gt; PhoneWindow:setWindowManager(IBinder token)</span><br><span class="line">ActivityThread -&gt;&gt; Instrumentation:callActivityOnCreate</span><br></pre></td></tr></table></figure>
+<h2 id="3-2-Activity-x2F-PhoneWindow-创建"><a href="#3-2-Activity-x2F-PhoneWindow-创建" class="headerlink" title="3.2 Activity&#x2F;PhoneWindow 创建"></a>3.2 Activity&#x2F;PhoneWindow 创建</h2><pre class="mermaid">sequenceDiagram
+autonumber
+ActivityThread ->> ActivityThread:handleLaunchActivity()
+ActivityThread ->> ActivityThread:performLaunchActivity()
+Note right of ActivityThread:1.创建 Activity
+ActivityThread ->> Instrumentation:newActivity()
+ActivityThread ->> Activity:attach()
+Note right of Activity:2.创建 PhoneWindow
+Activity ->> PhoneWindow:new PhoneWindow()
+Note right of Activity:设置回调用于把input事件从Window传递到Activity
+Activity ->> PhoneWindow:setCallback()
+Note right of Activity:设置 mToken = token;
+Activity ->> PhoneWindow:setWindowManager(IBinder token)
+ActivityThread ->> Instrumentation:callActivityOnCreate</pre>
 
 <p>总结</p>
 <ul>
@@ -841,7 +1300,43 @@
 </li>
 <li>执行 onCreate()</li>
 </ul>
-<h2 id="3-3-Window-显示-应用端"><a href="#3-3-Window-显示-应用端" class="headerlink" title="3.3 Window 显示 - 应用端"></a>3.3 Window 显示 - 应用端</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">sequenceDiagram</span><br><span class="line">autonumber</span><br><span class="line">ActivityThread -&gt;&gt;ActivityThread:handleResumeActivity()</span><br><span class="line">Note right of ActivityThread:执行 onResume()</span><br><span class="line">ActivityThread -&gt;&gt;ActivityThread:performResumeActivity()</span><br><span class="line">Note right of ActivityThread:从 PhoneWindow 获取 DecorView</span><br><span class="line">ActivityThread -&gt;&gt; PhoneWindow:getDecorView()</span><br><span class="line">ActivityThread -&gt;&gt; WindowManagerImpl:addView(DecorView)</span><br><span class="line">WindowManagerImpl -&gt;&gt; WindowManagerGlobal:addView(DecorView)</span><br><span class="line">Note right of WindowManagerGlobal:创建 ViewRootImpl</span><br><span class="line">WindowManagerGlobal -&gt;&gt; ViewRootImpl:new ViewRootImpl()</span><br><span class="line">WindowManagerGlobal -&gt;&gt; ViewRootImpl:setView(DecorView)</span><br><span class="line">ViewRootImpl -&gt;&gt; ViewRootImpl:requestLayout()</span><br><span class="line">ViewRootImpl --&gt;&gt; ViewRootImpl:performTraversals()</span><br><span class="line">Note over ViewRootImpl:2.通过 WMS 创建 Surface 并给到应用端</span><br><span class="line">ViewRootImpl -&gt;&gt; ViewRootImpl:relayoutWindow()</span><br><span class="line">Note over ViewRootImpl:3.1 绘制三部曲：测量</span><br><span class="line">ViewRootImpl -&gt;&gt; ViewRootImpl:performMeasure()</span><br><span class="line">Note over ViewRootImpl:3.2 绘制三部曲：布局</span><br><span class="line">ViewRootImpl -&gt;&gt; ViewRootImpl:performLayout()</span><br><span class="line"></span><br><span class="line">ViewRootImpl -&gt;&gt; ViewRootImpl:createSyncIfNeeded()</span><br><span class="line">Note over ViewRootImpl,SurfaceSyncGroup:4.1 创建 SurfaceSyncGroup 回调</span><br><span class="line">ViewRootImpl -&gt;&gt; SurfaceSyncGroup:new SurfaceSyncGroup()</span><br><span class="line"></span><br><span class="line">Note over ViewRootImpl:3.3 绘制三部曲：绘制</span><br><span class="line">ViewRootImpl -&gt;&gt; ViewRootImpl:performDraw()</span><br><span class="line">Note over ViewRootImpl,SurfaceSyncGroup:4.2 触发执行 SurfaceSyncGroup 回调</span><br><span class="line">ViewRootImpl -&gt;&gt; SurfaceSyncGroup:markSyncReady();</span><br><span class="line">Note over ViewRootImpl:4.3 进入 finish 流程</span><br><span class="line">ViewRootImpl -&gt;&gt; ViewRootImpl:reportDrawFinished()</span><br><span class="line">ViewRootImpl -&gt;&gt; Session:finishDrawing()</span><br><span class="line">Session -&gt;&gt; WMS:finishDrawingWindow()</span><br><span class="line"></span><br><span class="line">ViewRootImpl -&gt;&gt; Session:addToDisplayAsUser()</span><br><span class="line">Note over Session,WMS:1.创建挂载 WindowState，并绑定 W 和 WindowState</span><br><span class="line">Session -&gt;&gt; WMS:addWindow()</span><br></pre></td></tr></table></figure>
+<h2 id="3-3-Window-显示-应用端"><a href="#3-3-Window-显示-应用端" class="headerlink" title="3.3 Window 显示 - 应用端"></a>3.3 Window 显示 - 应用端</h2><pre class="mermaid">sequenceDiagram
+autonumber
+ActivityThread ->>ActivityThread:handleResumeActivity()
+Note right of ActivityThread:执行 onResume()
+ActivityThread ->>ActivityThread:performResumeActivity()
+Note right of ActivityThread:从 PhoneWindow 获取 DecorView
+ActivityThread ->> PhoneWindow:getDecorView()
+ActivityThread ->> WindowManagerImpl:addView(DecorView)
+WindowManagerImpl ->> WindowManagerGlobal:addView(DecorView)
+Note right of WindowManagerGlobal:创建 ViewRootImpl
+WindowManagerGlobal ->> ViewRootImpl:new ViewRootImpl()
+WindowManagerGlobal ->> ViewRootImpl:setView(DecorView)
+ViewRootImpl ->> ViewRootImpl:requestLayout()
+ViewRootImpl -->> ViewRootImpl:performTraversals()
+Note over ViewRootImpl:2.通过 WMS 创建 Surface 并给到应用端
+ViewRootImpl ->> ViewRootImpl:relayoutWindow()
+Note over ViewRootImpl:3.1 绘制三部曲：测量
+ViewRootImpl ->> ViewRootImpl:performMeasure()
+Note over ViewRootImpl:3.2 绘制三部曲：布局
+ViewRootImpl ->> ViewRootImpl:performLayout()
+
+ViewRootImpl ->> ViewRootImpl:createSyncIfNeeded()
+Note over ViewRootImpl,SurfaceSyncGroup:4.1 创建 SurfaceSyncGroup 回调
+ViewRootImpl ->> SurfaceSyncGroup:new SurfaceSyncGroup()
+
+Note over ViewRootImpl:3.3 绘制三部曲：绘制
+ViewRootImpl ->> ViewRootImpl:performDraw()
+Note over ViewRootImpl,SurfaceSyncGroup:4.2 触发执行 SurfaceSyncGroup 回调
+ViewRootImpl ->> SurfaceSyncGroup:markSyncReady();
+Note over ViewRootImpl:4.3 进入 finish 流程
+ViewRootImpl ->> ViewRootImpl:reportDrawFinished()
+ViewRootImpl ->> Session:finishDrawing()
+Session ->> WMS:finishDrawingWindow()
+
+ViewRootImpl ->> Session:addToDisplayAsUser()
+Note over Session,WMS:1.创建挂载 WindowState，并绑定 W 和 WindowState
+Session ->> WMS:addWindow()</pre>
 
 <p>总结</p>
 <ul>
@@ -854,7 +1349,19 @@
 </ul>
 </li>
 </ul>
-<h2 id="3-4-Window-显示-system-server-端"><a href="#3-4-Window-显示-system-server-端" class="headerlink" title="3.4 Window 显示 - system_server 端"></a>3.4 Window 显示 - system_server 端</h2><h3 id="3-4-1-addWindow"><a href="#3-4-1-addWindow" class="headerlink" title="3.4.1 addWindow()"></a>3.4.1 addWindow()</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">sequenceDiagram</span><br><span class="line">autonumber</span><br><span class="line">ViewRootImpl --&gt;&gt; WMS:addWindow()</span><br><span class="line">Note right of WMS:通过 IBinder token 获取 WindowToken</span><br><span class="line">WMS -&gt;&gt; DisplayContent:getWindowToken(IBinder token)</span><br><span class="line">Note over WMS,WindowState:创建 WindowState</span><br><span class="line">WMS -&gt;&gt; WindowState:new WindowState(W, WindowToken)</span><br><span class="line">Note over WMS,WindowState:创建 InputChannel</span><br><span class="line">WMS -&gt;&gt; WindowState:openInputChannel(outInputChannel)</span><br><span class="line">Note over WMS:把 W 对象和 WindowState 放入 Map</span><br><span class="line">WMS -&gt;&gt;WMS:mWindowMap.put(W, win)</span><br><span class="line">Note over WMS:挂载 WindowState 到 ActivityRecord(WindowToken)</span><br><span class="line">WMS -&gt;&gt;WMS:addWindowInner()</span><br></pre></td></tr></table></figure>
+<h2 id="3-4-Window-显示-system-server-端"><a href="#3-4-Window-显示-system-server-端" class="headerlink" title="3.4 Window 显示 - system_server 端"></a>3.4 Window 显示 - system_server 端</h2><h3 id="3-4-1-addWindow"><a href="#3-4-1-addWindow" class="headerlink" title="3.4.1 addWindow()"></a>3.4.1 addWindow()</h3><pre class="mermaid">sequenceDiagram
+autonumber
+ViewRootImpl -->> WMS:addWindow()
+Note right of WMS:通过 IBinder token 获取 WindowToken
+WMS ->> DisplayContent:getWindowToken(IBinder token)
+Note over WMS,WindowState:创建 WindowState
+WMS ->> WindowState:new WindowState(W, WindowToken)
+Note over WMS,WindowState:创建 InputChannel
+WMS ->> WindowState:openInputChannel(outInputChannel)
+Note over WMS:把 W 对象和 WindowState 放入 Map
+WMS ->>WMS:mWindowMap.put(W, win)
+Note over WMS:挂载 WindowState 到 ActivityRecord(WindowToken)
+WMS ->>WMS:addWindowInner()</pre>
 
 <p>总结</p>
 <ul>
@@ -863,7 +1370,31 @@
 <li>创建 InputChannel</li>
 <li>挂载 WindowState（详见 [1.2.2 创建挂载 WindowState](# 1.2.2 创建挂载 WindowState)）</li>
 </ul>
-<h3 id="3-4-2-relayoutWindow"><a href="#3-4-2-relayoutWindow" class="headerlink" title="3.4.2 relayoutWindow()"></a>3.4.2 relayoutWindow()</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">sequenceDiagram</span><br><span class="line">autonumber</span><br><span class="line">ViewRootImpl -&gt;&gt; ViewRootImpl:performTraversals()</span><br><span class="line">ViewRootImpl -&gt;&gt; ViewRootImpl:relayoutWindow()</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">ViewRootImpl -&gt;&gt; Session:relayout()</span><br><span class="line">Note over Session,WMS:WindowRelayoutResult 持有 mTmpFrames,SC 也是 WMS 侧写入的</span><br><span class="line">Session -&gt;&gt; WMS:relayoutWindow(WindowRelayoutResult, SurfaceControl)</span><br><span class="line">Note over WMS:创建 Buffer 类型的 Surface</span><br><span class="line">WMS -&gt;&gt; WMS:createSurfaceControl()</span><br><span class="line">WMS -&gt;&gt; WindowAnimator:createSurfaceLocked()</span><br><span class="line">Note over WMS,WindowAnimator:把构建好的 mSurfaceControl.mNativeObject 给到 outSurfaceControl.mNativeObject</span><br><span class="line">WMS -&gt;&gt; WindowAnimator:getSurfaceControl()</span><br><span class="line"></span><br><span class="line">Note over WMS,WindowPlacerLocked:计算窗口大小</span><br><span class="line">WMS -&gt;&gt; WindowPlacerLocked:performSurfacePlacement()</span><br><span class="line">Note over WMS,WindowState:填充 WMS 计算好后的数据，返回应用端</span><br><span class="line">WMS -&gt;&gt; WindowState:fillClientWindowFramesAndConfiguration()</span><br><span class="line"></span><br><span class="line">Note over ViewRootImpl:创建 BLASTBufferQueue 并绑定 Surface</span><br><span class="line">ViewRootImpl -&gt;&gt; ViewRootImpl:updateBlastSurfaceIfNeeded()</span><br><span class="line">Note over ViewRootImpl:将 WMS 计算的窗口大小设置到 mTmpFrames</span><br><span class="line">ViewRootImpl -&gt;&gt; ViewRootImpl:setFrame(mTmpFrames.frame)</span><br><span class="line">Note over ViewRootImpl:通过 mWinFrame.set(frame) 为 mWinFrame 赋值</span><br></pre></td></tr></table></figure>
+<h3 id="3-4-2-relayoutWindow"><a href="#3-4-2-relayoutWindow" class="headerlink" title="3.4.2 relayoutWindow()"></a>3.4.2 relayoutWindow()</h3><pre class="mermaid">sequenceDiagram
+autonumber
+ViewRootImpl ->> ViewRootImpl:performTraversals()
+ViewRootImpl ->> ViewRootImpl:relayoutWindow()
+
+
+ViewRootImpl ->> Session:relayout()
+Note over Session,WMS:WindowRelayoutResult 持有 mTmpFrames,SC 也是 WMS 侧写入的
+Session ->> WMS:relayoutWindow(WindowRelayoutResult, SurfaceControl)
+Note over WMS:创建 Buffer 类型的 Surface
+WMS ->> WMS:createSurfaceControl()
+WMS ->> WindowAnimator:createSurfaceLocked()
+Note over WMS,WindowAnimator:把构建好的 mSurfaceControl.mNativeObject 给到 outSurfaceControl.mNativeObject
+WMS ->> WindowAnimator:getSurfaceControl()
+
+Note over WMS,WindowPlacerLocked:计算窗口大小
+WMS ->> WindowPlacerLocked:performSurfacePlacement()
+Note over WMS,WindowState:填充 WMS 计算好后的数据，返回应用端
+WMS ->> WindowState:fillClientWindowFramesAndConfiguration()
+
+Note over ViewRootImpl:创建 BLASTBufferQueue 并绑定 Surface
+ViewRootImpl ->> ViewRootImpl:updateBlastSurfaceIfNeeded()
+Note over ViewRootImpl:将 WMS 计算的窗口大小设置到 mTmpFrames
+ViewRootImpl ->> ViewRootImpl:setFrame(mTmpFrames.frame)
+Note over ViewRootImpl:通过 mWinFrame.set(frame) 为 mWinFrame 赋值</pre>
 
 <p>总结</p>
 <ul>
@@ -874,12 +1405,50 @@
 </li>
 <li>创建 BLASTBufferQueue 并绑定 Surface</li>
 </ul>
-<h3 id="3-4-3-finishDrawingWindow"><a href="#3-4-3-finishDrawingWindow" class="headerlink" title="3.4.3 finishDrawingWindow()"></a>3.4.3 finishDrawingWindow()</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">sequenceDiagram</span><br><span class="line">autonumber</span><br><span class="line">ViewRootImpl -&gt;&gt; ViewRootImpl:performTraversals()</span><br><span class="line">ViewRootImpl -&gt;&gt; ViewRootImpl:createSyncIfNeeded()</span><br><span class="line">ViewRootImpl -&gt;&gt; ViewRootImpl:reportDrawFinished()</span><br><span class="line">ViewRootImpl -&gt;&gt; Session:finishDrawing()</span><br><span class="line">Session -&gt;&gt; WMS:finishDrawingWindow()</span><br><span class="line"></span><br><span class="line">Note over WMS:获取对应的 WindowState</span><br><span class="line">WMS -&gt;&gt; WMS:windowForClient()</span><br><span class="line">WMS -&gt;&gt; WindowState:finishDrawing()</span><br><span class="line">Note over WindowState,WindowStateAnimator:设置 COMMIT_DRAW_PENDING</span><br><span class="line">WindowState -&gt;&gt; WindowStateAnimator:finishDrawingLocked()</span><br><span class="line">WMS -&gt;&gt; WindowPlacerLocked:requestTraversal()</span><br></pre></td></tr></table></figure>
+<h3 id="3-4-3-finishDrawingWindow"><a href="#3-4-3-finishDrawingWindow" class="headerlink" title="3.4.3 finishDrawingWindow()"></a>3.4.3 finishDrawingWindow()</h3><pre class="mermaid">sequenceDiagram
+autonumber
+ViewRootImpl ->> ViewRootImpl:performTraversals()
+ViewRootImpl ->> ViewRootImpl:createSyncIfNeeded()
+ViewRootImpl ->> ViewRootImpl:reportDrawFinished()
+ViewRootImpl ->> Session:finishDrawing()
+Session ->> WMS:finishDrawingWindow()
+
+Note over WMS:获取对应的 WindowState
+WMS ->> WMS:windowForClient()
+WMS ->> WindowState:finishDrawing()
+Note over WindowState,WindowStateAnimator:设置 COMMIT_DRAW_PENDING
+WindowState ->> WindowStateAnimator:finishDrawingLocked()
+WMS ->> WindowPlacerLocked:requestTraversal()</pre>
 
 
 
 <p>requestTraversal() 流程</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">sequenceDiagram</span><br><span class="line">autonumber</span><br><span class="line">WMS -&gt;&gt; WindowPlacerLocked:requestTraversal()</span><br><span class="line">WindowPlacerLocked -&gt;&gt; WindowPlacerLocked:performSurfacePlacement()</span><br><span class="line">WindowPlacerLocked -&gt;&gt; WindowPlacerLocked:performSurfacePlacementLoop()</span><br><span class="line">WindowPlacerLocked -&gt;&gt; RootWindowContainer:performSurfacePlacement()</span><br><span class="line">Note over RootWindowContainer:处理 Surface 事务</span><br><span class="line">RootWindowContainer -&gt;&gt; RootWindowContainer:applySurfaceChangesTransaction()</span><br><span class="line">Note over RootWindowContainer，DisplayContent:遍历每个屏幕</span><br><span class="line">RootWindowContainer -&gt;&gt; DisplayContent:applySurfaceChangesTransaction()</span><br><span class="line">Note over DisplayContent:1.relayoutWinodw 流程</span><br><span class="line">DisplayContent -&gt;&gt; DisplayContent:performLayout()</span><br><span class="line">	DisplayContent -&gt;&gt; DisplayContent:performLayoutNoTrace()</span><br><span class="line">	Note over DisplayContent:1.1对所有顶级窗口进行布局</span><br><span class="line">	DisplayContent -&gt;&gt; DisplayContent:forAllWindows(mPerformLayout)</span><br><span class="line">	Note over DisplayContent:1.2处理子窗口的布局</span><br><span class="line">	DisplayContent -&gt;&gt; DisplayContent:forAllWindows(mPerformLayoutAttached)</span><br><span class="line">Note over DisplayContent:遍历所有窗口执行 lambda表达式</span><br><span class="line">DisplayContent -&gt;&gt; DisplayContent:forAllWindows(mApplySurfaceChangesTransaction)</span><br><span class="line">Note over DisplayContent,WindowStateAnimator:2.设置 READY_TO_SHOW</span><br><span class="line">DisplayContent -&gt;&gt; WindowStateAnimator:commitFinishDrawingLocked()</span><br><span class="line">Note over WindowState,WindowStateAnimator:满足条件会设置为 HAS_DRAW</span><br><span class="line">WindowStateAnimator -&gt;&gt; WindowState:performShowLocked()</span><br><span class="line">Note over WindowState,ActivityRecord:类型不是窗口，就移除 startwindow</span><br><span class="line">Note over WindowState,ActivityRecord:3.真正设置为 HAS_DRAW 的地方</span><br><span class="line">WindowState -&gt;&gt; ActivityRecord:onFirstWindowDrawn()</span><br></pre></td></tr></table></figure>
+<pre class="mermaid">sequenceDiagram
+autonumber
+WMS ->> WindowPlacerLocked:requestTraversal()
+WindowPlacerLocked ->> WindowPlacerLocked:performSurfacePlacement()
+WindowPlacerLocked ->> WindowPlacerLocked:performSurfacePlacementLoop()
+WindowPlacerLocked ->> RootWindowContainer:performSurfacePlacement()
+Note over RootWindowContainer:处理 Surface 事务
+RootWindowContainer ->> RootWindowContainer:applySurfaceChangesTransaction()
+Note over RootWindowContainer，DisplayContent:遍历每个屏幕
+RootWindowContainer ->> DisplayContent:applySurfaceChangesTransaction()
+Note over DisplayContent:1.relayoutWinodw 流程
+DisplayContent ->> DisplayContent:performLayout()
+    DisplayContent ->> DisplayContent:performLayoutNoTrace()
+    Note over DisplayContent:1.1对所有顶级窗口进行布局
+    DisplayContent ->> DisplayContent:forAllWindows(mPerformLayout)
+    Note over DisplayContent:1.2处理子窗口的布局
+    DisplayContent ->> DisplayContent:forAllWindows(mPerformLayoutAttached)
+Note over DisplayContent:遍历所有窗口执行 lambda表达式
+DisplayContent ->> DisplayContent:forAllWindows(mApplySurfaceChangesTransaction)
+Note over DisplayContent,WindowStateAnimator:2.设置 READY_TO_SHOW
+DisplayContent ->> WindowStateAnimator:commitFinishDrawingLocked()
+Note over WindowState,WindowStateAnimator:满足条件会设置为 HAS_DRAW
+WindowStateAnimator ->> WindowState:performShowLocked()
+Note over WindowState,ActivityRecord:类型不是窗口，就移除 startwindow
+Note over WindowState,ActivityRecord:3.真正设置为 HAS_DRAW 的地方
+WindowState ->> ActivityRecord:onFirstWindowDrawn()</pre>
 
 <p>总结</p>
 <ul>
@@ -1399,7 +1968,76 @@
 <li>不参与事件循环</li>
 </ul>
 <hr>
-<h2 id="时序图"><a href="#时序图" class="headerlink" title="时序图"></a>时序图</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">sequenceDiagram</span><br><span class="line">    participant SystemServer as &quot;SystemServer&quot;</span><br><span class="line">    participant InputManagerService as &quot;InputManagerService (Java)&quot;</span><br><span class="line">    participant NativeImpl as &quot;NativeImpl (Java)&quot;</span><br><span class="line">    participant JNI as &quot;JNI (C++)&quot;</span><br><span class="line">    participant NativeInputManager as &quot;NativeInputManager (C++)&quot;</span><br><span class="line">    participant InputManager as &quot;InputManager (C++)&quot;</span><br><span class="line">    participant InputDispatcher as &quot;InputDispatcher (C++)&quot;</span><br><span class="line">    participant InputReader as &quot;InputReader (C++)&quot;</span><br><span class="line">    participant EventHub as &quot;EventHub (C++)&quot;</span><br><span class="line"></span><br><span class="line">    SystemServer-&gt;&gt;InputManagerService: construct (Injector -&gt; new NativeImpl(service, messageQueue))</span><br><span class="line">    activate InputManagerService</span><br><span class="line">    InputManagerService-&gt;&gt;NativeImpl: new NativeImpl(...)</span><br><span class="line">    activate NativeImpl</span><br><span class="line">    NativeImpl-&gt;&gt;JNI: native long init(serviceObj, messageQueue)</span><br><span class="line">    activate JNI</span><br><span class="line">    JNI-&gt;&gt;JNI: std::call_once -&gt; create NativeInputManager</span><br><span class="line">    JNI-&gt;&gt;NativeInputManager: new NativeInputManager(serviceObj, looper)</span><br><span class="line">    activate NativeInputManager</span><br><span class="line">    NativeInputManager-&gt;&gt;InputManager: new InputManager(this, ...)</span><br><span class="line">    activate InputManager</span><br><span class="line">    InputManager-&gt;&gt;InputDispatcher: createInputDispatcher(...)</span><br><span class="line">    activate InputDispatcher</span><br><span class="line">    InputManager-&gt;&gt;InputReader: createInputReader(... (creates EventHub))</span><br><span class="line">    activate InputReader</span><br><span class="line">    InputReader-&gt;&gt;EventHub: new EventHub()</span><br><span class="line">    deactivate InputReader</span><br><span class="line">    deactivate InputDispatcher</span><br><span class="line">    deactivate InputManager</span><br><span class="line">    NativeInputManager-&gt;&gt;JNI: return pointer (jlong)</span><br><span class="line">    deactivate NativeInputManager</span><br><span class="line">    JNI-&gt;&gt;NativeImpl: init() returns jlong (store in mPtr)</span><br><span class="line">    deactivate JNI</span><br><span class="line">    deactivate NativeImpl</span><br><span class="line">    deactivate InputManagerService</span><br><span class="line"></span><br><span class="line">    %% Later during service start()</span><br><span class="line">    SystemServer-&gt;&gt;InputManagerService: startOtherServices() -&gt; InputManagerService.start()</span><br><span class="line">    activate InputManagerService</span><br><span class="line">    InputManagerService-&gt;&gt;NativeImpl: mNative.start()</span><br><span class="line">    activate NativeImpl</span><br><span class="line">    NativeImpl-&gt;&gt;JNI: nativeStart()</span><br><span class="line">    activate JNI</span><br><span class="line">    JNI-&gt;&gt;NativeInputManager: getNativeInputManager(env, mPtr)</span><br><span class="line">    activate NativeInputManager</span><br><span class="line">    NativeInputManager-&gt;&gt;InputManager: getInputManager()-&gt;start()</span><br><span class="line">    activate InputManager</span><br><span class="line">    InputManager-&gt;&gt;InputDispatcher: mDispatcher-&gt;start()</span><br><span class="line">    activate InputDispatcher</span><br><span class="line">    InputDispatcher-&gt;&gt;InputDispatcher: create InputThread -&gt; run dispatch loop</span><br><span class="line">    InputDispatcher--&gt;&gt;InputManager: start() returns OK</span><br><span class="line">    deactivate InputDispatcher</span><br><span class="line">    InputManager-&gt;&gt;InputReader: mReader-&gt;start()</span><br><span class="line">    activate InputReader</span><br><span class="line">    InputReader-&gt;&gt;InputReader: create InputThread -&gt; run read loop (EventHub-&gt;getEvents())</span><br><span class="line">    InputReader-&gt;&gt;EventHub: poll events</span><br><span class="line">    InputReader--&gt;&gt;InputManager: start() returns OK</span><br><span class="line">    deactivate InputReader</span><br><span class="line">    InputManager--&gt;&gt;NativeInputManager: start() returns OK</span><br><span class="line">    deactivate InputManager</span><br><span class="line">    NativeInputManager--&gt;&gt;JNI: nativeStart() returns</span><br><span class="line">    deactivate NativeInputManager</span><br><span class="line">    JNI--&gt;&gt;NativeImpl: nativeStart() returns</span><br><span class="line">    deactivate JNI</span><br><span class="line">    NativeImpl--&gt;&gt;InputManagerService: start() returns</span><br><span class="line">    deactivate NativeImpl</span><br><span class="line">    deactivate InputManagerService</span><br><span class="line"></span><br><span class="line">    note over InputManager: 启动顺序重要：\n1) 构造时创建 `InputDispatcher` 和 `InputReader`；\n2) `start()` 时先 `mDispatcher-&gt;start()`，再 `mReader-&gt;start()`；若 `mReader-&gt;start()` 失败，会停止 dispatcher 并返回错误。</span><br></pre></td></tr></table></figure>
+<h2 id="时序图"><a href="#时序图" class="headerlink" title="时序图"></a>时序图</h2><pre class="mermaid">sequenceDiagram
+    participant SystemServer as "SystemServer"
+    participant InputManagerService as "InputManagerService (Java)"
+    participant NativeImpl as "NativeImpl (Java)"
+    participant JNI as "JNI (C++)"
+    participant NativeInputManager as "NativeInputManager (C++)"
+    participant InputManager as "InputManager (C++)"
+    participant InputDispatcher as "InputDispatcher (C++)"
+    participant InputReader as "InputReader (C++)"
+    participant EventHub as "EventHub (C++)"
+
+    SystemServer->>InputManagerService: construct (Injector -> new NativeImpl(service, messageQueue))
+    activate InputManagerService
+    InputManagerService->>NativeImpl: new NativeImpl(...)
+    activate NativeImpl
+    NativeImpl->>JNI: native long init(serviceObj, messageQueue)
+    activate JNI
+    JNI->>JNI: std::call_once -> create NativeInputManager
+    JNI->>NativeInputManager: new NativeInputManager(serviceObj, looper)
+    activate NativeInputManager
+    NativeInputManager->>InputManager: new InputManager(this, ...)
+    activate InputManager
+    InputManager->>InputDispatcher: createInputDispatcher(...)
+    activate InputDispatcher
+    InputManager->>InputReader: createInputReader(... (creates EventHub))
+    activate InputReader
+    InputReader->>EventHub: new EventHub()
+    deactivate InputReader
+    deactivate InputDispatcher
+    deactivate InputManager
+    NativeInputManager->>JNI: return pointer (jlong)
+    deactivate NativeInputManager
+    JNI->>NativeImpl: init() returns jlong (store in mPtr)
+    deactivate JNI
+    deactivate NativeImpl
+    deactivate InputManagerService
+
+    %% Later during service start()
+    SystemServer->>InputManagerService: startOtherServices() -> InputManagerService.start()
+    activate InputManagerService
+    InputManagerService->>NativeImpl: mNative.start()
+    activate NativeImpl
+    NativeImpl->>JNI: nativeStart()
+    activate JNI
+    JNI->>NativeInputManager: getNativeInputManager(env, mPtr)
+    activate NativeInputManager
+    NativeInputManager->>InputManager: getInputManager()->start()
+    activate InputManager
+    InputManager->>InputDispatcher: mDispatcher->start()
+    activate InputDispatcher
+    InputDispatcher->>InputDispatcher: create InputThread -> run dispatch loop
+    InputDispatcher-->>InputManager: start() returns OK
+    deactivate InputDispatcher
+    InputManager->>InputReader: mReader->start()
+    activate InputReader
+    InputReader->>InputReader: create InputThread -> run read loop (EventHub->getEvents())
+    InputReader->>EventHub: poll events
+    InputReader-->>InputManager: start() returns OK
+    deactivate InputReader
+    InputManager-->>NativeInputManager: start() returns OK
+    deactivate InputManager
+    NativeInputManager-->>JNI: nativeStart() returns
+    deactivate NativeInputManager
+    JNI-->>NativeImpl: nativeStart() returns
+    deactivate JNI
+    NativeImpl-->>InputManagerService: start() returns
+    deactivate NativeImpl
+    deactivate InputManagerService
+
+    note over InputManager: 启动顺序重要：\n1) 构造时创建 `InputDispatcher` 和 `InputReader`；\n2) `start()` 时先 `mDispatcher->start()`，再 `mReader->start()`；若 `mReader->start()` 失败，会停止 dispatcher 并返回错误。</pre>
 
 
 
@@ -1407,15 +2045,100 @@
 
 
 
-<h2 id="初始化流程"><a href="#初始化流程" class="headerlink" title="初始化流程"></a>初始化流程</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">sequenceDiagram</span><br><span class="line">    participant SystemServer as &quot;SystemServer.java&quot;</span><br><span class="line">    participant InputManagerService as &quot;InputManagerService.java&quot;</span><br><span class="line">    participant NativeImpl as &quot;InputManagerService.java (NativeImpl)&quot;</span><br><span class="line">    participant JNI as &quot;com_android_server_input_InputManagerService.cpp&quot;</span><br><span class="line">    participant InputManager as &quot;InputManager.cpp&quot;</span><br><span class="line">    participant InputDispatcher as &quot;InputDispatcher.cpp&quot;</span><br><span class="line">    participant InputReader as &quot;InputReader.cpp&quot;</span><br><span class="line">    participant EventHub as &quot;EventHub.cpp&quot;</span><br><span class="line"></span><br><span class="line">    SystemServer-&gt;&gt;InputManagerService: construct (Injector -&gt; new NativeImpl)</span><br><span class="line">    InputManagerService-&gt;&gt;NativeImpl: new NativeImpl(...)</span><br><span class="line">    NativeImpl-&gt;&gt;JNI: native init(serviceObj, messageQueue)</span><br><span class="line">    JNI-&gt;&gt;JNI: std::call_once -&gt; create NativeInputManager</span><br><span class="line">    JNI-&gt;&gt;JNI: return native pointer (jlong)</span><br><span class="line">    JNI-&gt;&gt;NativeImpl: init() returns (mPtr stored)</span><br><span class="line"></span><br><span class="line">    JNI-&gt;&gt;NativeInputManager: (inside ctor) new InputManager(this, ...)</span><br><span class="line">    InputManager-&gt;&gt;InputDispatcher: createInputDispatcher(...)</span><br><span class="line">    InputManager-&gt;&gt;InputReader: createInputReader(...)</span><br><span class="line">    InputReader-&gt;&gt;EventHub: new EventHub()</span><br></pre></td></tr></table></figure>
+<h2 id="初始化流程"><a href="#初始化流程" class="headerlink" title="初始化流程"></a>初始化流程</h2><pre class="mermaid">sequenceDiagram
+    participant SystemServer as "SystemServer.java"
+    participant InputManagerService as "InputManagerService.java"
+    participant NativeImpl as "InputManagerService.java (NativeImpl)"
+    participant JNI as "com_android_server_input_InputManagerService.cpp"
+    participant InputManager as "InputManager.cpp"
+    participant InputDispatcher as "InputDispatcher.cpp"
+    participant InputReader as "InputReader.cpp"
+    participant EventHub as "EventHub.cpp"
 
-<h2 id="启动流程"><a href="#启动流程" class="headerlink" title="启动流程"></a>启动流程</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">sequenceDiagram</span><br><span class="line">    participant SystemServer as &quot;SystemServer.java&quot;</span><br><span class="line">    participant InputManagerService as &quot;InputManagerService.java&quot;</span><br><span class="line">    participant NativeImpl as &quot;InputManagerService.java (NativeImpl)&quot;</span><br><span class="line">    participant JNI as &quot;com_android_server_input_InputManagerService.cpp&quot;</span><br><span class="line">    participant NativeInputManager as &quot;com_android_server_input_InputManagerService.cpp (NativeInputManager)&quot;</span><br><span class="line">    participant InputManager as &quot;InputManager.cpp&quot;</span><br><span class="line">    participant InputDispatcher as &quot;InputDispatcher.cpp&quot;</span><br><span class="line">    participant InputReader as &quot;InputReader.cpp&quot;</span><br><span class="line"></span><br><span class="line">    SystemServer-&gt;&gt;InputManagerService: startOtherServices() -&gt; start()</span><br><span class="line">    InputManagerService-&gt;&gt;NativeImpl: mNative.start()</span><br><span class="line">    NativeImpl-&gt;&gt;JNI: nativeStart()</span><br><span class="line">    JNI-&gt;&gt;NativeInputManager: getNativeInputManager(mPtr)</span><br><span class="line">    NativeInputManager-&gt;&gt;InputManager: getInputManager()-&gt;start()</span><br><span class="line">    InputManager-&gt;&gt;InputDispatcher: mDispatcher-&gt;start()  -- start dispatch thread</span><br><span class="line">    InputManager-&gt;&gt;InputReader: mReader-&gt;start()          -- start reader thread (EventHub polls)</span><br></pre></td></tr></table></figure>
+    SystemServer->>InputManagerService: construct (Injector -> new NativeImpl)
+    InputManagerService->>NativeImpl: new NativeImpl(...)
+    NativeImpl->>JNI: native init(serviceObj, messageQueue)
+    JNI->>JNI: std::call_once -> create NativeInputManager
+    JNI->>JNI: return native pointer (jlong)
+    JNI->>NativeImpl: init() returns (mPtr stored)
 
-<h2 id="架构图"><a href="#架构图" class="headerlink" title="架构图"></a>架构图</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">flowchart LR</span><br><span class="line">    SystemServer[SystemServer.java]</span><br><span class="line">    IMS[InputManagerService.java]</span><br><span class="line">    NativeImpl[NativeImpl]</span><br><span class="line">    JNI[com_android_server_input_InputManagerService.cpp]</span><br><span class="line">    NIM[NativeInputManager]</span><br><span class="line">    IM[InputManager.cpp]</span><br><span class="line">    ID[InputDispatcher.cpp]</span><br><span class="line">    IR[InputReader.cpp]</span><br><span class="line">    EH[EventHub.cpp]</span><br><span class="line"></span><br><span class="line">    SystemServer --&gt; IMS</span><br><span class="line">    IMS --&gt; NativeImpl</span><br><span class="line">    NativeImpl --&gt; JNI</span><br><span class="line">    JNI --&gt; NIM</span><br><span class="line">    NIM --&gt; IM</span><br><span class="line">    IM --&gt; ID</span><br><span class="line">    IM --&gt; IR</span><br><span class="line">    IR --&gt; EH</span><br><span class="line"></span><br><span class="line">    %% 启动简要（复述关系，便于阅读）</span><br><span class="line">    IMS --&gt; NativeImpl</span><br><span class="line">    NativeImpl --&gt; JNI</span><br><span class="line">    JNI --&gt; NIM</span><br><span class="line">    NIM --&gt; IM</span><br><span class="line">    IM --&gt; ID</span><br><span class="line">    IM --&gt; IR</span><br></pre></td></tr></table></figure>
+    JNI->>NativeInputManager: (inside ctor) new InputManager(this, ...)
+    InputManager->>InputDispatcher: createInputDispatcher(...)
+    InputManager->>InputReader: createInputReader(...)
+    InputReader->>EventHub: new EventHub()</pre>
+
+<h2 id="启动流程"><a href="#启动流程" class="headerlink" title="启动流程"></a>启动流程</h2><pre class="mermaid">sequenceDiagram
+    participant SystemServer as "SystemServer.java"
+    participant InputManagerService as "InputManagerService.java"
+    participant NativeImpl as "InputManagerService.java (NativeImpl)"
+    participant JNI as "com_android_server_input_InputManagerService.cpp"
+    participant NativeInputManager as "com_android_server_input_InputManagerService.cpp (NativeInputManager)"
+    participant InputManager as "InputManager.cpp"
+    participant InputDispatcher as "InputDispatcher.cpp"
+    participant InputReader as "InputReader.cpp"
+
+    SystemServer->>InputManagerService: startOtherServices() -> start()
+    InputManagerService->>NativeImpl: mNative.start()
+    NativeImpl->>JNI: nativeStart()
+    JNI->>NativeInputManager: getNativeInputManager(mPtr)
+    NativeInputManager->>InputManager: getInputManager()->start()
+    InputManager->>InputDispatcher: mDispatcher->start()  -- start dispatch thread
+    InputManager->>InputReader: mReader->start()          -- start reader thread (EventHub polls)</pre>
+
+<h2 id="架构图"><a href="#架构图" class="headerlink" title="架构图"></a>架构图</h2><pre class="mermaid">flowchart LR
+    SystemServer[SystemServer.java]
+    IMS[InputManagerService.java]
+    NativeImpl[NativeImpl]
+    JNI[com_android_server_input_InputManagerService.cpp]
+    NIM[NativeInputManager]
+    IM[InputManager.cpp]
+    ID[InputDispatcher.cpp]
+    IR[InputReader.cpp]
+    EH[EventHub.cpp]
+
+    SystemServer --> IMS
+    IMS --> NativeImpl
+    NativeImpl --> JNI
+    JNI --> NIM
+    NIM --> IM
+    IM --> ID
+    IM --> IR
+    IR --> EH
+
+    %% 启动简要（复述关系，便于阅读）
+    IMS --> NativeImpl
+    NativeImpl --> JNI
+    JNI --> NIM
+    NIM --> IM
+    IM --> ID
+    IM --> IR</pre>
 
 
 
-<h2 id="思维导图"><a href="#思维导图" class="headerlink" title="思维导图"></a>思维导图</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">mindmap</span><br><span class="line">  root((Input Stack))</span><br><span class="line">    Java</span><br><span class="line">      SystemServer.java</span><br><span class="line">      InputManagerService.java</span><br><span class="line">      NativeImpl</span><br><span class="line">    JNI</span><br><span class="line">      nativeInit call_once</span><br><span class="line">      mPtr jlong</span><br><span class="line">      nativeStart getNativeInputManager</span><br><span class="line">    Native</span><br><span class="line">      NativeInputManager</span><br><span class="line">      InputManager</span><br><span class="line">        InputDispatcher</span><br><span class="line">        InputReader</span><br><span class="line">          EventHub</span><br><span class="line">    Startup</span><br><span class="line">      init 构造对象</span><br><span class="line">      start 先 Dispatcher 再 Reader</span><br><span class="line">    Threading</span><br><span class="line">      Dispatcher 线程 dispatch loop</span><br><span class="line">      Reader 线程 read loop EventHub poll</span><br><span class="line">    FailureModes</span><br><span class="line">      Reader start 失败 停止 Dispatcher</span><br></pre></td></tr></table></figure>
+<h2 id="思维导图"><a href="#思维导图" class="headerlink" title="思维导图"></a>思维导图</h2><pre class="mermaid">mindmap
+  root((Input Stack))
+    Java
+      SystemServer.java
+      InputManagerService.java
+      NativeImpl
+    JNI
+      nativeInit call_once
+      mPtr jlong
+      nativeStart getNativeInputManager
+    Native
+      NativeInputManager
+      InputManager
+        InputDispatcher
+        InputReader
+          EventHub
+    Startup
+      init 构造对象
+      start 先 Dispatcher 再 Reader
+    Threading
+      Dispatcher 线程 dispatch loop
+      Reader 线程 read loop EventHub poll
+    FailureModes
+      Reader start 失败 停止 Dispatcher</pre>
 
 <p><a href="https://blog.51cto.com/u_13424/13095230">https://blog.51cto.com/u_13424/13095230</a></p>
 <h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>ViewRootImpl 建立了一个 Java 层面的 InputChannel  对象，InputChannel 本质是一个 Unix domain socket 的一端，由 socketpair 创建。 InputDispatcher 和 ViewRootImpl 各持一端。</p>
@@ -1607,7 +2330,19 @@
 <li>进入 <code>BootAnimation::threadLoop()</code> 并执行动画播放（<code>android()</code>或 <code>movie()</code>）</li>
 <li>播放完成或收到退出 -&gt; <code>threadLoop()</code> 返回 -&gt; 清理 -&gt; 线程退出</li>
 </ol>
-<h2 id="1-4-时序图"><a href="#1-4-时序图" class="headerlink" title="1.4 时序图"></a>1.4 时序图</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">sequenceDiagram</span><br><span class="line">init -&gt;&gt; property_service:StartPropertyService()</span><br><span class="line">property_service -&gt;&gt; property_service:StartThread()</span><br><span class="line">property_service -&gt;&gt; property_service:PropertyServiceThread()</span><br><span class="line">property_service -&gt;&gt; property_service:handle_property_set_fd()</span><br><span class="line">property_service -&gt;&gt; property_service:HandlePropertySet()</span><br><span class="line">property_service -&gt;&gt; property_service:SendControlMessage()</span><br><span class="line">property_service -&gt;&gt; init:QueueControlMessage()</span><br><span class="line">init -&gt;&gt; init:HandleControlMessages()</span><br><span class="line">bootanimation_main --&gt;&gt; BootAnimation:onFirstRef()</span><br><span class="line">bootanimation_main --&gt;&gt; BootAnimation:readyToRun()</span><br><span class="line">bootanimation_main --&gt;&gt; BootAnimation:threadLoop()</span><br><span class="line">BootAnimation -&gt;&gt; BootAnimation:movie()</span><br></pre></td></tr></table></figure>
+<h2 id="1-4-时序图"><a href="#1-4-时序图" class="headerlink" title="1.4 时序图"></a>1.4 时序图</h2><pre class="mermaid">sequenceDiagram
+init ->> property_service:StartPropertyService()
+property_service ->> property_service:StartThread()
+property_service ->> property_service:PropertyServiceThread()
+property_service ->> property_service:handle_property_set_fd()
+property_service ->> property_service:HandlePropertySet()
+property_service ->> property_service:SendControlMessage()
+property_service ->> init:QueueControlMessage()
+init ->> init:HandleControlMessages()
+bootanimation_main -->> BootAnimation:onFirstRef()
+bootanimation_main -->> BootAnimation:readyToRun()
+bootanimation_main -->> BootAnimation:threadLoop()
+BootAnimation ->> BootAnimation:movie()</pre>
 
 ]]></content>
       <categories>
@@ -2104,7 +2839,37 @@
 <p>在这个例子中，<code>MyConfigModule</code> 必须被手动实例化，因为它有一个带参数的构造函数。</p>
 </li>
 </ul>
-<h2 id="5-Dagger2-Android-依赖注入流程图"><a href="#5-Dagger2-Android-依赖注入流程图" class="headerlink" title="5 Dagger2 Android 依赖注入流程图"></a>5 Dagger2 Android 依赖注入流程图</h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">sequenceDiagram</span><br><span class="line">    participant AppDev as Android应用开发者</span><br><span class="line">    participant AndroidApp as Android应用(Application/Activity/Fragment)</span><br><span class="line">    participant DaggerC as Dagger编译器(编译时)</span><br><span class="line">    participant GeneratedComp as 生成的Dagger Component 实现</span><br><span class="line">    participant Module as 模块(@Module, @Provides)</span><br><span class="line"></span><br><span class="line">    Note over AppDev,AndroidApp: **开发阶段：定义依赖**</span><br><span class="line"></span><br><span class="line">    AppDev-&gt;&gt;AndroidApp: 1. 在需要依赖的字段上使用 `@Inject` 注解&lt;br/&gt;`@Inject MyDependency myDependency;</span><br><span class="line">    AppDev-&gt;&gt;Module: 2. 定义提供依赖的模块和方法&lt;br/&gt;`@Module`, `@Provides MyDependency provideMyDependency()`</span><br><span class="line">    AppDev-&gt;&gt;GeneratedComp: 3. 定义组件接口，连接模块和注入点&lt;br/&gt;`@Component(modules = MyModule.class)`</span><br><span class="line"></span><br><span class="line">    Note over DaggerC: **编译时：生成依赖图**</span><br><span class="line"></span><br><span class="line">    DaggerC-&gt;&gt;AppDev: 4. Dagger 编译器扫描 `@Inject`, `@Provides`, `@Module`, `@Component`</span><br><span class="line">    DaggerC-&gt;&gt;GeneratedComp: 5. Dagger 编译器生成组件的实现类&lt;br/&gt;(例如 `DaggerAppComponent`)</span><br><span class="line">    Note over DaggerC: 编译器验证依赖图的完整性</span><br><span class="line"></span><br><span class="line">    Note over AndroidApp: **运行时：注入依赖**</span><br><span class="line"></span><br><span class="line">    AndroidApp-&gt;&gt;GeneratedComp: 6. 在 `Application/Activity/Fragment` 的 `onCreate()` 中&lt;br/&gt;创建 Component 实例：`DaggerAppComponent.builder().build()`</span><br><span class="line">    AndroidApp-&gt;&gt;GeneratedComp: 7. 调用 Component 的注入方法：&lt;br/&gt;`component.inject(this)(将自身传递给 Component)`</span><br><span class="line"></span><br><span class="line">    GeneratedComp-&gt;&gt;Module: 8. Component 解析 `inject()` 请求，&lt;br/&gt;根据依赖图调用模块中的 `@Provides` 方法&lt;br/&gt;(如果依赖是单例或已缓存，则直接提供)</span><br><span class="line"></span><br><span class="line">    Module--&gt;&gt;GeneratedComp: 9. 模块返回依赖实例&lt;br/&gt;(例如 `MyDependency` 的实例)</span><br><span class="line"></span><br><span class="line">    GeneratedComp--&gt;&gt;AndroidApp: 10. Component 将依赖实例注入到&lt;br/&gt;Android 应用组件中 `@Inject` 标记的字段</span><br><span class="line"></span><br><span class="line">    Note over AndroidApp: 11. Android 应用现在可以使用 `myDependency` 了</span><br></pre></td></tr></table></figure>
+<h2 id="5-Dagger2-Android-依赖注入流程图"><a href="#5-Dagger2-Android-依赖注入流程图" class="headerlink" title="5 Dagger2 Android 依赖注入流程图"></a>5 Dagger2 Android 依赖注入流程图</h2><pre class="mermaid">sequenceDiagram
+    participant AppDev as Android应用开发者
+    participant AndroidApp as Android应用(Application/Activity/Fragment)
+    participant DaggerC as Dagger编译器(编译时)
+    participant GeneratedComp as 生成的Dagger Component 实现
+    participant Module as 模块(@Module, @Provides)
+
+    Note over AppDev,AndroidApp: **开发阶段：定义依赖**
+
+    AppDev->>AndroidApp: 1. 在需要依赖的字段上使用 `@Inject` 注解<br/>`@Inject MyDependency myDependency;
+    AppDev->>Module: 2. 定义提供依赖的模块和方法<br/>`@Module`, `@Provides MyDependency provideMyDependency()`
+    AppDev->>GeneratedComp: 3. 定义组件接口，连接模块和注入点<br/>`@Component(modules = MyModule.class)`
+
+    Note over DaggerC: **编译时：生成依赖图**
+
+    DaggerC->>AppDev: 4. Dagger 编译器扫描 `@Inject`, `@Provides`, `@Module`, `@Component`
+    DaggerC->>GeneratedComp: 5. Dagger 编译器生成组件的实现类<br/>(例如 `DaggerAppComponent`)
+    Note over DaggerC: 编译器验证依赖图的完整性
+
+    Note over AndroidApp: **运行时：注入依赖**
+
+    AndroidApp->>GeneratedComp: 6. 在 `Application/Activity/Fragment` 的 `onCreate()` 中<br/>创建 Component 实例：`DaggerAppComponent.builder().build()`
+    AndroidApp->>GeneratedComp: 7. 调用 Component 的注入方法：<br/>`component.inject(this)(将自身传递给 Component)`
+
+    GeneratedComp->>Module: 8. Component 解析 `inject()` 请求，<br/>根据依赖图调用模块中的 `@Provides` 方法<br/>(如果依赖是单例或已缓存，则直接提供)
+
+    Module-->>GeneratedComp: 9. 模块返回依赖实例<br/>(例如 `MyDependency` 的实例)
+
+    GeneratedComp-->>AndroidApp: 10. Component 将依赖实例注入到<br/>Android 应用组件中 `@Inject` 标记的字段
+
+    Note over AndroidApp: 11. Android 应用现在可以使用 `myDependency` 了</pre>
 
 
 
@@ -4592,7 +5357,14 @@
 <h3 id="1-1-1-BinderInternal-getContextObject-获取封装有-sm-的BpBinder-的-BinderProxy"><a href="#1-1-1-BinderInternal-getContextObject-获取封装有-sm-的BpBinder-的-BinderProxy" class="headerlink" title="1.1.1 BinderInternal.getContextObject() - 获取封装有 sm 的BpBinder 的 BinderProxy"></a>1.1.1 BinderInternal.getContextObject() - 获取封装有 sm 的BpBinder 的 BinderProxy</h3><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">// BinderInternal.java</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">native</span> IBinder <span class="title function_">getContextObject</span><span class="params">()</span>;</span><br></pre></td></tr></table></figure>
 
 <p>此处调用的是 native 函数，注册流程在 <a href="">Android_Binder进程间通信机制01</a> 中的第六小结已经讲过，再简单说下注册流程：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">sequenceDiagram</span><br><span class="line">app_main -&gt;&gt; app_main:main()</span><br><span class="line">app_main -&gt;&gt; AndroidRuntime:start()</span><br><span class="line">AndroidRuntime -&gt;&gt; AndroidRuntime:startReg()</span><br><span class="line">AndroidRuntime -&gt;&gt; AndroidRuntime:register_jni_procs()</span><br><span class="line">AndroidRuntime -&gt;&gt; android_util_Binder:register_android_os_Binder()</span><br><span class="line">android_util_Binder -&gt;&gt; android_util_Binder:int_register_android_os_BinderInternal(env)</span><br><span class="line">android_util_Binder -&gt;&gt; android_util_Binder:gBinderInternalMethods</span><br></pre></td></tr></table></figure>
+<pre class="mermaid">sequenceDiagram
+app_main ->> app_main:main()
+app_main ->> AndroidRuntime:start()
+AndroidRuntime ->> AndroidRuntime:startReg()
+AndroidRuntime ->> AndroidRuntime:register_jni_procs()
+AndroidRuntime ->> android_util_Binder:register_android_os_Binder()
+android_util_Binder ->> android_util_Binder:int_register_android_os_BinderInternal(env)
+android_util_Binder ->> android_util_Binder:gBinderInternalMethods</pre>
 
 <p>app_main.main() ——&gt; AndroidRuntime.start() ——&gt; AndroidRuntime.startReg() ——&gt; AndroidRuntime.register_jni_procs() ——&gt; android_util_Binder.register_android_os_Binder() ——&gt; android_util_Binder.int_register_android_os_BinderInternal(env) ——&gt; android_util_Binder.gBinderInternalMethods：</p>
 <figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="comment">// android_util_Binder.cpp</span></span><br><span class="line"><span class="type">static</span> <span class="type">const</span> JNINativeMethod gBinderInternalMethods[] = &#123;</span><br><span class="line">     <span class="comment">/* name, signature, funcPtr */</span></span><br><span class="line">    &#123; <span class="string">&quot;getContextObject&quot;</span>, <span class="string">&quot;()Landroid/os/IBinder;&quot;</span>, (<span class="type">void</span>*)android_os_BinderInternal_getContextObject &#125;,</span><br><span class="line">    &#123; <span class="string">&quot;joinThreadPool&quot;</span>, <span class="string">&quot;()V&quot;</span>, (<span class="type">void</span>*)android_os_BinderInternal_joinThreadPool &#125;,</span><br><span class="line">    ...</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
@@ -7576,7 +8348,7 @@
 <li>将traces信息和 CPU使用情况信息保存到dropbox，即<em>data&#x2F;system&#x2F;dropbox</em>目录；</li>
 <li>根据进程类型，来决定直接后台杀掉（后台ANR），还是弹框告知用户；</li>
 </ul>
-<p>在输出trace的时候，Android 8.1.0新加了一个<code>useTombstonedForJavaTraces</code>属性，Java进程的traces通过<code>kill -3 [pid]</code>获取，Native进程的traces通过<code>debuggerd -b [pid]</code>获取，<code>kill -3</code>命令需要虚拟机的支持，所以无法输出Native进程traces.而<code>debuggerd -b [pid]</code>也可用于Java进程，但信息量远没有kill -3多。 ANR信息最为重要的是dropbox信息（比如<a href="mailto:&#100;&#97;&#116;&#97;&#x5f;&#97;&#112;&#112;&#95;&#x61;&#110;&#x72;&#64;&#49;&#53;&#x32;&#51;&#52;&#x34;&#55;&#x37;&#x31;&#54;&#55;&#x32;&#x38;&#46;&#116;&#x78;&#116;&#x2e;&#x67;&#x7a;">&#100;&#97;&#116;&#97;&#x5f;&#97;&#112;&#112;&#95;&#x61;&#110;&#x72;&#64;&#49;&#53;&#x32;&#51;&#52;&#x34;&#55;&#x37;&#x31;&#54;&#55;&#x32;&#x38;&#46;&#116;&#x78;&#116;&#x2e;&#x67;&#x7a;</a>）。</p>
+<p>在输出trace的时候，Android 8.1.0新加了一个<code>useTombstonedForJavaTraces</code>属性，Java进程的traces通过<code>kill -3 [pid]</code>获取，Native进程的traces通过<code>debuggerd -b [pid]</code>获取，<code>kill -3</code>命令需要虚拟机的支持，所以无法输出Native进程traces.而<code>debuggerd -b [pid]</code>也可用于Java进程，但信息量远没有kill -3多。 ANR信息最为重要的是dropbox信息（比如<a href="mailto:&#x64;&#x61;&#116;&#97;&#95;&#x61;&#x70;&#112;&#95;&#x61;&#x6e;&#114;&#64;&#49;&#53;&#x32;&#51;&#52;&#x34;&#x37;&#x37;&#49;&#x36;&#x37;&#x32;&#56;&#x2e;&#x74;&#120;&#116;&#46;&#x67;&#122;">&#x64;&#x61;&#116;&#97;&#95;&#x61;&#x70;&#112;&#95;&#x61;&#x6e;&#114;&#64;&#49;&#53;&#x32;&#51;&#52;&#x34;&#x37;&#x37;&#49;&#x36;&#x37;&#x32;&#56;&#x2e;&#x74;&#120;&#116;&#46;&#x67;&#122;</a>）。</p>
 ]]></content>
       <categories>
         <category>Android</category>

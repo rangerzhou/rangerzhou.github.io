@@ -432,7 +432,14 @@
 <h3 id="1-1-1-BinderInternal-getContextObject-获取封装有-sm-的BpBinder-的-BinderProxy"><a href="#1-1-1-BinderInternal-getContextObject-获取封装有-sm-的BpBinder-的-BinderProxy" class="headerlink" title="1.1.1 BinderInternal.getContextObject() - 获取封装有 sm 的BpBinder 的 BinderProxy"></a>1.1.1 BinderInternal.getContextObject() - 获取封装有 sm 的BpBinder 的 BinderProxy</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// BinderInternal.java</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">native</span> IBinder <span class="title function_">getContextObject</span><span class="params">()</span>;</span><br></pre></td></tr></table></figure>
 
 <p>此处调用的是 native 函数，注册流程在 <a href="">Android_Binder进程间通信机制01</a> 中的第六小结已经讲过，再简单说下注册流程：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">sequenceDiagram</span><br><span class="line">app_main -&gt;&gt; app_main:main()</span><br><span class="line">app_main -&gt;&gt; AndroidRuntime:start()</span><br><span class="line">AndroidRuntime -&gt;&gt; AndroidRuntime:startReg()</span><br><span class="line">AndroidRuntime -&gt;&gt; AndroidRuntime:register_jni_procs()</span><br><span class="line">AndroidRuntime -&gt;&gt; android_util_Binder:register_android_os_Binder()</span><br><span class="line">android_util_Binder -&gt;&gt; android_util_Binder:int_register_android_os_BinderInternal(env)</span><br><span class="line">android_util_Binder -&gt;&gt; android_util_Binder:gBinderInternalMethods</span><br></pre></td></tr></table></figure>
+<pre class="mermaid">sequenceDiagram
+app_main ->> app_main:main()
+app_main ->> AndroidRuntime:start()
+AndroidRuntime ->> AndroidRuntime:startReg()
+AndroidRuntime ->> AndroidRuntime:register_jni_procs()
+AndroidRuntime ->> android_util_Binder:register_android_os_Binder()
+android_util_Binder ->> android_util_Binder:int_register_android_os_BinderInternal(env)
+android_util_Binder ->> android_util_Binder:gBinderInternalMethods</pre>
 
 <p>app_main.main() ——&gt; AndroidRuntime.start() ——&gt; AndroidRuntime.startReg() ——&gt; AndroidRuntime.register_jni_procs() ——&gt; android_util_Binder.register_android_os_Binder() ——&gt; android_util_Binder.int_register_android_os_BinderInternal(env) ——&gt; android_util_Binder.gBinderInternalMethods：</p>
 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// android_util_Binder.cpp</span></span><br><span class="line"><span class="type">static</span> <span class="type">const</span> JNINativeMethod gBinderInternalMethods[] = &#123;</span><br><span class="line">     <span class="comment">/* name, signature, funcPtr */</span></span><br><span class="line">    &#123; <span class="string">&quot;getContextObject&quot;</span>, <span class="string">&quot;()Landroid/os/IBinder;&quot;</span>, (<span class="type">void</span>*)android_os_BinderInternal_getContextObject &#125;,</span><br><span class="line">    &#123; <span class="string">&quot;joinThreadPool&quot;</span>, <span class="string">&quot;()V&quot;</span>, (<span class="type">void</span>*)android_os_BinderInternal_joinThreadPool &#125;,</span><br><span class="line">    ...</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
@@ -1187,7 +1194,7 @@ window.addEventListener('pjax:success', () => {
 if (document.querySelectorAll('pre.mermaid').length) {
   NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
     mermaid.initialize({
-      theme    : 'forest',
+      theme    : 'default',
       logLevel : 3,
       flowchart: { curve     : 'linear' },
       gantt    : { axisFormat: '%m/%d/%Y' },
