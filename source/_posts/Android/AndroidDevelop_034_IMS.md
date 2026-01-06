@@ -650,3 +650,115 @@ mindmap
 ```
 
 https://blog.51cto.com/u_13424/13095230
+
+
+
+# 总结
+
+
+
+ViewRootImpl 建立了一个 Java 层面的 InputChannel  对象，InputChannel 本质是一个 Unix domain socket 的一端，由 socketpair 创建。 InputDispatcher 和 ViewRootImpl 各持一端。
+
+- system_server 侧由 InputDispatcher 通过 Looper + epoll 管理写入；
+- 应用进程侧 ViewRootImpl 把 socket fd 注册到 Looper，底层由 epoll_wait 监听可读事件，socket 可读后再分发为 InputEvent 到 ViewRootImpl。
+- Android 的 Looper 在 Java 层提供消息循环接口，但真正的阻塞和唤醒由 native 层的 Looper 实现。native Looper 使用 epoll 统一监听 MessageQueue 的 eventfd、InputChannel、Binder 等 fd。当消息入队或 fd 就绪时，epoll_wait 被唤醒，Looper 再回到 Java 层分发消息或事件。
+
+![InputChannel](../../images/2025/Input_InputChannel.png)
+
+
+
+
+
+![image-20260106093916981](../../images/2025/Input_Summary.png)
+
+
+
+Input 从 Native 调用 Java 层转入 Activity 过程
+
+实线：直接调用
+
+虚线：类持有的方法
+
+粗虚线：继承关系
+
+![Input_Native2JavaSequence](../../images/2025/Input_Native2JavaSequence.png)
+
+## 责任链模式
+
+Activity
+
+- 转发到下层
+- 兜底
+
+ViewGroup
+
+- 第一责任是分发
+    - 找到子 View，确认这次处理的点在这个子 View 上
+- 第二责任是自己负责消费
+- 拦截
+
+View
+
+- 消费
+
+## U 型链和 L 型链
+
+事件消费 U 型链：底层没有处理，根据责任链依次往上到 ViewGroup 或者 Activity 的 `onTouchEvent()`，形成 U
+
+L型链：事件分发从 Activity - ViewGroup - View，最终找到目标处理 `onTouchEvent()`，形成 L
+
+## 点击事件和touch事件的优先级
+
+触摸事件优先级高于点击事件，原因如下：
+
+``` java
+// View.java
+public boolean dispatchTouchEvent(MotionEvent event) {
+    if (mOnTouchListener != null
+            && (mViewFlags & ENABLED_MASK) == ENABLED
+            && mOnTouchListener.onTouch(this, event)) {
+        return true;
+    }
+    return onTouchEvent(event);
+}
+
+```
+
+
+
+- 先调用 `OnTouchListener.onTouch()`，如果 `onTouch()` 返回 true，事件被消费，流程结束，如果返回 false，才会进入 `onTouchEvent()`
+
+- 点击事件的触发是在 `onTouchEvent() - ACITON_UP - performClick() - OnClickListener.onClick()`，也就是说，点击事件是触摸事件处理成功后的副产物
+
+- 如果 View 重写了 `onTouchEvent()`，而又没有调用 `super()` 或者手动调用点击 `performClick()`，那么 `onClick()` 就永远不会被执行
+
+- 如果既想处理触摸，又想处理点击
+
+    ``` java
+    view.setOnTouchListener((v, e) -> {
+        // 自定义触摸处理
+        return false; // 放行
+    });
+    // 或者
+    view.setOnTouchListener((v, e) -> {
+        if (e.getAction() == ACTION_UP) {
+            v.performClick();
+        }
+        return true;
+    });
+    
+    ```
+
+- 如果中间被 CANCEL，click 也不会被触发
+
+
+
+## 事件分发详细解读
+
+ViewGroup
+
+![image-20260106111455918](../../images/2025/Input_ViewgroupHowtoDispatch.png)
+
+## 回收池的意义
+
+回收池就是那个 TouchTarget，核心目的是解决 MOVE 事件，使 MOVE 事件不去进行循环查找，采取享元设计模式是考虑空间问题，最多支持 32 根手指。

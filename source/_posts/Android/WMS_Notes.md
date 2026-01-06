@@ -603,14 +603,14 @@ public void processImageUri(String uriString) {
 
 # 4 Input 系统专题
 
-inotify：动态监听文件夹下的文件变化
+inotify：动态监听文件夹下的文件增加和删除
 
 ``` shell
 # 使用 getevent 命令可以显示当前的触摸事件
 $ adb shell getevent -lrt
 ```
 
-
+[触摸事件起源](https://juejin.cn/post/7171130176158302245?searchId=20260106145732A10DB23F9AC158009754)
 
 ## 1 示例：
 
