@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
 <meta name="theme-color" content="#222">
-<meta name="generator" content="Hexo 6.3.0">
+<meta name="generator" content="Hexo 8.1.1">
 <!-- pjax：防止跳转页面音乐暂停 -->
 <script src="https://cdn.jsdelivr.net/npm/pjax@0.2.8/pjax.js"></script>
   <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
@@ -24,13 +24,13 @@
 
 <script id="hexo-configurations">
     var NexT = window.NexT || {};
-    var CONFIG = {"hostname":"592988.xyz","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"always","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"manual"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":true,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":true,"nav":null,"activeClass":"gitalk"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+    var CONFIG = {"hostname":"852988.xyz","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"always","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"manual"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":true,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":true,"nav":null,"activeClass":"gitalk"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
   </script>
 
   <meta name="description" content="通过本文介绍，希望能够了解selinux的概念，如何查看selinux相关权限，如何配置selinux，如何临时打开关闭selinux。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="selinux介绍">
-<meta property="og:url" content="http://592988.xyz/2018/01/20/Android/Selinux_introduction/index.html">
+<meta property="og:url" content="https://852988.xyz/2018/01/20/Android/Selinux_introduction/index.html">
 <meta property="og:site_name" content="RangerZhou">
 <meta property="og:description" content="通过本文介绍，希望能够了解selinux的概念，如何查看selinux相关权限，如何配置selinux，如何临时打开关闭selinux。">
 <meta property="og:locale" content="zh_CN">
@@ -42,7 +42,7 @@
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="http://otqux1hnn.bkt.clouddn.com/rangerzhou/180420/selinux_dsp.png">
 
-<link rel="canonical" href="http://592988.xyz/2018/01/20/Android/Selinux_introduction/">
+<link rel="canonical" href="https://852988.xyz/2018/01/20/Android/Selinux_introduction/">
 
 
 <script id="page-configurations">
@@ -252,7 +252,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://592988.xyz/2018/01/20/Android/Selinux_introduction/">
+    <link itemprop="mainEntityOfPage" href="https://852988.xyz/2018/01/20/Android/Selinux_introduction/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -412,7 +412,7 @@
   </li>
   <li class="post-copyright-link">
     <strong>本文链接：</strong>
-    <a href="http://592988.xyz/2018/01/20/Android/Selinux_introduction/" title="selinux介绍">http://592988.xyz/2018/01/20/Android/Selinux_introduction/</a>
+    <a href="https://852988.xyz/2018/01/20/Android/Selinux_introduction/" title="selinux介绍">https://852988.xyz/2018/01/20/Android/Selinux_introduction/</a>
   </li>
   <li class="post-copyright-license">
     <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
@@ -525,7 +525,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E8%BF%9B%E7%A8%8B%E7%9A%84%E6%A6%82%E5%BF%B5"><span class="nav-text">1. 进程的概念</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E4%BB%80%E4%B9%88%E6%98%AFSELinux"><span class="nav-text">2. 什么是SELinux</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E6%9F%A5%E7%9C%8BSELinux%E6%9D%83%E9%99%90"><span class="nav-text">3. 查看SELinux权限</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#3-1-%E6%9F%A5%E7%9C%8B%E6%96%87%E4%BB%B6%E6%89%80%E5%85%B7%E6%9C%89%E7%9A%84selinux%E7%9B%B8%E5%85%B3%E6%A0%87%E8%AF%86%EF%BC%9Als-lZ"><span class="nav-text">3.1 查看文件所具有的selinux相关标识：ls -lZ</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#3-2-%E6%9F%A5%E7%9C%8B%E8%BF%9B%E7%A8%8B%E7%9A%84%E7%9B%B8%E5%85%B3%E6%A0%87%E8%AF%86ps-Z"><span class="nav-text">3.2 查看进程的相关标识ps -Z</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-%E8%B0%83%E8%AF%95%E4%B8%AD%E6%89%93%E5%BC%80%E5%92%8C%E5%85%B3%E9%97%ADselinux"><span class="nav-text">4. 调试中打开和关闭selinux</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#4-1-%E8%8E%B7%E5%8F%96%E5%BD%93%E5%89%8DSELinux%E8%BF%90%E8%A1%8C%E7%8A%B6%E6%80%81"><span class="nav-text">4.1 获取当前SELinux运行状态</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#4-2-%E6%94%B9%E5%8F%98SELinux%E8%BF%90%E8%A1%8C%E7%8A%B6%E6%80%81"><span class="nav-text">4.2 改变SELinux运行状态</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-%E9%85%8D%E7%BD%AEselinux"><span class="nav-text">5. 配置selinux</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#5-1-selinux%E6%9D%83%E9%99%90%E5%AD%98%E6%94%BE%E4%BD%8D%E7%BD%AE"><span class="nav-text">5.1 selinux权限存放位置</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#5-2-selinux%E6%9D%83%E9%99%90%E9%85%8D%E7%BD%AE%E6%96%B9%E6%B3%95"><span class="nav-text">5.2 selinux权限配置方法</span></a></li></ol></li></ol></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E8%BF%9B%E7%A8%8B%E7%9A%84%E6%A6%82%E5%BF%B5"><span class="nav-text">1. 进程的概念</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E4%BB%80%E4%B9%88%E6%98%AFSELinux"><span class="nav-text">2. 什么是SELinux</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E6%9F%A5%E7%9C%8BSELinux%E6%9D%83%E9%99%90"><span class="nav-text">3. 查看SELinux权限</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#3-1-%E6%9F%A5%E7%9C%8B%E6%96%87%E4%BB%B6%E6%89%80%E5%85%B7%E6%9C%89%E7%9A%84selinux%E7%9B%B8%E5%85%B3%E6%A0%87%E8%AF%86%EF%BC%9Als-lZ"><span class="nav-text">3.1 查看文件所具有的selinux相关标识：ls -lZ</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#3-2-%E6%9F%A5%E7%9C%8B%E8%BF%9B%E7%A8%8B%E7%9A%84%E7%9B%B8%E5%85%B3%E6%A0%87%E8%AF%86ps-Z"><span class="nav-text">3.2 查看进程的相关标识ps -Z</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-%E8%B0%83%E8%AF%95%E4%B8%AD%E6%89%93%E5%BC%80%E5%92%8C%E5%85%B3%E9%97%ADselinux"><span class="nav-text">4. 调试中打开和关闭selinux</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#4-1-%E8%8E%B7%E5%8F%96%E5%BD%93%E5%89%8DSELinux%E8%BF%90%E8%A1%8C%E7%8A%B6%E6%80%81"><span class="nav-text">4.1 获取当前SELinux运行状态</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#4-2-%E6%94%B9%E5%8F%98SELinux%E8%BF%90%E8%A1%8C%E7%8A%B6%E6%80%81"><span class="nav-text">4.2 改变SELinux运行状态</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-%E9%85%8D%E7%BD%AEselinux"><span class="nav-text">5. 配置selinux</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#5-1-selinux%E6%9D%83%E9%99%90%E5%AD%98%E6%94%BE%E4%BD%8D%E7%BD%AE"><span class="nav-text">5.1 selinux权限存放位置</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#5-2-selinux%E6%9D%83%E9%99%90%E9%85%8D%E7%BD%AE%E6%96%B9%E6%B3%95"><span class="nav-text">5.2 selinux权限配置方法</span></a></li></ol></li></ol></div>
       </div>
       <!--/noindex-->
 
@@ -539,20 +539,20 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">77</span>
+          <span class="site-state-item-count">93</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">8</span>
+        <span class="site-state-item-count">10</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">22</span>
+        <span class="site-state-item-count">24</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -606,7 +606,7 @@
 <div class="copyright">
   
   &copy; 2016 – 
-  <span itemprop="copyrightYear">2024</span>
+  <span itemprop="copyrightYear">2026</span>
   <span class="with-love">
     <i class="fa fa-heart"></i>
   </span>
@@ -843,6 +843,19 @@ window.addEventListener('pjax:success', () => {
 
 
 
+<script data-pjax>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : 'forest',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
 
 
     <div id="pjax">
@@ -852,7 +865,7 @@ window.addEventListener('pjax:success', () => {
 
 <script>
   var disqus_config = function() {
-    this.page.url = "http://592988.xyz/2018/01/20/Android/Selinux_introduction/";
+    this.page.url = "https://852988.xyz/2018/01/20/Android/Selinux_introduction/";
     this.page.identifier = "2018/01/20/Android/Selinux_introduction/";
     this.page.title = "selinux介绍";
     };

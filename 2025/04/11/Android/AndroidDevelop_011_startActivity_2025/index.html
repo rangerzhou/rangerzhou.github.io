@@ -1,0 +1,1004 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+<!-- pjax：防止跳转页面音乐暂停 -->
+<script src="https://cdn.jsdelivr.net/npm/pjax@0.2.8/pjax.js"></script>
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/desert.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/desert.jpg">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <meta name="google-site-verification" content="OJnYjbr3wdT22qLrZSzyD9lAyBcXiXlEQ7-5wAnaWoQ">
+  <meta name="baidu-site-verification" content="vr4n4JeXgB">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-minimal.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"852988.xyz","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"always","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"manual"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":true,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":true,"nav":null,"activeClass":"gitalk"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="详细梳理 Android 应用程序的启动流程。这是一个复杂但核心的过程，涉及到多个进程和组件的协作。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android - Activity 应用启动流程概述">
+<meta property="og:url" content="https://852988.xyz/2025/04/11/Android/AndroidDevelop_011_startActivity_2025/index.html">
+<meta property="og:site_name" content="RangerZhou">
+<meta property="og:description" content="详细梳理 Android 应用程序的启动流程。这是一个复杂但核心的过程，涉及到多个进程和组件的协作。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2025-04-11T14:12:19.000Z">
+<meta property="article:modified_time" content="2025-12-01T16:04:55.392Z">
+<meta property="article:author" content="Ranger Zhou">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://852988.xyz/2025/04/11/Android/AndroidDevelop_011_startActivity_2025/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+<script src="//cdn.bootcss.com/pace/1.0.2/pace.min.js"></script>
+<link href="//cdn.bootcss.com/pace/1.0.2/themes/pink/pace-theme-flash.css" rel="stylesheet">
+
+  <title>Android - Activity 应用启动流程概述 | RangerZhou</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-138158952-1"></script>
+    <script data-pjax>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-138158952-1');
+      }
+    </script>
+
+
+  <script data-pjax>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?24a6d3c4c0f292c5f682d26414c3994b";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+
+<!-- 加入APlayer音乐播放器 -->
+<link rel="stylesheet" href="/dist/APlayer.min.css">
+<div id="aplayer"></div>
+<script type="text/javascript" src="/dist/APlayer.min.js"></script>
+<script type="text/javascript" src="/dist/music.js"></script>
+
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">RangerZhou</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">Read the fucking source code</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-playlist">
+
+    <a href="/playlist/" rel="section"><i class="fa fa-music fa-fw"></i>歌单</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-commonweal">
+
+    <a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a>
+
+  </li>
+        <li class="menu-item menu-item-official">
+
+    <a href="/official" rel="section"><i class="fa fa-user fa-fw"></i>official</a>
+
+  </li>
+        <li class="menu-item menu-item-shop">
+
+    <a href="http://rangerzhou.taobao.com/" rel="noopener" target="_blank"><i class="fa fa-user fa-fw"></i>shop</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://852988.xyz/2025/04/11/Android/AndroidDevelop_011_startActivity_2025/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Ranger Zhou">
+      <meta itemprop="description" content="我是一个小流氓我从来也不浪，有一天我心血来潮耍了个流氓，我嘴里吹着小口哨我心里好得意，不知怎么哗啦啦啦啦我摔了一身泥">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="RangerZhou">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Android - Activity 应用启动流程概述
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2025-04-11 22:12:19" itemprop="dateCreated datePublished" datetime="2025-04-11T22:12:19+08:00">2025-04-11</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2025-12-02 00:04:55" itemprop="dateModified" datetime="2025-12-02T00:04:55+08:00">2025-12-02</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Android/" itemprop="url" rel="index"><span itemprop="name">Android</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/2025/04/11/Android/AndroidDevelop_011_startActivity_2025/" class="post-meta-item leancloud_visitors" data-flag-title="Android - Activity 应用启动流程概述" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <blockquote>
+<p>详细梳理 Android 应用程序的启动流程。这是一个复杂但核心的过程，涉及到多个进程和组件的协作。</p>
+</blockquote>
+<span id="more"></span>
+
+<h3 id="Android-应用启动流程概述"><a href="#Android-应用启动流程概述" class="headerlink" title="Android 应用启动流程概述"></a>Android 应用启动流程概述</h3><p>Android 应用程序的启动是一个多阶段、跨进程的复杂过程。当用户点击应用图标时，系统会协调多个关键组件来创建一个新的进程，加载应用代码，并初始化应用组件（通常是 Activity）。</p>
+<p>其核心目标是：</p>
+<ol>
+<li><strong>进程创建：</strong> 为应用程序创建一个独立的 Linux 进程。</li>
+<li><strong>VM 初始化：</strong> 在新进程中初始化 ART&#x2F;Dalvik 虚拟机。</li>
+<li><strong>代码加载：</strong> 加载应用程序的 <code>.apk</code> 文件和相关代码。</li>
+<li><strong>组件启动：</strong> 实例化并启动请求的应用程序组件（如 Activity）。</li>
+</ol>
+<h3 id="参与者"><a href="#参与者" class="headerlink" title="参与者"></a>参与者</h3><p>在应用启动过程中，主要有以下几个关键参与者：</p>
+<ol>
+<li><strong>Zygote 进程：</strong><ul>
+<li>Android 系统中的第一个 Java 进程。</li>
+<li>预加载了大部分 Android 框架类和资源，并创建了一个 ART&#x2F;Dalvik 虚拟机实例。</li>
+<li>作为所有新应用程序进程的<strong>孵化器</strong>。当需要启动新应用时，Zygote 会通过 <code>fork</code> 自身来快速创建新进程，从而实现“写时复制”（Copy-on-Write）优化，提高启动速度和内存效率。</li>
+</ul>
+</li>
+<li><strong>System Server 进程：</strong><ul>
+<li>Android 系统的核心进程，由 Zygote fork 出来。</li>
+<li>运行着所有核心系统服务，如 <code>ActivityManagerService (AMS)</code>、<code>PackageManagerService (PMS)</code>、<code>WindowManagerService (WMS)</code> 等。这些服务通过 Binder IPC 提供系统级功能。</li>
+</ul>
+</li>
+<li><strong>ActivityManagerService (AMS)：</strong><ul>
+<li><code>System Server</code> 进程中的核心服务，负责管理所有应用程序的生命周期、进程管理、Activity 栈管理、任务管理等。</li>
+<li>它是应用启动的<strong>中央协调者</strong>。</li>
+</ul>
+</li>
+<li><strong>Launcher (桌面应用)：</strong><ul>
+<li>用户点击应用图标的入口。它是一个特殊的 Android 应用。</li>
+<li>当用户点击图标时，它会向 <code>AMS</code> 发送一个启动应用的请求。</li>
+</ul>
+</li>
+<li><strong>Application Process (应用程序进程)：</strong><ul>
+<li>每个 Android 应用程序运行在自己的独立 Linux 进程中。</li>
+<li>这个进程由 Zygote fork 出来，并包含了应用的 ART&#x2F;Dalvik VM 和应用自身的所有代码。</li>
+</ul>
+</li>
+<li><strong>ActivityThread (应用程序主线程对象)：</strong><ul>
+<li>每个应用程序进程的主线程（UI 线程）上运行的 Java 对象。</li>
+<li>负责管理进程内所有 Activity、Service、BroadcastReceiver 的生命周期，并处理 UI 事件。</li>
+<li>它内部包含一个 <code>Looper</code> 和 <code>Handler</code>，用于处理消息队列。</li>
+</ul>
+</li>
+</ol>
+<h3 id="应用启动流程（从点击图标开始）"><a href="#应用启动流程（从点击图标开始）" class="headerlink" title="应用启动流程（从点击图标开始）"></a>应用启动流程（从点击图标开始）</h3><p>以下是用户点击桌面应用图标时，一个典型的应用启动流程：</p>
+<ol>
+<li><strong>用户点击应用图标（Launcher）</strong><ul>
+<li>用户在 Launcher（桌面应用）上点击一个应用的图标。</li>
+<li>Launcher 通过 Binder IPC 向 <code>ActivityManagerService (AMS)</code> 发送一个启动 Activity 的请求（通常是 <code>startActivity()</code> 调用）。这个请求包含了要启动的 Activity 的 <code>Intent</code> 信息。</li>
+</ul>
+</li>
+<li><strong>AMS 接收并处理启动请求（System Server 进程）</strong><ul>
+<li><code>AMS</code> 接收到 <code>startActivity()</code> 请求。</li>
+<li>它首先进行一系列检查：权限检查、目标 Activity 是否存在、是否需要创建新的任务栈等。</li>
+<li><code>AMS</code> 判断目标 Activity 所属的应用程序进程是否已经存在：<ul>
+<li><strong>如果进程已存在：</strong> <code>AMS</code> 会直接通知该进程（通过 Binder IPC）去启动目标 Activity。</li>
+<li><strong>如果进程不存在（首次启动或进程已被杀死）：</strong> <code>AMS</code> 需要创建一个新的应用程序进程。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><strong>AMS 请求 Zygote 创建新进程（System Server -&gt; Zygote）</strong><ul>
+<li>如果需要创建新进程，<code>AMS</code> 会通过 Socket IPC 向 <code>Zygote</code> 进程发送一个“fork 新进程”的请求。这个请求包含了新进程的包名、UID、需要启动的 Activity 等信息。</li>
+</ul>
+</li>
+<li><strong>Zygote 创建并初始化新进程（Zygote 进程）</strong><ul>
+<li><code>Zygote</code> 进程接收到请求后，会执行 <code>fork()</code> 系统调用，创建一个新的子进程。这个子进程是 <code>Zygote</code> 进程的副本，继承了 <code>Zygote</code> 预加载的所有类和资源，以及一个已经初始化好的 ART&#x2F;Dalvik 虚拟机。</li>
+<li><code>Zygote</code> 还会执行一些初始化工作，例如设置新进程的 UID&#x2F;GID、配置 Selinux 上下文等。</li>
+<li>然后，<code>Zygote</code> 子进程会执行 <code>ActivityThread.main()</code> 方法。这是应用程序进程的入口点。</li>
+</ul>
+</li>
+<li><strong>应用程序进程初始化（Application Process）</strong><ul>
+<li><code>ActivityThread.main()</code> 方法是新应用程序进程的入口。它会：<ul>
+<li>创建并初始化 <code>Looper</code>（消息循环）和 <code>Handler</code>（消息处理器），用于处理主线程的消息队列。</li>
+<li>创建 <code>ActivityThread</code> 实例本身。</li>
+<li>通过 Binder IPC 向 <code>AMS</code> 发送一个“进程已启动并准备就绪”的信号，并建立起与 <code>AMS</code> 的 Binder 通信通道。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><strong>AMS 通知应用程序进程启动 Activity</strong><ul>
+<li>一旦 <code>AMS</code> 收到应用程序进程的“准备就绪”信号，它就会向该应用程序进程发送一个 Binder 请求，通知其启动目标 Activity。这个请求包含 Activity 的信息（如类名、Intent、配置等）。</li>
+</ul>
+</li>
+<li><strong>ActivityThread 启动 Activity 并执行生命周期方法</strong><ul>
+<li>应用程序进程中的 <code>ActivityThread</code> 接收到 <code>AMS</code> 的启动 Activity 请求。</li>
+<li><code>ActivityThread</code> 在主线程中：<ul>
+<li>加载目标 Activity 的类。</li>
+<li>通过反射创建 Activity 实例。</li>
+<li>为 Activity 创建 <code>Context</code>。</li>
+<li>调用 Activity 的生命周期方法：<code>onCreate()</code> -&gt; <code>onStart()</code> -&gt; <code>onResume()</code>。</li>
+<li>将 Activity 的根视图添加到 <code>WindowManagerService</code> 中，使其可见。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><strong>Activity 显示到屏幕上</strong><ul>
+<li>一旦 <code>Activity</code> 的 <code>onResume()</code> 方法执行完毕，其界面就会被渲染并显示在屏幕上，用户可以开始与应用交互。</li>
+</ul>
+</li>
+</ol>
+<h3 id="Application-和-Activity-的先后顺序及关系"><a href="#Application-和-Activity-的先后顺序及关系" class="headerlink" title="Application 和 Activity 的先后顺序及关系"></a><code>Application</code> 和 <code>Activity</code> 的先后顺序及关系</h3><p>在 Android 应用进程被创建并初始化后，在任何 <code>Activity</code> 组件被启动之前，<code>Application</code> 类会首先被实例化。</p>
+<h4 id="1-先后顺序"><a href="#1-先后顺序" class="headerlink" title="1. 先后顺序"></a>1. 先后顺序</h4><p>在应用程序进程中，当 <code>ActivityThread.main()</code> 方法执行时，它会按以下核心顺序进行：</p>
+<ol>
+<li><strong>实例化 <code>Application</code> 对象：</strong><ul>
+<li><code>ActivityThread</code> 会首先通过反射机制实例化你应用中定义的 <code>Application</code> 子类（如果没有定义，则使用默认的 <code>android.app.Application</code>）。</li>
+<li>紧接着，会调用这个 <code>Application</code> 对象的 <strong><code>onCreate()</code></strong> 方法。这个方法是整个应用程序进程的入口点，用于进行应用级别的全局初始化。</li>
+</ul>
+</li>
+<li><strong>实例化并启动第一个 <code>Activity</code> 对象：</strong><ul>
+<li>在 <code>Application.onCreate()</code> 方法执行完毕后，<code>ActivityThread</code> 才会根据 <code>AMS</code> 的请求，去实例化并启动要显示给用户的第一个 <code>Activity</code>。</li>
+<li>然后，会调用这个 <code>Activity</code> 对象的生命周期方法：<code>onCreate()</code> -&gt; <code>onStart()</code> -&gt; <code>onResume()</code>。</li>
+</ul>
+</li>
+</ol>
+<p><strong>总结顺序：</strong> <code>Application</code> 实例化 -&gt; <code>Application.onCreate()</code> -&gt; <code>Activity</code> 实例化 -&gt; <code>Activity.onCreate()</code> -&gt; <code>Activity.onStart()</code> -&gt; <code>Activity.onResume()</code></p>
+<h4 id="2-它们之间的关系"><a href="#2-它们之间的关系" class="headerlink" title="2. 它们之间的关系"></a>2. 它们之间的关系</h4><p><code>Application</code> 和 <code>Activity</code> 都代表了 Android 应用中的重要组件，并且都继承自 <code>Context</code>，但它们扮演着不同的角色：</p>
+<ul>
+<li><strong><code>Application</code> (应用全局上下文)：</strong><ul>
+<li><strong>生命周期：</strong> 与应用程序进程的生命周期一致。在应用程序进程的整个生命周期中，<code>Application</code> 对象只会被创建<strong>一次</strong>。当进程启动时它被创建，当进程被系统销毁时它才会被销毁。</li>
+<li><strong>作用：</strong> 作为整个应用程序的<strong>全局上下文</strong>。它通常用于存放和初始化<strong>应用级别的全局状态</strong>、共享资源、第三方库的初始化等，这些初始化只需要执行一次，并且需要在任何 Activity 或其他组件启动之前完成。</li>
+<li><strong>获取方式：</strong> 在 <code>Activity</code> 或 <code>Service</code> 中可以通过 <code>getApplication()</code> 方法获取 <code>Application</code> 对象。</li>
+</ul>
+</li>
+<li><strong><code>Activity</code> (屏幕&#x2F;UI 组件上下文)：</strong><ul>
+<li><strong>生命周期：</strong> 与用户界面的生命周期绑定。一个应用可以有多个 Activity，并且它们可以根据用户的交互和导航，在应用进程中被<strong>多次创建和销毁</strong>。</li>
+<li><strong>作用：</strong> 代表应用的一个<strong>单一的、具有用户界面的屏幕</strong>。它负责用户交互、UI 布局的显示与管理。</li>
+<li><strong>上下文：</strong> <code>Activity</code> 自身也是一个 <code>Context</code>（Activity Context），它包含了应用程序上下文的信息，同时还包含了关于当前 Activity 的主题、资源、特定 UI 组件等信息。它的生命周期比 Application Context 更短。</li>
+</ul>
+</li>
+</ul>
+<p><strong>简要类比：</strong></p>
+<p>你可以把 <code>Application</code> 想象成一座<strong>建筑（整个应用程序）</strong>，而 <code>Activity</code> 则是这座建筑里的<strong>不同房间（不同的用户界面屏幕）</strong>。</p>
+<ul>
+<li>当你第一次进入这座建筑时（应用进程启动），首先要做的可能是打开建筑的总电源（<code>Application.onCreate()</code>），初始化整个建筑的公共设施。</li>
+<li>之后，你才能进入某个房间（<code>Activity.onCreate()</code>），打开房间的灯（<code>Activity.onStart()</code>），并开始在房间里活动（<code>Activity.onResume()</code>）。</li>
+<li>你可以从一个房间进入另一个房间（启动新的 Activity），或者离开一个房间但仍在建筑内（Activity 被销毁但 Application 依然存在）。</li>
+</ul>
+<p>这种分层和生命周期的设计，使得开发者可以更好地管理应用资源和状态，将全局性操作放在 <code>Application</code> 中，将与特定 UI 相关的操作放在 <code>Activity</code> 中。</p>
+<h3 id="关键概念总结"><a href="#关键概念总结" class="headerlink" title="关键概念总结"></a>关键概念总结</h3><ul>
+<li><strong>Binder IPC：</strong> Android 框架中用于进程间通信的核心机制。AMS、Launcher、应用程序进程之间都通过 Binder 进行通信。</li>
+<li><strong>Zygote 的作用：</strong> 通过 <code>fork</code> 自身快速创建新进程，实现代码共享和内存效率优化。</li>
+<li><strong>Main Thread (UI Thread) 和 Looper&#x2F;Handler：</strong> 每个应用程序进程都有一个主线程，它负责处理用户界面事件和所有组件的生命周期回调。<code>Looper</code> 和 <code>Handler</code> 机制是主线程能够处理消息队列的关键。</li>
+<li><strong>AMS 的核心地位：</strong> <code>ActivityManagerService</code> 是整个应用启动和生命周期管理的“中央大脑”，负责协调所有进程和组件的行为。</li>
+</ul>
+<p>理解这个流程对于 Android 开发者至关重要，它能帮助你更好地理解应用性能优化、启动时间、内存管理以及 Activity 生命周期管理等方面的问题。</p>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div>Donate comment here.</div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechatpay.jpg" alt="Ranger Zhou 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.jpg" alt="Ranger Zhou 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>Ranger Zhou
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://852988.xyz/2025/04/11/Android/AndroidDevelop_011_startActivity_2025/" title="Android - Activity 应用启动流程概述">https://852988.xyz/2025/04/11/Android/AndroidDevelop_011_startActivity_2025/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2025/02/20/Vehicle/CAN_Bus/" rel="prev" title="CAN Bus协议详解">
+      <i class="fa fa-chevron-left"></i> CAN Bus协议详解
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2025/05/12/Android/AndroidDevelop_028_CarService/" rel="next" title="Android - CarService">
+      Android - CarService <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+      <div class="tabs tabs-comment">
+        <ul class="nav-tabs">
+            <li class="tab"><a href="#comment-disqus">disqus</a></li>
+            <li class="tab"><a href="#comment-livere">livere</a></li>
+            <li class="tab"><a href="#comment-gitalk">gitalk</a></li>
+        </ul>
+        <div class="tab-content">
+            <div class="tab-pane disqus" id="comment-disqus">
+              
+  <div class="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
+            </div>
+            <div class="tab-pane livere" id="comment-livere">
+              
+  <div class="comments">
+    <div id="lv-container" data-id="city" data-uid="MTAyMC8yOTcyNS82Mjky"></div>
+  </div>
+  
+            </div>
+            <div class="tab-pane gitalk" id="comment-gitalk">
+              <div class="comments" id="gitalk-container"></div>
+            </div>
+        </div>
+      </div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#Android-%E5%BA%94%E7%94%A8%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E6%A6%82%E8%BF%B0"><span class="nav-text">Android 应用启动流程概述</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%82%E4%B8%8E%E8%80%85"><span class="nav-text">参与者</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BA%94%E7%94%A8%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%EF%BC%88%E4%BB%8E%E7%82%B9%E5%87%BB%E5%9B%BE%E6%A0%87%E5%BC%80%E5%A7%8B%EF%BC%89"><span class="nav-text">应用启动流程（从点击图标开始）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Application-%E5%92%8C-Activity-%E7%9A%84%E5%85%88%E5%90%8E%E9%A1%BA%E5%BA%8F%E5%8F%8A%E5%85%B3%E7%B3%BB"><span class="nav-text">Application 和 Activity 的先后顺序及关系</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-%E5%85%88%E5%90%8E%E9%A1%BA%E5%BA%8F"><span class="nav-text">1. 先后顺序</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-%E5%AE%83%E4%BB%AC%E4%B9%8B%E9%97%B4%E7%9A%84%E5%85%B3%E7%B3%BB"><span class="nav-text">2. 它们之间的关系</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%B3%E9%94%AE%E6%A6%82%E5%BF%B5%E6%80%BB%E7%BB%93"><span class="nav-text">关键概念总结</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Ranger Zhou</p>
+  <div class="site-description" itemprop="description">我是一个小流氓我从来也不浪，有一天我心血来潮耍了个流氓，我嘴里吹着小口哨我心里好得意，不知怎么哗啦啦啦啦我摔了一身泥</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">93</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">24</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/rangerzhou" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;rangerzhou" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:rangero_o@qq.com" title="E-Mail → mailto:rangero_o@qq.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://rangerzhou.taobao.com/" title="Taobao → http:&#x2F;&#x2F;rangerzhou.taobao.com&#x2F;" rel="noopener" target="_blank"><i class="fab fa-youtube fa-fw"></i>Taobao</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="/images/wechat.jpg" title="WeChat → &#x2F;images&#x2F;wechat.jpg"><i class="fab fa-youtube fa-fw"></i>WeChat</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://blog.csdn.net/ranger0220?viewmode=contents" title="CSDN → http:&#x2F;&#x2F;blog.csdn.net&#x2F;ranger0220?viewmode&#x3D;contents" rel="noopener" target="_blank"><i class="fab fa-youtube fa-fw"></i>CSDN</a>
+      </span>
+  </div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      墙裂推荐
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="http://rangerzhou.taobao.com/" title="http:&#x2F;&#x2F;rangerzhou.taobao.com" rel="noopener" target="_blank">Taobao</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2016 – 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Ranger Zhou</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+<script data-pjax>
+  (function() {
+    function leancloudSelector(url) {
+      url = encodeURI(url);
+      return document.getElementById(url).querySelector('.leancloud-visitors-count');
+    }
+
+    function addCount(Counter) {
+      var visitors = document.querySelector('.leancloud_visitors');
+      var url = decodeURI(visitors.id);
+      var title = visitors.dataset.flagTitle;
+
+      Counter('get', '/classes/Counter?where=' + encodeURIComponent(JSON.stringify({ url })))
+        .then(response => response.json())
+        .then(({ results }) => {
+          if (results.length > 0) {
+            var counter = results[0];
+            leancloudSelector(url).innerText = counter.time + 1;
+            Counter('put', '/classes/Counter/' + counter.objectId, { time: { '__op': 'Increment', 'amount': 1 } })
+              .catch(error => {
+                console.error('Failed to save visitor count', error);
+              });
+          } else {
+              Counter('post', '/classes/Counter', { title, url, time: 1 })
+                .then(response => response.json())
+                .then(() => {
+                  leancloudSelector(url).innerText = 1;
+                })
+                .catch(error => {
+                  console.error('Failed to create', error);
+                });
+          }
+        })
+        .catch(error => {
+          console.error('LeanCloud Counter Error', error);
+        });
+    }
+
+    function showTime(Counter) {
+      var visitors = document.querySelectorAll('.leancloud_visitors');
+      var entries = [...visitors].map(element => {
+        return decodeURI(element.id);
+      });
+
+      Counter('get', '/classes/Counter?where=' + encodeURIComponent(JSON.stringify({ url: { '$in': entries } })))
+        .then(response => response.json())
+        .then(({ results }) => {
+          for (let url of entries) {
+            let target = results.find(item => item.url === url);
+            leancloudSelector(url).innerText = target ? target.time : 0;
+          }
+        })
+        .catch(error => {
+          console.error('LeanCloud Counter Error', error);
+        });
+    }
+
+    let { app_id, app_key, server_url } = {"enable":true,"app_id":"U9g4mWmsQg8FjOE3xsqUy9Df-gzGzoHsz","app_key":"24cDno14OiDhAreVmoEjzqns","server_url":"https://u9g4mwms.lc-cn-n1-shared.com","security":false};
+    function fetchData(api_server) {
+      var Counter = (method, url, data) => {
+        return fetch(`${api_server}/1.1${url}`, {
+          method,
+          headers: {
+            'X-LC-Id'     : app_id,
+            'X-LC-Key'    : app_key,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(data)
+        });
+      };
+      if (CONFIG.page.isPost) {
+        if (CONFIG.hostname !== location.hostname) return;
+        addCount(Counter);
+      } else if (document.querySelectorAll('.post-title-link').length >= 1) {
+        showTime(Counter);
+      }
+    }
+
+    let api_server = app_id.slice(-9) !== '-MdYXbMMI' ? server_url : `https://${app_id.slice(0, 8).toLowerCase()}.api.lncldglobal.com`;
+
+    if (api_server) {
+      fetchData(api_server);
+    } else {
+      fetch('https://app-router.leancloud.cn/2/route?appId=' + app_id)
+        .then(response => response.json())
+        .then(({ api_server }) => {
+          fetchData('https://' + api_server);
+        });
+    }
+  })();
+</script>
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/pjax/pjax.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/pangu@4/dist/browser/pangu.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '#page-configurations',
+    '.content-wrap',
+    '.post-toc-wrap',
+    '.languages',
+    '#pjax'
+  ],
+  switches: {
+    '.post-toc-wrap': Pjax.switches.innerHTML
+  },
+  analytics: false,
+  cacheBust: false,
+  scrollTo : !CONFIG.bookmark.enable
+});
+
+window.addEventListener('pjax:success', () => {
+  document.querySelectorAll('script[data-pjax], script#page-configurations, #pjax script').forEach(element => {
+    var code = element.text || element.textContent || element.innerHTML || '';
+    var parent = element.parentNode;
+    parent.removeChild(element);
+    var script = document.createElement('script');
+    if (element.id) {
+      script.id = element.id;
+    }
+    if (element.className) {
+      script.className = element.className;
+    }
+    if (element.type) {
+      script.type = element.type;
+    }
+    if (element.src) {
+      script.src = element.src;
+      // Force synchronous loading of peripheral JS.
+      script.async = false;
+    }
+    if (element.dataset.pjax !== undefined) {
+      script.dataset.pjax = '';
+    }
+    if (code !== '') {
+      script.appendChild(document.createTextNode(code));
+    }
+    parent.appendChild(script);
+  });
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+
+
+  
+  <script data-pjax>
+    (function(){
+      var canonicalURL, curProtocol;
+      //Get the <link> tag
+      var x=document.getElementsByTagName("link");
+		//Find the last canonical URL
+		if(x.length > 0){
+			for (i=0;i<x.length;i++){
+				if(x[i].rel.toLowerCase() == 'canonical' && x[i].href){
+					canonicalURL=x[i].href;
+				}
+			}
+		}
+    //Get protocol
+	    if (!canonicalURL){
+	    	curProtocol = window.location.protocol.split(':')[0];
+	    }
+	    else{
+	    	curProtocol = canonicalURL.split(':')[0];
+	    }
+      //Get current URL if the canonical URL does not exist
+	    if (!canonicalURL) canonicalURL = window.location.href;
+	    //Assign script content. Replace current URL with the canonical URL
+      !function(){var e=/([http|https]:\/\/[a-zA-Z0-9\_\.]+\.baidu\.com)/gi,r=canonicalURL,t=document.referrer;if(!e.test(r)){var n=(String(curProtocol).toLowerCase() === 'https')?"https://sp0.baidu.com/9_Q4simg2RQJ8t7jm9iCKT-xh_/s.gif":"//api.share.baidu.com/s.gif";t?(n+="?r="+encodeURIComponent(document.referrer),r&&(n+="&l="+r)):r&&(n+="?l="+r);var i=new Image;i.src=n}}(window);})();
+  </script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+<script data-pjax>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : 'forest',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+    <div id="pjax">
+  
+
+  
+
+<script>
+  var disqus_config = function() {
+    this.page.url = "https://852988.xyz/2025/04/11/Android/AndroidDevelop_011_startActivity_2025/";
+    this.page.identifier = "2025/04/11/Android/AndroidDevelop_011_startActivity_2025/";
+    this.page.title = "Android - Activity 应用启动流程概述";
+    };
+  NexT.utils.loadComments(document.querySelector('#disqus_thread'), () => {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: disqus_config
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://rangerzhou.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  });
+</script>
+
+<script>
+NexT.utils.loadComments(document.querySelector('#lv-container'), () => {
+  window.livereOptions = {
+    refer: location.pathname.replace(CONFIG.root, '').replace('index.html', '')
+  };
+  (function(d, s) {
+    var j, e = d.getElementsByTagName(s)[0];
+    if (typeof LivereTower === 'function') { return; }
+    j = d.createElement(s);
+    j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+    j.async = true;
+    e.parentNode.insertBefore(j, e);
+  })(document, 'script');
+});
+</script>
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : 'b7bb504993135f5a2eab',
+      clientSecret: '6f83aec5c45d75e248e2914be90c4601e2e1dc44',
+      repo        : 'rangerzhou.github.io',
+      owner       : 'rangerzhou',
+      admin       : ['rangerzhou'],
+      id          : 'c8c16fa48dfac8122f03ca9bb105df86',
+        language: 'zh-CN',
+      distractionFreeMode: true
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
+
+    </div>
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/haru01.model.json"},"display":{"position":"left","width":300,"height":800},"mobile":{"show":false},"log":false});</script></body>
+</html>

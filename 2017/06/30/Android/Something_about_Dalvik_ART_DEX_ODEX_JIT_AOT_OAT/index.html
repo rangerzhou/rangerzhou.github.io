@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
 <meta name="theme-color" content="#222">
-<meta name="generator" content="Hexo 6.3.0">
+<meta name="generator" content="Hexo 8.1.1">
 <!-- pjax：防止跳转页面音乐暂停 -->
 <script src="https://cdn.jsdelivr.net/npm/pjax@0.2.8/pjax.js"></script>
   <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
@@ -24,22 +24,22 @@
 
 <script id="hexo-configurations">
     var NexT = window.NexT || {};
-    var CONFIG = {"hostname":"592988.xyz","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"always","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"manual"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":true,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":true,"nav":null,"activeClass":"gitalk"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+    var CONFIG = {"hostname":"852988.xyz","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"always","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"manual"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":true,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":true,"nav":null,"activeClass":"gitalk"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
   </script>
 
   <meta name="description" content="关于 Dalvik、ART、DEX、ODEX、JIT、AOT、OAT，说真的，我看着都头大，每次看完过不了多久就会忘记一些内容，然后再去搜资料，好记性不如烂笔头，写在这里随时温故。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="关于 Dalvik、ART、DEX、ODEX、JIT、AOT、OAT">
-<meta property="og:url" content="http://592988.xyz/2017/06/30/Android/Something_about_Dalvik_ART_DEX_ODEX_JIT_AOT_OAT/index.html">
+<meta property="og:url" content="https://852988.xyz/2017/06/30/Android/Something_about_Dalvik_ART_DEX_ODEX_JIT_AOT_OAT/index.html">
 <meta property="og:site_name" content="RangerZhou">
 <meta property="og:description" content="关于 Dalvik、ART、DEX、ODEX、JIT、AOT、OAT，说真的，我看着都头大，每次看完过不了多久就会忘记一些内容，然后再去搜资料，好记性不如烂笔头，写在这里随时温故。">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2017-06-30T08:29:38.000Z">
-<meta property="article:modified_time" content="2023-04-17T15:24:15.481Z">
+<meta property="article:modified_time" content="2025-12-04T13:57:42.664Z">
 <meta property="article:author" content="Ranger Zhou">
 <meta name="twitter:card" content="summary">
 
-<link rel="canonical" href="http://592988.xyz/2017/06/30/Android/Something_about_Dalvik_ART_DEX_ODEX_JIT_AOT_OAT/">
+<link rel="canonical" href="https://852988.xyz/2017/06/30/Android/Something_about_Dalvik_ART_DEX_ODEX_JIT_AOT_OAT/">
 
 
 <script id="page-configurations">
@@ -249,7 +249,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://592988.xyz/2017/06/30/Android/Something_about_Dalvik_ART_DEX_ODEX_JIT_AOT_OAT/">
+    <link itemprop="mainEntityOfPage" href="https://852988.xyz/2017/06/30/Android/Something_about_Dalvik_ART_DEX_ODEX_JIT_AOT_OAT/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -279,7 +279,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2023-04-17 23:24:15" itemprop="dateModified" datetime="2023-04-17T23:24:15+08:00">2023-04-17</time>
+                <time title="修改时间：2025-12-04 21:57:42" itemprop="dateModified" datetime="2025-12-04T21:57:42+08:00">2025-12-04</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -390,6 +390,559 @@
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">PRODUCT_DEFAULT_PROPERTY_OVERRIDES += \</span><br><span class="line">    dalvik.vm.image-dex2oat-Xms=64m \</span><br><span class="line">    dalvik.vm.image-dex2oat-Xmx=64m \</span><br><span class="line">    dalvik.vm.dex2oat-Xms=64m \</span><br><span class="line">    dalvik.vm.dex2oat-Xmx=512m \</span><br><span class="line">    ro.dalvik.vm.native.bridge=0 \</span><br><span class="line">    dalvik.vm.usejit=true \</span><br><span class="line">    dalvik.vm.usejitprofiles=true \</span><br><span class="line">    dalvik.vm.appimageformat=lz4</span><br></pre></td></tr></table></figure>
 
 <p>dalvik.vm.usejit&#x3D;true 和 dalvik.vm.usejitprofiles&#x3D;true 属性。</p>
+<h1 id="20251201-更新"><a href="#20251201-更新" class="headerlink" title="20251201 更新"></a>20251201 更新</h1><p>好的，这是一个非常经典的问题。DVM（Dalvik Virtual Machine）和 JVM（Java Virtual Machine）都是虚拟机，用于运行应用程序，但它们在设计目标、架构和技术实现上有显著区别。</p>
+<p>简单来说，<strong>DVM是为早期Android系统量身定做的，专注于在资源有限的移动设备上高效运行；而JVM是一个更通用、为桌面和服务器环境设计的平台。</strong></p>
+<p>下面我们从几个维度进行详细对比：</p>
+<hr>
+<h2 id="1-DVM-和-JVM"><a href="#1-DVM-和-JVM" class="headerlink" title="1. DVM 和 JVM"></a>1. DVM 和 JVM</h2><h3 id="DVM-x2F-JVM-核心区别对比表"><a href="#DVM-x2F-JVM-核心区别对比表" class="headerlink" title="DVM&#x2F;JVM 核心区别对比表"></a>DVM&#x2F;JVM 核心区别对比表</h3><table>
+<thead>
+<tr>
+<th align="left">特性</th>
+<th align="left">DVM（Dalvik Virtual Machine）</th>
+<th align="left">JVM（Java Virtual Machine）</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><strong>出身与背景</strong></td>
+<td align="left">由谷歌（和开放手机联盟）开发，专为Android设计。</td>
+<td align="left">由Sun Microsystems（现属Oracle）开发，是Java平台的核心。</td>
+</tr>
+<tr>
+<td align="left"><strong>架构基础</strong></td>
+<td align="left"><strong>基于寄存器</strong> 的架构。</td>
+<td align="left"><strong>基于栈</strong> 的架构。</td>
+</tr>
+<tr>
+<td align="left"><strong>执行文件格式</strong></td>
+<td align="left">执行 <strong><code>.dex</code> (Dalvik Executable)</strong> 格式文件。</td>
+<td align="left">执行 <strong><code>.class</code></strong> 格式文件。</td>
+</tr>
+<tr>
+<td align="left"><strong>执行机制</strong></td>
+<td align="left">一个DVM进程可以同时执行多个 <strong><code>.dex</code></strong> 文件。</td>
+<td align="left">每个 <strong><code>.class</code></strong> 文件通常由一个类加载器单独加载。</td>
+</tr>
+<tr>
+<td align="left"><strong>内存与性能</strong></td>
+<td align="left">寄存器架构通常需要更多指令但指令数更少，执行速度可能更快，但代码体积可能稍大。</td>
+<td align="left">栈架构指令更紧凑（指令数多但体积小），但可能需要更多指令来完成相同操作。</td>
+</tr>
+<tr>
+<td align="left"><strong>进程与隔离</strong></td>
+<td align="left">在Android中，<strong>每个应用运行在独立的DVM实例中</strong>，这是一个Linux进程。这提供了更好的应用隔离和安全性。</td>
+<td align="left">通常多个Java应用或组件可以运行在同一个JVM进程中（如应用服务器）。</td>
+</tr>
+<tr>
+<td align="left"><strong>现状</strong></td>
+<td align="left"><strong>已被ART取代</strong>。从Android 5.0（Lollipop）开始，DVM被ART（Android Runtime）替换。</td>
+<td align="left"><strong>至今仍是Java和JVM语言（Kotlin, Scala等）的绝对主流平台</strong>。</td>
+</tr>
+</tbody></table>
+<hr>
+<h3 id="关键区别详解"><a href="#关键区别详解" class="headerlink" title="关键区别详解"></a>关键区别详解</h3><h4 id="1-架构：基于寄存器-vs-基于栈"><a href="#1-架构：基于寄存器-vs-基于栈" class="headerlink" title="1. 架构：基于寄存器 vs. 基于栈"></a>1. 架构：基于寄存器 vs. 基于栈</h4><p>这是最根本的技术区别。</p>
+<ul>
+<li><p><strong>JVM（基于栈）</strong>：</p>
+<ul>
+<li>它使用一个“操作数栈”来执行指令。所有操作（如加法、乘法）都是通过从栈顶弹出数据，进行计算，然后再将结果压回栈顶来完成的。</li>
+<li><strong>优点</strong>：指令非常紧凑（因为不需要指定寄存器地址），与硬件无关性极好。</li>
+<li><strong>缺点</strong>：完成一个操作需要更多的指令（load, store, push, pop等），理论上可能更慢。</li>
+</ul>
+<p><em>示例：计算 <code>a = b + c</code></em></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">iload_1  // 将变量b的值压入栈顶</span><br><span class="line">iload_2  // 将变量c的值压入栈顶</span><br><span class="line">iadd     // 弹出栈顶两个值相加，结果压回栈顶</span><br><span class="line">istore_3 // 弹出栈顶值，存入变量a</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>DVM（基于寄存器）</strong>：</p>
+<ul>
+<li>它使用虚拟寄存器来保存数据。指令直接对这些寄存器进行操作。</li>
+<li><strong>优点</strong>：对于某些操作，指令数量更少，执行速度更快，更接近于本地机器码的执行方式。</li>
+<li><strong>缺点</strong>：指令本身更长（因为需要指定寄存器地址），代码体积更大。</li>
+</ul>
+<p><em>示例：计算 <code>a = b + c</code></em></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">add-int v3, v1, v2  // 将寄存器v1和v2的值相加，结果存入寄存器v3</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h4 id="2-执行文件格式：-dex-vs-class"><a href="#2-执行文件格式：-dex-vs-class" class="headerlink" title="2. 执行文件格式：.dex vs. .class"></a>2. 执行文件格式：<code>.dex</code> vs. <code>.class</code></h4><ul>
+<li><strong>JVM</strong>： 编译Java代码后，会生成许多独立的 <code>.class</code> 文件。每个类对应一个文件。在运行时，JVM会按需加载这些文件。</li>
+<li><strong>DVM</strong>： Android编译工具（如dx）会将所有生成的 <code>.class</code> 文件进行转换、优化并<strong>合并成一个或多个 <code>.dex</code> 文件</strong>。<ul>
+<li><strong>优点</strong>：<ul>
+<li><strong>共享常量池</strong>： 多个类中相同的字符串、常量等只存储一次，极大地<strong>减少了冗余</strong>。</li>
+<li><strong>整体优化</strong>： 可以在整个应用层面进行优化。</li>
+<li><strong>节省空间</strong>： 这是为了适应早期Android设备存储和内存有限的情况而做的关键优化。</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h4 id="3-设计哲学与优化目标"><a href="#3-设计哲学与优化目标" class="headerlink" title="3. 设计哲学与优化目标"></a>3. 设计哲学与优化目标</h4><ul>
+<li><strong>JVM</strong>： 设计目标是“一次编写，到处运行”，强调可移植性和通用性。它通常运行在资源相对丰富的服务器或PC上。</li>
+<li><strong>DVM</strong>： 设计目标是在<strong>内存、CPU和电池都受限的移动设备</strong>上高效运行。因此，它在节省内存、提高性能和降低功耗方面做了大量优化。每个应用一个独立DVM实例的设计，也直接服务于Android的应用沙盒安全模型。</li>
+</ul>
+<hr>
+<h3 id="DVM的演进：被ART取代"><a href="#DVM的演进：被ART取代" class="headerlink" title="DVM的演进：被ART取代"></a>DVM的演进：被ART取代</h3><p>DVM使用的是 <strong>JIT（即时编译）</strong> ，即在应用运行时，将字节码逐段编译成本地机器码。这会导致应用在启动和运行初期有一些性能开销。</p>
+<p>从 Android 5.0 开始，Google 用 <strong>ART</strong> 彻底取代了 DVM。ART 的核心改进是引入了 <strong>AOT（预编译）</strong> 机制：</p>
+<ul>
+<li><strong>ART（Android Runtime）</strong>：<ul>
+<li><strong>在应用安装时</strong>，就将DEX字节码<strong>完全编译</strong>成本地机器码。</li>
+<li><strong>优点</strong>： 应用启动和执行速度更快，因为无需在运行时进行编译。</li>
+<li><strong>缺点</strong>： 安装时间变长，占用存储空间更多。</li>
+</ul>
+</li>
+</ul>
+<p>后来的Android版本（如Android 7.0）引入了<strong>混合模式</strong>（JIT + AOT），在安装速度、存储空间和运行性能之间取得了更好的平衡。</p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><table>
+<thead>
+<tr>
+<th align="left">项目</th>
+<th align="left">JVM</th>
+<th align="left">DVM (历史角色)</th>
+<th align="left">ART (现代替代)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><strong>定位</strong></td>
+<td align="left">通用计算平台</td>
+<td align="left">移动设备优化</td>
+<td align="left">移动设备进一步优化</td>
+</tr>
+<tr>
+<td align="left"><strong>编译方式</strong></td>
+<td align="left">JIT (为主)</td>
+<td align="left">JIT</td>
+<td align="left">AOT -&gt; 混合编译 (JIT+AOT)</td>
+</tr>
+<tr>
+<td align="left"><strong>现状</strong></td>
+<td align="left">主流、活跃</td>
+<td align="left"><strong>已淘汰</strong></td>
+<td align="left">Android现行标准</td>
+</tr>
+</tbody></table>
+<p><strong>结论</strong>：DVM和JVM的主要区别源于它们不同的设计目标：一个为资源受限的移动设备，一个为通用的计算环境。虽然DVM本身已成为历史，但其设计的<code>.dex</code>格式和基于寄存器的思想被ART继承和发展。理解DVM有助于理解Android系统的演进和设计哲学。而今天的Android开发者，更应该关注的是ART的工作原理。</p>
+<h2 id="2-ART-工作原理"><a href="#2-ART-工作原理" class="headerlink" title="2. ART 工作原理"></a>2. ART 工作原理</h2><p>好的，我们来详细解析 <strong>ART（Android Runtime）</strong> 的工作原理。</p>
+<p>ART 是 Android 5.0（Lollipop）以来取代 DVM（Dalvik Virtual Machine）的安卓运行时环境。它的核心目标是提升应用性能，特别是响应速度和流畅度。</p>
+<h3 id="核心演进：从-DVM-的-JIT-到-ART-的-AOT"><a href="#核心演进：从-DVM-的-JIT-到-ART-的-AOT" class="headerlink" title="核心演进：从 DVM 的 JIT 到 ART 的 AOT"></a>核心演进：从 DVM 的 JIT 到 ART 的 AOT</h3><p>要理解 ART，首先要看它和前任 DVM 最大的不同：</p>
+<ul>
+<li><strong>DVM 使用 JIT（即时编译）</strong>：应用在<strong>运行时</strong>，由虚拟机逐条将字节码解释执行，并对频繁执行的代码（热点代码）进行即时编译成本地机器码。这会导致启动和运行初期的性能开销。</li>
+<li><strong>ART 引入 AOT（预编译）</strong>：应用在<strong>安装期间</strong>，就将全部的字节码预先编译成本地机器码。这样应用在<strong>运行时直接执行本地机器码</strong>，无需再解释或即时编译，从而大幅提升运行效率。</li>
+</ul>
+<hr>
+<h3 id="ART-的工作流程与演化"><a href="#ART-的工作流程与演化" class="headerlink" title="ART 的工作流程与演化"></a>ART 的工作流程与演化</h3><p>ART 并非一成不变，它经历了几个重要的阶段，其“工作原理”也在不断优化。</p>
+<h4 id="阶段一：Android-5-0-6-0-的纯-AOT-模式"><a href="#阶段一：Android-5-0-6-0-的纯-AOT-模式" class="headerlink" title="阶段一：Android 5.0 ~ 6.0 的纯 AOT 模式"></a>阶段一：Android 5.0 ~ 6.0 的纯 AOT 模式</h4><p>这是 ART 最初的工作方式，非常直接。</p>
+<ol>
+<li><strong>安装应用</strong>：当你安装一个 APK 时，系统内部的 <strong><code>dex2oat</code></strong> 工具会启动。</li>
+<li><strong>预编译（AOT）</strong>：<code>dex2oat</code> 读取 APK 中的 <code>.dex</code> 字节码文件，并将其<strong>全部编译</strong>成本地机器码。</li>
+<li><strong>存储机器码</strong>：编译生成的机器码会以一个 <code>.oat</code> 或 <code>.odex</code> 文件的形式存储在设备的存储空间中。</li>
+<li><strong>运行应用</strong>：当你启动这个应用时，系统直接加载并执行 <code>.oat</code> 文件中的本地机器码。</li>
+</ol>
+<p><strong>优缺点</strong>：</p>
+<ul>
+<li><strong>优点</strong>：运行速度极快，异常流畅。</li>
+<li><strong>缺点</strong>：<ul>
+<li><strong>安装时间非常长</strong>：编译整个应用很耗时。</li>
+<li><strong>占用存储空间大</strong>：本地机器码比原始的 <code>.dex</code> 字节码大得多。</li>
+<li><strong>系统更新费时</strong>：每次系统OTA更新，都需要重新编译所有应用。</li>
+</ul>
+</li>
+</ul>
+<h4 id="阶段二：Android-7-0-引入的混合模式（JIT-AOT）"><a href="#阶段二：Android-7-0-引入的混合模式（JIT-AOT）" class="headerlink" title="阶段二：Android 7.0 引入的混合模式（JIT + AOT）"></a>阶段二：Android 7.0 引入的混合模式（JIT + AOT）</h4><p>为了解决纯 AOT 的缺点，Android 7.0（Nougat）为 ART 引入了 <strong>JIT 编译器</strong>，形成了一个混合编译系统，这也是目前 ART 的基石。</p>
+<p>这个模式的工作流程变得更加智能，分为三个环节：</p>
+<p><strong>1. 安装时：解释执行 + JIT 分析</strong></p>
+<ul>
+<li>应用安装时<strong>不再进行全量 AOT 编译</strong>，安装速度极快。</li>
+<li>应用首次运行时，字节码会被<strong>解释器</strong> 逐条解释执行（这与 DVM 最初阶段类似，但 ART 的解释器更高效）。</li>
+<li>同时，<strong>JIT 编译器</strong> 开始工作，它监控应用的运行，识别出那些被频繁调用的“热点代码”。</li>
+<li>JIT 会将这些热点代码<strong>即时编译</strong>成本地机器码，并缓存起来。当下次再执行到相同代码时，就直接使用缓存的机器码，从而提升运行速度。</li>
+<li>JIT 还会<strong>生成一个“性能分析文件”</strong>，记录哪些方法（函数）是热点方法。</li>
+</ul>
+<p><strong>2. 闲置时：基于分析的 AOT</strong></p>
+<ul>
+<li>当设备<strong>充电且空闲</strong>时（连接电源，屏幕关闭，系统空闲），一个名为 <strong><code>dex2oat</code></strong> 的后台进程会启动。</li>
+<li>它读取由 JIT 生成的“性能分析文件”，只将文件中记录的<strong>热点方法</strong>进行 AOT 编译，生成本地机器码。</li>
+<li>这样，我们既避免了安装时编译所有代码的耗时，又让最常用的代码享受到了 AOT 编译的性能优势。</li>
+</ul>
+<p><strong>3. 运行时：三层执行机制</strong><br>应用运行时，ART 采用一个三层结构来执行代码，确保性能和效率的平衡：</p>
+<ol>
+<li><strong>解释器</strong>：对所有代码都可用，用于执行冷门代码，避免不必要的编译开销。</li>
+<li><strong>JIT 缓存</strong>：执行已经由 JIT 编译过的热点代码。</li>
+<li><strong>AOT 代码</strong>：执行已经由后台 AOT 编译好的热点代码。这是执行速度最快的层次。</li>
+</ol>
+<p>系统会智能地在三者之间切换，这个调度机制的精妙之处在于：</p>
+<ol>
+<li><strong>性能优先</strong>：系统总是优先尝试使用最快的执行方式（AOT &gt; JIT &gt; 解释器）。</li>
+<li><strong>无缝切换</strong>：对开发者完全透明，应用代码无需任何修改。</li>
+<li><strong>渐进优化</strong>：一个方法可能会随着应用的使用，从“解释执行”升级到“JIT编译”，最终可能被“AOT编译”，性能逐步提升。</li>
+<li><strong>资源高效</strong>：避免了不必要的编译开销，只有真正被频繁使用的代码才会被升级到更快的执行层。</li>
+</ol>
+<h4 id="阶段三：Android-10-引入的优化：执行配置文件"><a href="#阶段三：Android-10-引入的优化：执行配置文件" class="headerlink" title="阶段三：Android 10 引入的优化：执行配置文件"></a>阶段三：Android 10 引入的优化：执行配置文件</h4><p>在 Android 10 及更高版本中，这个混合模式得到了进一步优化。</p>
+<ul>
+<li><strong>云配置文件</strong>：Google Play 可以收集<strong>匿名化的、聚合的</strong>性能分析数据（来自大量用户），形成一个“云配置文件”。</li>
+<li><strong>首次启动即优化</strong>：当你安装一个新应用时，Play Store 可以附带下载这个应用的云配置文件。在安装过程中，ART 就可以直接根据这个配置文件，对已知的热点方法进行 AOT 编译。</li>
+<li><strong>好处</strong>：这意味着应用<strong>在第一次运行时就能达到最佳性能</strong>，而不是需要用户使用几次、经过后台分析编译后才能变快。</li>
+</ul>
+<hr>
+<h3 id="ART-的其他关键特性和优势"><a href="#ART-的其他关键特性和优势" class="headerlink" title="ART 的其他关键特性和优势"></a>ART 的其他关键特性和优势</h3><p>除了核心的编译技术，ART 还带来了其他重要改进：</p>
+<ul>
+<li><strong>更高效的垃圾回收（GC）</strong>：<ul>
+<li><strong>暂停次数更少</strong>：ART 将 GC 中的两次暂停减少到一次，大大提升了响应速度。</li>
+<li><strong>并行化</strong>：GC 过程与应用逻辑并行执行，进一步减少对应用性能的干扰。</li>
+</ul>
+</li>
+<li><strong>更好的调试支持</strong>：支持更多的采样分析工具、堆栈转储和调试特性。</li>
+<li><strong>64位支持</strong>：原生支持 64 位架构，为更强大的移动计算奠定了基础。</li>
+</ul>
+<h3 id="总结-1"><a href="#总结-1" class="headerlink" title="总结"></a>总结</h3><p>ART 的工作原理可以概括为：</p>
+<blockquote>
+<p><strong>一个智能的、分层编译的运行时系统。它通过在安装时快速解释执行，在运行时使用 JIT 进行即时优化，并在设备闲置时基于性能分析对关键代码进行预编译（AOT），最终实现了安装速度、存储空间占用和运行时性能三者之间的最佳平衡。</strong></p>
+</blockquote>
+<p>这种演进体现了 Android 系统在追求极致性能的同时，也越来越注重用户体验的细节。</p>
+<h2 id="3-JIT-工作过程"><a href="#3-JIT-工作过程" class="headerlink" title="3. JIT 工作过程"></a>3. JIT 工作过程</h2><p>这是一个非常好的问题，它触及了 JIT 工作原理的核心细节。</p>
+<p>简单答案是：<strong>通常情况下，JIT 在本次运行期间编译的热点代码，其缓存会在应用进程被杀死后失效。下次冷启动应用时，需要重新进行 JIT 编译。</strong></p>
+<p>下面我们来详细解释这个过程。</p>
+<h3 id="JIT-的工作周期：进程内有效"><a href="#JIT-的工作周期：进程内有效" class="headerlink" title="JIT 的工作周期：进程内有效"></a>JIT 的工作周期：进程内有效</h3><ol>
+<li><p><strong>本次运行期间（应用在后台）</strong>：</p>
+<ul>
+<li>当你启动一个应用，JIT 开始工作。它监视执行的代码，识别出热点方法。</li>
+<li>它将这些热点方法编译成本地机器码，并存储在一个<strong>专属于当前进程的“JIT 代码缓存”</strong> 中。</li>
+<li>只要这个应用进程还活着（即使你切换到其他应用，但它还在后台运行），这个代码缓存就一直有效。</li>
+<li>如果你从后台切回这个应用，执行到之前编译过的热点代码，系统会直接使用缓存中的机器码，无需重新编译，所以体验会很流畅。</li>
+</ul>
+</li>
+<li><p><strong>应用被彻底杀死后（下次冷启动）</strong>：</p>
+<ul>
+<li>当系统需要释放内存时，或者用户手动“强制停止”应用后，该应用的进程会被完全销毁。</li>
+<li>进程拥有的所有资源都会被系统回收，这其中就包括 <strong>JIT 代码缓存</strong>。</li>
+<li>因此，当你下次<strong>冷启动</strong>这个应用时，JIT 需要从零开始，重新解释执行字节码，重新识别热点代码，并重新进行编译。</li>
+</ul>
+</li>
+</ol>
+<h3 id="为什么-JIT-不持久化缓存？"><a href="#为什么-JIT-不持久化缓存？" class="headerlink" title="为什么 JIT 不持久化缓存？"></a>为什么 JIT 不持久化缓存？</h3><p>你可能会想，如果把 JIT 编译好的代码保存到磁盘上，下次启动直接使用，不是更快吗？这主要是因为 <strong>JIT 的优化特性</strong>：</p>
+<ul>
+<li><strong>动态优化</strong>：JIT 的优势在于它能根据<strong>本次运行的实际情况</strong>进行优化。例如，它可以根据代码执行的路径、变量的实际类型进行非常激进的优化（如内联、去虚拟化等）。这些优化是基于运行时信息的，每次运行的情况可能略有不同，所以上次的优化结果可能不适用于下次。</li>
+<li><strong>缓存失效问题</strong>：如果应用的代码更新了，或者运行环境发生了变化，持久化的缓存就会失效，管理这些缓存的版本和有效性会变得非常复杂。</li>
+</ul>
+<h3 id="ART-的巧妙设计：连接-JIT-与-AOT"><a href="#ART-的巧妙设计：连接-JIT-与-AOT" class="headerlink" title="ART 的巧妙设计：连接 JIT 与 AOT"></a>ART 的巧妙设计：连接 JIT 与 AOT</h3><p>正是因为 JIT 缓存的“临时性”，ART 才引入了 <strong>“混合模式”</strong> 来弥补这个缺陷。这个过程完美地解释了 JIT 和 AOT 是如何协作的：</p>
+<ol>
+<li><p><strong>首次运行（JIT 工作并分析）</strong>：</p>
+<ul>
+<li>应用冷启动，所有代码通过解释器执行。</li>
+<li>JIT 开始工作，编译热点代码，同时<strong>生成一个“执行配置文件”</strong>，记录下哪些方法被频繁调用。</li>
+</ul>
+</li>
+<li><p><strong>设备闲置时（AOT 介入）</strong>：</p>
+<ul>
+<li>当手机充电且空闲时，ART 的 <code>dex2oat</code> 工具会读取 JIT 生成的<strong>执行配置文件</strong>。</li>
+<li>然后，它根据这个“指南”，只将配置文件中记录的<strong>热点方法</strong>进行<strong>预编译（AOT）</strong>，并将结果以 <code>.odex</code> 文件的形式<strong>持久化存储到磁盘上</strong>。</li>
+</ul>
+</li>
+<li><p><strong>后续运行（享受持久化好处）</strong>：</p>
+<ul>
+<li>当你再次冷启动应用时，系统会直接加载那些已经被 AOT 编译好的热点方法机器码。</li>
+<li>对于非热点代码，或者本次运行新出现的热点代码，仍然会走解释器 -&gt; JIT 的流程。</li>
+<li>这样，应用在启动时就能获得很好的性能，因为最关键的路径代码已经是本地机器码了。</li>
+</ul>
+</li>
+</ol>
+<h3 id="总结-2"><a href="#总结-2" class="headerlink" title="总结"></a>总结</h3><table>
+<thead>
+<tr>
+<th align="left">编译方式</th>
+<th align="left">编译时机</th>
+<th>缓存是否持久化</th>
+<th align="left">优点</th>
+<th align="left">缺点</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><strong>JIT</strong></td>
+<td align="left"><strong>运行时</strong></td>
+<td><strong>否</strong>（进程级）</td>
+<td align="left">动态优化、安装快、占用空间小</td>
+<td align="left">冷启动性能差、有运行时开销</td>
+</tr>
+<tr>
+<td align="left"><strong>AOT</strong></td>
+<td align="left"><strong>安装时&#x2F;闲置时</strong></td>
+<td><strong>是</strong>（磁盘级）</td>
+<td align="left">运行性能最佳、无运行时开销</td>
+<td align="left">安装&#x2F;更新慢、占用空间大、优化不灵活</td>
+</tr>
+</tbody></table>
+<p>所以，回到你的问题：</p>
+<ul>
+<li><strong>JIT 编译是每次冷启动后都需要重新进行的。</strong></li>
+<li>但 ART 的智慧在于，它利用 JIT 的<strong>分析能力</strong>来指导 AOT 进行<strong>持久化编译</strong>，从而使得频繁使用的应用在多次启动后，其性能会逐渐接近纯 AOT 的水平，同时又避免了纯 AOT 的所有缺点。</li>
+</ul>
+<h2 id="4-ART-的-GC-机制"><a href="#4-ART-的-GC-机制" class="headerlink" title="4. ART 的 GC 机制"></a>4. ART 的 GC 机制</h2><p>好的，我们来详细解析 ART（Android 5.0+）中更高效的垃圾回收机制。与 DVM 的 GC 相比，ART 的 GC 在效率、速度和对应用响应能力的影响上都有了质的飞跃。</p>
+<h3 id="核心改进：从-DVM-的“拖沓”到-ART-的“流畅”"><a href="#核心改进：从-DVM-的“拖沓”到-ART-的“流畅”" class="headerlink" title="核心改进：从 DVM 的“拖沓”到 ART 的“流畅”"></a>核心改进：从 DVM 的“拖沓”到 ART 的“流畅”</h3><p>要理解 ART GC 的高效，我们先回顾一下 DVM GC（特别是 Android 2.3 之前）的主要问题：</p>
+<ul>
+<li><strong>两次完整的暂停</strong>：DVM 的 GC 会进行两次 <code>Stop-the-World</code> 暂停。在暂停期间，<strong>所有应用线程（包括 UI 主线程）都会被挂起</strong>，导致应用卡顿、界面无响应。</li>
+<li><strong>保守的回收</strong>：DVM 的 GC 算法相对保守，容易产生内存碎片。</li>
+<li><strong>与 JIT 协作不佳</strong>：JIT 编译器自身也会产生一些临时对象，给 GC 带来额外压力。</li>
+</ul>
+<p>ART 的 GC 针对这些问题进行了彻底的重新设计。</p>
+<hr>
+<h3 id="ART-高效垃圾回收的关键特性"><a href="#ART-高效垃圾回收的关键特性" class="headerlink" title="ART 高效垃圾回收的关键特性"></a>ART 高效垃圾回收的关键特性</h3><h4 id="1-更少的暂停，尤其是并发-GC"><a href="#1-更少的暂停，尤其是并发-GC" class="headerlink" title="1. 更少的暂停，尤其是并发 GC"></a>1. 更少的暂停，尤其是并发 GC</h4><p>这是 ART GC 带来的最显著的体验提升。</p>
+<ul>
+<li><strong>DVM</strong>：两次 <code>Stop-the-World</code> 暂停。<ul>
+<li>第一次暂停：标记阶段，找出所有活动对象。</li>
+<li>第二次暂停：清理阶段，回收内存。</li>
+</ul>
+</li>
+<li><strong>ART</strong>：<strong>绝大多数情况下只有一次 <code>Stop-the-World</code> 暂停。</strong><ul>
+<li>ART 将 <strong>标记阶段</strong> 设计成了<strong>并发</strong>的。这意味着 GC 可以<strong>与应用线程同时运行</strong>。GC 线程在后台标记活动对象，而你的应用主线程仍在正常运行，渲染 UI 和处理事件。</li>
+<li>只有 <strong>清理阶段</strong> 需要一次非常短暂的 <code>Stop-the-World</code> 暂停。这次暂停的时间极短，以至于用户几乎无法察觉。</li>
+</ul>
+</li>
+</ul>
+<p><strong>体验对比</strong>：</p>
+<ul>
+<li><strong>DVM</strong>：GC 时，应用可能会明显“卡”一下。</li>
+<li><strong>ART</strong>：GC 在后台悄悄进行，应用保持流畅，用户基本感知不到 GC 的发生。</li>
+</ul>
+<h4 id="2-更快的垃圾回收周期"><a href="#2-更快的垃圾回收周期" class="headerlink" title="2. 更快的垃圾回收周期"></a>2. 更快的垃圾回收周期</h4><p>ART 的 GC 算法本身更加高效，执行一次完整的 GC 周期所需的时间比 DVM 更短。这不仅减少了暂停的持续时间，也降低了整体的 CPU 开销，有助于节省电量。</p>
+<h4 id="3-改进的堆内存整理与内存映射交换"><a href="#3-改进的堆内存整理与内存映射交换" class="headerlink" title="3. 改进的堆内存整理与内存映射交换"></a>3. 改进的堆内存整理与内存映射交换</h4><p>这是解决内存碎片化和 <code>OutOfMemoryError</code> 的关键。</p>
+<ul>
+<li><strong>背景</strong>：频繁的分配和释放会导致堆内存出现“碎片”。即使总空闲内存足够，也可能因为找不到一块连续的足够大的内存来分配大对象而导致 OOM。</li>
+<li><strong>DVM</strong>：使用一种称为 <code>mark-sweep</code>（标记-清除）的算法，它只标记和清除死对象，但<strong>不整理</strong>存活对象，因此无法解决内存碎片问题。</li>
+<li><strong>ART</strong>：引入了更先进的算法，包括：<ul>
+<li><strong>部分堆压缩</strong>：ART 不会在每次 GC 时都整理整个堆，那太耗时了。它会<strong>选择性地对堆的特定区域进行整理</strong>，将存活对象移动到一起，从而合并出大块的连续空闲内存。</li>
+<li><strong>内存映射交换</strong>：<ul>
+<li>对于像 <code>ByteBuffer</code> 这类不是由 GC 直接管理的“廉价”对象，ART 和 DVM 都会在原生堆（Native Heap）中为其分配内存。</li>
+<li>DVM 中，当这个对象在 Java 堆中被回收时，其对应的原生内存也需要被显式回收，否则会导致原生内存泄漏。</li>
+<li>ART 通过更智能的<strong>内存映射交换</strong> 技术，能将 Java 堆中的对象与其在原生堆中的内存更紧密地绑定在一起。当 Java 对象被 GC 回收时，其关联的原生内存也<strong>更有把握地被自动、及时地释放</strong>，这减少了原生内存泄漏的风险。</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h4 id="4-针对不同代际的优化策略"><a href="#4-针对不同代际的优化策略" class="headerlink" title="4. 针对不同代际的优化策略"></a>4. 针对不同代际的优化策略</h4><p>ART 的 GC 采用了<strong>分代收集</strong> 策略，这是现代高效 GC 的标配。其核心思想是“<strong>弱分代假说</strong>”：绝大多数对象都是朝生夕死的。</p>
+<p>ART 将堆内存分为两个主要区域：</p>
+<ol>
+<li><p><strong>年轻代</strong>：</p>
+<ul>
+<li>新创建的对象都被分配在这里。</li>
+<li>这里的 GC 发生得非常频繁，但速度极快，因为它只扫描这一小块区域。</li>
+<li>目标是快速回收那些用完即弃的临时对象。</li>
+</ul>
+</li>
+<li><p><strong>老年代</strong>：</p>
+<ul>
+<li>在年轻代中经历过多次 GC 后仍然存活的对象，会被提升到老年代。</li>
+<li>这里的对象通常生命周期更长，GC 发生的频率较低，但每次处理的量更大，耗时也更长。</li>
+</ul>
+</li>
+</ol>
+<p><strong>这种分代的好处</strong>：</p>
+<ul>
+<li><strong>效率高</strong>：大部分 GC 都只发生在年轻代，速度快、暂停时间短。</li>
+<li><strong>针对性</strong>：对不同生命周期的对象使用不同的回收策略，总体开销更小。</li>
+</ul>
+<h4 id="5-与-JIT-x2F-AOT-的更好协作"><a href="#5-与-JIT-x2F-AOT-的更好协作" class="headerlink" title="5. 与 JIT&#x2F;AOT 的更好协作"></a>5. 与 JIT&#x2F;AOT 的更好协作</h4><ul>
+<li>ART 的运行时（包括 JIT&#x2F;AOT 编译器）与 GC 是共同设计的，它们共享一些内部结构。</li>
+<li>这使得 GC 能够更精确地识别 JIT&#x2F;AOT 产生的元数据和临时对象，避免它们被误判为垃圾，或者确保它们能被及时回收，减少了内存开销。</li>
+</ul>
+<h3 id="总结：ART-GC-如何实现高效"><a href="#总结：ART-GC-如何实现高效" class="headerlink" title="总结：ART GC 如何实现高效"></a>总结：ART GC 如何实现高效</h3><table>
+<thead>
+<tr>
+<th align="left">特性</th>
+<th align="left">DVM GC</th>
+<th align="left">ART GC</th>
+<th align="left">带来的好处</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><strong>暂停次数</strong></td>
+<td align="left">2 次 <code>Stop-the-World</code></td>
+<td align="left"><strong>1 次 <code>Stop-the-World</code></strong></td>
+<td align="left">应用响应更及时，卡顿减少</td>
+</tr>
+<tr>
+<td align="left"><strong>标记阶段</strong></td>
+<td align="left">同步（暂停应用）</td>
+<td align="left"><strong>并发</strong>（与应用并行）</td>
+<td align="left">UI 主线程几乎不受 GC 影响</td>
+</tr>
+<tr>
+<td align="left"><strong>堆整理</strong></td>
+<td align="left">不整理，易碎片化</td>
+<td align="left"><strong>并行化部分压缩</strong></td>
+<td align="left">减少 <code>OutOfMemoryError</code>，更有效利用内存</td>
+</tr>
+<tr>
+<td align="left"><strong>收集策略</strong></td>
+<td align="left">主要为单一策略</td>
+<td align="left"><strong>分代收集</strong></td>
+<td align="left">GC 周期更快，整体开销更低</td>
+</tr>
+<tr>
+<td align="left"><strong>与非堆内存协作</strong></td>
+<td align="left">相对薄弱</td>
+<td align="left"><strong>内存映射交换</strong></td>
+<td align="left">减少原生内存泄漏</td>
+</tr>
+</tbody></table>
+<p>总而言之，ART 的垃圾回收通过 <strong>并发标记、减少暂停、分代收集和智能堆整理</strong> 等一系列组合拳，极大地降低了垃圾回收对应用性能和用户体验的负面影响，使得 Android 应用能够运行得更流畅、更稳定。这对于移动设备有限的资源和用户对流畅性的高要求至关重要。</p>
+<p>DVM 使用 Mark-Sweep GC，不分代、不压缩，STW 时间很长，因此早期 Android 常卡顿。<br> ART 使用分代 GC、并发标记、Sticky GC、部分压缩和 region-based GC，暂停时间极短，内存碎片大幅减少，同时 AOT 让 GC 更高效。</p>
+<p>下面给你用 <strong>超清晰、好理解、不绕弯子</strong> 的方式解释这三种 GC：<br> <strong>Sticky GC、Generational GC、Region-based GC（基于 region 的 GC）</strong>。<br> 它们都是 ART Runtime 在不同层次上的优化。</p>
+<hr>
+<h2 id="5-Sticky-GC-x2F-Gen-GC-x2F-Region-based-GC"><a href="#5-Sticky-GC-x2F-Gen-GC-x2F-Region-based-GC" class="headerlink" title="5 Sticky GC&#x2F;Gen GC&#x2F;Region-based GC"></a>5 Sticky GC&#x2F;Gen GC&#x2F;Region-based GC</h2><h3 id="5-1-Sticky-GC（ART-特有的轻量级-GC）"><a href="#5-1-Sticky-GC（ART-特有的轻量级-GC）" class="headerlink" title="5.1 Sticky GC（ART 特有的轻量级 GC）"></a>5.1 Sticky GC（ART 特有的轻量级 GC）</h3><p>Sticky GC 用来处理：</p>
+<ul>
+<li>最近被修改过引用的对象（Dirty Cards），利用 Write Barrier 标记：<ul>
+<li>哪些内存区域被修改（Dirty）</li>
+<li>Sticky GC 只扫描“脏卡”区域</li>
+</ul>
+</li>
+<li>刚分配的新对象（Young Generation），这些对象通常还没晋升到老年代。</li>
+<li>不扫描全部 Young Generation</li>
+<li>不扫描 Old Generation</li>
+<li>不进行压缩</li>
+<li>不做并发标记</li>
+<li>只扫“Dirty Cards + 新生代中的部分对象”</li>
+</ul>
+<p>为什么叫 Sticky？因为它假设：</p>
+<ul>
+<li>老年代（以前存活的对象）大概率还活着</li>
+<li><strong>只“黏住”扫描那些“最近修改过的区域”</strong></li>
+</ul>
+<p>如何判断“最近修改”？</p>
+<p>ART 使用：</p>
+<ul>
+<li><strong>Card Table（卡表）</strong></li>
+<li><strong>Write Barrier（写屏障）</strong></li>
+</ul>
+<p>当某个对象引用发生变化时，对应内存区域被标记为“Dirty Card”。</p>
+<p>Sticky GC 的特点：</p>
+<ul>
+<li>扫描范围非常小（基本只扫新生代 + Dirty Card）</li>
+<li>执行速度极快（通常 &lt; 1ms）</li>
+<li>减少 STW</li>
+</ul>
+<p>类比举例：</p>
+<ul>
+<li><strong>普通 GC</strong> &#x3D; 把整个房子的垃圾全打扫</li>
+<li><strong>Sticky GC</strong> &#x3D; 只打扫“刚刚弄脏”的地方</li>
+</ul>
+<hr>
+<h3 id="5-2-Generational-GC（分代-GC）"><a href="#5-2-Generational-GC（分代-GC）" class="headerlink" title="5.2 Generational GC（分代 GC）"></a>5.2 Generational GC（分代 GC）</h3><p>一句话理解：</p>
+<p>Generational GC &#x3D; 新生代频繁回收，老年代几乎不动。**</p>
+<p>基本观察：</p>
+<p>在几乎所有语言中（Java&#x2F;C#&#x2F;ART 都一样）对象分布规律是：</p>
+<ul>
+<li><strong>80% 的对象很快死亡（瞬时对象）</strong></li>
+<li>只有小部分对象长期存活</li>
+</ul>
+<p>所以 ART 把堆分成两类：</p>
+<hr>
+<p><strong>（1）Young Generation（新生代）</strong></p>
+<ul>
+<li>存放新创建的对象</li>
+<li>死亡率高</li>
+<li>GC 非常快（通常就是 Sticky GC）</li>
+<li>每次 Young GC 后，存活的对象可能晋升到 Old Generation</li>
+</ul>
+<p><font color=red><strong>Sticky GC 是 Young GC 中的“超轻量版”，主要清理最近脏的那一点点。Young GC 扫整个新生代，是正常的少量停顿回收。</strong></font></p>
+<hr>
+<p><strong>（2）Old Generation（老年代）</strong></p>
+<ul>
+<li>存放长时间存活的对象</li>
+<li>GC 很少触发（减少暂停时间和扫描量）</li>
+<li>通常使用并发 GC（Concurrent Mark Sweep）</li>
+</ul>
+<hr>
+<p>为什么这样能变快？</p>
+<p>只有新生代需要频繁扫描，老年代不动。</p>
+<p>类比举例：</p>
+<ul>
+<li><strong>新生代</strong> &#x3D; 快递包装垃圾（每天都有，大多数一次性）</li>
+<li><strong>老年代</strong> &#x3D; 家具电器（很少扔）</li>
+</ul>
+<p>&#x3D;&gt; 每天只清理快递垃圾，不需要每天检查家具。</p>
+<hr>
+<h3 id="5-3-Region-based-GC（基于-Region-的-GC）"><a href="#5-3-Region-based-GC（基于-Region-的-GC）" class="headerlink" title="5.3 Region-based GC（基于 Region 的 GC）"></a>5.3 Region-based GC（基于 Region 的 GC）</h3><p>（Android 8+）</p>
+<p>一句话理解：</p>
+<p>Region GC &#x3D; 不再把堆区分“老&#x2F;新”，而是切成很多小块，每块都能单独 GC。**</p>
+<p>为什么需要 Region GC？</p>
+<p>在大型应用中：</p>
+<ul>
+<li>对象生命周期复杂</li>
+<li>新生代&#x2F;老年代划分很难合适</li>
+<li>特别是像 G1 那样减少全堆扫描更重要</li>
+</ul>
+<p>因此 Android 8 开始引入更现代的结构。</p>
+<hr>
+<p>Region GC 的核心思想：</p>
+<ul>
+<li>把整个 heap 划分为几十到几百个 Region（每个大约 256KB～1MB）</li>
+<li>每个 Region 包含生命周期接近的对象</li>
+<li>GC 时只处理“部分 Region”（partial&#x2F;selected GC）</li>
+<li>避免全堆扫描</li>
+<li>结合 Concurrent 标记减少 STW</li>
+</ul>
+<p>好处：</p>
+<ul>
+<li>没有严格的“新生代&#x2F;老年代”边界，动态更灵活</li>
+<li>Region 可以作为复制、压缩的单位</li>
+<li>能类似 G1 GC 做 incremental &#x2F; partial GC</li>
+<li>处理大对象更灵活（可以放到大 Region）</li>
+</ul>
+<p>类比：</p>
+<ul>
+<li>以前的 GC 是把堆分两层（新生代、老年代）</li>
+<li>Region GC &#x3D; 把堆分成很多小球场<ul>
+<li>哪块脏，就扫哪块</li>
+<li>哪块空了，就回收哪块</li>
+<li>哪块碎了，就整理哪块</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h3 id="5-4-三者的关系（最关键）"><a href="#5-4-三者的关系（最关键）" class="headerlink" title="5.4 三者的关系（最关键）"></a>5.4 三者的关系（最关键）</h3><p>它们不是互相替代，而是 <strong>分层补充、叠加</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>机制</th>
+<th>作用层面</th>
+<th>ART 是否使用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Sticky GC</strong></td>
+<td>微型、小范围 GC（主要扫新对象）</td>
+<td>✔ ART 独有</td>
+</tr>
+<tr>
+<td><strong>Generational GC</strong></td>
+<td>把对象按生命周期分代，提高回收效率</td>
+<td>✔ ART 长期使用</td>
+</tr>
+<tr>
+<td><strong>Region-based GC</strong></td>
+<td>更细粒度划分 heap，提高并发与局部性</td>
+<td>✔ Android 8+ 引入</td>
+</tr>
+</tbody></table>
+<p>最终形成：</p>
+<blockquote>
+<p><strong>Region-based heap + Generational strategy + Sticky GC + Concurrent GC 流程</strong><br>共同减少 STW、减少扫描量、减少碎片。</p>
+</blockquote>
+<hr>
+<p>📌 最形象的总结（让你从此不糊涂）</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">      +--------------------+</span><br><span class="line">      |    Region GC       |</span><br><span class="line">      |  (分成小块来扫)       |</span><br><span class="line">      +----------+---------+</span><br><span class="line">                 |</span><br><span class="line">          分代策略（Generational）</span><br><span class="line">            /            \</span><br><span class="line">Young Region              Old Region</span><br><span class="line">       |</span><br><span class="line">  Sticky GC（扫最脏的部分）</span><br></pre></td></tr></table></figure>
+
+<hr>
+<p>✔ 面试官喜欢问的延伸点：</p>
+<ul>
+<li>为什么 Sticky GC 能做到几百微秒？</li>
+<li>为什么 Android 8 用 Region GC 而不是整套 G1？</li>
+<li>新生代大小怎么影响性能？</li>
+</ul>
+<p>Android ART 从 Android 8 以后采用 region-based heap，结合分代 GC、Sticky GC、并发标记和局部压缩。<br>整个 GC 是通过 region + generational + concurrent 来降低 STW。<br>所以最新 Android 使用的是 Region-based Generational Concurrent GC。</p>
+<ul>
+<li><strong>对象实例和数组 → 一律在堆</strong></li>
+<li><strong>实例字段（哪怕是基本类型）→ 在堆</strong></li>
+<li><strong>static 字段本身 → 在 Metaspace（元空间）</strong></li>
+<li><strong>static 字段指向的对象 → 在堆</strong></li>
+<li><strong>方法局部变量（基本类型 &amp; 引用）→ 栈</strong></li>
+<li><strong>局部 new 的对象 → 堆</strong></li>
+</ul>
 
     </div>
 
@@ -425,7 +978,7 @@
   </li>
   <li class="post-copyright-link">
     <strong>本文链接：</strong>
-    <a href="http://592988.xyz/2017/06/30/Android/Something_about_Dalvik_ART_DEX_ODEX_JIT_AOT_OAT/" title="关于 Dalvik、ART、DEX、ODEX、JIT、AOT、OAT">http://592988.xyz/2017/06/30/Android/Something_about_Dalvik_ART_DEX_ODEX_JIT_AOT_OAT/</a>
+    <a href="https://852988.xyz/2017/06/30/Android/Something_about_Dalvik_ART_DEX_ODEX_JIT_AOT_OAT/" title="关于 Dalvik、ART、DEX、ODEX、JIT、AOT、OAT">https://852988.xyz/2017/06/30/Android/Something_about_Dalvik_ART_DEX_ODEX_JIT_AOT_OAT/</a>
   </li>
   <li class="post-copyright-license">
     <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
@@ -535,7 +1088,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#1-Dalvik%EF%BC%86ART"><span class="nav-text">1. Dalvik＆ART</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-1-Dalvik"><span class="nav-text">1.1 Dalvik</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-2-ART"><span class="nav-text">1.2 ART</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-3-Dalvik%E5%92%8CART%E5%8C%BA%E5%88%AB"><span class="nav-text">1.3 Dalvik和ART区别</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#2-dex%EF%BC%86odex%EF%BC%86oat"><span class="nav-text">2. dex＆odex＆oat</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#2-1-dex"><span class="nav-text">2.1 dex</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-2-odex"><span class="nav-text">2.2 odex</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-3-oat"><span class="nav-text">2.3 oat</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-4-dexopt%E5%92%8Cdex2oat%E5%8C%BA%E5%88%AB"><span class="nav-text">2.4 dexopt和dex2oat区别</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#3-JIT%EF%BC%86AOT"><span class="nav-text">3. JIT＆AOT</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#3-1-JIT"><span class="nav-text">3.1 JIT</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-2-AOT"><span class="nav-text">3.2 AOT</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#4-Android-N%E4%B8%8A%E7%9A%84%E6%94%B9%E5%8F%98"><span class="nav-text">4. Android N上的改变</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#4-1-ART%E7%BC%BA%E7%82%B9"><span class="nav-text">4.1 ART缺点</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-2-Android-N%E7%9A%84%E6%94%B9%E5%8F%98"><span class="nav-text">4.2 Android N的改变</span></a></li></ol></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#1-Dalvik%EF%BC%86ART"><span class="nav-text">1. Dalvik＆ART</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-1-Dalvik"><span class="nav-text">1.1 Dalvik</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-2-ART"><span class="nav-text">1.2 ART</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-3-Dalvik%E5%92%8CART%E5%8C%BA%E5%88%AB"><span class="nav-text">1.3 Dalvik和ART区别</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#2-dex%EF%BC%86odex%EF%BC%86oat"><span class="nav-text">2. dex＆odex＆oat</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#2-1-dex"><span class="nav-text">2.1 dex</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-2-odex"><span class="nav-text">2.2 odex</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-3-oat"><span class="nav-text">2.3 oat</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-4-dexopt%E5%92%8Cdex2oat%E5%8C%BA%E5%88%AB"><span class="nav-text">2.4 dexopt和dex2oat区别</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#3-JIT%EF%BC%86AOT"><span class="nav-text">3. JIT＆AOT</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#3-1-JIT"><span class="nav-text">3.1 JIT</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-2-AOT"><span class="nav-text">3.2 AOT</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#4-Android-N%E4%B8%8A%E7%9A%84%E6%94%B9%E5%8F%98"><span class="nav-text">4. Android N上的改变</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#4-1-ART%E7%BC%BA%E7%82%B9"><span class="nav-text">4.1 ART缺点</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-2-Android-N%E7%9A%84%E6%94%B9%E5%8F%98"><span class="nav-text">4.2 Android N的改变</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#20251201-%E6%9B%B4%E6%96%B0"><span class="nav-text">20251201 更新</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-DVM-%E5%92%8C-JVM"><span class="nav-text">1. DVM 和 JVM</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#DVM-x2F-JVM-%E6%A0%B8%E5%BF%83%E5%8C%BA%E5%88%AB%E5%AF%B9%E6%AF%94%E8%A1%A8"><span class="nav-text">DVM&#x2F;JVM 核心区别对比表</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%B3%E9%94%AE%E5%8C%BA%E5%88%AB%E8%AF%A6%E8%A7%A3"><span class="nav-text">关键区别详解</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-%E6%9E%B6%E6%9E%84%EF%BC%9A%E5%9F%BA%E4%BA%8E%E5%AF%84%E5%AD%98%E5%99%A8-vs-%E5%9F%BA%E4%BA%8E%E6%A0%88"><span class="nav-text">1. 架构：基于寄存器 vs. 基于栈</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-%E6%89%A7%E8%A1%8C%E6%96%87%E4%BB%B6%E6%A0%BC%E5%BC%8F%EF%BC%9A-dex-vs-class"><span class="nav-text">2. 执行文件格式：.dex vs. .class</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-%E8%AE%BE%E8%AE%A1%E5%93%B2%E5%AD%A6%E4%B8%8E%E4%BC%98%E5%8C%96%E7%9B%AE%E6%A0%87"><span class="nav-text">3. 设计哲学与优化目标</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#DVM%E7%9A%84%E6%BC%94%E8%BF%9B%EF%BC%9A%E8%A2%ABART%E5%8F%96%E4%BB%A3"><span class="nav-text">DVM的演进：被ART取代</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-text">总结</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-ART-%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86"><span class="nav-text">2. ART 工作原理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A0%B8%E5%BF%83%E6%BC%94%E8%BF%9B%EF%BC%9A%E4%BB%8E-DVM-%E7%9A%84-JIT-%E5%88%B0-ART-%E7%9A%84-AOT"><span class="nav-text">核心演进：从 DVM 的 JIT 到 ART 的 AOT</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ART-%E7%9A%84%E5%B7%A5%E4%BD%9C%E6%B5%81%E7%A8%8B%E4%B8%8E%E6%BC%94%E5%8C%96"><span class="nav-text">ART 的工作流程与演化</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%98%B6%E6%AE%B5%E4%B8%80%EF%BC%9AAndroid-5-0-6-0-%E7%9A%84%E7%BA%AF-AOT-%E6%A8%A1%E5%BC%8F"><span class="nav-text">阶段一：Android 5.0 ~ 6.0 的纯 AOT 模式</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%98%B6%E6%AE%B5%E4%BA%8C%EF%BC%9AAndroid-7-0-%E5%BC%95%E5%85%A5%E7%9A%84%E6%B7%B7%E5%90%88%E6%A8%A1%E5%BC%8F%EF%BC%88JIT-AOT%EF%BC%89"><span class="nav-text">阶段二：Android 7.0 引入的混合模式（JIT + AOT）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%98%B6%E6%AE%B5%E4%B8%89%EF%BC%9AAndroid-10-%E5%BC%95%E5%85%A5%E7%9A%84%E4%BC%98%E5%8C%96%EF%BC%9A%E6%89%A7%E8%A1%8C%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6"><span class="nav-text">阶段三：Android 10 引入的优化：执行配置文件</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ART-%E7%9A%84%E5%85%B6%E4%BB%96%E5%85%B3%E9%94%AE%E7%89%B9%E6%80%A7%E5%92%8C%E4%BC%98%E5%8A%BF"><span class="nav-text">ART 的其他关键特性和优势</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%80%BB%E7%BB%93-1"><span class="nav-text">总结</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-JIT-%E5%B7%A5%E4%BD%9C%E8%BF%87%E7%A8%8B"><span class="nav-text">3. JIT 工作过程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#JIT-%E7%9A%84%E5%B7%A5%E4%BD%9C%E5%91%A8%E6%9C%9F%EF%BC%9A%E8%BF%9B%E7%A8%8B%E5%86%85%E6%9C%89%E6%95%88"><span class="nav-text">JIT 的工作周期：进程内有效</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88-JIT-%E4%B8%8D%E6%8C%81%E4%B9%85%E5%8C%96%E7%BC%93%E5%AD%98%EF%BC%9F"><span class="nav-text">为什么 JIT 不持久化缓存？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ART-%E7%9A%84%E5%B7%A7%E5%A6%99%E8%AE%BE%E8%AE%A1%EF%BC%9A%E8%BF%9E%E6%8E%A5-JIT-%E4%B8%8E-AOT"><span class="nav-text">ART 的巧妙设计：连接 JIT 与 AOT</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%80%BB%E7%BB%93-2"><span class="nav-text">总结</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-ART-%E7%9A%84-GC-%E6%9C%BA%E5%88%B6"><span class="nav-text">4. ART 的 GC 机制</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A0%B8%E5%BF%83%E6%94%B9%E8%BF%9B%EF%BC%9A%E4%BB%8E-DVM-%E7%9A%84%E2%80%9C%E6%8B%96%E6%B2%93%E2%80%9D%E5%88%B0-ART-%E7%9A%84%E2%80%9C%E6%B5%81%E7%95%85%E2%80%9D"><span class="nav-text">核心改进：从 DVM 的“拖沓”到 ART 的“流畅”</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ART-%E9%AB%98%E6%95%88%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E7%9A%84%E5%85%B3%E9%94%AE%E7%89%B9%E6%80%A7"><span class="nav-text">ART 高效垃圾回收的关键特性</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-%E6%9B%B4%E5%B0%91%E7%9A%84%E6%9A%82%E5%81%9C%EF%BC%8C%E5%B0%A4%E5%85%B6%E6%98%AF%E5%B9%B6%E5%8F%91-GC"><span class="nav-text">1. 更少的暂停，尤其是并发 GC</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-%E6%9B%B4%E5%BF%AB%E7%9A%84%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E5%91%A8%E6%9C%9F"><span class="nav-text">2. 更快的垃圾回收周期</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-%E6%94%B9%E8%BF%9B%E7%9A%84%E5%A0%86%E5%86%85%E5%AD%98%E6%95%B4%E7%90%86%E4%B8%8E%E5%86%85%E5%AD%98%E6%98%A0%E5%B0%84%E4%BA%A4%E6%8D%A2"><span class="nav-text">3. 改进的堆内存整理与内存映射交换</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#4-%E9%92%88%E5%AF%B9%E4%B8%8D%E5%90%8C%E4%BB%A3%E9%99%85%E7%9A%84%E4%BC%98%E5%8C%96%E7%AD%96%E7%95%A5"><span class="nav-text">4. 针对不同代际的优化策略</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#5-%E4%B8%8E-JIT-x2F-AOT-%E7%9A%84%E6%9B%B4%E5%A5%BD%E5%8D%8F%E4%BD%9C"><span class="nav-text">5. 与 JIT&#x2F;AOT 的更好协作</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%80%BB%E7%BB%93%EF%BC%9AART-GC-%E5%A6%82%E4%BD%95%E5%AE%9E%E7%8E%B0%E9%AB%98%E6%95%88"><span class="nav-text">总结：ART GC 如何实现高效</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-Sticky-GC-x2F-Gen-GC-x2F-Region-based-GC"><span class="nav-text">5 Sticky GC&#x2F;Gen GC&#x2F;Region-based GC</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#5-1-Sticky-GC%EF%BC%88ART-%E7%89%B9%E6%9C%89%E7%9A%84%E8%BD%BB%E9%87%8F%E7%BA%A7-GC%EF%BC%89"><span class="nav-text">5.1 Sticky GC（ART 特有的轻量级 GC）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-2-Generational-GC%EF%BC%88%E5%88%86%E4%BB%A3-GC%EF%BC%89"><span class="nav-text">5.2 Generational GC（分代 GC）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-3-Region-based-GC%EF%BC%88%E5%9F%BA%E4%BA%8E-Region-%E7%9A%84-GC%EF%BC%89"><span class="nav-text">5.3 Region-based GC（基于 Region 的 GC）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-4-%E4%B8%89%E8%80%85%E7%9A%84%E5%85%B3%E7%B3%BB%EF%BC%88%E6%9C%80%E5%85%B3%E9%94%AE%EF%BC%89"><span class="nav-text">5.4 三者的关系（最关键）</span></a></li></ol></li></ol></li></ol></div>
       </div>
       <!--/noindex-->
 
@@ -549,20 +1102,20 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">77</span>
+          <span class="site-state-item-count">93</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">8</span>
+        <span class="site-state-item-count">10</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">22</span>
+        <span class="site-state-item-count">24</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -616,7 +1169,7 @@
 <div class="copyright">
   
   &copy; 2016 – 
-  <span itemprop="copyrightYear">2024</span>
+  <span itemprop="copyrightYear">2026</span>
   <span class="with-love">
     <i class="fa fa-heart"></i>
   </span>
@@ -853,6 +1406,19 @@ window.addEventListener('pjax:success', () => {
 
 
 
+<script data-pjax>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : 'forest',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
 
 
     <div id="pjax">
@@ -862,7 +1428,7 @@ window.addEventListener('pjax:success', () => {
 
 <script>
   var disqus_config = function() {
-    this.page.url = "http://592988.xyz/2017/06/30/Android/Something_about_Dalvik_ART_DEX_ODEX_JIT_AOT_OAT/";
+    this.page.url = "https://852988.xyz/2017/06/30/Android/Something_about_Dalvik_ART_DEX_ODEX_JIT_AOT_OAT/";
     this.page.identifier = "2017/06/30/Android/Something_about_Dalvik_ART_DEX_ODEX_JIT_AOT_OAT/";
     this.page.title = "关于 Dalvik、ART、DEX、ODEX、JIT、AOT、OAT";
     };

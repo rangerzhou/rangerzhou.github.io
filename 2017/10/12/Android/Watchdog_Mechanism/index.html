@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
 <meta name="theme-color" content="#222">
-<meta name="generator" content="Hexo 6.3.0">
+<meta name="generator" content="Hexo 8.1.1">
 <!-- pjax：防止跳转页面音乐暂停 -->
 <script src="https://cdn.jsdelivr.net/npm/pjax@0.2.8/pjax.js"></script>
   <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
@@ -24,13 +24,13 @@
 
 <script id="hexo-configurations">
     var NexT = window.NexT || {};
-    var CONFIG = {"hostname":"592988.xyz","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"always","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"manual"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":true,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":true,"nav":null,"activeClass":"gitalk"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+    var CONFIG = {"hostname":"852988.xyz","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"always","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"manual"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":true,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":true,"nav":null,"activeClass":"gitalk"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
   </script>
 
   <meta name="description" content="1. 概述 xxxxxx">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Watchdog机制及实例分析">
-<meta property="og:url" content="http://592988.xyz/2017/10/12/Android/Watchdog_Mechanism/index.html">
+<meta property="og:url" content="https://852988.xyz/2017/10/12/Android/Watchdog_Mechanism/index.html">
 <meta property="og:site_name" content="RangerZhou">
 <meta property="og:description" content="1. 概述 xxxxxx">
 <meta property="og:locale" content="zh_CN">
@@ -40,7 +40,7 @@
 <meta property="article:tag" content="Watchdog">
 <meta name="twitter:card" content="summary">
 
-<link rel="canonical" href="http://592988.xyz/2017/10/12/Android/Watchdog_Mechanism/">
+<link rel="canonical" href="https://852988.xyz/2017/10/12/Android/Watchdog_Mechanism/">
 
 
 <script id="page-configurations">
@@ -250,7 +250,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://592988.xyz/2017/10/12/Android/Watchdog_Mechanism/">
+    <link itemprop="mainEntityOfPage" href="https://852988.xyz/2017/10/12/Android/Watchdog_Mechanism/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -365,9 +365,10 @@
 </li>
 <li><p>OVERDUE表示已经超时，默认情况下timeout是1分钟，但监测对象可以通过传参自行设定，譬如PKMS的<strong>Handler Checker</strong>的超时是10分钟:</p>
 </li>
-<li><p>&#96;&#96;&#96; java<br>private static final long WATCHDOG_TIMEOUT &#x3D; 1000<em>60</em>10;     &#x2F;&#x2F; ten minutes<br>        Watchdog.getInstance().addThread(mHandler, WATCHDOG_TIMEOUT);</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">  </span><br><span class="line"></span><br><span class="line">##### 2.3.4 getBlockedCheckersLocked</span><br><span class="line"></span><br><span class="line">``` java</span><br><span class="line">    private ArrayList&lt;HandlerChecker&gt; getBlockedCheckersLocked() &#123;</span><br><span class="line">        ArrayList&lt;HandlerChecker&gt; checkers = new ArrayList&lt;HandlerChecker&gt;();</span><br><span class="line">        for (int i=0; i&lt;mHandlerCheckers.size(); i++) &#123;</span><br><span class="line">            HandlerChecker hc = mHandlerCheckers.get(i);</span><br><span class="line">            if (hc.isOverdueLocked()) &#123;</span><br><span class="line">                checkers.add(hc);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        return checkers;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure></li>
+<li><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">long</span> <span class="variable">WATCHDOG_TIMEOUT</span> <span class="operator">=</span> <span class="number">1000</span>*<span class="number">60</span>*<span class="number">10</span>;     <span class="comment">// ten minutes</span></span><br><span class="line">        Watchdog.getInstance().addThread(mHandler, WATCHDOG_TIMEOUT);</span><br></pre></td></tr></table></figure></li>
 </ul>
+<h5 id="2-3-4-getBlockedCheckersLocked"><a href="#2-3-4-getBlockedCheckersLocked" class="headerlink" title="2.3.4 getBlockedCheckersLocked"></a>2.3.4 getBlockedCheckersLocked</h5><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> ArrayList&lt;HandlerChecker&gt; <span class="title function_">getBlockedCheckersLocked</span><span class="params">()</span> &#123;</span><br><span class="line">    ArrayList&lt;HandlerChecker&gt; checkers = <span class="keyword">new</span> <span class="title class_">ArrayList</span>&lt;HandlerChecker&gt;();</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i=<span class="number">0</span>; i&lt;mHandlerCheckers.size(); i++) &#123;</span><br><span class="line">        <span class="type">HandlerChecker</span> <span class="variable">hc</span> <span class="operator">=</span> mHandlerCheckers.get(i);</span><br><span class="line">        <span class="keyword">if</span> (hc.isOverdueLocked()) &#123;</span><br><span class="line">            checkers.add(hc);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> checkers;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
 <p>如果超时时间到了，还有HandlerChecker处于未完成的状态(OVERDUE)，则通过getBlockedCheckersLocked()方法，获取阻塞的HandlerChecker，生成一些描述信息</p>
 <h5 id="2-3-5-保存日志"><a href="#2-3-5-保存日志" class="headerlink" title="2.3.5 保存日志"></a>2.3.5 保存日志</h5><p>保存日志，包括一些运行时的堆栈信息，这些日志是我们解决Watchdog问题的重要依据。如果判断需要杀掉system_server进程，则给当前进程(system_server)发送signal。</p>
 <h3 id="3-实例分析"><a href="#3-实例分析" class="headerlink" title="3. 实例分析"></a>3. 实例分析</h3><h3 id="4-总结"><a href="#4-总结" class="headerlink" title="4. 总结"></a>4. 总结</h3>
@@ -405,7 +406,7 @@
   </li>
   <li class="post-copyright-link">
     <strong>本文链接：</strong>
-    <a href="http://592988.xyz/2017/10/12/Android/Watchdog_Mechanism/" title="Watchdog机制及实例分析">http://592988.xyz/2017/10/12/Android/Watchdog_Mechanism/</a>
+    <a href="https://852988.xyz/2017/10/12/Android/Watchdog_Mechanism/" title="Watchdog机制及实例分析">https://852988.xyz/2017/10/12/Android/Watchdog_Mechanism/</a>
   </li>
   <li class="post-copyright-license">
     <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
@@ -518,7 +519,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E6%A6%82%E8%BF%B0"><span class="nav-text">1. 概述</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-Watchdog%E6%9C%BA%E5%88%B6%E8%A7%A3%E6%9E%90"><span class="nav-text">2. Watchdog机制解析</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#2-1-Watchdog%E7%9A%84%E5%88%9D%E5%A7%8B%E5%8C%96"><span class="nav-text">2.1 Watchdog的初始化</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-2-%E8%A7%A6%E5%8F%91Watchdog"><span class="nav-text">2.2 触发Watchdog</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-3-Watchdog%E7%9B%91%E6%B5%8B%E6%9C%BA%E5%88%B6"><span class="nav-text">2.3 Watchdog监测机制</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#2-3-1-scheduleCheckLocked-%E6%96%B9%E6%B3%95"><span class="nav-text">2.3.1 scheduleCheckLocked()方法</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#2-3-2-%E5%AE%9A%E6%9C%9F%E6%A3%80%E6%9F%A5"><span class="nav-text">2.3.2 定期检查</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#2-3-3-%E6%A3%80%E6%9F%A5%E7%BA%BF%E7%A8%8B%E6%88%96%E6%9C%8D%E5%8A%A1%E6%98%AF%E5%90%A6%E6%9C%89%E9%97%AE%E9%A2%98"><span class="nav-text">2.3.3 检查线程或服务是否有问题</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#2-3-5-%E4%BF%9D%E5%AD%98%E6%97%A5%E5%BF%97"><span class="nav-text">2.3.5 保存日志</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E5%AE%9E%E4%BE%8B%E5%88%86%E6%9E%90"><span class="nav-text">3. 实例分析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-%E6%80%BB%E7%BB%93"><span class="nav-text">4. 总结</span></a></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E6%A6%82%E8%BF%B0"><span class="nav-text">1. 概述</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-Watchdog%E6%9C%BA%E5%88%B6%E8%A7%A3%E6%9E%90"><span class="nav-text">2. Watchdog机制解析</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#2-1-Watchdog%E7%9A%84%E5%88%9D%E5%A7%8B%E5%8C%96"><span class="nav-text">2.1 Watchdog的初始化</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-2-%E8%A7%A6%E5%8F%91Watchdog"><span class="nav-text">2.2 触发Watchdog</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-3-Watchdog%E7%9B%91%E6%B5%8B%E6%9C%BA%E5%88%B6"><span class="nav-text">2.3 Watchdog监测机制</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#2-3-1-scheduleCheckLocked-%E6%96%B9%E6%B3%95"><span class="nav-text">2.3.1 scheduleCheckLocked()方法</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#2-3-2-%E5%AE%9A%E6%9C%9F%E6%A3%80%E6%9F%A5"><span class="nav-text">2.3.2 定期检查</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#2-3-3-%E6%A3%80%E6%9F%A5%E7%BA%BF%E7%A8%8B%E6%88%96%E6%9C%8D%E5%8A%A1%E6%98%AF%E5%90%A6%E6%9C%89%E9%97%AE%E9%A2%98"><span class="nav-text">2.3.3 检查线程或服务是否有问题</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#2-3-4-getBlockedCheckersLocked"><span class="nav-text">2.3.4 getBlockedCheckersLocked</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#2-3-5-%E4%BF%9D%E5%AD%98%E6%97%A5%E5%BF%97"><span class="nav-text">2.3.5 保存日志</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E5%AE%9E%E4%BE%8B%E5%88%86%E6%9E%90"><span class="nav-text">3. 实例分析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-%E6%80%BB%E7%BB%93"><span class="nav-text">4. 总结</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
@@ -532,20 +533,20 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">77</span>
+          <span class="site-state-item-count">93</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">8</span>
+        <span class="site-state-item-count">10</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">22</span>
+        <span class="site-state-item-count">24</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -599,7 +600,7 @@
 <div class="copyright">
   
   &copy; 2016 – 
-  <span itemprop="copyrightYear">2024</span>
+  <span itemprop="copyrightYear">2026</span>
   <span class="with-love">
     <i class="fa fa-heart"></i>
   </span>
@@ -836,6 +837,19 @@ window.addEventListener('pjax:success', () => {
 
 
 
+<script data-pjax>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : 'forest',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
 
 
     <div id="pjax">
@@ -845,7 +859,7 @@ window.addEventListener('pjax:success', () => {
 
 <script>
   var disqus_config = function() {
-    this.page.url = "http://592988.xyz/2017/10/12/Android/Watchdog_Mechanism/";
+    this.page.url = "https://852988.xyz/2017/10/12/Android/Watchdog_Mechanism/";
     this.page.identifier = "2017/10/12/Android/Watchdog_Mechanism/";
     this.page.title = "Watchdog机制及实例分析";
     };

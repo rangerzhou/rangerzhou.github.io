@@ -1,0 +1,1070 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 8.1.1">
+<!-- pjax：防止跳转页面音乐暂停 -->
+<script src="https://cdn.jsdelivr.net/npm/pjax@0.2.8/pjax.js"></script>
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/desert.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/desert.jpg">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <meta name="google-site-verification" content="OJnYjbr3wdT22qLrZSzyD9lAyBcXiXlEQ7-5wAnaWoQ">
+  <meta name="baidu-site-verification" content="vr4n4JeXgB">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-minimal.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"852988.xyz","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"always","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"manual"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":true,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":true,"nav":null,"activeClass":"gitalk"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="Android 跨进程通信随笔。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android - 跨进程通信随笔">
+<meta property="og:url" content="https://852988.xyz/2023/02/21/Android/AndroidDevelop_033_IPC_Notes/index.html">
+<meta property="og:site_name" content="RangerZhou">
+<meta property="og:description" content="Android 跨进程通信随笔。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://852988.xyz/images/2025/IPC.png">
+<meta property="article:published_time" content="2023-02-21T15:22:05.000Z">
+<meta property="article:modified_time" content="2026-01-06T16:00:22.798Z">
+<meta property="article:author" content="Ranger Zhou">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://852988.xyz/images/2025/IPC.png">
+
+<link rel="canonical" href="https://852988.xyz/2023/02/21/Android/AndroidDevelop_033_IPC_Notes/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+<script src="//cdn.bootcss.com/pace/1.0.2/pace.min.js"></script>
+<link href="//cdn.bootcss.com/pace/1.0.2/themes/pink/pace-theme-flash.css" rel="stylesheet">
+
+  <title>Android - 跨进程通信随笔 | RangerZhou</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-138158952-1"></script>
+    <script data-pjax>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-138158952-1');
+      }
+    </script>
+
+
+  <script data-pjax>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?24a6d3c4c0f292c5f682d26414c3994b";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+
+<!-- 加入APlayer音乐播放器 -->
+<link rel="stylesheet" href="/dist/APlayer.min.css">
+<div id="aplayer"></div>
+<script type="text/javascript" src="/dist/APlayer.min.js"></script>
+<script type="text/javascript" src="/dist/music.js"></script>
+
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">RangerZhou</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">Read the fucking source code</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-playlist">
+
+    <a href="/playlist/" rel="section"><i class="fa fa-music fa-fw"></i>歌单</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-commonweal">
+
+    <a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a>
+
+  </li>
+        <li class="menu-item menu-item-official">
+
+    <a href="/official" rel="section"><i class="fa fa-user fa-fw"></i>official</a>
+
+  </li>
+        <li class="menu-item menu-item-shop">
+
+    <a href="http://rangerzhou.taobao.com/" rel="noopener" target="_blank"><i class="fa fa-user fa-fw"></i>shop</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://852988.xyz/2023/02/21/Android/AndroidDevelop_033_IPC_Notes/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Ranger Zhou">
+      <meta itemprop="description" content="我是一个小流氓我从来也不浪，有一天我心血来潮耍了个流氓，我嘴里吹着小口哨我心里好得意，不知怎么哗啦啦啦啦我摔了一身泥">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="RangerZhou">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Android - 跨进程通信随笔
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2023-02-21 23:22:05" itemprop="dateCreated datePublished" datetime="2023-02-21T23:22:05+08:00">2023-02-21</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2026-01-07 00:00:22" itemprop="dateModified" datetime="2026-01-07T00:00:22+08:00">2026-01-07</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Android/" itemprop="url" rel="index"><span itemprop="name">Android</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/2023/02/21/Android/AndroidDevelop_033_IPC_Notes/" class="post-meta-item leancloud_visitors" data-flag-title="Android - 跨进程通信随笔" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <blockquote>
+<p>Android 跨进程通信随笔。</p>
+</blockquote>
+<span id="more"></span>
+
+<h1 id="跨进程通信"><a href="#跨进程通信" class="headerlink" title="跨进程通信"></a>跨进程通信</h1><h2 id="Binder-使用"><a href="#Binder-使用" class="headerlink" title="Binder 使用"></a>Binder 使用</h2><p>常见通信方式：</p>
+<ul>
+<li>Service.bindService()</li>
+<li>ServiceManager.getService()</li>
+</ul>
+<p>AIDL 方法参数修饰：</p>
+<ul>
+<li><p>in：客户端流向服务端，只有客户端可以修改，服务端修改了客户端也不会收到</p>
+</li>
+<li><p>out：服务端流向客户端，只有服务端可以修改，服务端收到的会是空数据，比如 ViewRootImpl 中的 outSurfaceControl</p>
+</li>
+<li><p>inout：双向都可修改</p>
+</li>
+</ul>
+<h2 id="socket"><a href="#socket" class="headerlink" title="socket"></a>socket</h2><p>Android 中 socket 代码：<code>system/core/libcutils/socket_local_client_unix.c</code></p>
+<h3 id="普通文件系统套接字（默认方式）"><a href="#普通文件系统套接字（默认方式）" class="headerlink" title="普通文件系统套接字（默认方式）"></a>普通文件系统套接字（默认方式）</h3><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">sockaddr_un</span> addr;</span><br><span class="line">addr.sun_family = AF_UNIX;</span><br><span class="line"><span class="built_in">strcpy</span>(addr.sun_path, <span class="string">&quot;/tmp/mysocket&quot;</span>);  <span class="comment">// 普通路径</span></span><br><span class="line"><span class="comment">// 会在文件系统中创建 /tmp/mysocket 文件</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>特点：</strong></p>
+<ul>
+<li>在文件系统中可见（<code>ls -l /tmp/mysocket</code> 可以看到）</li>
+<li>有权限控制（文件权限位）</li>
+<li>需要手动清理（程序退出后文件还在）</li>
+<li>路径长度受限制</li>
+</ul>
+<h3 id="抽象套接字名（Linux-特有）"><a href="#抽象套接字名（Linux-特有）" class="headerlink" title="抽象套接字名（Linux 特有）"></a>抽象套接字名（Linux 特有）</h3><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">sockaddr_un</span> addr;</span><br><span class="line">addr.sun_family = AF_UNIX;</span><br><span class="line">addr.sun_path[<span class="number">0</span>] = <span class="number">0</span>;  <span class="comment">// 关键操作：将第一个字节设为 &#x27;\0&#x27;</span></span><br><span class="line"><span class="built_in">strcpy</span>(&amp;addr.sun_path[<span class="number">1</span>], <span class="string">&quot;myabstractsocket&quot;</span>);  <span class="comment">// 从第二个字节开始</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>关键点：<code>sun_path[0] = &#39;\0&#39;</code> 的作用：</strong></p>
+<p>完整示例</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;sys/socket.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;sys/un.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;string.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="type">int</span> sockfd = <span class="built_in">socket</span>(AF_UNIX, SOCK_STREAM, <span class="number">0</span>);</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">struct</span> <span class="title class_">sockaddr_un</span> addr;</span><br><span class="line">    <span class="built_in">memset</span>(&amp;addr, <span class="number">0</span>, <span class="built_in">sizeof</span>(addr));</span><br><span class="line">    addr.sun_family = AF_UNIX;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 关键：第一个字节设为 0</span></span><br><span class="line">    addr.sun_path[<span class="number">0</span>] = <span class="number">0</span>;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 套接字名从第二个字节开始</span></span><br><span class="line">    <span class="type">const</span> <span class="type">char</span>* abstract_name = <span class="string">&quot;my_application_socket&quot;</span>;</span><br><span class="line">    <span class="built_in">strncpy</span>(&amp;addr.sun_path[<span class="number">1</span>], abstract_name, </span><br><span class="line">            <span class="built_in">sizeof</span>(addr.sun_path) - <span class="number">2</span>);</span><br><span class="line">    </span><br><span class="line">    <span class="built_in">bind</span>(sockfd, (<span class="keyword">struct</span> sockaddr*)&amp;addr, </span><br><span class="line">         <span class="built_in">sizeof</span>(addr.sun_family) + <span class="number">1</span> + <span class="built_in">strlen</span>(abstract_name));</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 现在可以监听、接受连接了...</span></span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>两种方式对比</p>
+<table>
+<thead>
+<tr>
+<th align="left">特性</th>
+<th align="left">文件系统套接字</th>
+<th align="left">抽象套接字（<code>sun_path[0]=0</code>）</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">文件系统可见性</td>
+<td align="left">是，创建 socket 文件</td>
+<td align="left">否，无文件系统实体</td>
+</tr>
+<tr>
+<td align="left">命名空间</td>
+<td align="left">全局文件系统</td>
+<td align="left">内核抽象命名空间</td>
+</tr>
+<tr>
+<td align="left">名称冲突</td>
+<td align="left">路径必须唯一</td>
+<td align="left">名称在系统范围内唯一即可</td>
+</tr>
+<tr>
+<td align="left">权限控制</td>
+<td align="left">通过文件权限</td>
+<td align="left">通过进程权限（UID&#x2F;GID）</td>
+</tr>
+<tr>
+<td align="left">清理</td>
+<td align="left">需手动 <code>unlink()</code></td>
+<td align="left">自动随进程结束而销毁</td>
+</tr>
+<tr>
+<td align="left">跨平台</td>
+<td align="left">所有 Unix 系统支持</td>
+<td align="left"><strong>仅 Linux 支持</strong></td>
+</tr>
+<tr>
+<td align="left">名称长度</td>
+<td align="left">受文件系统路径限制</td>
+<td align="left">最多约 107 字节</td>
+</tr>
+</tbody></table>
+<p><strong>总结：<code>serun.sun_path[0] = 0</code> 是 Linux 特有的技巧，用于创建不在文件系统中留下实体的「抽象套接字」，避免了文件系统污染和清理问题，特别适合临时或私有进程间通信。</strong></p>
+<p>查看创建的 socket 状态：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">netstat -an | grep server-socket</span><br></pre></td></tr></table></figure>
+
+<h2 id="epoll"><a href="#epoll" class="headerlink" title="epoll"></a>epoll</h2><p>Socket 存在的问题：</p>
+<p>涉及 IO 的 accept&#x2F;read&#x2F;write 都是阻塞 IO 的，如果有成千上万个 Client 需要通信</p>
+<ul>
+<li><p>accept 成功后，为每个 Client 开启一个线程进行读取，线程太多不可行</p>
+</li>
+<li><p>accept 成功后，开启一个子线程，然后在这个子线程中使用非阻塞的 read() 循环读取（while 1）多个客户端的消息(如下代码)，但是如果没有数据就会太浪费 CPU</p>
+ <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 设置成非阻塞模式</span></span><br><span class="line">flags = <span class="built_in">fcntl</span>(sockfd, F_GETFL, <span class="number">0</span>); <span class="comment">//获取文件的flags值</span></span><br><span class="line"><span class="built_in">fcntl</span>(sockfd, F_SETFL, flags | O_NONBLOCK); </span><br><span class="line"></span><br><span class="line"><span class="comment">// 设置成阻塞模式</span></span><br><span class="line">flags = <span class="built_in">fcntl</span>(sockfd,F_GETFL,<span class="number">0</span>);</span><br><span class="line"><span class="built_in">fcntl</span>(sockfd,F_SETFL,flags&amp;~O_NONBLOCK); </span><br><span class="line"></span><br><span class="line"><span class="comment">// 循环调用 read 读取各个客户端的数据</span></span><br><span class="line"><span class="keyword">while</span>(<span class="number">1</span>) &#123;</span><br><span class="line">	<span class="built_in">read</span>(fd1...);<span class="comment">//客户1</span></span><br><span class="line">	<span class="built_in">read</span>(fd2...);<span class="comment">//客户2</span></span><br><span class="line">	<span class="built_in">read</span>(fd3...);<span class="comment">//客户3</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+</ul>
+<p>如此引出 I&#x2F;O 多路复用技术（I&#x2F;O multiplexing），复用是指在同一个进程（线程）中，处理多路 I&#x2F;O，多路指多个文件描述符。</p>
+<p>使用流程</p>
+<ul>
+<li><p>epoll_create：创建一个epoll的句柄，size用来告诉内核这个监听的数目一共有多大。这个参数不同于select()中的第一个参数，给出最大监听的fd+1的值。需要注意的是，当创建好epoll句柄后，它就是会占用一个fd值，在linux下如果查看&#x2F;proc&#x2F;进程id&#x2F;fd&#x2F;，是能够看到这个fd的，所以在使用完epoll后，必须调用close()关闭，否则可能导致fd被耗尽。</p>
+ <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">int</span> <span class="title">epoll_create</span><span class="params">(<span class="type">int</span> size)</span></span>;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>epoll_ctl：epoll的事件注册函数，注册要监听的事件类型，第一个参数是epoll_create()的返回值，第二个参数表示动作，用三个宏来表示：</p>
+<ul>
+<li>EPOLL_CTL_ADD：注册新的fd到epfd中；</li>
+<li>EPOLL_CTL_MOD：修改已经注册的fd的监听事件；</li>
+<li>EPOLL_CTL_DEL：从epfd中删除一个fd；</li>
+</ul>
+ <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">int</span> <span class="title">epoll_ctl</span><span class="params">(<span class="type">int</span> epfd, <span class="type">int</span> op, <span class="type">int</span> fd, <span class="keyword">struct</span> epoll_event *event)</span></span>;</span><br></pre></td></tr></table></figure>
+
+<p> 第三个参数是需要监听的fd，第四个参数是告诉内核需要监听什么事，struct epoll_event结构如下：</p>
+ <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">epoll_event</span> &#123;</span><br><span class="line">  <span class="type">__uint32_t</span> events;  <span class="comment">/* Epoll events */</span></span><br><span class="line">  <span class="type">epoll_data_t</span> data;  <span class="comment">/* User data variable */</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p> events 类型为 EPOLLIN 表示对应的文件描述符可以读，EPOLLOUT 表示对应的文件描述符可以写；</p>
+</li>
+<li><p>epoll_wait：等待事件的产生</p>
+</li>
+</ul>
+<h2 id="SocketPair"><a href="#SocketPair" class="headerlink" title="SocketPair"></a>SocketPair</h2><p>普通 socket（伪代码）：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 客户端</span></span><br><span class="line"><span class="built_in">socket</span>();</span><br><span class="line"><span class="built_in">connect</span>();</span><br><span class="line">    </span><br><span class="line"><span class="comment">// 服务端</span></span><br><span class="line"><span class="built_in">socket</span>();</span><br><span class="line"><span class="built_in">bind</span>();</span><br><span class="line"><span class="built_in">listen</span>();</span><br><span class="line"><span class="built_in">accept</span>()</span><br></pre></td></tr></table></figure>
+
+<p>使用 socketpair</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> fd[<span class="number">2</span>];</span><br><span class="line"><span class="built_in">socketpair</span>(AF_UNIX, SOCK_STREAM, <span class="number">0</span>, fd);</span><br><span class="line"><span class="built_in">setsockopt</span>()</span><br></pre></td></tr></table></figure>
+
+<p>IPCThreadState —— 每个 binder 线程都有一个这个对象</p>
+<h2 id="Native-之间-binder-通信"><a href="#Native-之间-binder-通信" class="headerlink" title="Native 之间 binder 通信"></a>Native 之间 binder 通信</h2><p><strong>Server 端</strong></p>
+<ul>
+<li>继承 BBinder</li>
+<li>实现 onTransact</li>
+<li>获取客户端 callback（也是一个 BBinder 对象）</li>
+<li>addService</li>
+<li>joinThreadPool</li>
+<li>callback -&gt; transact()</li>
+</ul>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// server.cpp</span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;binder/IServiceManager.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;binder/IBinder.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;binder/Parcel.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;binder/ProcessState.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;binder/IPCThreadState.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> android;</span><br><span class="line"><span class="meta">#<span class="keyword">ifdef</span> LOG_TAG</span></span><br><span class="line"><span class="meta">#<span class="keyword">undef</span> LOG_TAG</span></span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> LOG_TAG <span class="string">&quot;sampleService&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SAMPLE_SERIVCE_DES <span class="string">&quot;my_hello&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SAMPLE_CB_SERIVCE_DES <span class="string">&quot;android.os.SampleCallback&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SRV_CODE 1</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> CB_CODE 1</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">SampleService</span>: <span class="keyword">public</span> BBinder &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">  <span class="built_in">SampleService</span>() &#123;</span><br><span class="line">    <span class="built_in">ALOGE</span>(<span class="string">&quot;Server ------------------------------ %d&quot;</span>,__LINE__);</span><br><span class="line">    mydescriptor = <span class="built_in">String16</span>(SAMPLE_SERIVCE_DES);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">virtual</span> ~<span class="built_in">SampleService</span>() &#123;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="keyword">virtual</span> <span class="type">const</span> String16&amp; <span class="title">getInterfaceDescriptor</span><span class="params">()</span> <span class="type">const</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> mydescriptor;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">protected</span>:</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">callFunction</span><span class="params">(<span class="type">int</span> val)</span> </span>&#123;</span><br><span class="line">    <span class="built_in">ALOGE</span>(<span class="string">&quot;Server ------------------------------ %d&quot;</span>,__LINE__);</span><br><span class="line">    <span class="built_in">ALOGI</span>( <span class="string">&quot;Service: %s(), %d, val = %d&quot;</span>,__FUNCTION__,__LINE__,val);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="keyword">virtual</span> <span class="type">status_t</span> <span class="title">onTransact</span><span class="params">(<span class="type">uint32_t</span> code, <span class="type">const</span> Parcel&amp; data, Parcel* reply, <span class="type">uint32_t</span> flags = <span class="number">0</span>)</span> </span>&#123;</span><br><span class="line">    <span class="built_in">ALOGD</span>( <span class="string">&quot;Service onTransact,line = %d, code = %d&quot;</span>,__LINE__, code);</span><br><span class="line">    <span class="keyword">switch</span> (code) &#123;</span><br><span class="line">    <span class="keyword">case</span> SRV_CODE:</span><br><span class="line">      <span class="comment">//读取Client传过来的IBinder对象</span></span><br><span class="line">      callback = data.<span class="built_in">readStrongBinder</span>();</span><br><span class="line"></span><br><span class="line">      <span class="keyword">if</span>(callback != <span class="literal">NULL</span>)</span><br><span class="line">       &#123;</span><br><span class="line">         Parcel _data, _reply;</span><br><span class="line">	 _data.<span class="built_in">writeInt32</span>(<span class="number">1</span>);</span><br><span class="line">	 _data.<span class="built_in">writeInt32</span>(<span class="number">2</span>);</span><br><span class="line">	 _data.<span class="built_in">writeInt32</span>(<span class="number">3</span>);</span><br><span class="line"></span><br><span class="line">	 <span class="comment">//2.String8类型</span></span><br><span class="line">	 _data.<span class="built_in">writeString8</span>(<span class="built_in">String8</span>(<span class="string">&quot;who...&quot;</span>));</span><br><span class="line">	 _data.<span class="built_in">writeString8</span>(<span class="built_in">String8</span>(<span class="string">&quot;are...&quot;</span>));</span><br><span class="line">	 _data.<span class="built_in">writeString8</span>(<span class="built_in">String8</span>(<span class="string">&quot;you...&quot;</span>));</span><br><span class="line">	 <span class="comment">//回调客户端</span></span><br><span class="line">         <span class="type">int</span> ret = callback-&gt;<span class="built_in">transact</span>(CB_CODE, _data, &amp;_reply, <span class="number">0</span>);</span><br><span class="line">       &#125;</span><br><span class="line">      <span class="comment">//调用server端的</span></span><br><span class="line">      <span class="built_in">callFunction</span>(<span class="number">6666</span>);</span><br><span class="line">      <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">default</span>:</span><br><span class="line">      <span class="keyword">return</span> BBinder::<span class="built_in">onTransact</span>(code, data, reply, flags);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">  String16 mydescriptor;</span><br><span class="line">  sp&lt;IBinder&gt; callback;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  sp&lt;IServiceManager&gt; sm = <span class="built_in">defaultServiceManager</span>();</span><br><span class="line">  SampleService* samServ = <span class="keyword">new</span> <span class="built_in">SampleService</span>();</span><br><span class="line">  <span class="type">status_t</span> ret = sm-&gt;<span class="built_in">addService</span>(<span class="built_in">String16</span>(SAMPLE_SERIVCE_DES), samServ);</span><br><span class="line"></span><br><span class="line">  <span class="built_in">ALOGD</span>(<span class="string">&quot;Service addservice&quot;</span>);</span><br><span class="line">  <span class="comment">//ProcessState::self()-&gt;startThreadPool();</span></span><br><span class="line">  <span class="built_in">printf</span>(<span class="string">&quot;server before joinThreadPool \n&quot;</span>);</span><br><span class="line">  IPCThreadState::<span class="built_in">self</span>()-&gt;<span class="built_in">joinThreadPool</span>( <span class="literal">true</span>);</span><br><span class="line">  <span class="built_in">printf</span>(<span class="string">&quot;server before joinThreadPool \n&quot;</span>);</span><br><span class="line">  <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+
+<p><strong>客户端</strong></p>
+<ul>
+<li>继承 BBinder</li>
+<li>实现 onTransact</li>
+<li>获取服务端 Binder</li>
+<li>joinThreadPool</li>
+<li>transact()</li>
+</ul>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// client.cpp</span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;binder/IServiceManager.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;binder/IBinder.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;binder/Parcel.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;binder/ProcessState.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;binder/IPCThreadState.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;private/binder/binder_module.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;binder/IInterface.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;binder/Parcel.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;binder/Binder.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> android;</span><br><span class="line"><span class="meta">#<span class="keyword">ifdef</span> LOG_TAG</span></span><br><span class="line"><span class="meta">#<span class="keyword">undef</span> LOG_TAG</span></span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> LOG_TAG <span class="string">&quot;binderCallbackClient&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SAMPLE_SERIVCE_DES <span class="string">&quot;my_hello&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SAMPLE_CB_SERIVCE_DES <span class="string">&quot;android.os.SampleCallback&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SRV_CODE 1</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> CB_CODE 1</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">SampeCallback</span> : <span class="keyword">public</span> BBinder</span><br><span class="line">&#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">  <span class="built_in">SampeCallback</span>()</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="built_in">ALOGE</span>(<span class="string">&quot;Client ------------------------------ %d&quot;</span>,__LINE__);</span><br><span class="line">    mydescriptor = <span class="built_in">String16</span>(SAMPLE_CB_SERIVCE_DES);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">virtual</span> ~<span class="built_in">SampeCallback</span>() &#123;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="function"><span class="keyword">virtual</span> <span class="type">const</span> String16&amp; <span class="title">getInterfaceDescriptor</span><span class="params">()</span> <span class="type">const</span></span>&#123;</span><br><span class="line">    <span class="keyword">return</span> mydescriptor;</span><br><span class="line">  &#125;</span><br><span class="line"><span class="keyword">protected</span>:</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">callbackFunction</span><span class="params">(<span class="type">int</span> val)</span> </span>&#123;</span><br><span class="line">    <span class="built_in">ALOGE</span>(<span class="string">&quot; -----------callback Client ok------------------- %d val = %d&quot;</span>,__LINE__,val);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="keyword">virtual</span> <span class="type">status_t</span> <span class="title">onTransact</span><span class="params">( <span class="type">uint32_t</span> code, <span class="type">const</span> Parcel&amp; data,Parcel* reply,<span class="type">uint32_t</span> flags = <span class="number">0</span>)</span></span>&#123;</span><br><span class="line">    <span class="built_in">ALOGD</span>( <span class="string">&quot;Client onTransact, line = %d, code = %d&quot;</span>,__LINE__,code);</span><br><span class="line">    <span class="type">int</span> val_1,val_2,val_3;</span><br><span class="line">    String8 str_1,str_2,str_3;</span><br><span class="line">    <span class="keyword">switch</span> (code)&#123;</span><br><span class="line">    <span class="keyword">case</span> CB_CODE:</span><br><span class="line">      <span class="comment">//1.读取int32类型数据</span></span><br><span class="line">      val_1 = data.<span class="built_in">readInt32</span>();</span><br><span class="line">      val_2 = data.<span class="built_in">readInt32</span>();</span><br><span class="line">      val_3 = data.<span class="built_in">readInt32</span>();</span><br><span class="line"></span><br><span class="line">      <span class="built_in">ALOGE</span>(<span class="string">&quot;Client ------------------------------ %d, read int32 = %d&quot;</span>,__LINE__,val_1);</span><br><span class="line">      <span class="built_in">ALOGE</span>(<span class="string">&quot;Client ------------------------------ %d, read int32 = %d&quot;</span>,__LINE__,val_2);</span><br><span class="line">      <span class="built_in">ALOGE</span>(<span class="string">&quot;Client ------------------------------ %d, read int32 = %d&quot;</span>,__LINE__,val_3);</span><br><span class="line"></span><br><span class="line">      <span class="comment">//2.读取String8类型字符串;str_1.string()--&gt;String8转换char类型数组</span></span><br><span class="line">      str_1 = data.<span class="built_in">readString8</span>();</span><br><span class="line">      str_2 = data.<span class="built_in">readString8</span>();</span><br><span class="line">      str_3 = data.<span class="built_in">readString8</span>();</span><br><span class="line">      <span class="built_in">ALOGE</span>(<span class="string">&quot;Client ------------------------------ %d, read String = %s&quot;</span>,__LINE__,str_1.<span class="built_in">string</span>());</span><br><span class="line">      <span class="built_in">ALOGE</span>(<span class="string">&quot;Client ------------------------------ %d, read String = %s&quot;</span>,__LINE__,str_2.<span class="built_in">string</span>());</span><br><span class="line">      <span class="built_in">ALOGE</span>(<span class="string">&quot;Client ------------------------------ %d, read String = %s&quot;</span>,__LINE__,str_3.<span class="built_in">string</span>());</span><br><span class="line"></span><br><span class="line">      <span class="built_in">callbackFunction</span>(<span class="number">1234567</span>);</span><br><span class="line">      <span class="keyword">break</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">default</span>:</span><br><span class="line">      <span class="keyword">return</span> BBinder::<span class="built_in">onTransact</span>(code, data, reply, flags);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">  &#125;</span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">  String16 mydescriptor;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  sp&lt;IServiceManager&gt; sm = <span class="built_in">defaultServiceManager</span>();</span><br><span class="line">  sp&lt;IBinder&gt; ibinder = sm-&gt;<span class="built_in">getService</span>(<span class="built_in">String16</span>(SAMPLE_SERIVCE_DES));</span><br><span class="line">  <span class="keyword">if</span> (ibinder == <span class="literal">NULL</span>)&#123;</span><br><span class="line">    <span class="built_in">ALOGW</span>( <span class="string">&quot;Client can&#x27;t find Service&quot;</span> );</span><br><span class="line">           <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">     &#125;</span><br><span class="line">     Parcel _data,_reply;</span><br><span class="line">     SampeCallback *callback = <span class="keyword">new</span> <span class="built_in">SampeCallback</span>();</span><br><span class="line">     <span class="comment">//写入客户端的callback</span></span><br><span class="line">     _data.<span class="built_in">writeStrongBinder</span>(<span class="built_in">sp</span>&lt;IBinder&gt;(callback));</span><br><span class="line">     _data.<span class="built_in">writeInterfaceToken</span>(<span class="built_in">String16</span>(SAMPLE_CB_SERIVCE_DES));</span><br><span class="line">     <span class="type">int</span> ret = ibinder-&gt;<span class="built_in">transact</span>(SRV_CODE, _data, &amp;_reply, <span class="number">0</span>);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;Client before joinThreadPool \n&quot;</span>);</span><br><span class="line">    <span class="comment">//ProcessState::self()-&gt;startThreadPool();</span></span><br><span class="line">    IPCThreadState::<span class="built_in">self</span>()-&gt;<span class="built_in">joinThreadPool</span>();</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;Client ------------------------------ main end&quot;</span>);</span><br><span class="line"><span class="comment">// while(1);</span></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="C-与-Java-之间的-binder-通信"><a href="#C-与-Java-之间的-binder-通信" class="headerlink" title="C++ 与 Java 之间的 binder 通信"></a>C++ 与 Java 之间的 binder 通信</h2><p>服务端</p>
+<ul>
+<li>和上面的服务端基本一样</li>
+</ul>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;binder/IServiceManager.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;binder/IBinder.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;binder/Parcel.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;binder/ProcessState.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;binder/IPCThreadState.h&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> android;</span><br><span class="line"><span class="meta">#<span class="keyword">ifdef</span> LOG_TAG</span></span><br><span class="line"><span class="meta">#<span class="keyword">undef</span> LOG_TAG</span></span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> LOG_TAG <span class="string">&quot;sampleService&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SAMPLE_SERIVCE_DES <span class="string">&quot;sample.hello&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> FUNC_CALLFUNCTION 1</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">SampleService</span>: <span class="keyword">public</span> BBinder &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">  <span class="built_in">SampleService</span>() &#123;</span><br><span class="line">    mydescriptor = <span class="built_in">String16</span>(SAMPLE_SERIVCE_DES);</span><br><span class="line">  &#125;</span><br><span class="line">     </span><br><span class="line">  <span class="keyword">virtual</span> ~<span class="built_in">SampleService</span>() &#123;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="keyword">virtual</span> <span class="type">const</span> String16&amp; <span class="title">getInterfaceDescriptor</span><span class="params">()</span> <span class="type">const</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> mydescriptor;</span><br><span class="line">  &#125;</span><br><span class="line">     </span><br><span class="line"><span class="keyword">protected</span>:     </span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">callFunction</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="built_in">ALOGE</span>( <span class="string">&quot;Service callFunction-----------&quot;</span>);</span><br><span class="line">  &#125;</span><br><span class="line">     </span><br><span class="line">  <span class="function"><span class="keyword">virtual</span> <span class="type">status_t</span> <span class="title">onTransact</span><span class="params">(<span class="type">uint32_t</span> code, <span class="type">const</span> Parcel&amp; data,</span></span></span><br><span class="line"><span class="params"><span class="function">			      Parcel* reply, <span class="type">uint32_t</span> flags = <span class="number">0</span>)</span> </span>&#123;</span><br><span class="line">    <span class="built_in">ALOGD</span>( <span class="string">&quot;Service onTransact, code = %d&quot;</span> , code);</span><br><span class="line">    <span class="keyword">switch</span> (code) &#123;</span><br><span class="line">    <span class="keyword">case</span> FUNC_CALLFUNCTION:</span><br><span class="line">      <span class="built_in">callFunction</span>();</span><br><span class="line">      <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">default</span>:</span><br><span class="line">      <span class="keyword">return</span> BBinder::<span class="built_in">onTransact</span>(code, data, reply, flags);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">  String16 mydescriptor;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  sp &lt; IServiceManager &gt; sm = <span class="built_in">defaultServiceManager</span>();</span><br><span class="line">  SampleService* samServ = <span class="keyword">new</span> <span class="built_in">SampleService</span>();</span><br><span class="line">  <span class="type">status_t</span> ret = sm-&gt;<span class="built_in">addService</span>(<span class="built_in">String16</span>(SAMPLE_SERIVCE_DES), samServ);</span><br><span class="line">  <span class="built_in">ALOGD</span>(<span class="string">&quot;Service main addservice &quot;</span>);</span><br><span class="line">  ProcessState::<span class="built_in">self</span>()-&gt;<span class="built_in">startThreadPool</span>();</span><br><span class="line">  IPCThreadState::<span class="built_in">self</span>()-&gt;<span class="built_in">joinThreadPool</span>( <span class="literal">true</span>);</span><br><span class="line">  <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>配置 Android.mk</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">LOCAL_PATH:= <span class="variable">$(<span class="built_in">call</span> my-<span class="built_in">dir</span>)</span></span><br><span class="line"><span class="keyword">include</span> <span class="variable">$(CLEAR_VARS)</span></span><br><span class="line"></span><br><span class="line">LOCAL_SRC_FILES:= server_binder.cpp</span><br><span class="line">LOCAL_SHARED_LIBRARIES := liblog \</span><br><span class="line">    libcutils \</span><br><span class="line">    libbinder \</span><br><span class="line">    libutils \</span><br><span class="line">    libhardware</span><br><span class="line">LOCAL_MODULE:= binder_for_java</span><br><span class="line"><span class="keyword">include</span> <span class="variable">$(BUILD_EXECUTABLE)</span></span><br></pre></td></tr></table></figure>
+
+
+
+<p>客户端</p>
+<ul>
+<li>java 实现的客户端，也基本上一样，只不过是写法不一样</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.test.frameworkBinder;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> android.os.IBinder;</span><br><span class="line"><span class="keyword">import</span> android.os.RemoteException;</span><br><span class="line"><span class="keyword">import</span> android.os.ServiceManager;</span><br><span class="line"><span class="keyword">import</span> android.os.Parcel;</span><br><span class="line"><span class="keyword">import</span> android.util.Log;</span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">ClientDemo</span> &#123;</span><br><span class="line">  <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> java.lang.<span class="type">String</span> <span class="variable">DESCRIPTOR</span> <span class="operator">=</span> <span class="string">&quot;sample.hello&quot;</span>;</span><br><span class="line">  <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">int</span> <span class="variable">FUNC_CALLFUNCTION</span> <span class="operator">=</span> <span class="number">1</span>;</span><br><span class="line">  <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> RemoteException &#123;</span><br><span class="line">    testService();</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">testService</span><span class="params">()</span>&#123;</span><br><span class="line">    Log.i(<span class="string">&quot;ClentDemo&quot;</span>, <span class="string">&quot;Client main &quot;</span>);</span><br><span class="line">    <span class="type">Parcel</span> <span class="variable">_data</span> <span class="operator">=</span> Parcel.obtain();</span><br><span class="line">    <span class="type">Parcel</span> <span class="variable">_reply</span> <span class="operator">=</span> Parcel.obtain();</span><br><span class="line">    <span class="type">IBinder</span> <span class="variable">b</span> <span class="operator">=</span> ServiceManager.getService(DESCRIPTOR);</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">      _data.writeInterfaceToken(DESCRIPTOR);</span><br><span class="line">      b.transact(FUNC_CALLFUNCTION, _data, _reply, <span class="number">0</span>);</span><br><span class="line">      _reply.readException();</span><br><span class="line">      _reply.readInt();</span><br><span class="line">    &#125; <span class="keyword">catch</span> (RemoteException e) &#123;</span><br><span class="line">      e.printStackTrace();</span><br><span class="line">    &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">      _reply.recycle();</span><br><span class="line">      _data.recycle();</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>配置 Android.mk</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">LOCAL_PATH:= <span class="variable">$(<span class="built_in">call</span> my-<span class="built_in">dir</span>)</span></span><br><span class="line"><span class="keyword">include</span> <span class="variable">$(CLEAR_VARS)</span></span><br><span class="line"></span><br><span class="line">LOCAL_SRC_FILES := <span class="variable">$(<span class="built_in">call</span> all-subdir-java-files)</span></span><br><span class="line">LOCAL_MODULE := ClientDemo </span><br><span class="line">LOCAL_MODULE_TAGS := optional</span><br><span class="line">LOCAL_DEX_PREOPT := false </span><br><span class="line"><span class="keyword">include</span> <span class="variable">$(BUILD_JAVA_LIBRARY)</span></span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="Binder-系统中的对象"><a href="#Binder-系统中的对象" class="headerlink" title="Binder 系统中的对象"></a>Binder 系统中的对象</h2><p>详解 BinderProxy&#x2F;BpBinder&#x2F;BBinder&#x2F;JavaBBinder&#x2F;Binder 之间的关系</p>
+<h3 id="BinderProxy-和-BpBinder-的关系"><a href="#BinderProxy-和-BpBinder-的关系" class="headerlink" title="BinderProxy 和 BpBinder 的关系"></a>BinderProxy 和 BpBinder 的关系</h3><p>通过 asInterface(BpBinder) 把 BpBinder 转换为 BinderProxy，实际上是 <code>javaObjectForIBinder()</code> 函数，BinderProxy 中有个 mNativeData，其中的 mObject 指向 BpBinder，AIDL 生成的 Proxy.mRemote 就是指向 BpBinder</p>
+<p><strong>mRemote 来源：</strong></p>
+<blockquote>
+<p>驱动层把 Server 端的 Binder 对象发来之后，客户端要通过 Parcel <code>readStrongBinder()</code> 读取， <code>readStrongBinder() -&gt; unflatten_binder() -&gt; getStrongProxyForHandle() -&gt; javaObjectForIBinder()</code>，把 BpBinder 转换为了 BinderProxy，然后 <code>mRemote.transact() -&gt; BinderProxy.transact() -&gt; transactNative() -&gt; BpBinder.transact() -&gt; android_os_Proxy_transact() -&gt; IPCThreadState.transact()</code></p>
+</blockquote>
+<h3 id="JavaBBinder-和-Binder-之间的关系"><a href="#JavaBBinder-和-Binder-之间的关系" class="headerlink" title="JavaBBinder 和 Binder 之间的关系"></a>JavaBBinder 和 Binder 之间的关系</h3><h4 id="Android-9-以前版本"><a href="#Android-9-以前版本" class="headerlink" title="Android 9 以前版本"></a>Android 9 以前版本</h4><p>Binder 就是 Java 层创建的一个继承了 Stub 的 Service 对象：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">MyService</span> <span class="keyword">extends</span> <span class="title class_">IMyService</span>.Stub &#123; &#125;</span><br></pre></td></tr></table></figure>
+
+<p>调用其父类 Binder 的构造函数:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="title function_">Binder</span><span class="params">()</span> &#123;</span><br><span class="line">    init(); <span class="comment">// 调用 native init()</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>init() 会自动把 <strong>this 对象</strong> 作为第一个参数传给 JNI 层，this 即 Binder 对象，JNI 函数在哪里？</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// android_util_Binder.cpp</span></span><br><span class="line"><span class="function"><span class="type">static</span> <span class="type">void</span> <span class="title">android_os_Binder_init</span><span class="params">(JNIEnv* env, jobject obj)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    JavaBBinderHolder* jbh = <span class="keyword">new</span> <span class="built_in">JavaBBinderHolder</span>();</span><br><span class="line">    env-&gt;<span class="built_in">SetLongField</span>(obj, gBinderOffsets.mObject, (jlong)jbh);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"> <span class="keyword">class</span> <span class="title class_">JavaBBinderHolder</span> : <span class="keyword">public</span> RefBase</span><br><span class="line">  &#123;</span><br><span class="line">  <span class="keyword">public</span>:</span><br><span class="line">      <span class="function">sp&lt;JavaBBinder&gt; <span class="title">get</span><span class="params">(JNIEnv* env, jobject obj)</span></span></span><br><span class="line"><span class="function">      </span>&#123;</span><br><span class="line">          AutoMutex _l(mLock);</span><br><span class="line">          sp&lt;JavaBBinder&gt; b = mBinder.<span class="built_in">promote</span>();</span><br><span class="line">          <span class="keyword">if</span> (b == <span class="literal">NULL</span>) &#123;</span><br><span class="line">              b = <span class="keyword">new</span> <span class="built_in">JavaBBinder</span>(env, obj);</span><br><span class="line">              mBinder = b;</span><br><span class="line">              ...</span><br><span class="line">          &#125;</span><br><span class="line">  </span><br><span class="line">          <span class="keyword">return</span> b;</span><br><span class="line">      &#125;</span><br></pre></td></tr></table></figure>
+
+<p>这里 <code>android_os_Binder_init()</code> 的 obj 参数就是传入的 Binder 对象了，即 MyService 对象，然后把常见的 jbh 的指针存入 obj.mObject 变量中，即存入 Java Binder 的 mObject 变量中，这样以后 java 层访问 mObject，就能拿到对应的 native 对象；</p>
+<h4 id="Android-9-及之后的版本"><a href="#Android-9-及之后的版本" class="headerlink" title="Android 9 及之后的版本"></a>Android 9 及之后的版本</h4><p>从 Android 9 开始，Binder 的构造方法中没有了 <code>init()</code>，取而代之的是 <code>getNativeBBinderHolder()</code> 这个 native 方法，</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Binder.java</span></span><br><span class="line"><span class="keyword">public</span> <span class="title function_">Binder</span><span class="params">(<span class="meta">@Nullable</span> String descriptor)</span> &#123;</span><br><span class="line">     mObject = getNativeBBinderHolder();</span><br><span class="line"><span class="comment">// android_util_Binder.cpp</span></span><br><span class="line"><span class="keyword">static</span> jlong <span class="title function_">android_os_Binder_getNativeBBinderHolder</span><span class="params">(JNIEnv* env, jobject clazz)</span></span><br><span class="line">&#123;</span><br><span class="line">    JavaBBinderHolder* jbh = <span class="keyword">new</span> <span class="title class_">JavaBBinderHolder</span>();</span><br><span class="line">    <span class="keyword">return</span> (jlong) jbh;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这里 native 层没有了把 jbh 指针传入 <code>Binder.mObject</code> 的操作了，而是直接返回 jbh 的指针给到 <code>Binder.mBoject</code> 变量，所以 Holder 指针还是最终存入了 <code>mObject</code>，区别在于写入操作从 native 层移动到了 Java 层；</p>
+<h4 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h4><ul>
+<li>Android 9 以前：构造 Binder 的时候，通过 <code>init()</code> 调用到 native 层的 <code>android_os_Binder_init(JNIEnv* env, jobject obj)</code>，在其中传入 Java Binder 对象 obj 构造 JavaBBinderHolder 对象（当 jbh 的 get() 被调用时，就会创建 JavaBBinder 对象），并把 jbh 的指针传给 Java 层的 Binder.mObject 变量，这样 Java Binder 就可以通过 jbh 指针获取到 JavaBBinder，而 JavaBBinder 也持有了 Java 层的 Binder obj</li>
+<li>Android 9 及之后：构造 Binder 的时候，通过  <code>getNativeBBinderHolder()</code> 获取 jbh 的指针</li>
+<li><strong>JavaBBinder 包含 Java Binder 对象（把 obj 传入 JavaBBinder）</strong> → Native 层可以随时调用 Java Binder 方法</li>
+<li><strong>Java Binder 保存 JavaBBinder 指针（把持有 JavaBBinder 的 jbh 指针传给 Binder.mObject）</strong> → Java 层可以通过 JNI 调用 native 逻辑</li>
+</ul>
+<p><img src="/../../images/2025/IPC.png" alt="img"></p>
+<h2 id="Binder-bug-分析"><a href="#Binder-bug-分析" class="headerlink" title="Binder bug 分析"></a>Binder bug 分析</h2><p>使用 <code>adb logcat -b all</code> 抓取其中的 kernel 日志，<font color=red><strong>kernel 在日志中的表现是进程号和线程号都是 0；</strong></font></p>
+<p>在 binder 通信中，驱动层的 <code>binder_transaction()</code> 中的 <code>binder_alloc_new_buf()</code> 会在 <strong>服务端（Server）进程</strong> 的地址空间中为服务端申请内存，用于存放 IPC 的数据，而在 IPC 结束时释放内存，问题发生的原因是客户端调用的跨进程通信方法为 <code>oneway</code> 方法，然后客户端短时间内频繁调用多次，而内存还没来得及释放，因为前面的还在 async_todo 队列没有处理，导致内存被耗尽；</p>
+<h2 id="Binder-传输大文件的方法"><a href="#Binder-传输大文件的方法" class="headerlink" title="Binder 传输大文件的方法"></a>Binder 传输大文件的方法</h2><ul>
+<li>共享内存(适用于 Bitmap&#x2F;大图像)</li>
+<li>文件描述符(适用于任何大文件)</li>
+<li>分块传输</li>
+<li>ContentProvider</li>
+</ul>
+<h3 id="使用共享内存（Ashmem）"><a href="#使用共享内存（Ashmem）" class="headerlink" title="使用共享内存（Ashmem）"></a>使用共享内存（Ashmem）</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Android 原生支持 Bitmap 通过共享内存传输</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">sendLargeBitmap</span><span class="params">(Bitmap bitmap)</span> &#123;</span><br><span class="line">    <span class="comment">// Bitmap 默认使用 Ashmem 时，Binder 只传递文件描述符</span></span><br><span class="line">    bitmap.setHasAlpha(<span class="literal">true</span>);</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 配置为使用 Ashmem</span></span><br><span class="line">    BitmapFactory.<span class="type">Options</span> <span class="variable">options</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">BitmapFactory</span>.Options();</span><br><span class="line">    options.inPreferredConfig = Bitmap.Config.ARGB_8888;</span><br><span class="line">    options.inPurgeable = <span class="literal">true</span>;  <span class="comment">// 可清除，使用共享内存</span></span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 或者直接创建 Ashmem Bitmap</span></span><br><span class="line">    <span class="type">Bitmap</span> <span class="variable">ashmemBitmap</span> <span class="operator">=</span> Bitmap.createBitmap(</span><br><span class="line">        width, height, Bitmap.Config.ARGB_8888, </span><br><span class="line">        <span class="literal">true</span>,  <span class="comment">// isMutable</span></span><br><span class="line">        <span class="literal">false</span>  <span class="comment">// 不使用共享内存？实际会自动使用</span></span><br><span class="line">    );</span><br><span class="line">    </span><br><span class="line">    <span class="type">Parcel</span> <span class="variable">parcel</span> <span class="operator">=</span> Parcel.obtain();</span><br><span class="line">    bitmap.writeToParcel(parcel, <span class="number">0</span>);  <span class="comment">// 自动使用 Ashmem 优化</span></span><br><span class="line">    parcel.setDataPosition(<span class="number">0</span>);</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 传输 Parcel（实际只传 fd）</span></span><br><span class="line">    service.receiveBitmapParcel(parcel);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>验证是否使用共享内存</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">Bitmap</span> <span class="variable">bitmap</span> <span class="operator">=</span> ...;</span><br><span class="line"><span class="keyword">if</span> (bitmap.isMutable() &amp;&amp; NativeAllocationRegistry.isNativeAllocation(bitmap)) &#123;</span><br><span class="line">    Log.d(<span class="string">&quot;Bitmap&quot;</span>, <span class="string">&quot;使用共享内存分配&quot;</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="文件描述符"><a href="#文件描述符" class="headerlink" title="文件描述符"></a>文件描述符</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// AIDL 接口定义</span></span><br><span class="line"><span class="keyword">interface</span> <span class="title class_">IFileService</span> &#123;</span><br><span class="line">    <span class="comment">// 传递文件描述符，而不是文件数据</span></span><br><span class="line">    oneway <span class="keyword">void</span> <span class="title function_">sendLargeFile</span><span class="params">(in ParcelFileDescriptor pfd, <span class="type">long</span> fileSize)</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 客户端实现</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">sendLargeFile</span><span class="params">(File largeFile)</span> &#123;</span><br><span class="line">    <span class="keyword">try</span> (<span class="type">ParcelFileDescriptor</span> <span class="variable">pfd</span> <span class="operator">=</span> ParcelFileDescriptor.open(</span><br><span class="line">            largeFile, ParcelFileDescriptor.MODE_READ_ONLY)) &#123;</span><br><span class="line">        </span><br><span class="line">        <span class="comment">// 只传递 fd，不传递文件内容</span></span><br><span class="line">        service.sendLargeFile(pfd, largeFile.length());</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 服务端接收</span></span><br><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">sendLargeFile</span><span class="params">(ParcelFileDescriptor pfd, <span class="type">long</span> fileSize)</span> &#123;</span><br><span class="line">    <span class="keyword">try</span> (<span class="type">FileInputStream</span> <span class="variable">fis</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">FileInputStream</span>(pfd.getFileDescriptor())) &#123;</span><br><span class="line">        <span class="comment">// 从文件描述符读取数据</span></span><br><span class="line">        <span class="type">byte</span>[] buffer = <span class="keyword">new</span> <span class="title class_">byte</span>[<span class="number">8192</span>];</span><br><span class="line">        <span class="type">int</span> read;</span><br><span class="line">        <span class="keyword">while</span> ((read = fis.read(buffer)) != -<span class="number">1</span>) &#123;</span><br><span class="line">            <span class="comment">// 处理数据...</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="分块传输"><a href="#分块传输" class="headerlink" title="分块传输"></a>分块传输</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// AIDL 定义分块接口</span></span><br><span class="line"><span class="keyword">interface</span> <span class="title class_">IChunkTransfer</span> &#123;</span><br><span class="line">    <span class="keyword">void</span> <span class="title function_">startTransfer</span><span class="params">(String fileName, <span class="type">long</span> totalSize)</span>;</span><br><span class="line">    oneway <span class="keyword">void</span> <span class="title function_">sendChunk</span><span class="params">(in <span class="type">byte</span>[] chunk, <span class="type">int</span> chunkId)</span>;</span><br><span class="line">    <span class="keyword">void</span> <span class="title function_">endTransfer</span><span class="params">(String fileName, <span class="type">boolean</span> success)</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 客户端分块发送</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">sendFileInChunks</span><span class="params">(File file, <span class="type">int</span> chunkSize)</span> &#123;</span><br><span class="line">    <span class="type">String</span> <span class="variable">fileName</span> <span class="operator">=</span> file.getName();</span><br><span class="line">    <span class="type">long</span> <span class="variable">totalSize</span> <span class="operator">=</span> file.length();</span><br><span class="line">    </span><br><span class="line">    service.startTransfer(fileName, totalSize);</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">try</span> (<span class="type">FileInputStream</span> <span class="variable">fis</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">FileInputStream</span>(file)) &#123;</span><br><span class="line">        <span class="type">byte</span>[] buffer = <span class="keyword">new</span> <span class="title class_">byte</span>[chunkSize];  <span class="comment">// 例如 64KB</span></span><br><span class="line">        <span class="type">int</span> <span class="variable">chunkId</span> <span class="operator">=</span> <span class="number">0</span>;</span><br><span class="line">        <span class="type">int</span> read;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">while</span> ((read = fis.read(buffer)) != -<span class="number">1</span>) &#123;</span><br><span class="line">            <span class="keyword">if</span> (read &lt; buffer.length) &#123;</span><br><span class="line">                <span class="comment">// 最后一块可能不满</span></span><br><span class="line">                <span class="type">byte</span>[] lastChunk = Arrays.copyOf(buffer, read);</span><br><span class="line">                service.sendChunk(lastChunk, chunkId++);</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                service.sendChunk(buffer, chunkId++);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        service.endTransfer(fileName, <span class="literal">true</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="ContentProvider-Uri"><a href="#ContentProvider-Uri" class="headerlink" title="ContentProvider + Uri"></a><strong>ContentProvider + Uri</strong></h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 1. 将文件保存到 ContentProvider</span></span><br><span class="line"><span class="keyword">public</span> Uri <span class="title function_">saveBitmapToProvider</span><span class="params">(Context context, Bitmap bitmap)</span> &#123;</span><br><span class="line">    <span class="type">File</span> <span class="variable">cacheDir</span> <span class="operator">=</span> context.getExternalCacheDir();</span><br><span class="line">    <span class="type">File</span> <span class="variable">tempFile</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">File</span>(cacheDir, <span class="string">&quot;temp_&quot;</span> + System.currentTimeMillis() + <span class="string">&quot;.jpg&quot;</span>);</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">try</span> (<span class="type">FileOutputStream</span> <span class="variable">fos</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">FileOutputStream</span>(tempFile)) &#123;</span><br><span class="line">        bitmap.compress(Bitmap.CompressFormat.JPEG, <span class="number">85</span>, fos);</span><br><span class="line">        </span><br><span class="line">        <span class="comment">// 生成可共享的 Uri</span></span><br><span class="line">        <span class="keyword">return</span> FileProvider.getUriForFile(</span><br><span class="line">            context,</span><br><span class="line">            context.getPackageName() + <span class="string">&quot;.fileprovider&quot;</span>,</span><br><span class="line">            tempFile</span><br><span class="line">        );</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 2. 只传递 Uri</span></span><br><span class="line">service.processImageUri(uri.toString());</span><br><span class="line"></span><br><span class="line"><span class="comment">// 3. 服务端读取 Uri</span></span><br><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">processImageUri</span><span class="params">(String uriString)</span> &#123;</span><br><span class="line">    <span class="type">Uri</span> <span class="variable">uri</span> <span class="operator">=</span> Uri.parse(uriString);</span><br><span class="line">    <span class="keyword">try</span> (<span class="type">InputStream</span> <span class="variable">is</span> <span class="operator">=</span> getContentResolver().openInputStream(uri)) &#123;</span><br><span class="line">        <span class="type">Bitmap</span> <span class="variable">bitmap</span> <span class="operator">=</span> BitmapFactory.decodeStream(is);</span><br><span class="line">        <span class="comment">// 处理 bitmap...</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id=""><a href="#" class="headerlink" title=""></a></h1>
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div>Donate comment here.</div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechatpay.jpg" alt="Ranger Zhou 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.jpg" alt="Ranger Zhou 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>Ranger Zhou
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://852988.xyz/2023/02/21/Android/AndroidDevelop_033_IPC_Notes/" title="Android - 跨进程通信随笔">https://852988.xyz/2023/02/21/Android/AndroidDevelop_033_IPC_Notes/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2023/02/19/Android/AndroidDevelop_031_Native_Posix_Thread/" rel="prev" title="Android - Native 层多线程方案">
+      <i class="fa fa-chevron-left"></i> Android - Native 层多线程方案
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2023/02/21/Android/AndroidDevelop_032_Native_PrintHeapStack/" rel="next" title="Android - Native 层堆栈打印">
+      Android - Native 层堆栈打印 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+      <div class="tabs tabs-comment">
+        <ul class="nav-tabs">
+            <li class="tab"><a href="#comment-disqus">disqus</a></li>
+            <li class="tab"><a href="#comment-livere">livere</a></li>
+            <li class="tab"><a href="#comment-gitalk">gitalk</a></li>
+        </ul>
+        <div class="tab-content">
+            <div class="tab-pane disqus" id="comment-disqus">
+              
+  <div class="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
+            </div>
+            <div class="tab-pane livere" id="comment-livere">
+              
+  <div class="comments">
+    <div id="lv-container" data-id="city" data-uid="MTAyMC8yOTcyNS82Mjky"></div>
+  </div>
+  
+            </div>
+            <div class="tab-pane gitalk" id="comment-gitalk">
+              <div class="comments" id="gitalk-container"></div>
+            </div>
+        </div>
+      </div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E8%B7%A8%E8%BF%9B%E7%A8%8B%E9%80%9A%E4%BF%A1"><span class="nav-text">跨进程通信</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Binder-%E4%BD%BF%E7%94%A8"><span class="nav-text">Binder 使用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#socket"><span class="nav-text">socket</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%99%AE%E9%80%9A%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F%E5%A5%97%E6%8E%A5%E5%AD%97%EF%BC%88%E9%BB%98%E8%AE%A4%E6%96%B9%E5%BC%8F%EF%BC%89"><span class="nav-text">普通文件系统套接字（默认方式）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8A%BD%E8%B1%A1%E5%A5%97%E6%8E%A5%E5%AD%97%E5%90%8D%EF%BC%88Linux-%E7%89%B9%E6%9C%89%EF%BC%89"><span class="nav-text">抽象套接字名（Linux 特有）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#epoll"><span class="nav-text">epoll</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SocketPair"><span class="nav-text">SocketPair</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Native-%E4%B9%8B%E9%97%B4-binder-%E9%80%9A%E4%BF%A1"><span class="nav-text">Native 之间 binder 通信</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#C-%E4%B8%8E-Java-%E4%B9%8B%E9%97%B4%E7%9A%84-binder-%E9%80%9A%E4%BF%A1"><span class="nav-text">C++ 与 Java 之间的 binder 通信</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Binder-%E7%B3%BB%E7%BB%9F%E4%B8%AD%E7%9A%84%E5%AF%B9%E8%B1%A1"><span class="nav-text">Binder 系统中的对象</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#BinderProxy-%E5%92%8C-BpBinder-%E7%9A%84%E5%85%B3%E7%B3%BB"><span class="nav-text">BinderProxy 和 BpBinder 的关系</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#JavaBBinder-%E5%92%8C-Binder-%E4%B9%8B%E9%97%B4%E7%9A%84%E5%85%B3%E7%B3%BB"><span class="nav-text">JavaBBinder 和 Binder 之间的关系</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Android-9-%E4%BB%A5%E5%89%8D%E7%89%88%E6%9C%AC"><span class="nav-text">Android 9 以前版本</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Android-9-%E5%8F%8A%E4%B9%8B%E5%90%8E%E7%9A%84%E7%89%88%E6%9C%AC"><span class="nav-text">Android 9 及之后的版本</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-text">总结</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Binder-bug-%E5%88%86%E6%9E%90"><span class="nav-text">Binder bug 分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Binder-%E4%BC%A0%E8%BE%93%E5%A4%A7%E6%96%87%E4%BB%B6%E7%9A%84%E6%96%B9%E6%B3%95"><span class="nav-text">Binder 传输大文件的方法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8%E5%85%B1%E4%BA%AB%E5%86%85%E5%AD%98%EF%BC%88Ashmem%EF%BC%89"><span class="nav-text">使用共享内存（Ashmem）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%96%87%E4%BB%B6%E6%8F%8F%E8%BF%B0%E7%AC%A6"><span class="nav-text">文件描述符</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%86%E5%9D%97%E4%BC%A0%E8%BE%93"><span class="nav-text">分块传输</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ContentProvider-Uri"><span class="nav-text">ContentProvider + Uri</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link"><span class="nav-text"></span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Ranger Zhou</p>
+  <div class="site-description" itemprop="description">我是一个小流氓我从来也不浪，有一天我心血来潮耍了个流氓，我嘴里吹着小口哨我心里好得意，不知怎么哗啦啦啦啦我摔了一身泥</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">93</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">24</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/rangerzhou" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;rangerzhou" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:rangero_o@qq.com" title="E-Mail → mailto:rangero_o@qq.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://rangerzhou.taobao.com/" title="Taobao → http:&#x2F;&#x2F;rangerzhou.taobao.com&#x2F;" rel="noopener" target="_blank"><i class="fab fa-youtube fa-fw"></i>Taobao</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="/images/wechat.jpg" title="WeChat → &#x2F;images&#x2F;wechat.jpg"><i class="fab fa-youtube fa-fw"></i>WeChat</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://blog.csdn.net/ranger0220?viewmode=contents" title="CSDN → http:&#x2F;&#x2F;blog.csdn.net&#x2F;ranger0220?viewmode&#x3D;contents" rel="noopener" target="_blank"><i class="fab fa-youtube fa-fw"></i>CSDN</a>
+      </span>
+  </div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      墙裂推荐
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="http://rangerzhou.taobao.com/" title="http:&#x2F;&#x2F;rangerzhou.taobao.com" rel="noopener" target="_blank">Taobao</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2016 – 
+  <span itemprop="copyrightYear">2026</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Ranger Zhou</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+<script data-pjax>
+  (function() {
+    function leancloudSelector(url) {
+      url = encodeURI(url);
+      return document.getElementById(url).querySelector('.leancloud-visitors-count');
+    }
+
+    function addCount(Counter) {
+      var visitors = document.querySelector('.leancloud_visitors');
+      var url = decodeURI(visitors.id);
+      var title = visitors.dataset.flagTitle;
+
+      Counter('get', '/classes/Counter?where=' + encodeURIComponent(JSON.stringify({ url })))
+        .then(response => response.json())
+        .then(({ results }) => {
+          if (results.length > 0) {
+            var counter = results[0];
+            leancloudSelector(url).innerText = counter.time + 1;
+            Counter('put', '/classes/Counter/' + counter.objectId, { time: { '__op': 'Increment', 'amount': 1 } })
+              .catch(error => {
+                console.error('Failed to save visitor count', error);
+              });
+          } else {
+              Counter('post', '/classes/Counter', { title, url, time: 1 })
+                .then(response => response.json())
+                .then(() => {
+                  leancloudSelector(url).innerText = 1;
+                })
+                .catch(error => {
+                  console.error('Failed to create', error);
+                });
+          }
+        })
+        .catch(error => {
+          console.error('LeanCloud Counter Error', error);
+        });
+    }
+
+    function showTime(Counter) {
+      var visitors = document.querySelectorAll('.leancloud_visitors');
+      var entries = [...visitors].map(element => {
+        return decodeURI(element.id);
+      });
+
+      Counter('get', '/classes/Counter?where=' + encodeURIComponent(JSON.stringify({ url: { '$in': entries } })))
+        .then(response => response.json())
+        .then(({ results }) => {
+          for (let url of entries) {
+            let target = results.find(item => item.url === url);
+            leancloudSelector(url).innerText = target ? target.time : 0;
+          }
+        })
+        .catch(error => {
+          console.error('LeanCloud Counter Error', error);
+        });
+    }
+
+    let { app_id, app_key, server_url } = {"enable":true,"app_id":"U9g4mWmsQg8FjOE3xsqUy9Df-gzGzoHsz","app_key":"24cDno14OiDhAreVmoEjzqns","server_url":"https://u9g4mwms.lc-cn-n1-shared.com","security":false};
+    function fetchData(api_server) {
+      var Counter = (method, url, data) => {
+        return fetch(`${api_server}/1.1${url}`, {
+          method,
+          headers: {
+            'X-LC-Id'     : app_id,
+            'X-LC-Key'    : app_key,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(data)
+        });
+      };
+      if (CONFIG.page.isPost) {
+        if (CONFIG.hostname !== location.hostname) return;
+        addCount(Counter);
+      } else if (document.querySelectorAll('.post-title-link').length >= 1) {
+        showTime(Counter);
+      }
+    }
+
+    let api_server = app_id.slice(-9) !== '-MdYXbMMI' ? server_url : `https://${app_id.slice(0, 8).toLowerCase()}.api.lncldglobal.com`;
+
+    if (api_server) {
+      fetchData(api_server);
+    } else {
+      fetch('https://app-router.leancloud.cn/2/route?appId=' + app_id)
+        .then(response => response.json())
+        .then(({ api_server }) => {
+          fetchData('https://' + api_server);
+        });
+    }
+  })();
+</script>
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/pjax/pjax.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/pangu@4/dist/browser/pangu.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '#page-configurations',
+    '.content-wrap',
+    '.post-toc-wrap',
+    '.languages',
+    '#pjax'
+  ],
+  switches: {
+    '.post-toc-wrap': Pjax.switches.innerHTML
+  },
+  analytics: false,
+  cacheBust: false,
+  scrollTo : !CONFIG.bookmark.enable
+});
+
+window.addEventListener('pjax:success', () => {
+  document.querySelectorAll('script[data-pjax], script#page-configurations, #pjax script').forEach(element => {
+    var code = element.text || element.textContent || element.innerHTML || '';
+    var parent = element.parentNode;
+    parent.removeChild(element);
+    var script = document.createElement('script');
+    if (element.id) {
+      script.id = element.id;
+    }
+    if (element.className) {
+      script.className = element.className;
+    }
+    if (element.type) {
+      script.type = element.type;
+    }
+    if (element.src) {
+      script.src = element.src;
+      // Force synchronous loading of peripheral JS.
+      script.async = false;
+    }
+    if (element.dataset.pjax !== undefined) {
+      script.dataset.pjax = '';
+    }
+    if (code !== '') {
+      script.appendChild(document.createTextNode(code));
+    }
+    parent.appendChild(script);
+  });
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+
+
+  
+  <script data-pjax>
+    (function(){
+      var canonicalURL, curProtocol;
+      //Get the <link> tag
+      var x=document.getElementsByTagName("link");
+		//Find the last canonical URL
+		if(x.length > 0){
+			for (i=0;i<x.length;i++){
+				if(x[i].rel.toLowerCase() == 'canonical' && x[i].href){
+					canonicalURL=x[i].href;
+				}
+			}
+		}
+    //Get protocol
+	    if (!canonicalURL){
+	    	curProtocol = window.location.protocol.split(':')[0];
+	    }
+	    else{
+	    	curProtocol = canonicalURL.split(':')[0];
+	    }
+      //Get current URL if the canonical URL does not exist
+	    if (!canonicalURL) canonicalURL = window.location.href;
+	    //Assign script content. Replace current URL with the canonical URL
+      !function(){var e=/([http|https]:\/\/[a-zA-Z0-9\_\.]+\.baidu\.com)/gi,r=canonicalURL,t=document.referrer;if(!e.test(r)){var n=(String(curProtocol).toLowerCase() === 'https')?"https://sp0.baidu.com/9_Q4simg2RQJ8t7jm9iCKT-xh_/s.gif":"//api.share.baidu.com/s.gif";t?(n+="?r="+encodeURIComponent(document.referrer),r&&(n+="&l="+r)):r&&(n+="?l="+r);var i=new Image;i.src=n}}(window);})();
+  </script>
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+<script data-pjax>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : 'forest',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+    <div id="pjax">
+  
+
+  
+
+<script>
+  var disqus_config = function() {
+    this.page.url = "https://852988.xyz/2023/02/21/Android/AndroidDevelop_033_IPC_Notes/";
+    this.page.identifier = "2023/02/21/Android/AndroidDevelop_033_IPC_Notes/";
+    this.page.title = "Android - 跨进程通信随笔";
+    };
+  NexT.utils.loadComments(document.querySelector('#disqus_thread'), () => {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: disqus_config
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://rangerzhou.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  });
+</script>
+
+<script>
+NexT.utils.loadComments(document.querySelector('#lv-container'), () => {
+  window.livereOptions = {
+    refer: location.pathname.replace(CONFIG.root, '').replace('index.html', '')
+  };
+  (function(d, s) {
+    var j, e = d.getElementsByTagName(s)[0];
+    if (typeof LivereTower === 'function') { return; }
+    j = d.createElement(s);
+    j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+    j.async = true;
+    e.parentNode.insertBefore(j, e);
+  })(document, 'script');
+});
+</script>
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID    : 'b7bb504993135f5a2eab',
+      clientSecret: '6f83aec5c45d75e248e2914be90c4601e2e1dc44',
+      repo        : 'rangerzhou.github.io',
+      owner       : 'rangerzhou',
+      admin       : ['rangerzhou'],
+      id          : '8cfc9e48a7db2fe2776c8dff7d013fbb',
+        language: 'zh-CN',
+      distractionFreeMode: true
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+});
+</script>
+
+    </div>
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/haru01.model.json"},"display":{"position":"left","width":300,"height":800},"mobile":{"show":false},"log":false});</script></body>
+</html>
