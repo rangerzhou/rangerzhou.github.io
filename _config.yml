@@ -13,7 +13,7 @@ timezone: Asia/Shanghai
 
 # URL
 ## If your site is put in a subdirectory, set url as 'http://yoursite.com/child' and root as '/child/'
-url: http://592988.xyz
+url: https://852988.xyz
 root: /
 permalink: :year/:month/:day/:title/
 permalink_defaults:
@@ -57,6 +57,8 @@ highlight:
   enable: true
   line_number: true
   auto_detect: false
+  exclude_languages:
+    - mermaid
   tab_replace:
 
 # Category & Tag
