@@ -140,6 +140,8 @@ InputReader 解析: 识别为单指触摸DOWN事件
 
 ## 5 InputDispatcher
 
+WMS 通过 InputMonitor 在 system_server 中将 WindowState 树转换为只包含 input 所需字段的 InputWindowHandle 快照，并通过 InputManagerService 和 JNI 原子性同步到 native InputDispatcher。InputDispatcher 始终只基于这份本地快照进行窗口查找和事件分发，从不直接访问 WMS，以保证输入路径的高性能和一致性。
+
 ## 6 SocketPair 创建和传递的完整流程
 
 ### **1. 创建时机：窗口创建时**
@@ -800,11 +802,23 @@ WallpaperService ->> WMS:BbqSurfaceControl
 Note right of WallpaperService:绘制第一帧完成，提交
 WallpaperService ->> WMS:finishDrawing()
 
-WallpaperManagerService ->> WallpaperService:detach()
-WallpaperService ->> WMS:removeWindowState()
-WallpaperService ->> WMS:remove BbqSurfaceControl
-WallpaperService ->> WMS:removeWallpaperWindowToken
+WallpaperManagerService ->> WallpaperManagerService:detachWallpaperLocked()
+WallpaperManagerService ->> WallpaperManagerService:DisplayConnector.disconnectLocked()
+Note right of WallpaperManagerService:1.移除 WallpaperToken
+WallpaperManagerService ->> WindowManagerInternal:removeWindowToken()
+WallpaperManagerService ->> WallpaperService:IWallpaperServiceWrapper.detach()
+WallpaperService ->> WallpaperService:IWallpaperEngineWrapper.destroy()
+WallpaperService ->> WallpaperService:executeMessage(DO_DETACH)
+WallpaperService ->> WallpaperService:IWallpaperEngineWrapper.doDetachEngine()
+WallpaperService ->> WallpaperService:IWallpaperEngineWrapper.detach()
+Note over WallpaperService,Session:2.移除 WindowState
+WallpaperService ->> Session:remove(WindowState)
+Note over WallpaperService,SurfaceControl:3.移除 mBbqSurfaceControl
+WallpaperService ->> SurfaceControl:Transaction.remove(mBbqSurfaceControl)
+WallpaperManagerService -->> WallpaperManagerService:unbindService()
 ```
+
+
 
 ### 源码跟踪
 
@@ -1569,7 +1583,7 @@ record_android_trace -o /h/Android/traces/$(date +%Y%m%d_%H%M%S)_trace_file.perf
 
 点击图标时的 down 和 up
 
-## 面试题
+# 10 面试题
 
 ### Activity 启动流程
 
@@ -1611,8 +1625,12 @@ record_android_trace -o /h/Android/traces/$(date +%Y%m%d_%H%M%S)_trace_file.perf
 
 - system_server 中的窗口层级树是“逻辑窗口管理树”，用于决定窗口的归属、层级、策略和生命周期；
      SurfaceFlinger 中的层级树是“图形合成树”，用于管理 Layer 及其 buffer 的合成与显示。
-- 两者并非一一对应，而是通过 SurfaceControl 建立映射关系，一个窗口容器可能对应多个或零个 SurfaceFlinger Layer。
+- 两者并非一一对应，而是通过 SurfaceControl 建立映射关系，
+     - 多屏互动的 mirror 图层，没有在 WMS 中创建对应的 WindowContainer
+     - 
+
 - Winscope 中看到的 Task/ActivityRecord/WindowToken 只是 Layer 的名字，因为 system_server 在创建 SurfaceControl/Layer 时将 WindowContainer 的名字传给了 SF。
+- <font color=red>**窗口层级树上的任意节点其实都是继承了 WindowContainer 类，WindowContainer 在创建或者添加时候都会产生一个对应的 SurfaceControl，而 SurfaceControl 又会触发到 SurfaceFlinger 创建一 一对应的 Layer，而且 WindowContainer 的层级结构关系都会一 一影响自己 SurfaceControl，所以一般在SurfaceFlinger也会有一个和wms一 一对应Layer结构树。**</font>
 
 #### 什么情况、分析什么问题会看层级结构树，命令是什么
 
@@ -1660,7 +1678,7 @@ record_android_trace -o /h/Android/traces/$(date +%Y%m%d_%H%M%S)_trace_file.perf
 #### leash 是什么
 
 leash 层在 WMS 的窗口层级树中，对应的是某个 `WindowContainer` 自身持有的 `SurfaceControl`；
- 在 SurfaceFlinger 的层级树中，对应的是一个 `ContainerLayer`，用于承载该 WindowContainer 及其子窗口的统一动画与变换。（注意这里说的是 WindowLayer，所以 WindowState 没有 leash）
+ 在 SurfaceFlinger 的层级树中，对应的是一个 `ContainerLayer`，用于承载该 WindowContainer 及其子窗口的统一动画与变换。（注意这里说的是 ContainerLayer，所以 WindowState 没有 leash，因为 WindowState 持有的是 BufferStateLayer）
 
 #### 有哪些调试方法及命令
 
@@ -1721,9 +1739,11 @@ SF 层面可以直接创建一个 Layer 吗
 
 ### 黑屏/闪屏/冻屏
 
+冻屏
 
+使用 dumpsys window windows 查看窗口信息，或者使用 dumpsys SurfaceFlinger 查看 HWC 信息
 
-
+APPLICATION_TYPE_OVERLAY 的窗口，dumpsys 信息查看到窗口之后，在 ViewRootImpl.setView() 中根据包名和 type 类型进行拦截（ActivityThread.currentPackageName() 接口直接获取包名信息）。
 
 [FWK 面经](https://bbs.csdn.net/topics/616075900)
 
