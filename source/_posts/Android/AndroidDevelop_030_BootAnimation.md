@@ -81,6 +81,10 @@ int main(int, char**) {
 - 限制 Binder 线程池最多 4 个线程，启动 Binder 线程池
 - 创建和初始化 SurfaceFlinger
 - 向 sm 注册 SurfaceFlinger 和 SurfaceComposerAIDL
+   - 使用 SF 的时候，一般会获取一个 SurfaceComposerClient 对象，这个对象创建的时候会连接 SurfaceComposerAIDL
+   - 连接 SurfaceComposerAIDL 的时候会创建一个 Client 对象
+   - Client 对象持有 SF 的引用
+
 - 启动 DisplayService
 - 进入事件循环，阻塞主线程运行 SurfaceFlinger
 
@@ -95,7 +99,7 @@ void SurfaceFlinger::init() FTL_FAKE_GUARD(kMainThreadContext) {
     });
 ```
 
-init() 为避免在主线程阻塞，把 initBootProperties 用 `std::async` 在后台启动一次（property_set 可能依赖 property_service，可能慢，第一次调用时会创建并保存一个 future），以后再次 callOnce 不会重复启动。
+`init()` 为避免在主线程阻塞，把 initBootProperties 用 `std::async` 在后台启动一次（property_set 可能依赖 property_service，可能慢，第一次调用时会创建并保存一个 future），以后再次 callOnce 不会重复启动。
 
 ``` cpp
 // SurfaceFlinger.cpp
@@ -367,9 +371,9 @@ HandleControlMessage() 调用 function(service)，
 
 - `service->Start()` 会做启动流程
 
-## 1.3 bootanimation 启动
+# 2 bootanimation 启动
 
-### 1 main()
+## 1 main()
 
 ``` cpp
 // bootanimation_main.cpp
@@ -390,7 +394,7 @@ int main()
 
 这里主要是创建了 Binder 线程池，然后使用智能指针创建 BootAnimation 对象，在第一次取得强引用时会导致 `RefBase::onFirstRef()` 被调用，
 
-### 2 onFirstRef()
+## 2 onFirstRef()
 
 ``` cpp
 // BootAnimation.cpp
@@ -405,7 +409,7 @@ void BootAnimation::onFirstRef() {
 
 再回到 `main()` 中，`boot->run()` 会调用 `readyToRun()` 和 `threadLoop()`；
 
-### 3 readyToRun()
+## 3 readyToRun()
 
 ``` cpp
 // BootAnimation.cpp
@@ -420,7 +424,7 @@ status_t BootAnimation::readyToRun() {
 
 `readyToRun()` 主要是初始化显示、EGL、surface 等；
 
-### 4 threadLoop()
+## 4 threadLoop()
 
 ``` cpp
 // BootAnimation.cpp
@@ -449,7 +453,7 @@ bool BootAnimation::threadLoop() {
 
 
 
-### 5 总体的快速时序（简化）
+## 5 总体的快速时序（简化）
 
 1. main: `sp boot = new BootAnimation(...)`
 2. RefBase 在第一次强引用时触发 -> `BootAnimation::onFirstRef()` 执行（预加载资源）
@@ -458,7 +462,7 @@ bool BootAnimation::threadLoop() {
 5. 进入 `BootAnimation::threadLoop()` 并执行动画播放（`android()`或 `movie()`）
 6. 播放完成或收到退出 -> `threadLoop()` 返回 -> 清理 -> 线程退出
 
-## 1.4 时序图
+# 3 时序图
 
 ``` mermaid
 sequenceDiagram
@@ -476,3 +480,33 @@ bootanimation_main -->> BootAnimation:threadLoop()
 BootAnimation ->> BootAnimation:movie()
 ```
 
+# 4 总结
+
+SurfaceFlinger 启动时设置属性 `ctl.start=bootanim`， init 属性服务捕获 `ctl.start`，查找 bootanim 服务，启动 `/system/bin/bootanimation` 进程，BootAnimation 进程启动，BootAnimation 的 main() 做三件事：
+
+- 启动 Binder 线程池
+- 创建 BootAnimation 对象
+- 调用 `run()` 进入动画线程
+
+运行机制
+
+BootAnimation 本质上是一个独立进程，通过 EGL/OpenGL 渲染动画帧
+
+- preloadAnimation()
+   - 预加载 zip 包或内置动画资源
+   - 解析 `desc.txt`（分辨率、fps、part 列表）
+- readyToRun()
+   - 创建 Surface
+   - 初始化 EGL / OpenGL 环境
+   - 准备渲染上下文
+- threadLoop() 播放动画
+   - 如果有 zip → 播放 movie()
+   - 如果没有 zip → 播放内置 logo（android()）
+   - 每帧渲染到 SurfaceFlinger 提供的 Surface
+   - 循环直到退出条件满足
+- 退出机制
+   - SystemServer 启动完成后，设置属性：`service.bootanim.exit=1`，BootAnimation 在 threadLoop 中检测到，清理 EGL → 退出进程
+
+**总结来说，开机动画是由 SurfaceFlinger 触发 init 启动的独立进程，通过 EGL 渲染 zip 帧动画，直到 SystemServer 完成启动后通知它退出。整个流程体现了 Android 各层之间的协作：init、SurfaceFlinger、SystemServer、属性服务共同完成了开机动画的启动与退出。**
+
+BootAnimation 在播放动画的主循环里会不断调用 `checkExit()`，通过 `property_get("service.bootanim.exit")` 读取系统属性。当 SystemServer 启动完成后把该属性设为 1，BootAnimation 检测到后调用 `requestExit()` 退出循环，从而结束开机动画。

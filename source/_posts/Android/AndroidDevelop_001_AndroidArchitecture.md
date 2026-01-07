@@ -171,3 +171,22 @@ APP 包含系统应用和第三方应用，Android 随附一套用于电子邮�
 - Native与Kernel之间有一层系统调用(SysCall)层
 - Java层与Native(C/C++)层之间的纽带 JNI
 
+## 总结
+
+Android 的开机流程可以分为四个主要阶段：Bootloader → Linux Kernel → init → Zygote/SystemServer
+
+- Bootloader 阶段
+   - 完成硬件初始化
+   - 加载 Linux Kernel
+- Linux Kernel 阶段
+   - 初始化驱动
+   - 挂载根文件系统
+   - 启动第一个用户态进程：`/init`
+- init 阶段
+   - 解析 `init.rc`
+   - 启动关键系统服务（如 servicemanager、surfaceflinger、bootanim）
+   - 启动 Zygote
+- Zygote → SystemServer
+   - Zygote 预加载类库，fork SystemServer
+   - SystemServer 启动 AMS、WMS、PMS 等核心服务
+   - 系统进入可交互状态
