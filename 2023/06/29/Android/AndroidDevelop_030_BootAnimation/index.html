@@ -35,7 +35,7 @@
 <meta property="og:description" content="Android 开机动画介绍。">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2023-06-29T15:01:21.000Z">
-<meta property="article:modified_time" content="2026-01-06T14:19:41.594Z">
+<meta property="article:modified_time" content="2026-01-07T17:01:58.660Z">
 <meta property="article:author" content="Ranger Zhou">
 <meta name="twitter:card" content="summary">
 
@@ -279,7 +279,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2026-01-06 22:19:41" itemprop="dateModified" datetime="2026-01-06T22:19:41+08:00">2026-01-06</time>
+                <time title="修改时间：2026-01-08 01:01:58" itemprop="dateModified" datetime="2026-01-08T01:01:58+08:00">2026-01-08</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -342,15 +342,25 @@
 
 <p>主要工作：</p>
 <ul>
-<li>限制 Binder 线程池最多 4 个线程，启动 Binder 线程池</li>
-<li>创建和初始化 SurfaceFlinger</li>
-<li>向 sm 注册 SurfaceFlinger 和 SurfaceComposerAIDL</li>
-<li>启动 DisplayService</li>
-<li>进入事件循环，阻塞主线程运行 SurfaceFlinger</li>
+<li><p>限制 Binder 线程池最多 4 个线程，启动 Binder 线程池</p>
+</li>
+<li><p>创建和初始化 SurfaceFlinger</p>
+</li>
+<li><p>向 sm 注册 SurfaceFlinger 和 SurfaceComposerAIDL</p>
+<ul>
+<li>使用 SF 的时候，一般会获取一个 SurfaceComposerClient 对象，这个对象创建的时候会连接 SurfaceComposerAIDL</li>
+<li>连接 SurfaceComposerAIDL 的时候会创建一个 Client 对象</li>
+<li>Client 对象持有 SF 的引用</li>
+</ul>
+</li>
+<li><p>启动 DisplayService</p>
+</li>
+<li><p>进入事件循环，阻塞主线程运行 SurfaceFlinger</p>
+</li>
 </ul>
 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// SurfaceFlinger.cpp</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">SurfaceFlinger::init</span><span class="params">()</span> <span class="title">FTL_FAKE_GUARD</span><span class="params">(kMainThreadContext)</span> </span>&#123;</span><br><span class="line">    <span class="comment">// Avoid blocking the main thread on `init` to set properties.</span></span><br><span class="line">    mInitBootPropsFuture.<span class="built_in">callOnce</span>([<span class="keyword">this</span>] &#123;</span><br><span class="line">        <span class="keyword">return</span> std::<span class="built_in">async</span>(std::launch::async, &amp;SurfaceFlinger::initBootProperties, <span class="keyword">this</span>);</span><br><span class="line">    &#125;);</span><br></pre></td></tr></table></figure>
 
-<p>init() 为避免在主线程阻塞，把 initBootProperties 用 <code>std::async</code> 在后台启动一次（property_set 可能依赖 property_service，可能慢，第一次调用时会创建并保存一个 future），以后再次 callOnce 不会重复启动。</p>
+<p><code>init()</code> 为避免在主线程阻塞，把 initBootProperties 用 <code>std::async</code> 在后台启动一次（property_set 可能依赖 property_service，可能慢，第一次调用时会创建并保存一个 future），以后再次 callOnce 不会重复启动。</p>
 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// SurfaceFlinger.cpp</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">SurfaceFlinger::initBootProperties</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="built_in">property_set</span>(<span class="string">&quot;service.sf.present_timestamp&quot;</span>, mHasReliablePresentFences ? <span class="string">&quot;1&quot;</span> : <span class="string">&quot;0&quot;</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (base::<span class="built_in">GetBoolProperty</span>(<span class="string">&quot;debug.sf.boot_animation&quot;</span>s, <span class="literal">true</span>)) &#123;</span><br><span class="line">        <span class="comment">// 重置和启动（需要时）开机动画</span></span><br><span class="line">        <span class="built_in">property_set</span>(<span class="string">&quot;service.bootanim.exit&quot;</span>, <span class="string">&quot;0&quot;</span>);</span><br><span class="line">        <span class="built_in">property_set</span>(<span class="string">&quot;service.bootanim.progress&quot;</span>, <span class="string">&quot;0&quot;</span>);</span><br><span class="line">        <span class="built_in">property_set</span>(<span class="string">&quot;ctl.start&quot;</span>, <span class="string">&quot;bootanim&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <p>这里的 <code>debug.sf.boot_animation</code> 属性表示是否启用开机动画，默认为 true，即默认启用开机动画，然后设置 <code>ctl.start</code> 为 <code>bootanim</code></p>
@@ -411,24 +421,24 @@
 <li><p><code>service-&gt;Start()</code> 会做启动流程</p>
 </li>
 </ul>
-<h2 id="1-3-bootanimation-启动"><a href="#1-3-bootanimation-启动" class="headerlink" title="1.3 bootanimation 启动"></a>1.3 bootanimation 启动</h2><h3 id="1-main"><a href="#1-main" class="headerlink" title="1 main()"></a>1 main()</h3><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// bootanimation_main.cpp</span></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    ...</span><br><span class="line">        <span class="function">sp&lt;ProcessState&gt; <span class="title">proc</span><span class="params">(ProcessState::self())</span></span>;</span><br><span class="line">        ProcessState::<span class="built_in">self</span>()-&gt;<span class="built_in">startThreadPool</span>();</span><br><span class="line">        sp&lt;BootAnimation&gt; boot = <span class="keyword">new</span> <span class="built_in">BootAnimation</span>(audioplay::<span class="built_in">createAnimationCallbacks</span>());</span><br><span class="line">        <span class="built_in">waitForSurfaceFlinger</span>();</span><br><span class="line">        boot-&gt;<span class="built_in">run</span>(<span class="string">&quot;BootAnimation&quot;</span>, PRIORITY_DISPLAY);</span><br><span class="line">        IPCThreadState::<span class="built_in">self</span>()-&gt;<span class="built_in">joinThreadPool</span>();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h1 id="2-bootanimation-启动"><a href="#2-bootanimation-启动" class="headerlink" title="2 bootanimation 启动"></a>2 bootanimation 启动</h1><h2 id="1-main"><a href="#1-main" class="headerlink" title="1 main()"></a>1 main()</h2><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// bootanimation_main.cpp</span></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    ...</span><br><span class="line">        <span class="function">sp&lt;ProcessState&gt; <span class="title">proc</span><span class="params">(ProcessState::self())</span></span>;</span><br><span class="line">        ProcessState::<span class="built_in">self</span>()-&gt;<span class="built_in">startThreadPool</span>();</span><br><span class="line">        sp&lt;BootAnimation&gt; boot = <span class="keyword">new</span> <span class="built_in">BootAnimation</span>(audioplay::<span class="built_in">createAnimationCallbacks</span>());</span><br><span class="line">        <span class="built_in">waitForSurfaceFlinger</span>();</span><br><span class="line">        boot-&gt;<span class="built_in">run</span>(<span class="string">&quot;BootAnimation&quot;</span>, PRIORITY_DISPLAY);</span><br><span class="line">        IPCThreadState::<span class="built_in">self</span>()-&gt;<span class="built_in">joinThreadPool</span>();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
 
 <p>这里主要是创建了 Binder 线程池，然后使用智能指针创建 BootAnimation 对象，在第一次取得强引用时会导致 <code>RefBase::onFirstRef()</code> 被调用，</p>
-<h3 id="2-onFirstRef"><a href="#2-onFirstRef" class="headerlink" title="2 onFirstRef()"></a>2 onFirstRef()</h3><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// BootAnimation.cpp</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">BootAnimation::onFirstRef</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    ...</span><br><span class="line">        <span class="built_in">preloadAnimation</span>();</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="2-onFirstRef"><a href="#2-onFirstRef" class="headerlink" title="2 onFirstRef()"></a>2 onFirstRef()</h2><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// BootAnimation.cpp</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">BootAnimation::onFirstRef</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    ...</span><br><span class="line">        <span class="built_in">preloadAnimation</span>();</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <p>主要做了预加载动画资源的工作；</p>
 <p>再回到 <code>main()</code> 中，<code>boot-&gt;run()</code> 会调用 <code>readyToRun()</code> 和 <code>threadLoop()</code>；</p>
-<h3 id="3-readyToRun"><a href="#3-readyToRun" class="headerlink" title="3 readyToRun()"></a>3 readyToRun()</h3><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// BootAnimation.cpp</span></span><br><span class="line"><span class="function"><span class="type">status_t</span> <span class="title">BootAnimation::readyToRun</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="built_in">ATRACE_CALL</span>();</span><br><span class="line">    mAssets.<span class="built_in">addDefaultAssets</span>();</span><br><span class="line">    <span class="keyword">return</span> <span class="built_in">initDisplaysAndSurfaces</span>();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h2 id="3-readyToRun"><a href="#3-readyToRun" class="headerlink" title="3 readyToRun()"></a>3 readyToRun()</h2><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// BootAnimation.cpp</span></span><br><span class="line"><span class="function"><span class="type">status_t</span> <span class="title">BootAnimation::readyToRun</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="built_in">ATRACE_CALL</span>();</span><br><span class="line">    mAssets.<span class="built_in">addDefaultAssets</span>();</span><br><span class="line">    <span class="keyword">return</span> <span class="built_in">initDisplaysAndSurfaces</span>();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
 
 <p><code>readyToRun()</code> 主要是初始化显示、EGL、surface 等；</p>
-<h3 id="4-threadLoop"><a href="#4-threadLoop" class="headerlink" title="4 threadLoop()"></a>4 threadLoop()</h3><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// BootAnimation.cpp</span></span><br><span class="line"><span class="function"><span class="type">bool</span> <span class="title">BootAnimation::threadLoop</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="built_in">ATRACE_CALL</span>();</span><br><span class="line">    <span class="type">bool</span> result;</span><br><span class="line">    <span class="built_in">initShaders</span>();</span><br><span class="line"></span><br><span class="line">    <span class="comment">// We have no bootanimation file, so we use the stock android logo</span></span><br><span class="line">    <span class="comment">// animation.</span></span><br><span class="line">    <span class="keyword">if</span> (mZipFileName.<span class="built_in">empty</span>()) &#123;</span><br><span class="line">        <span class="built_in">ALOGD</span>(<span class="string">&quot;No animation file&quot;</span>);</span><br><span class="line">        result = <span class="built_in">android</span>(mDisplays.<span class="built_in">front</span>());</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        result = <span class="built_in">movie</span>();</span><br><span class="line">    &#125;</span><br><span class="line">    ...</span><br><span class="line">    <span class="keyword">return</span> result;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="4-threadLoop"><a href="#4-threadLoop" class="headerlink" title="4 threadLoop()"></a>4 threadLoop()</h2><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// BootAnimation.cpp</span></span><br><span class="line"><span class="function"><span class="type">bool</span> <span class="title">BootAnimation::threadLoop</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="built_in">ATRACE_CALL</span>();</span><br><span class="line">    <span class="type">bool</span> result;</span><br><span class="line">    <span class="built_in">initShaders</span>();</span><br><span class="line"></span><br><span class="line">    <span class="comment">// We have no bootanimation file, so we use the stock android logo</span></span><br><span class="line">    <span class="comment">// animation.</span></span><br><span class="line">    <span class="keyword">if</span> (mZipFileName.<span class="built_in">empty</span>()) &#123;</span><br><span class="line">        <span class="built_in">ALOGD</span>(<span class="string">&quot;No animation file&quot;</span>);</span><br><span class="line">        result = <span class="built_in">android</span>(mDisplays.<span class="built_in">front</span>());</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        result = <span class="built_in">movie</span>();</span><br><span class="line">    &#125;</span><br><span class="line">    ...</span><br><span class="line">    <span class="keyword">return</span> result;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <p><code>threadLoop()</code> 主要工作： </p>
 <ul>
 <li>若没有 zip：调用 [android(display)](vscode-file:&#x2F;&#x2F;vscode-app&#x2F;d:&#x2F;Program Files&#x2F;Microsoft VS Code&#x2F;resources&#x2F;app&#x2F;out&#x2F;vs&#x2F;code&#x2F;electron-browser&#x2F;workbench&#x2F;workbench.html)，进入显示 stock logo 的循环（会处理显示事件、swap buffers、检查退出），循环直到 [exitPending()](vscode-file:&#x2F;&#x2F;vscode-app&#x2F;d:&#x2F;Program Files&#x2F;Microsoft VS Code&#x2F;resources&#x2F;app&#x2F;out&#x2F;vs&#x2F;code&#x2F;electron-browser&#x2F;workbench&#x2F;workbench.html) 或退出条件；最后返回 false。</li>
 <li>若有 zip：调用 [movie()](vscode-file:&#x2F;&#x2F;vscode-app&#x2F;d:&#x2F;Program Files&#x2F;Microsoft VS Code&#x2F;resources&#x2F;app&#x2F;out&#x2F;vs&#x2F;code&#x2F;electron-browser&#x2F;workbench&#x2F;workbench.html) 做完整的动画播放（[movie()](vscode-file:&#x2F;&#x2F;vscode-app&#x2F;d:&#x2F;Program Files&#x2F;Microsoft VS Code&#x2F;resources&#x2F;app&#x2F;out&#x2F;vs&#x2F;code&#x2F;electron-browser&#x2F;workbench&#x2F;workbench.html) 内部完成动画循环逻辑）。</li>
 </ul>
-<h3 id="5-总体的快速时序（简化）"><a href="#5-总体的快速时序（简化）" class="headerlink" title="5 总体的快速时序（简化）"></a>5 总体的快速时序（简化）</h3><ol>
+<h2 id="5-总体的快速时序（简化）"><a href="#5-总体的快速时序（简化）" class="headerlink" title="5 总体的快速时序（简化）"></a>5 总体的快速时序（简化）</h2><ol>
 <li>main: <code>sp boot = new BootAnimation(...)</code></li>
 <li>RefBase 在第一次强引用时触发 -&gt; <code>BootAnimation::onFirstRef()</code> 执行（预加载资源）</li>
 <li>main: <code>boot-&gt;run(...)</code> -&gt; <code>Thread::run()</code> 创建新线程并返回</li>
@@ -436,7 +446,7 @@
 <li>进入 <code>BootAnimation::threadLoop()</code> 并执行动画播放（<code>android()</code>或 <code>movie()</code>）</li>
 <li>播放完成或收到退出 -&gt; <code>threadLoop()</code> 返回 -&gt; 清理 -&gt; 线程退出</li>
 </ol>
-<h2 id="1-4-时序图"><a href="#1-4-时序图" class="headerlink" title="1.4 时序图"></a>1.4 时序图</h2><pre class="mermaid">sequenceDiagram
+<h1 id="3-时序图"><a href="#3-时序图" class="headerlink" title="3 时序图"></a>3 时序图</h1><pre class="mermaid">sequenceDiagram
 init ->> property_service:StartPropertyService()
 property_service ->> property_service:StartThread()
 property_service ->> property_service:PropertyServiceThread()
@@ -450,6 +460,40 @@ bootanimation_main -->> BootAnimation:readyToRun()
 bootanimation_main -->> BootAnimation:threadLoop()
 BootAnimation ->> BootAnimation:movie()</pre>
 
+<h1 id="4-总结"><a href="#4-总结" class="headerlink" title="4 总结"></a>4 总结</h1><p>SurfaceFlinger 启动时设置属性 <code>ctl.start=bootanim</code>， init 属性服务捕获 <code>ctl.start</code>，查找 bootanim 服务，启动 <code>/system/bin/bootanimation</code> 进程，BootAnimation 进程启动，BootAnimation 的 main() 做三件事：</p>
+<ul>
+<li>启动 Binder 线程池</li>
+<li>创建 BootAnimation 对象</li>
+<li>调用 <code>run()</code> 进入动画线程</li>
+</ul>
+<p>运行机制</p>
+<p>BootAnimation 本质上是一个独立进程，通过 EGL&#x2F;OpenGL 渲染动画帧</p>
+<ul>
+<li>preloadAnimation()<ul>
+<li>预加载 zip 包或内置动画资源</li>
+<li>解析 <code>desc.txt</code>（分辨率、fps、part 列表）</li>
+</ul>
+</li>
+<li>readyToRun()<ul>
+<li>创建 Surface</li>
+<li>初始化 EGL &#x2F; OpenGL 环境</li>
+<li>准备渲染上下文</li>
+</ul>
+</li>
+<li>threadLoop() 播放动画<ul>
+<li>如果有 zip → 播放 movie()</li>
+<li>如果没有 zip → 播放内置 logo（android()）</li>
+<li>每帧渲染到 SurfaceFlinger 提供的 Surface</li>
+<li>循环直到退出条件满足</li>
+</ul>
+</li>
+<li>退出机制<ul>
+<li>SystemServer 启动完成后，设置属性：<code>service.bootanim.exit=1</code>，BootAnimation 在 threadLoop 中检测到，清理 EGL → 退出进程</li>
+</ul>
+</li>
+</ul>
+<p><strong>总结来说，开机动画是由 SurfaceFlinger 触发 init 启动的独立进程，通过 EGL 渲染 zip 帧动画，直到 SystemServer 完成启动后通知它退出。整个流程体现了 Android 各层之间的协作：init、SurfaceFlinger、SystemServer、属性服务共同完成了开机动画的启动与退出。</strong></p>
+<p>BootAnimation 在播放动画的主循环里会不断调用 <code>checkExit()</code>，通过 <code>property_get(&quot;service.bootanim.exit&quot;)</code> 读取系统属性。当 SystemServer 启动完成后把该属性设为 1，BootAnimation 检测到后调用 <code>requestExit()</code> 退出循环，从而结束开机动画。</p>
 
     </div>
 
@@ -524,8 +568,8 @@ BootAnimation ->> BootAnimation:movie()</pre>
       <div class="tabs tabs-comment">
         <ul class="nav-tabs">
             <li class="tab"><a href="#comment-disqus">disqus</a></li>
-            <li class="tab"><a href="#comment-livere">livere</a></li>
             <li class="tab"><a href="#comment-gitalk">gitalk</a></li>
+            <li class="tab"><a href="#comment-livere">livere</a></li>
         </ul>
         <div class="tab-content">
             <div class="tab-pane disqus" id="comment-disqus">
@@ -537,15 +581,15 @@ BootAnimation ->> BootAnimation:movie()</pre>
   </div>
   
             </div>
+            <div class="tab-pane gitalk" id="comment-gitalk">
+              <div class="comments" id="gitalk-container"></div>
+            </div>
             <div class="tab-pane livere" id="comment-livere">
               
   <div class="comments">
     <div id="lv-container" data-id="city" data-uid="MTAyMC8yOTcyNS82Mjky"></div>
   </div>
   
-            </div>
-            <div class="tab-pane gitalk" id="comment-gitalk">
-              <div class="comments" id="gitalk-container"></div>
             </div>
         </div>
       </div>
@@ -595,7 +639,7 @@ BootAnimation ->> BootAnimation:movie()</pre>
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#1-SurfaceFlinger-%E5%90%AF%E5%8A%A8"><span class="nav-text">1 SurfaceFlinger 启动</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-1-%E6%A0%B9%E6%8D%AE-rc-%E5%90%AF%E5%8A%A8-SF"><span class="nav-text">1.1 根据 rc 启动 SF</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-2-init-%E7%9B%91%E5%90%AC%E5%B1%9E%E6%80%A7%E5%8F%98%E5%8C%96"><span class="nav-text">1.2 init 监听属性变化</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-2-1-%E5%90%AF%E5%8A%A8%E5%B1%9E%E6%80%A7%E6%9C%8D%E5%8A%A1"><span class="nav-text">1.2.1 启动属性服务</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-startPropertyService"><span class="nav-text">1 startPropertyService()</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-2-2-%E5%90%AF%E5%8A%A8%E5%B1%9E%E6%80%A7%E6%9C%8D%E5%8A%A1%E7%BA%BF%E7%A8%8B"><span class="nav-text">1.2.2 启动属性服务线程</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-StartThread"><span class="nav-text">1 StartThread()</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-PropertyServiceThread"><span class="nav-text">2 PropertyServiceThread()</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-2-3-%E5%A4%84%E7%90%86%E8%AE%BE%E7%BD%AE%E5%B1%9E%E6%80%A7%E4%BA%8B%E4%BB%B6"><span class="nav-text">1.2.3 处理设置属性事件</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-handle-property-set-fd"><span class="nav-text">1 handle_property_set_fd()</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-HandlePropertySet"><span class="nav-text">2 HandlePropertySet()</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-SendControlMessage"><span class="nav-text">3 SendControlMessage()</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#4-QueueControlMessage"><span class="nav-text">4 QueueControlMessage()</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#5-HandleControlMessages"><span class="nav-text">5 HandleControlMessages()</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-3-bootanimation-%E5%90%AF%E5%8A%A8"><span class="nav-text">1.3 bootanimation 启动</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-main"><span class="nav-text">1 main()</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-onFirstRef"><span class="nav-text">2 onFirstRef()</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-readyToRun"><span class="nav-text">3 readyToRun()</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-threadLoop"><span class="nav-text">4 threadLoop()</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-%E6%80%BB%E4%BD%93%E7%9A%84%E5%BF%AB%E9%80%9F%E6%97%B6%E5%BA%8F%EF%BC%88%E7%AE%80%E5%8C%96%EF%BC%89"><span class="nav-text">5 总体的快速时序（简化）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-4-%E6%97%B6%E5%BA%8F%E5%9B%BE"><span class="nav-text">1.4 时序图</span></a></li></ol></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#1-SurfaceFlinger-%E5%90%AF%E5%8A%A8"><span class="nav-text">1 SurfaceFlinger 启动</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-1-%E6%A0%B9%E6%8D%AE-rc-%E5%90%AF%E5%8A%A8-SF"><span class="nav-text">1.1 根据 rc 启动 SF</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-2-init-%E7%9B%91%E5%90%AC%E5%B1%9E%E6%80%A7%E5%8F%98%E5%8C%96"><span class="nav-text">1.2 init 监听属性变化</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-2-1-%E5%90%AF%E5%8A%A8%E5%B1%9E%E6%80%A7%E6%9C%8D%E5%8A%A1"><span class="nav-text">1.2.1 启动属性服务</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-startPropertyService"><span class="nav-text">1 startPropertyService()</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-2-2-%E5%90%AF%E5%8A%A8%E5%B1%9E%E6%80%A7%E6%9C%8D%E5%8A%A1%E7%BA%BF%E7%A8%8B"><span class="nav-text">1.2.2 启动属性服务线程</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-StartThread"><span class="nav-text">1 StartThread()</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-PropertyServiceThread"><span class="nav-text">2 PropertyServiceThread()</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-2-3-%E5%A4%84%E7%90%86%E8%AE%BE%E7%BD%AE%E5%B1%9E%E6%80%A7%E4%BA%8B%E4%BB%B6"><span class="nav-text">1.2.3 处理设置属性事件</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-handle-property-set-fd"><span class="nav-text">1 handle_property_set_fd()</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-HandlePropertySet"><span class="nav-text">2 HandlePropertySet()</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-SendControlMessage"><span class="nav-text">3 SendControlMessage()</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#4-QueueControlMessage"><span class="nav-text">4 QueueControlMessage()</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#5-HandleControlMessages"><span class="nav-text">5 HandleControlMessages()</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#2-bootanimation-%E5%90%AF%E5%8A%A8"><span class="nav-text">2 bootanimation 启动</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-main"><span class="nav-text">1 main()</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-onFirstRef"><span class="nav-text">2 onFirstRef()</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-readyToRun"><span class="nav-text">3 readyToRun()</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-threadLoop"><span class="nav-text">4 threadLoop()</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-%E6%80%BB%E4%BD%93%E7%9A%84%E5%BF%AB%E9%80%9F%E6%97%B6%E5%BA%8F%EF%BC%88%E7%AE%80%E5%8C%96%EF%BC%89"><span class="nav-text">5 总体的快速时序（简化）</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#3-%E6%97%B6%E5%BA%8F%E5%9B%BE"><span class="nav-text">3 时序图</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#4-%E6%80%BB%E7%BB%93"><span class="nav-text">4 总结</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
@@ -954,22 +998,6 @@ if (document.querySelectorAll('pre.mermaid').length) {
   });
 </script>
 
-<script>
-NexT.utils.loadComments(document.querySelector('#lv-container'), () => {
-  window.livereOptions = {
-    refer: location.pathname.replace(CONFIG.root, '').replace('index.html', '')
-  };
-  (function(d, s) {
-    var j, e = d.getElementsByTagName(s)[0];
-    if (typeof LivereTower === 'function') { return; }
-    j = d.createElement(s);
-    j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
-    j.async = true;
-    e.parentNode.insertBefore(j, e);
-  })(document, 'script');
-});
-</script>
-
 <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
 
 <script>
@@ -987,6 +1015,22 @@ NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
     });
     gitalk.render('gitalk-container');
   }, window.Gitalk);
+});
+</script>
+
+<script>
+NexT.utils.loadComments(document.querySelector('#lv-container'), () => {
+  window.livereOptions = {
+    refer: location.pathname.replace(CONFIG.root, '').replace('index.html', '')
+  };
+  (function(d, s) {
+    var j, e = d.getElementsByTagName(s)[0];
+    if (typeof LivereTower === 'function') { return; }
+    j = d.createElement(s);
+    j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+    j.async = true;
+    e.parentNode.insertBefore(j, e);
+  })(document, 'script');
 });
 </script>
 

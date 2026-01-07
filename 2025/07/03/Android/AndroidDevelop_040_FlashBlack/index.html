@@ -27,15 +27,15 @@
     var CONFIG = {"hostname":"852988.xyz","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"always","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"manual"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":true,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":true,"nav":null,"activeClass":"gitalk"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
   </script>
 
-  <meta name="description" content="Android 壁纸服务启动流程。 源码：android-15.0.0_r23">
+  <meta name="description" content="Android 壁纸服务启动流程以及闪黑分析。 源码：android-15.0.0_r23">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Android - 壁纸服务流程">
+<meta property="og:title" content="Android - 切换壁纸闪黑问题分析">
 <meta property="og:url" content="https://852988.xyz/2025/07/03/Android/AndroidDevelop_040_FlashBlack/index.html">
 <meta property="og:site_name" content="RangerZhou">
-<meta property="og:description" content="Android 壁纸服务启动流程。 源码：android-15.0.0_r23">
+<meta property="og:description" content="Android 壁纸服务启动流程以及闪黑分析。 源码：android-15.0.0_r23">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2025-07-03T15:55:26.000Z">
-<meta property="article:modified_time" content="2026-01-06T15:17:13.034Z">
+<meta property="article:modified_time" content="2026-01-07T11:57:31.878Z">
 <meta property="article:author" content="Ranger Zhou">
 <meta name="twitter:card" content="summary">
 
@@ -54,7 +54,7 @@
 <script src="//cdn.bootcss.com/pace/1.0.2/pace.min.js"></script>
 <link href="//cdn.bootcss.com/pace/1.0.2/themes/pink/pace-theme-flash.css" rel="stylesheet">
 
-  <title>Android - 壁纸服务流程 | RangerZhou</title>
+  <title>Android - 切换壁纸闪黑问题分析 | RangerZhou</title>
   
     <script async src="https://www.googletagmanager.com/gtag/js?id=UA-138158952-1"></script>
     <script data-pjax>
@@ -262,7 +262,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          Android - 壁纸服务流程
+          Android - 切换壁纸闪黑问题分析
         </h1>
 
         <div class="post-meta">
@@ -279,7 +279,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2026-01-06 23:17:13" itemprop="dateModified" datetime="2026-01-06T23:17:13+08:00">2026-01-06</time>
+                <time title="修改时间：2026-01-07 19:57:31" itemprop="dateModified" datetime="2026-01-07T19:57:31+08:00">2026-01-07</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -292,7 +292,7 @@
             </span>
 
           
-            <span id="/2025/07/03/Android/AndroidDevelop_040_FlashBlack/" class="post-meta-item leancloud_visitors" data-flag-title="Android - 壁纸服务流程" title="阅读次数">
+            <span id="/2025/07/03/Android/AndroidDevelop_040_FlashBlack/" class="post-meta-item leancloud_visitors" data-flag-title="Android - 切换壁纸闪黑问题分析" title="阅读次数">
               <span class="post-meta-item-icon">
                 <i class="fa fa-eye"></i>
               </span>
@@ -310,19 +310,18 @@
 
       
         <blockquote>
-<p>Android 壁纸服务启动流程。</p>
+<p>Android 壁纸服务启动流程以及闪黑分析。</p>
 <p>源码：android-15.0.0_r23</p>
 </blockquote>
 <span id="more"></span>
 
-<h1 id="时序图"><a href="#时序图" class="headerlink" title="时序图"></a>时序图</h1><h2 id="绑定-ImageWallpaper"><a href="#绑定-ImageWallpaper" class="headerlink" title="绑定 ImageWallpaper"></a>绑定 ImageWallpaper</h2><pre class="mermaid">sequenceDiagram
+<h1 id="壁纸服务启动流程"><a href="#壁纸服务启动流程" class="headerlink" title="壁纸服务启动流程"></a>壁纸服务启动流程</h1><h2 id="绑定-ImageWallpaper"><a href="#绑定-ImageWallpaper" class="headerlink" title="绑定 ImageWallpaper"></a>绑定 ImageWallpaper</h2><pre class="mermaid">sequenceDiagram
 autonumber
 box Lavender system_server
 participant SystemServer
 participant SystemServiceManager
 participant WallpaperManagerService.Lifecycle
 participant WallpaperManagerService
-participant AMS
 participant WindowManagerInternal
 end
 
@@ -337,20 +336,25 @@ SystemServiceManager ->> WallpaperManagerService.Lifecycle:onStart()
 Note right of WallpaperManagerService.Lifecycle:创建 WallpaperManagerService 对象
 WallpaperManagerService.Lifecycle ->> WallpaperManagerService:new WallpaperManagerService()
 SystemServer ->> SystemServiceManager:startBootPhase(PHASE_ACTIVITY_MANAGER_READY)
-SystemServiceManager ->> WallpaperManagerService.Lifecycle:startBootPhase()
-WallpaperManagerService.Lifecycle ->> WallpaperManagerService:startBootPhase()
+SystemServiceManager ->> WallpaperManagerService.Lifecycle:onBootPhase()
+WallpaperManagerService.Lifecycle ->> WallpaperManagerService:onBootPhase()
 WallpaperManagerService ->> WallpaperManagerService:systemReady()
 WallpaperManagerService ->> WallpaperManagerService:initialize()
+Note over WallpaperManagerService:从系统配置中读取当前壁纸/锁屏壁纸信息/壁纸组件名等
 WallpaperManagerService ->> WallpaperManagerService:loadSettingsLocked()
+Note over WallpaperManagerService:准备兜底壁纸
 WallpaperManagerService ->> WallpaperManagerService:initializeFallbackWallpaper()
+Note over WallpaperManagerService:选择要绑定的壁纸组件，默认ImageWallpaper
 WallpaperManagerService ->> WallpaperManagerService:bindWallpaperComponentLocked()
+Note over WallpaperManagerService:建立与壁纸服务的连接
 WallpaperManagerService ->> WallpaperManagerService:bindWallpaperDescriptionLocked()
 Note right of WallpaperManagerService:绑定 ImageWallpaper 服务
 WallpaperManagerService ->> ImageWallpaper:bindServiceAsUser()</pre>
 
-
-
-<h2 id="attach-x2F-relayout-x2F-finishDrawing"><a href="#attach-x2F-relayout-x2F-finishDrawing" class="headerlink" title="attach()&#x2F;relayout()&#x2F;finishDrawing()"></a>attach()&#x2F;relayout()&#x2F;finishDrawing()</h2><pre class="mermaid">sequenceDiagram
+<p>系统启动过程中，SystemServer 启动 WallpaperManagerService，在系统就绪后读取壁纸配置，并最终通过 bindService 方式把系统默认的 ImageWallpaper 服务绑定起来，从而让桌面壁纸真正开始工作。</p>
+<p>SystemServer 启动过程中会创建 WallpaperManagerService，但真正的初始化发生在 PHASE_ACTIVITY_MANAGER_READY 之后。此时服务会读取壁纸配置，初始化兜底壁纸，并通过 bindServiceAsUser 绑定 SystemUI 进程中的 ImageWallpaper 服务，最终由 WallpaperService 渲染并显示系统壁纸。</p>
+<h2 id="绑定新壁纸"><a href="#绑定新壁纸" class="headerlink" title="绑定新壁纸"></a>绑定新壁纸</h2><p>attach()&#x2F;relayout()&#x2F;finishDrawing()</p>
+<pre class="mermaid">sequenceDiagram
 autonumber
 box Lavender system_server
 participant WallpaperManagerService
@@ -374,6 +378,8 @@ WallpaperManagerService ->> WallpaperService:IWallpaperServiceWrapper.attach()
 WallpaperService ->> WallpaperService:IWallpaperEngineWrapper.IWallpaperEngineWrapper()
 WallpaperService ->> WallpaperService:IWallpaperEngineWrapper.executeMessage(DO_ATTACH)
 WallpaperService ->> WallpaperService:IWallpaperEngineWrapper.doAttachEngine()
+Note over WallpaperService, ImageWallpaper:ImageWallpaper 创建 Engine
+WallpaperService ->> ImageWallpaper:onCreateEngine()
 WallpaperService -->> WallpaperManagerService:WallpaperConnection.attachEngine()
 Note over WallpaperManagerService, WallpaperService:一系列操作
 WallpaperManagerService ->> WallpaperService:IWallpaperEngineWrapper.setInAmbientMode()
@@ -403,7 +409,63 @@ Session ->> WindowManagerService:finishDrawingWindow()</pre>
 <li><p>Session:finishDrawing()：本质上是客户端对 Window Manager 的一个<strong>“报告”：“我已经画好了，你可以把我显示出来了！”</strong></p>
 </li>
 </ul>
-<h2 id="detach"><a href="#detach" class="headerlink" title="detach()"></a>detach()</h2>
+<p>ImageWallpaper 创建 WallpaperService.Engine，并通过 WMS 注册一个 TYPE_WALLPAPER 的窗口；WMS 为其创建 SurfaceControl，在 SurfaceFlinger 中生成对应的 Layer；壁纸内容通过 BufferQueue 提交给 SF，最终与应用窗口一起合成并显示。</p>
+<h2 id="解绑旧壁纸"><a href="#解绑旧壁纸" class="headerlink" title="解绑旧壁纸"></a>解绑旧壁纸</h2><p>detach()</p>
+<pre class="mermaid">sequenceDiagram
+WallpaperManagerService ->> WallpaperService:attach()
+Note right of WallpaperService:创建 WindowState
+WallpaperService ->> WMS:addToDisplay()
+Note right of WallpaperService:创建 Surface
+WallpaperService ->> WMS:relayout()
+WallpaperService ->> WMS:BbqSurfaceControl
+Note right of WallpaperService:绘制第一帧完成，提交
+WallpaperService ->> WMS:finishDrawing()
+
+WallpaperManagerService ->> WallpaperManagerService:detachWallpaperLocked()
+WallpaperManagerService ->> WallpaperManagerService:DisplayConnector.disconnectLocked()
+Note right of WallpaperManagerService:1.移除 WallpaperToken
+WallpaperManagerService ->> WindowManagerInternal:removeWindowToken()
+WallpaperManagerService ->> WallpaperService:IWallpaperServiceWrapper.detach()
+WallpaperService ->> WallpaperService:IWallpaperEngineWrapper.destroy()
+WallpaperService ->> WallpaperService:executeMessage(DO_DETACH)
+WallpaperService ->> WallpaperService:IWallpaperEngineWrapper.doDetachEngine()
+WallpaperService ->> WallpaperService:IWallpaperEngineWrapper.detach()
+Note over WallpaperService,Session:2.移除 WindowState
+WallpaperService ->> Session:remove(WindowState)
+Note over WallpaperService,SurfaceControl:3.移除 mBbqSurfaceControl
+WallpaperService ->> SurfaceControl:Transaction.remove(mBbqSurfaceControl)
+WallpaperManagerService -->> WallpaperManagerService:unbindService()</pre>
+
+<p>对于旧壁纸，detach 过程中，移除了 WindowToken&#x2F;WindowState&#x2F;BbqSurfaceControl ，</p>
+<h1 id="闪黑问题"><a href="#闪黑问题" class="headerlink" title="闪黑问题"></a>闪黑问题</h1><h2 id="问题描述"><a href="#问题描述" class="headerlink" title="问题描述"></a>问题描述</h2><blockquote>
+<p>切换壁纸时出现闪黑。</p>
+</blockquote>
+<p>看源码之前可能的猜想：</p>
+<ul>
+<li>图片太大，新壁纸绘制慢？</li>
+<li>新老窗口动画切换异常？</li>
+<li>新老壁纸移除时序？</li>
+</ul>
+<h2 id="分析"><a href="#分析" class="headerlink" title="分析"></a>分析</h2><p>抓取 Winscope，查看 SF 层级，发现在闪黑的时候，壁纸图层消失了，等过了几帧后才出现，那么分析出现之前最后一帧的状态，取消勾选 <code>Only visible</code>（因为此时是不可见的状态，取消勾选才能看到未显示的图层）， 看到对应壁纸图层的 BbqSurface 消失了，而将要显示的新壁纸的 BbqSurface 是存在的（为什么新壁纸不可见，写明了原因：Buffer is empty，即新壁纸还没有向它的 Bbq 绘制），这种 Buffer 类型的图层才是真正显示内容的地方，所以原因就找到了，就是新的 Bbq 已经被移除，但是新的 Bbq 还没有绘制，而源码中，注意 attach() 和 detach() 都是异步的，所以有可能旧壁纸移除时新壁纸还没有准备好，所以导致闪黑。</p>
+<h2 id="解决"><a href="#解决" class="headerlink" title="解决"></a>解决</h2><p>前面知道 BBQ 被移除，所以可以看 SurfaceControl 的 <code>remove()</code>（其他还有 <code>show()/hide()</code> API 也经常用） API 的调用堆栈，通过调用堆栈看到和之前 detach() 流程中的 <code>SurfaceControl:Transaction.remove(mBbqSurfaceControl)</code> 对上了。</p>
+<p><font color=red>首先尝试注释这行</font>，结果还是有闪黑，抓取 winscope 发现 BBQ 没有被移除了，但是 winscope 右侧显示状态是不可见，原因是 <code>Invisible due to: Alpha is 0</code>，而 alpha 值通常和动画有关，图层中也存在 leash 图层（动画相关），所以考虑是窗口移除动画导致 alpha 为 0。</p>
+<p>接下来<font color=red>尝试注释掉移除 WindowState 和 WindowToken 的代码</font>，移除后发现闪黑确实解决了，但是dumpsys window 的时候发现每次切换壁纸，都会多一个 WindowToken，会导致内存泄漏，<font color=red><strong>所以需要找到合适的时机移除而不是不移除</strong></font>。</p>
+<p>在之前的源码分析中，在 <code>updateSurface()</code> 中调用了 <code>reportEngineShown() - reportShown() - WallpaperManagerService.engineShown()</code>，就是告知 system_server 新壁纸已经显示，<font color=red><strong>所以考虑在 <code>engineShown()</code> 中对 WindowToken 进行移除，同时传入参数 true（把孩子 WindowState 也移除）</strong></font>：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// WallpaperService.java </span></span><br><span class="line"><span class="comment">// 1.注释移除 WindowState</span></span><br><span class="line">-                    mSession.remove(mWindow);</span><br><span class="line">-                &#125; <span class="keyword">catch</span> (RemoteException e) &#123;</span><br><span class="line">+                   <span class="comment">// mSession.remove(mWindow);</span></span><br><span class="line">+                &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">...</span><br><span class="line"><span class="comment">// 2.注释移除 mBbqSurfaceControl</span></span><br><span class="line">-                    <span class="keyword">new</span> <span class="title class_">SurfaceControl</span>.Transaction().remove(mBbqSurfaceControl).apply();</span><br><span class="line">+                    <span class="comment">//new SurfaceControl.Transaction().remove(mBbqSurfaceControl).apply();</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// WallpaperManagerService.java</span></span><br><span class="line">+    WallpaperConnection.DisplayConnector mPendingRemoveDisplayConnector= <span class="literal">null</span>;</span><br><span class="line">     <span class="keyword">class</span> <span class="title class_">WallpaperConnection</span> <span class="keyword">extends</span> <span class="title class_">IWallpaperConnection</span>.Stub</span><br><span class="line">             <span class="keyword">implements</span> <span class="title class_">ServiceConnection</span> &#123;</span><br><span class="line">         <span class="comment">// 3.注释移除 WindowToken</span></span><br><span class="line">-                mWindowManagerInternal.removeWindowToken(mToken, <span class="literal">false</span><span class="comment">/* removeWindows */</span>, mDisplayId);</span><br><span class="line">+<span class="comment">//                mWindowManagerInternal.removeWindowToken(mToken, false/* removeWindows */, mDisplayId);</span></span><br><span class="line">+                mPendingRemoveDisplayConnector = <span class="built_in">this</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 4.在合适的时机移除 WindowToken 及孩子</span></span><br><span class="line">         <span class="meta">@Override</span></span><br><span class="line">         <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">engineShown</span><span class="params">(IWallpaperEngine engine)</span> &#123;</span><br><span class="line">+            <span class="keyword">if</span> (mPendingRemoveDisplayConnector != <span class="literal">null</span>) &#123;</span><br><span class="line">+                mWindowManagerInternal.removeWindowToken(mPendingRemoveDisplayConnector.mToken, <span class="literal">true</span><span class="comment">/* removeWindows */</span>,</span><br><span class="line">+                        mPendingRemoveDisplayConnector.mDisplayId);</span><br><span class="line">+                mPendingRemoveDisplayConnector = <span class="literal">null</span>;</span><br><span class="line">+                android.util.Log.i(<span class="string">&quot;test33&quot;</span>,<span class="string">&quot; engineShown mPendingRemoveDisplayConnector = &quot;</span> + mPendingRemoveDisplayConnector);</span><br><span class="line">+            &#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>黑屏原因（根据 Winscope 分析）</p>
+<ul>
+<li>没有图层</li>
+<li>动画导致 alpha 为 0</li>
+<li>Buffer 没有准备好</li>
+<li>flag 本身是 hide</li>
+</ul>
+<p>解决思路</p>
+<ul>
+<li>找到 remove 或 hide 的地方（根据 SurfaceControl 的堆栈）</li>
+<li>重新规划调整图层显示顺序（熟悉具体业务代码）</li>
+</ul>
+
     </div>
 
     
@@ -438,7 +500,7 @@ Session ->> WindowManagerService:finishDrawingWindow()</pre>
   </li>
   <li class="post-copyright-link">
     <strong>本文链接：</strong>
-    <a href="https://852988.xyz/2025/07/03/Android/AndroidDevelop_040_FlashBlack/" title="Android - 壁纸服务流程">https://852988.xyz/2025/07/03/Android/AndroidDevelop_040_FlashBlack/</a>
+    <a href="https://852988.xyz/2025/07/03/Android/AndroidDevelop_040_FlashBlack/" title="Android - 切换壁纸闪黑问题分析">https://852988.xyz/2025/07/03/Android/AndroidDevelop_040_FlashBlack/</a>
   </li>
   <li class="post-copyright-license">
     <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
@@ -474,8 +536,8 @@ Session ->> WindowManagerService:finishDrawingWindow()</pre>
       <div class="tabs tabs-comment">
         <ul class="nav-tabs">
             <li class="tab"><a href="#comment-disqus">disqus</a></li>
-            <li class="tab"><a href="#comment-livere">livere</a></li>
             <li class="tab"><a href="#comment-gitalk">gitalk</a></li>
+            <li class="tab"><a href="#comment-livere">livere</a></li>
         </ul>
         <div class="tab-content">
             <div class="tab-pane disqus" id="comment-disqus">
@@ -487,15 +549,15 @@ Session ->> WindowManagerService:finishDrawingWindow()</pre>
   </div>
   
             </div>
+            <div class="tab-pane gitalk" id="comment-gitalk">
+              <div class="comments" id="gitalk-container"></div>
+            </div>
             <div class="tab-pane livere" id="comment-livere">
               
   <div class="comments">
     <div id="lv-container" data-id="city" data-uid="MTAyMC8yOTcyNS82Mjky"></div>
   </div>
   
-            </div>
-            <div class="tab-pane gitalk" id="comment-gitalk">
-              <div class="comments" id="gitalk-container"></div>
             </div>
         </div>
       </div>
@@ -545,7 +607,7 @@ Session ->> WindowManagerService:finishDrawingWindow()</pre>
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%97%B6%E5%BA%8F%E5%9B%BE"><span class="nav-text">时序图</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BB%91%E5%AE%9A-ImageWallpaper"><span class="nav-text">绑定 ImageWallpaper</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#attach-x2F-relayout-x2F-finishDrawing"><span class="nav-text">attach()&#x2F;relayout()&#x2F;finishDrawing()</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#detach"><span class="nav-text">detach()</span></a></li></ol></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%A3%81%E7%BA%B8%E6%9C%8D%E5%8A%A1%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B"><span class="nav-text">壁纸服务启动流程</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BB%91%E5%AE%9A-ImageWallpaper"><span class="nav-text">绑定 ImageWallpaper</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BB%91%E5%AE%9A%E6%96%B0%E5%A3%81%E7%BA%B8"><span class="nav-text">绑定新壁纸</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%A7%A3%E7%BB%91%E6%97%A7%E5%A3%81%E7%BA%B8"><span class="nav-text">解绑旧壁纸</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E9%97%AA%E9%BB%91%E9%97%AE%E9%A2%98"><span class="nav-text">闪黑问题</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%97%AE%E9%A2%98%E6%8F%8F%E8%BF%B0"><span class="nav-text">问题描述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%88%86%E6%9E%90"><span class="nav-text">分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%A7%A3%E5%86%B3"><span class="nav-text">解决</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-text">总结</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
@@ -887,7 +949,7 @@ if (document.querySelectorAll('pre.mermaid').length) {
   var disqus_config = function() {
     this.page.url = "https://852988.xyz/2025/07/03/Android/AndroidDevelop_040_FlashBlack/";
     this.page.identifier = "2025/07/03/Android/AndroidDevelop_040_FlashBlack/";
-    this.page.title = "Android - 壁纸服务流程";
+    this.page.title = "Android - 切换壁纸闪黑问题分析";
     };
   NexT.utils.loadComments(document.querySelector('#disqus_thread'), () => {
     if (window.DISQUS) {
@@ -902,22 +964,6 @@ if (document.querySelectorAll('pre.mermaid').length) {
       (d.head || d.body).appendChild(s);
     }
   });
-</script>
-
-<script>
-NexT.utils.loadComments(document.querySelector('#lv-container'), () => {
-  window.livereOptions = {
-    refer: location.pathname.replace(CONFIG.root, '').replace('index.html', '')
-  };
-  (function(d, s) {
-    var j, e = d.getElementsByTagName(s)[0];
-    if (typeof LivereTower === 'function') { return; }
-    j = d.createElement(s);
-    j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
-    j.async = true;
-    e.parentNode.insertBefore(j, e);
-  })(document, 'script');
-});
 </script>
 
 <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
@@ -937,6 +983,22 @@ NexT.utils.loadComments(document.querySelector('#gitalk-container'), () => {
     });
     gitalk.render('gitalk-container');
   }, window.Gitalk);
+});
+</script>
+
+<script>
+NexT.utils.loadComments(document.querySelector('#lv-container'), () => {
+  window.livereOptions = {
+    refer: location.pathname.replace(CONFIG.root, '').replace('index.html', '')
+  };
+  (function(d, s) {
+    var j, e = d.getElementsByTagName(s)[0];
+    if (typeof LivereTower === 'function') { return; }
+    j = d.createElement(s);
+    j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+    j.async = true;
+    e.parentNode.insertBefore(j, e);
+  })(document, 'script');
 });
 </script>
 
