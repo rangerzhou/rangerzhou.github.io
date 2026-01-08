@@ -23,7 +23,7 @@ nativeScheduleVsync 在底层通过 requestNextVsync 去请求下一个 Vsync，
 
 
 
-### Surface与Canvas的区别在哪里
+# Surface与Canvas的区别在哪里
 
 Surface和Canvas都有画布的意思
 
@@ -33,7 +33,7 @@ Canvas是对画布操作细节的封装，它更多的是和View、用户打交�
 
 当Canvas完成一轮绘制后，会将绘制结果提交到Surface的缓冲区中，然后由Surface交给屏幕管理器绘制
 
-### Surface与Canvas是如何关联的
+# Surface与Canvas是如何关联的
 
 每个Window对应一个Surface，每个Surface对应一块屏幕缓冲区
 
@@ -49,3 +49,48 @@ ViewRootImpl再通过Surface，将Canvas的绘制结果提交到屏幕管理器�
 
 由此我们可以看出，Surface只有一个，而Canvas有多个，Canvas负责具体细节，而Surface直接和屏幕管理器打交道
 [参考](https://blog.csdn.net/u013718730/article/details/120753180)
+
+
+
+
+
+屏幕诉求
+
+- 诉求是 bitmap
+
+数据转换
+
+- xml -> view -> bitmap(onDraw 完成)，转换的手段是通过 skia、opengl
+
+
+
+onDraw 调用流程
+
+- Choreographer 调用 doFrame
+
+
+
+问题
+
+- 屏幕撕裂
+- 跳帧
+
+
+
+解决方案
+
+- 控制屏幕刷新率
+- 控制 APP 绘图速递
+
+
+
+SF 出现的设计目的
+
+- 控制硬件刷新率，用一个时间
+
+
+
+Choreographer 出现的设计目的
+
+- 控制 APP 制图速度，协调 VSYNC 的时间，然后判定执行
+
