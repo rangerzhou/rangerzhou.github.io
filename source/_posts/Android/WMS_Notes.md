@@ -1573,9 +1573,99 @@ https://raw.githubusercontent.com/google/perfetto/master/tools/record_android_tr
 record_android_trace -o /h/Android/traces/$(date +%Y%m%d_%H%M%S)_trace_file.perfetto-trace -t 5s -b 32mb sched freq idle am wm gfx view binder_driver hal dalvik camera input res memory gfx view wm am ss video camera hal res sync idle binder_driver binder_lock ss
 ```
 
+# 10 ANR 补充
+
+[思维导图](https://www.processon.com/view/link/62430e020e3e74078d564070)
+
+什么场景会出现 ANR？
+
+- 常规：onCreate()/Sleep()
+- 非常规
+    - 数据问题导致导致的 ANR
+        - 数据过大，频繁GC会导致线程暂停，处理时间拉长
+    - 锁的问题导致的 ANR
+        - 线程死锁
+    - binder 通信数据量过大
 
 
 
+如何分析 ANR 问题
+
+- 通过日志确认 ANR 类型
+
+    - input 事件
+    - 服务
+    - 广播
+
+- 看 trace 文件第一行时间节点前后 CPU 使用状况（事件被拉长，要么 CPU 锁了，要么 GC，STW 产生导致线程执行时间拖长），事故点前后的运行状态
+
+- 看 trace 中的主线程状态（假如 Runnable）
+
+    ![ANR_Thread_State](../../images/2025/ANR_Thread_State.png)
+
+    
+
+- 查看事故点代码（和 ANR 进程相关的堆栈）
+
+- 看 CPU
+
+    - 看总 CPU 的利用率
+        - 其他进程高，自己低——系统资源造成
+        - 自己高（IO 频繁，死循环，上锁）
+    - CPU 效率，40% 以下基本都算正常，如果正常，排除掉 IO 问题（write/read/database/内核态过高 等考虑 IO 问题）
+
+- 看GC
+
+    - Concurrent GC
+
+        ![Concurrent GC](../../images/2025/ANR_GC.png)
+
+    - Young GC
+
+    - Total GC time
+
+        ![TotalGC](../../images/2025/ANR_TotalGC.png)
+
+    - 意味着对象回收率不高，GC次数过多，造成 STW 559 次，GC造成的时间很长，说明有对象频繁创建代码存在，回收不掉，内存泄漏
+
+        
+
+    总结
+
+    - 判定是否为 CPU 问题
+        - 死锁
+    - 如果非CPU 就定位 GC 问题
+    - GC 问题直接去看 trace 上面的 GC 分析信息
+        - 常规 GC 导致的问题，就是有频繁的对象生产动作
+        - 常规少量数据不会出现这个问题，但是数据量异常会引发连锁反应
+        - 根本原因是卡顿
+
+
+
+采集关键信息
+
+- 时间/类型/线程状态/事故点
+
+- CPU状态：通过时间去找 mainlog 看 CPU 运行状态
+
+- 根据线程+CPU状态判断大致问题
+
+    - 是 CPU 问题
+
+    - 非CPU问题，看GC处理信息
+
+- GC 处理信息
+    - 结合代码和出事的原因处理代码
+
+
+
+面试角度如何处理 ANR 问题
+
+- 确定时间
+- 确定类型
+- 确定主线程状态
+- 查看时间节点的 CPU 状态
+- 非 CPU 问题，看 GC 的处理信息看是否 GC 问题（值上百考虑有问题）
 
 ## 冷启动优化
 
