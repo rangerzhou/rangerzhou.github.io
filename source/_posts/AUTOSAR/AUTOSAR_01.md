@@ -94,7 +94,7 @@ RTE 功能
 
 ## BSW
 
-![image-20240902001703378](C:/Users/Ranger/AppData/Roaming/Typora/typora-user-images/image-20240902001703378.png)
+![AutoSAR_Arch](../../images/2025/AutoSAR_Arch.jpg)
 
 ### BSW 分层
 

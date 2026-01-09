@@ -5,6 +5,7 @@ tags:
 categories: Android
 copyright: true
 password:
+published: false
 ---
 
 >Android 渲染机制分析，代码基于 Android 12
@@ -94,3 +95,17 @@ Choreographer 出现的设计目的
 
 - 控制 APP 制图速度，协调 VSYNC 的时间，然后判定执行
 
+
+
+回答思路
+
+- View 怎么在屏幕上展示的
+- 屏幕需要的是什么 --- bitmap
+- 当前自己写的是什么 —— java 数据
+- 中间有什么问题 —— 数据怎么转换，转换的过程是 draw，用什么转换（Skia、OpenGL）？，转换完成会遇到什么问题？
+- 数据如何上屏（给驱动）？
+- Android APP 直接把转换完成的数据传递给屏幕的缺陷，android 的设计方案
+- SF + Choreographer
+- SF 干什么
+- Choreographer 干什么
+- SF 与 APP 数据之间的通信

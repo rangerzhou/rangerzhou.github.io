@@ -628,17 +628,13 @@ WindowState ->> ActivityRecord:onFirstWindowDrawn()
 
 # 4 Activity 启动流程
 
-``` scss
-Launcher 点击图标向 AMS 发起启动请求
-	AMS
-AMS 通过 socket 向 Zygote 通信
-```
+
 
 ## App - AMS
 
 
 
-![AppToAMS](../../images/2025/StartActivity_AppToAMS.webp)
+<img src="../../images/2025/StartActivity_AppToAMS.webp" alt="AppToAMS" style="zoom:67%;" />
 
 - 由 Launcher 进程发起启动 Activity 的请求
 
@@ -654,7 +650,7 @@ AMS 通过 socket 向 Zygote 通信
 
 
 
-![img](../../images/2025/StartActivity_LauncherPause.webp)
+![img](../../images/2025/StartActivity_LauncherPause.png)
 
 SourceActivity 完成 pause 后，执行 ActivityRecord::activityPaused 流程，AMS 需要显示当前顶层 Activity 所以执行了 RootWindowContainer::resumeFocusedTasksTopActivities 方法，但是这一次是不是真的能显示顶层 Activity 还是要看其进程是否已经创建好了。
 
@@ -662,7 +658,7 @@ SourceActivity 完成 pause 后，执行 ActivityRecord::activityPaused 流程�
 
 ## 启动进程
 
-![框图-阶段三.png](../../images/2025/StartActivity_StartProcess.webp)
+![框图-阶段三.png](../../images/2025/StartActivity_StartProcess.png)
 
 - 通过 Socket 和 Zygote 通信创建进程，并启动到 `ActivityThread.main()`
 
@@ -670,16 +666,16 @@ SourceActivity 完成 pause 后，执行 ActivityRecord::activityPaused 流程�
 
 ## 启动 Activity
 
-![框图-阶段四.png](../../images/2025/StartActivity_StartActivity.webp)
+<img src="../../images/2025/StartActivity_StartActivity.jpg" alt="框图-阶段四.png" style="zoom: 50%;" />
 
-- ActivityRecord.setProcess(WindowProcessController)：链接 ActivityRecord 和创建的进程
-- 执行 handleLaunchActivity() -> performLaunchActivity()：
+- `ActivityRecord.setProcess(WindowProcessController)`：链接 ActivityRecord 和创建的进程
+- 执行 `handleLaunchActivity() -> performLaunchActivity()`：
     - 创建 Activity
-    - Activity.attach()
+    - `Activity.attach()`
         - 创建 PhoneWindow
-        - 传递 ActivityRecord.token 到 Activity.mToken 以及 Window.mAppToken
+        - 传递 `ActivityRecord.token` 到 `Activity.mToken` 以及 `Window.mAppToken`
     - 详见 [3.2 Activity/PhoneWindow 创建](# 3.2 Activity/PhoneWindow 创建)
-- 执行 handleResumeActivity() -> performResumeActivity()：
+- 执行 `handleResumeActivity() -> performResumeActivity()`：
     - 创建 ViewRootImpl
     - 创建 WindowState 并挂载到 ActivityRecord
     - 绑定 WindowState 和 W
