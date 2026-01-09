@@ -4,6 +4,45 @@ date: 2026-01-05
 published: false
 ---
 
+# 2 Bootanimation
+
+- 准备 part 动画资源，这部分由美工准备
+
+- 编写 desc.txt
+
+    ``` scss
+    // desc.txt
+    // 类型：c = 播放一次（常量），p = 循环播放
+    // 循环次数：数字表示播放次数，0 = 无限循环
+    // 暂停帧数：播放完毕后暂停的帧数
+    // 文件夹名：动画图片所在的文件夹名称（如 part0）
+    // 背景颜色：十六进制颜色值（如 #ffee00 = 黄色）
+    // 缩放模式：c = 居中，s = 拉伸，f = 填充
+    // 对齐方式：c = 居中
+    
+    1080 360 60
+    c 1 0 part0 #ffee00 c c
+    c 0 0 part1 #ffee00 c c
+    c 1 0 part2 #ffee00 c c
+    c 1 1 part3 #ffee00 c c
+    c 1 0 part4 #ffee00 c c
+    ```
+
+    
+
+- 存储方式打包 bootanimation.zip 并放入 `frameworks/base/cmds/bootanimation` 目录下
+    - `zip -r -X -Z store bootanimation part*/* desc.txt`
+
+- 预置到 `/system/media`，编辑 Android.mk
+
+    - ``` makefile
+        $(shell cp $(LOCAL_PATH)/bootanimation.zip $(ANDROID_PRODUCT_OUT)/system/media/bootanimation.zip)
+        ```
+
+
+
+
+
 # 4 Input 系统专题
 
 inotify：动态监听文件夹下的文件增加和删除
@@ -1080,7 +1119,9 @@ Window #9 Window{9d1w325 u0 Splash Screen com.android.gallery3d}
 
 frameworks 目录搜索 ”Splash Screen“
 
-> dumpsys 信息显示的包名，并不一定就说明这里的信息是这个报名所属进程打印的，从 dumpsys 的 mSession 可以判定所属进程
+> dumpsys 信息显示的包名，并不一定就说明这里的信息是这个包名所属进程创建的，<font color=red>**有可能只是把 windowstate 挂载到了这个进程，比如 SplashScreen(StartingWindow) 就是挂载到了APP进程的ActivityRecord下，又比如负一屏挂载到桌面**</font>，从 dumpsys 的 mSession 可以判定所属进程，或者通过 logcat 确定进程号，发现是 SystemUI
+>
+> 然后通过查看层层调用，最后发现是一个跨进程调用到 TaskOrganizer.addStartingWindow()，grep "addStartingWindow(" 发现是 TaskOrganizerController.addStartingWindow() - ITaskOrganizer.addStartingWindow 中调用的，而这个类路径属于 system_server 进程，说明是从 system_server 进程 IPC 到 SystemUI 进程，由 SystemUI 添加 Splash Screen，
 
 ``` shell
 adb shell dumpsys activity containers
@@ -1088,7 +1129,42 @@ adb shell dumpsys activity containers
 
 这个 dumpsys 可以显示挂载顺序
 
-应用定制 splashscreen logo，在 style 中添加 <item>，
+### 添加 SplashScreen Window 到应用
+
+时序图
+
+``` mermaid
+sequenceDiagram
+autonumber
+ActivityStarter ->> ActivityStarter:startActivityInner()
+ActivityStarter ->> Task:startActivityLocked()
+Note over StartingSurfaceController:这里会设置一个标志位是否显示 Starting Window
+Task ->> StartingSurfaceController:showStartingWindow()
+StartingSurfaceController ->> ActivityRecord:showStartingWindow()
+ActivityRecord -->> ActivityRecord:addStartingWindow()
+ActivityRecord ->> ActivityRecord:scheduleAddStartingWindow()
+ActivityRecord ->> ActivityRecord:AddStartingWindow:run()
+ActivityRecord ->> SplashScreenStartingData:createStartingSurface()
+SplashScreenStartingData ->> StartingSurfaceController:createSplashScreenStartingSurface()
+StartingSurfaceController ->> TaskOrganizerController:addStartingWindow()
+Note over TaskOrganizerController,TaskOrganizer:IPC 到 SystemUI 进程
+TaskOrganizerController ->> TaskOrganizer:mInterface:addStartingWindow()
+TaskOrganizer ->> ShellTaskOrganizer:addStartingWindow()
+Note over StartingWindowController:这里传入了 StartingWindowInfo 和 ActivityRecord.token
+ShellTaskOrganizer ->> StartingWindowController:addStartingWindow(info,token)
+Note over StartingSurfaceDrawer:在里面设置了 TYPE_APPLICATION_STARTING
+StartingWindowController ->> StartingSurfaceDrawer:addSplashScreenStartingWindow()
+
+Note over StartingSurfaceDrawer:添加窗口
+StartingSurfaceDrawer ->> StartingSurfaceDrawer:addWindow()
+StartingSurfaceDrawer ->> WindowManagerGlobal:addView()
+```
+
+
+
+### 应用定制 splashscreen logo 及动画
+
+在 style.xml 中的 <style> 标签中添加 <item>，
 
 ``` xml
 <item name="android:windowSplashScreenBackground">#ffffffff</item>
@@ -1097,9 +1173,53 @@ adb shell dumpsys activity containers
 <item name="android:windowSplashScreenAnimationDuration">1000</item>
 ```
 
-然后 StartingSurfaceDrawer.java 中就会获取主题，更具体的是 `SplashscreenContentDrawer.getWindowAttrs()`，
+然后 StartingSurfaceDrawer.java 中就会获取主题，更具体的是 `SplashscreenContentDrawer.cerateContentView() -> SplashscreenContentDrawer.makeSplashScreenContentView() SplashscreenContentDrawer.getWindowAttrs()`，在这里就获取了 style 中设置的内容，
 
-logo往下，主Activity向上的动画方案：把 SplashScreen 最后一帧传递给应用，应用进程再做动画处理
+StartingSurfaceDrawer.getSplashScreenTheme()
+
+
+
+### logo往下，主Activity向上的动画方案
+
+如何发现是 copy 方案？打开 Proto 日志：`adb shell wm logging enable-text WIM_SHELL_STARTING_WINDOW`，然后 `adb logcat -s ShellStartingWindow` 查看打开 APP 的日志，发现当有向下动画的时候，多了一条日志：`Copying splash screen window view for task:xxx`
+
+搜索发现是在 `StartingSurfaceDrawer.copySplashScreenView()` 打印的，网上追踪发现和前面添加 SplashScreen 的逻辑一致，都是通过跨进程调用过来的，在 `TaskOrganizerController.copySplashScreenView()` 添加断点打印堆栈：
+
+``` scss
+WindowStateAnimator:commitFinishDrawingLocked()
+	WindowState:performShowLocked()
+		ActivityRecord:onFirstWindowDrawn()
+		ActivityRecord:removeStartingWindow()
+		// 如果这里的 mHandleExitSplashScreen 为 false，就不会走到 copy
+		ActivityRecord:transferSplashScreenIfNeeded()
+		ActivityRecord:requestCopySplashScreen()
+		TaskOrganizerController:copySplashScreenView()
+			// 到了 SystemUI 进程
+			ShellTaskOrganizer:copySplashScreenView()
+				StartingWindowController:copySplashScreenView()
+					StartingSurfaceDrawer:copySplashScreenView()
+					...
+		// 回调 APP 进程，根据之前Parcel的SplashView对象重新构建一个SplashScreenView并且添加到DecorView
+		ActivityThread:createSplashScreen()
+		ActivityRecord:onSplashScreenAttachComplete()
+		ActivityRecord:removeStartingWindowAnimation()
+```
+
+
+
+``` scss
+ActivityRecord:setCustomizeSplashScreenExitAnimation()
+SplashScreen:setOnExitAnimationListener()
+This means that the SplashScreen will be inflated in the application process once the process has started
+```
+
+追踪调用最后到了 SplashScreen:setOnExitAnimationListener()，也就是说，如果应用调用了这个方法，就是告知 SystemUI 我要来处理这个退出动画，否则 SplashScreen 会在应用第一帧绘制完成的时候退出
+
+那么系统就会帮我们 copy
+
+
+
+把 SplashScreen 最后一帧传递给应用，应用进程再做动画处理
 
 触发 SystemUI 帮我们拷贝最后一帧到应用：
 
@@ -1107,7 +1227,52 @@ logo往下，主Activity向上的动画方案：把 SplashScreen 最后一帧传
 SplashScreen.setOnExitAnimationListener(this::onSplashScreenExit)
 ```
 
-### 总结
+### Removing Splash Window
+
+这里说的是主 Activity 显示后移除 Splash Window
+
+日志表现："Removing splash screen window for task: xxx"
+
+搜索日志发现是在 `StartingSurfaceDrawer.removeWindowSynced()` 中发现，然后它继续调用  -> `StartingSurfaceDrawer.removeWindowInner() -> WindowManagerGlobal.remove()`，并且 `setVisibility(View.GONE)`，
+
+向上调用链：`removeWindowSynced() <- StartingSurfaceDrawer.removeStartingWindow() <- StartingWindowController.removeStartingWindow() <- ShellTaskOrganizer.removeStartingWindow() <- TaskOrganizer.removeStartingWindow()` 又到了跨进程调用的地方了，那么就到了 `TaskOrganizerController.removeStartingWindow()`，到了 system_server 进程，在这里查看堆栈，
+
+``` scss
+// 没有动画定制，即没有 setOnExitAnimationListener()
+WindowStateAnimator:commitFinishDrawingLocked()
+	WindowState:performShowLocked()
+		ActivityRecord:onFirstWindowDrawn()
+		ActivityRecord:removeStartingWindow()
+
+		// ####################有动画定制时-Start#############################
+		// 如果这里的 mHandleExitSplashScreen 为 false，就不会走到 copy
+		ActivityRecord:transferSplashScreenIfNeeded()
+		ActivityRecord:requestCopySplashScreen()
+		TaskOrganizerController:copySplashScreenView()
+			// 到了 SystemUI 进程
+			ShellTaskOrganizer:copySplashScreenView()
+				StartingWindowController:copySplashScreenView()
+					StartingSurfaceDrawer:copySplashScreenView()
+					...
+		// 回调 APP 进程，根据之前Parcel的SplashView对象重新构建一个SplashScreenView并且添加到DecorView
+		ActivityThread:createSplashScreen()
+		ActivityRecord:onSplashScreenAttachComplete()
+		ActivityRecord:removeStartingWindowAnimation()
+		// ####################有动画定制时-End###############################
+
+		// 后续为移除通用步骤
+		ActivityRecord:removeStartingWindowAnimation()
+
+			StartingSurfaceController:StartingSurface:remove()
+				TaskOrganizerController:removeStartingWindow()
+					// 到了 SystemUI 进程
+					ShellTaskOrganizer:removeStartingWindow()
+
+```
+
+那么也就是说，主 Activity window 已经绘制好的时候，就告知 ActivityRecord 我已经绘制好了准备显示了，然后 ActivityRecord 就开始移除 Starting Window 了，如果应用有动画定制，那么先 copy 最后一帧到应用，然后再移除。
+
+#### Remove 流程总结
 
 APP 没有定制动画的情况
 
@@ -1119,15 +1284,18 @@ APP 定制动画的情况
 
 ![SplashScreen](../../images/2025/SplashScreen.png)
 
-### 实战移除闪屏 logo
+### 实战移除 Starting Window
 
-方案1：TaskFragment.SHOW_APP_STARTING_PREVIEW 改为 false
+这里说的是不要 Splash Screen
 
-方案2：ActivityRecord.addStartingWindow() 中修改，判断个条件让它直接 return
+前面添加 window 的时候，看到 `Task ->> StartingSurfaceController:showStartingWindow()` 调用之前的判断条件中有一个标志位 `Task.SHOW_APP_STARTING_PREVIEW`，如果设置为 false，就可以不显示 Starting Window。
 
-缺点：点击图标后，会卡一会儿
+- 方案1：TaskFragment.SHOW_APP_STARTING_PREVIEW 改为 false
+    - **缺点：点击图标后会卡一会儿，而且可能不能完全覆盖。**
+- 方案2：有些 showStartingWindow() 的调用判断条件没有包含上面那个标志，`ActivityRecord.addStartingWindow()` 中修改，判断个条件让它直接 return
+    - **缺点：点击图标后，会卡一会儿。**
 
-方案3：在 `SplashscreenContentDrawer.getWindowAttrs()` 中直接设置 Icon 为透明 ColorDrawable
+- 方案3：在 `SplashscreenContentDrawer.getWindowAttrs()` 中直接设置 Icon 为透明 ColorDrawable
 
 ``` java
 // 这里判空是为了不对第三方想定制 logo 的 APP 产生影响
@@ -1136,7 +1304,9 @@ if(attrs.mSplashScreenIcon == null) {
 }
 ```
 
-这种方案只是替换了 logo，logo 后面的大背景还是会正常显示
+这种方案只是替换了 logo，logo 后面的大背景还是会正常显示，但是在真机上会很快闪过。
+
+
 
 ## 11 应用动画
 
@@ -1508,7 +1678,7 @@ animator.start();
 2. **系统机制原理**
     - Android WMS/SurfaceFlinger 对 Task/Activity 的显示使用 **Surface 层级合成**。
     - `moveRootTaskToDisplay()` 只是把 Task 逻辑上移到目标 Display，Surface 还需要通过动画移动到最终位置。
-    - 在移动过程中，未被拖动覆盖的区域没有其他可绘制内容，所以显示黑色。
+    - <font color=red>**在移动过程中，未被拖动覆盖的区域没有其他可绘制内容，所以显示黑色。**</font>
 3. **mLaunchTaskBehind 的作用**
     - 设置 `ActivityRecord.mLaunchTaskBehind = true` 时，Task 不会立即覆盖目标 Display。
     - 屏幕2继续显示原有界面，拖动 Surface 在其上滑动时，不会出现黑色空白。
