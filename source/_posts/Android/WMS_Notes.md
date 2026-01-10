@@ -2007,5 +2007,28 @@ APPLICATION_TYPE_OVERLAY 的窗口，dumpsys 信息查看到窗口之后，在 V
 
 [FWK 面经](https://bbs.csdn.net/topics/616075900)
 
+### Lifecycle 总结
 
+> Lifecycle 是通过 Activity/Fragment 主动上报生命周期事件， 由 LifecycleRegistry 维护状态并通知 Observer 的一套生命周期感知机制。
 
+- Android Lifecycle 是一套**生命周期事件分发机制**。
+
+- Activity / Fragment 在系统生命周期回调中，把自身状态变化同步给 `LifecycleRegistry`
+
+- `LifecycleRegistry` 维护一个**状态机**，并把对应事件**按顺序分发给注册的 Observer**。
+
+- Observer 不再直接依赖 Activity 回调，而是被动感知生命周期，从而避免生命周期错用和内存泄漏。
+
+为什么说它是状态机？
+
+> 因为 Lifecycle 内部不是简单回调，而是维护当前 State，事件驱动状态流转，保证 Observer 的状态不会乱序或非法回退。
+
+它和直接在 Activity 写代码的区别？
+
+> 把生命周期管理从业务逻辑中抽离出来， Observer 只关心“何时可用、何时不可用”，不关心宿主细节。
+
+Lifecycle/ViewModel/LiveData
+
+> Lifecycle 解决“什么时候能用”，
+> ViewModel 解决“数据放哪”，
+> LiveData 解决“怎么安全通知”。
