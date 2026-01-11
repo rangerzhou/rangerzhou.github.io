@@ -2032,3 +2032,32 @@ Lifecycle/ViewModel/LiveData
 > Lifecycle 解决“什么时候能用”，
 > ViewModel 解决“数据放哪”，
 > LiveData 解决“怎么安全通知”。
+
+<font color=red>**回答思路**</font>
+
+- 本质：Lifecycle 的本质是**观察者模式**，核心组件包括 **LifecycleOwner**（生命周期持有者）和 **LifecycleRegistry**（状态管理器）。
+- 原理：通过一个无 UI 的 ReportFragment 注入到 Activity 中，用来捕获生命周期的变化，当 ReportFragment 感知到事件时，就会调用 LifecycleRegistry 的 handleLifecycleEvent 方法，LR 中维护了一个状态机，每当状态变化，就会遍历所有观察者，如果状态不同步，就会补发事件直到状态对齐；
+- 价值：业务代码不再挤在 Activity 的回调里，比如如果不使用，就要在各个生命周期中手动触发生命周期的通知；
+
+### LiveData 总结
+
+<font color=red>**回答思路**</font>
+
+- 本质：LiveData 是一种可观察的数据持有者类，与普通观察者模式不同的是，它具有生命周期感知能力，也就是说它 **只会在组件处于活跃状态时分发数据更新**，并在组件销毁时自动清理；
+- 原理：调用 `observe(owner, observer)` 时，LiveData 将观察者包装成一个 `LifecycleBoundObserver`，它实现了 `LifecycleEventObserver` 接口，从而能挂载到宿主的生命周期上；每次数据更新，LiveData 会检查宿主状态，只有在 STARTED 或 RESUMED 时才会触发 Observer 的回调；当感知到生命周期变为 `DESTROYED` 时，LiveData 会自动调用 `removeObserver`；
+- LiveData 内部维护一个 `mVersion` 版本号。当新观察者订阅时，如果观察者的版本号小于 LiveData 的版本号，它会立即收到最后一次缓存的数据。
+- `postValue()` 可以在子线程调用，它内部通过 `Handler` 将任务抛到主线程执行，且在主线程处理前，多次调用 `postValue` 只会保留最后一次的值。
+
+### Dagger2 总结
+
+<font color=red>**回答思路**</font>
+
+- 本质：Dagger2 是一款基于**编译时注解**的依赖注入框架。它在编译阶段自动生成负责创建和注入对象的代码，从而避免了反射带来的性能损耗，并能在编译期发现依赖配置错误（如循环依赖）。
+- 核心组件
+    - **Dependency（被依赖的对象）：** 通过 `@Inject` 构造函数或 `@Module` 中的 `@Provides` 方法定义。
+    - **Consumer（依赖的需求方）：** 通过 `@Inject` 标记成员变量来声明需要注入。
+    - **Component（注入器/桥梁）：** 这是一个接口，Dagger 编译器会生成该接口的实现类（如 `DaggerYourComponent`），它内部持有一个‘工厂模式’生成的列表，负责把对象塞进需求方。
+- 运行机制
+    - **编译期生成代码：** 编译器扫描注解，为每个需要实例化的类生成对应的 **Factory（工厂类）**，并为 Component 生成实现类，在内部构建一套完整的**依赖图谱**。
+    - **运行期注入：** 当我们调用 `component.inject(this)` 时，Dagger 会直接调用生成的代码，通过 new 对象或调用 Provider 的方式直接赋值给目标变量。
+- “Dagger2 就是通过 **APT（注解处理器）** 在编译时把‘手动 new 对象’的过程自动化了，利用**生成的 Component 实现类**作为中转站，将依赖对象精确地填装到目标类中。
