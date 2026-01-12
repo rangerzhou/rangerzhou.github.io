@@ -1689,6 +1689,10 @@ animator.start();
         1. 使用 `mLaunchTaskBehind` 保留原 Task 界面；
         2. 或者拖动 Surface 覆盖整个目标显示区域。
 
+#### 闪屏 - 12
+
+
+
 ------
 
 ### 答题技巧
@@ -1719,6 +1723,8 @@ void resetState() { //恢复正常状态，让mLaunchTaskBehind变成false
 
 
 #### 松手自动移动 - 9
+
+
 
 
 
@@ -2061,3 +2067,13 @@ Lifecycle/ViewModel/LiveData
     - **编译期生成代码：** 编译器扫描注解，为每个需要实例化的类生成对应的 **Factory（工厂类）**，并为 Component 生成实现类，在内部构建一套完整的**依赖图谱**。
     - **运行期注入：** 当我们调用 `component.inject(this)` 时，Dagger 会直接调用生成的代码，通过 new 对象或调用 Provider 的方式直接赋值给目标变量。
 - “Dagger2 就是通过 **APT（注解处理器）** 在编译时把‘手动 new 对象’的过程自动化了，利用**生成的 Component 实现类**作为中转站，将依赖对象精确地填装到目标类中。
+
+
+
+### 缓存复用
+
+- 复用的是什么？复用的是 ViewHolder（一个 Item）
+
+- mCachedViews：大小是2
+- RecycledViewPoll
+-  
