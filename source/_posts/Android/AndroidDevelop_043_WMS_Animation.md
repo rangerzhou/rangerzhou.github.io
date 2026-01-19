@@ -27,7 +27,7 @@ Leash 的 Surface 图层特点
 
 # 窗口动画
 
-为窗口添加动画
+为窗口添加动画，比如 Activity 内打开一个 TYPE_APPLICATION_OVERLAY 窗口，窗口渐变显示和渐变退出的动画。
 
 定义动画
 
@@ -63,7 +63,20 @@ mLayoutParams.windowAnimations = R.style.MyWindow;
 
 从 commitFinishDrawingLocked() 开始
 
+## 总结
 
+- 在 `commitFinishDrawingLocked()` 开始，逐步调用到 `SurfaceAnimator.createAnimationLeash()`
+- 创建 leash 图层，挂在 WindowToken 下面，WindowState 上面
+- 动画结束后，通过回调，开始执行退出动画
+- 
+
+# 应用切换动画
+
+常见 proto log：`WM_DEBUG_REMOTE_ANIMATIONS/WM_DEBUG_ANIM WM_DEBUG_APP_TRANSITIONS_ANIM/WM_DEBUG_APP_TRANSITIONS/WM_DEBUG_STARTING_WINDOW/WM_DEBUG_STATES/WM_SHOW_SURFACE_ALLOC`
+
+壁纸动画 window_animation，leash 挂到了 WallpaperWindowToken 的上面
+
+App 动画 app_transition，leash 挂到了 Task上面
 
 
 

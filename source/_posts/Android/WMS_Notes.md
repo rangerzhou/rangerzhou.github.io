@@ -2077,3 +2077,189 @@ Lifecycle/ViewModel/LiveData
 - mCachedViews：大小是2
 - RecycledViewPoll
 -  
+
+### ThreadLocal
+
+在调用 Looper.prepare() 的时候，会设置 Looper，
+
+``` java
+// Looper.java 源码简化
+static final ThreadLocal<Looper> sThreadLocal = new ThreadLocal<Looper>();
+
+private static void prepare(boolean quitAllowed) {
+    // 1. 检查当前线程是否已经有 Looper 了
+    if (sThreadLocal.get() != null) {
+        throw new RuntimeException("Only one Looper may be created per thread");
+    }
+    // 2. 创建 Looper 并存入当前线程的私有存储空间
+    sThreadLocal.set(new Looper(quitAllowed));
+}
+
+public static @Nullable Looper myLooper() {
+    // 3. 获取当前线程专属的 Looper
+    return sThreadLocal.get();
+}
+```
+
+**唯一性保障：** 确保每个线程只创建一套 `Looper/MessageQueue` 体系。
+
+**线程私有化：** 实现了 `Looper` 对象的线程本地化存储，避免了跨线程访问的竞争。
+
+**代码简洁：** 让开发者在线程任何位置通过 `Looper.myLooper()` 都能轻松获取当前线程的 Looper，而不需要在方法间层层传递参数。
+
+ThreadLocal 的内部原理
+
+`ThreadLocal` 并不是存数据的地方，它更像是一个**“Key”**。
+
+- 每个线程（`Thread` 类）内部都有一个成员变量：`threadLocals`，它的类型是 `ThreadLocalMap`。
+- `ThreadLocalMap` 是一个定制的哈希表，它的 **Key 是 `ThreadLocal` 对象本身**，**Value 是你想要存的对象（Looper）**。
+
+### Handler 内存泄漏问题
+
+如果 Handler 是 Activity 的**非静态内部类**，它会隐式持有外部类 Activity 的引用，只要 Message 还没被处理（比如你发了一个延迟 10 分钟的消息），这条引用链就会一直存在。当你关闭 Activity 时，由于 Looper 还在引用这个 Message，导致 Activity 无法被 GC 回收，从而发生内存泄漏。
+
+如何解决：
+
+- 方法 A：静态内部类 + 弱引用 (WeakReference)
+
+    - 静态内部类不会持有外部类的引用。如果需要调用 Activity 的方法，使用弱引用，这样当 Activity 被销毁时，GC 可以正常回收它。
+
+- 方法 B：及时清理消息 (生命周期同步)
+
+    - 在 Activity 销毁时（`onDestroy`），手动清空消息队列中关联的消息和任务。
+
+        ``` java
+        @Override
+        protected void onDestroy() {
+            super.onDestroy();
+            // 移除所有回调和消息
+            mHandler.removeCallbacksAndMessages(null);
+        }
+        ```
+
+### 多线程编程
+
+**为什么用？**（性能、响应）。
+
+**有什么难点？**（原子、可见、有序）。
+
+**用什么同步？**（synchronized, CAS, Lock, volatile）。
+
+**在 Android 怎么管？**（线程池、HandlerThread、协程）。
+
+**怎么避坑？**（内存泄漏、死锁、线程安全容器）。
+
+#### 线程池
+
+##### 创建线程的方式
+
+- 继承 Thread
+    - 缺点：单继承，继承了 Thread，就无法继承其他类了
+- 实现 Runnable 接口
+- 实现 Callable 接口：可以获取线程执行的返回值
+- 线程池创建
+
+为什么不推荐 Executors 创建线程
+
+##### **`newFixedThreadPool` 和 `newSingleThreadExecutor`**
+
+- **代码实现：** 它们使用的是 `LinkedBlockingQueue`（无界阻塞队列）。
+- **致命缺陷：** 这个队列的默认容量是 `Integer.MAX_VALUE`（约 21 亿）。
+- **后果：** 当请求处理任务的速度赶不上提交任务的速度时，队列会无限堆积，最终导致堆内存耗尽，触发 **OOM**。
+
+##### **`newCachedThreadPool` 和 `newScheduledThreadPool`**
+
+- **代码实现：** 它们将 `maximumPoolSize`（最大线程数）设置为了 `Integer.MAX_VALUE`。
+- **致命缺陷：** 允许创建的线程数量几乎没有上限。
+- **后果：** 每一个新任务进来，如果没有空闲线程就会创建一个新的线程。大量的线程创建会消耗大量的 CPU 资源和内存（每个线程默认分配 1MB 栈空间），最终导致 **OOM** 或系统卡死。
+
+##### 替代方案：手动创建 `ThreadPoolExecutor`
+
+官方和面试官更希望你直接使用 `ThreadPoolExecutor` 的构造函数，因为这样你必须显式地思考以下 **7 个核心参数**，从而实现对资源的精准控制：
+
+``` java
+// 推荐的创建方式
+ThreadPoolExecutor executor = new ThreadPoolExecutor(
+    2,                      // 1. corePoolSize: 核心线程数
+    5,                      // 2. maximumPoolSize: 最大线程数
+    60L,                    // 3. keepAliveTime: 非核心线程闲置存活时间
+    TimeUnit.SECONDS,       // 4. unit: 时间单位
+    new LinkedBlockingQueue<>(100), // 5. workQueue: 有界队列，防止 OOM
+    Executors.defaultThreadFactory(), // 6. threadFactory: 线程工厂
+    new ThreadPoolExecutor.AbortPolicy() // 7. handler: 拒绝策略，任务满了怎么办
+);
+```
+
+
+
+##### 线程池状态
+
+- Running：线程池新建或调用 execute() 方法后，处于运行状态，能够接收新的任务
+- Shutdown：调用 `shutDown()` 方法后，不再接收新任务，但是会执行已经提交到等待任务队列中的任务
+- Stop：调用 `stop()` 方法后，不再接收新任务，且会中断正在处理中的任务
+- Tidying：中间状态，不做任何处理
+- Terminated：线程池内部的所有线程都已经终止时，线程池进入 Terminated 状态
+
+##### Sychronized 和 ReentrantLock 区别
+
+![Sychronized_ReentrantLock](../../images/2025/Sychronized_ReentrantLock.png)
+
+ReentrantLock 可以是公平锁也可以是非公平锁，它们的区别在于线程在使用 `lock()` 方法加锁时：
+
+- 如果是公平锁，会先检查 AQS 队列中是否存在线程在排队，如果有线程在排队，则当前线程也进行排队
+- 如果是非公平锁，则不会去检查是否有线程在排队，而是直接竞争锁
+- 不管是公平锁还是非公平锁，一旦没竞争到锁，都会进行排队，**当锁释放时，都是唤醒排在最前面的线程**，所以非公平锁只是体现在了线程加锁阶段，而没有体现在线程被唤醒阶段，简单来说就是：<font color=red>**如果是公平锁，则直接去排队，如果是非公平锁，先竞争，没竞争到再去排队**</font>
+
+Sychronized 的锁升级过程
+
+- 无锁
+- 偏向锁
+    - 只有一个线程在频繁访问同步块（绝大多数情况），锁会“偏心”于第一个访问它的线程。它会在 Mark Word 中记录该线程的 ID， 以后该线程进入和退出同步块时，不需要进行昂贵的 CAS 操作，只需简单检查一下线程 ID 是否一致。
+- 轻量级锁
+    - 当有**第二个线程**尝试竞争锁时（但竞争不激烈），偏向锁就会升级
+    - 线程会在自己的栈帧中创建一个存放锁记录的空间（Lock Record）。 
+    - 尝试使用 **CAS** 将对象的 Mark Word 指向自己的 Lock Record。 
+    - 如果成功，获得锁。如果失败，说明存在竞争，线程会进行**自旋（Self-Spinning）**（即不停地循环尝试获取锁，而不挂起 CPU）
+- 重量级锁
+    - **触发：** 1. 自旋次数过多（长时间拿不到锁）。 2. 或者是多个线程同时激烈竞争。
+    - **原理：** 锁标志位变为 `10`。此时 Mark Word 指向的是堆中的 **Monitor 对象**。
+    - **表现：** 未获取到锁的线程会被**阻塞（Blocked）**，进入等待队列，交由操作系统管理。
+
+
+
+#### ThreadLocal
+
+ThreadLocal 底层是通过 ThreadLocalMap 来实现的，每个 Thread 对象中都存在一个 ThreadLocalMap，Map 的 key 为 ThreadLocal 对象，value 为需要缓存的值；
+
+![image-20260119142132653](../../images/2025/ThreadLocal.png)
+
+线程池中使用 ThreadLocal 内存泄漏
+
+![image-20260119142812166](../../images/2025/image-20260119142812166.png)
+
+
+
+当一个共享变量是共享的，但是需要每个线程互不影响，相互隔离，就可以使用 ThreadLocal
+
+
+
+#### volatile
+
+- 防止指令重排（比如 单例模式 中的双重检测锁，`instance = new Singleton()` 分为：1.分配空间、2.初始化、3.赋值引用。重排可能导致顺序变成 **1-3-2**。如果此时另一个线程进来，会发现 `instance` 不为 null，但其实它还没初始化完成（对象还是个半成品），直接使用会导致崩溃。）
+- 内存可见性：一旦变量被修改，JVM 会强制要求该线程立即将新值刷新到**主内存**。同时，其他线程在读取该变量时，其本地缓存会被标记为无效，必须直接从主内存获取最新值。
+- 不保证原子性：比如 `i++` 是由‘读-改-写’三个独立步骤组成的。`volatile` 只能保证你‘读’到的是最新的，但如果两个线程同时读到了最新的 10，并各自加 1 得到 11 往回写，最终结果就是 11 而不是 12。这种复合操作必须使用 `AtomicInteger` 或加锁。
+
+
+
+Android 多线程
+
+多线程方式
+
+- Thread，Runnable
+    - Android 中创建线程最基本的两种方法，用到了 Thread 类和 Runnable 接口，一般和 Handler 一起使用，用于线程中的通信，为了方便这种通信方式，生成了 HandlerThread 类；
+- HandlerThread
+    - 继承自 Thread 类
+- AsyncTask
+- Executor
+- IntentService
+

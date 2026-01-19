@@ -662,6 +662,7 @@ ViewRootImpl 建立了一个 Java 层面的 InputChannel  对象，InputChannel 
 - system_server 侧由 InputDispatcher 通过 Looper + epoll 管理写入；
 - 应用进程侧 ViewRootImpl 把 socket fd 注册到 Looper，底层由 epoll_wait 监听可读事件，socket 可读后再分发为 InputEvent 到 ViewRootImpl。
 - Android 的 Looper 在 Java 层提供消息循环接口，但真正的阻塞和唤醒由 native 层的 Looper 实现。native Looper 使用 epoll 统一监听 MessageQueue 的 eventfd、InputChannel、Binder 等 fd。当消息入队或 fd 就绪时，epoll_wait 被唤醒，Looper 再回到 Java 层分发消息或事件。
+- 不管是 Java 层的 message 还是 Native 层的 message，都是通过向 mWorkEventFd 写入数据来唤醒 epoll_wait()，醒来后就开始处理消息，如果是计时消息，epoll_wait() 就等待指定的事件之后醒来，对于 input 事件，监听的是 InputChannel 创建的 socket fd 从而知道有消息到来，然后直接回调 InputEventReceiver 进行处理
 
 ![InputChannel](../../images/2025/Input_InputChannel.png)
 
