@@ -117,3 +117,9 @@ logcat -b events | grep input_focus
 - 查 Activity 生命周期是否已结束
 - 查是否在 transition / animation 中
 - 多 display 下查 displayId 是否匹配
+
+
+
+[酷派Android ANR|原理解析及常见案例](https://mp.weixin.qq.com/s/40T6ITvJNWR8F42530k4DA?poc_token=HExVbmmjqJIJt3A3Io1TdIZDwsDaJJBXpPS8grUk)
+
+[Android ANR|原理解析及常见案例 - 酷派技术团队 #20](https://github.com/cyrushine/bookmark/issues/20)
