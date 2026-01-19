@@ -170,7 +170,7 @@ WallpaperManagerService -->> WallpaperManagerService:unbindService()
 
 ## 分析
 
-抓取 Winscope，查看 SF 层级，发现在闪黑的时候，壁纸图层消失了，等过了几帧后才出现，那么分析出现之前最后一帧的状态，取消勾选 `Only visible`（因为此时是不可见的状态，取消勾选才能看到未显示的图层）， 看到对应壁纸图层的 BbqSurface 消失了，而将要显示的新壁纸的 BbqSurface 是存在的（为什么新壁纸不可见，写明了原因：Buffer is empty，即新壁纸还没有向它的 Bbq 绘制），这种 Buffer 类型的图层才是真正显示内容的地方，所以原因就找到了，就是新的 Bbq 已经被移除，但是新的 Bbq 还没有绘制，而源码中，注意 attach() 和 detach() 都是异步的，所以有可能旧壁纸移除时新壁纸还没有准备好，所以导致闪黑。
+抓取 Winscope，查看 SF 层级，发现在闪黑的时候，壁纸图层消失了，等过了几帧后才出现，那么分析出现之前最后一帧的状态，取消勾选 `Only visible`（因为此时是不可见的状态，取消勾选才能看到未显示的图层）， 看到对应壁纸图层的 BbqSurface 消失了，而将要显示的新壁纸的 BbqSurface 是存在的（为什么新壁纸不可见，写明了原因：Buffer is empty，即新壁纸还没有向它的 Bbq 绘制），这种 Buffer 类型的图层才是真正显示内容的地方，所以原因就找到了，就是旧的 Bbq 已经被移除，但是新的 Bbq 还没有绘制，而源码中，注意 attach() 和 detach() 都是异步的，所以有可能旧壁纸移除时新壁纸还没有准备好，所以导致闪黑。
 
 ## 解决
 

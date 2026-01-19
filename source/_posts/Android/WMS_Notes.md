@@ -1119,7 +1119,7 @@ Window #9 Window{9d1w325 u0 Splash Screen com.android.gallery3d}
 
 frameworks 目录搜索 ”Splash Screen“
 
-> dumpsys 信息显示的包名，并不一定就说明这里的信息是这个包名所属进程创建的，<font color=red>**有可能只是把 windowstate 挂载到了这个进程，比如 SplashScreen(StartingWindow) 就是挂载到了APP进程的ActivityRecord下，又比如负一屏挂载到桌面**</font>，从 dumpsys 的 mSession 可以判定所属进程，或者通过 logcat 确定进程号，发现是 SystemUI
+> dumpsys 信息显示的包名，并不一定就说明这里的信息是这个包名所属进程创建的，<font color=red>**有可能只是把 windowstate 挂载到了这个进程，比如 SplashScreen(StartingWindow) 就是挂载到了APP进程的ActivityRecord下，又比如负一屏挂载到桌面**</font>，从 dumpsys 的 mSession 可以判定属于哪个进程创建，或者通过 logcat 确定进程号，发现是 SystemUI
 >
 > 然后通过查看层层调用，最后发现是一个跨进程调用到 TaskOrganizer.addStartingWindow()，grep "addStartingWindow(" 发现是 TaskOrganizerController.addStartingWindow() - ITaskOrganizer.addStartingWindow 中调用的，而这个类路径属于 system_server 进程，说明是从 system_server 进程 IPC 到 SystemUI 进程，由 SystemUI 添加 Splash Screen，
 
