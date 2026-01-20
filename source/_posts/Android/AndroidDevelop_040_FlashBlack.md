@@ -170,13 +170,13 @@ WallpaperManagerService -->> WallpaperManagerService:unbindService()
 
 ## 分析
 
-抓取 Winscope，查看 SF 层级，发现在闪黑的时候，壁纸图层消失了，等过了几帧后才出现，那么分析出现之前最后一帧的状态，取消勾选 `Only visible`（因为此时是不可见的状态，取消勾选才能看到未显示的图层）， 看到对应壁纸图层的 BbqSurface 消失了，而将要显示的新壁纸的 BbqSurface 是存在的（为什么新壁纸不可见，写明了原因：Buffer is empty，即新壁纸还没有向它的 Bbq 绘制），这种 Buffer 类型的图层才是真正显示内容的地方，所以原因就找到了，就是旧的 Bbq 已经被移除，但是新的 Bbq 还没有绘制，而源码中，注意 attach() 和 detach() 都是异步的，所以有可能旧壁纸移除时新壁纸还没有准备好，所以导致闪黑。
+抓取 Winscope，查看 SF 层级，发现在闪黑的时候，壁纸图层消失了，等过了几帧后才出现，那么分析出现之前最后一帧的状态，取消勾选 `Only visible`（因为此时是不可见的状态，取消勾选才能看到未显示的图层）， 看到对应壁纸图层的 BbqSurface 消失了，而将要显示的新壁纸的 BbqSurface 是存在的（为什么新壁纸不可见，写明了原因：Buffer is empty，即新壁纸还没有向它的 Bbq 绘制），这种 Buffer 类型的图层才是真正显示内容的地方，<font color=red>**所以原因就找到了，1️⃣就是旧的 Bbq 已经被移除，2️⃣但是新的 Bbq 还没有绘制**</font>，而源码中，注意 attach() 和 detach() 都是异步的，所以有可能旧壁纸移除时新壁纸还没有准备好，所以导致闪黑。
 
 ## 解决
 
 前面知道 BBQ 被移除，所以可以看 SurfaceControl 的 `remove()`（其他还有 `show()/hide()` API 也经常用） API 的调用堆栈，通过调用堆栈看到和之前 detach() 流程中的 `SurfaceControl:Transaction.remove(mBbqSurfaceControl)` 对上了。
 
-<font color=red>首先尝试注释这行</font>，结果还是有闪黑，抓取 winscope 发现 BBQ 没有被移除了，但是 winscope 右侧显示状态是不可见，原因是 `Invisible due to: Alpha is 0`，而 alpha 值通常和动画有关，图层中也存在 leash 图层（动画相关），所以考虑是窗口移除动画导致 alpha 为 0。
+<font color=red>首先尝试注释这行</font>，结果还是有闪黑，抓取 winscope 发现 BBQ 没有被移除了，但是 winscope 右侧显示状态是不可见，<font color=red>**3️⃣原因是 `Invisible due to: Alpha is 0`，而 alpha 值通常和动画有关，图层中也存在 leash 图层（动画相关），所以考虑是窗口移除动画导致 alpha 为 0**</font>。
 
 接下来<font color=red>尝试注释掉移除 WindowState 和 WindowToken 的代码</font>，移除后发现闪黑确实解决了，但是dumpsys window 的时候发现每次切换壁纸，都会多一个 WindowToken，会导致内存泄漏，<font color=red>**所以需要找到合适的时机移除而不是不移除**</font>。
 

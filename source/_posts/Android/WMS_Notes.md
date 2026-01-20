@@ -874,16 +874,12 @@ https://blog.csdn.net/learnframework/article/details/148973403
 #### 1.adb 命令方式离线抓取
 
 ``` shell
-# 1、启用抓取windows和sf数据
-# WindowManager:
+# 抓取 WindowManager:
 adb shell cmd window tracing start
-# SurfaceFlinger：
-adb shell su root service call SurfaceFlinger 1025 i32 1
-
-# 2、停用抓取
-# WindowManager: 
 adb shell cmd window tracing stop
-# SurfaceFlinger：
+
+# 抓取 SurfaceFlinger：
+adb shell su root service call SurfaceFlinger 1025 i32 1
 adb shell su root service call SurfaceFlinger 1025 i32 0
 
 # 3、获取抓取pb文件
@@ -934,16 +930,54 @@ https://mp.weixin.qq.com/s/4suK7-drFenNxiHvIeAokw
 
 adb 抓取方式有较大差异；
 
+``` shell
+# 抓取 WindowManager 命令继续可用:
+adb shell cmd window tracing start
+adb shell cmd window tracing stop
+
+# 抓取 SurfaceFlinger 命令不可用：
+adb shell su root service call SurfaceFlinger 1025 i32 1
+adb shell su root service call SurfaceFlinger 1025 i32 0
+# 报错
+Result: Parcel(Error: 0xfffffffffffffffe "No such file or directory")
+```
+
+报错原因是源码中 1025 的分支已经 Deprecated 了，建议用 Perfetto 抓取
 
 
 
+**解决方案：**
 
-/data/misc/wmtrace
+``` shell
+# 开始抓取
+$ adb shell perfetto --out /data/misc/perfetto-traces/winsocpe-proxy-trace.perfetto-trace --txt --config /data/misc/perfetto-configs/winscope-proxy-trace.conf --detach=WINSCOPE-PROXY-TRACING-SESSION
+# 结束抓取
+$ adb shell perfetto --attach=WINSCOPE-PROXY-TRACING-SESSION --stop
+# 导出数据
+$ adb pull /data/misc/perfetto-traces/winscope-proxy-trace.perfetto-trace
+
+# windowmanager 相关的还是原来的命令以及目录
+```
+
+
+
+网页端运行依赖：
+
+- `npm run start`：浏览器的运行后台
+- `python3 development/tools/winscope/src/adb/winscope_proxy.py`：负责帮忙抓取设备上的数据服务
+
+
+
+生成路径：*/data/misc/wmtrace*
 
 - layers_trace.winscope：Surface 相关 trace
+    - Android 15 版本 SF winscope trace 路径：`/data/misc/perfetto-traces/winscope-proxy-trace.perfetto-trace`
+
 - wm_trace.winscope：Window 相关 trace
 
 prebuilts/misc/common/winscopewinscope.html 打开网页
+
+
 
 发现没有壁纸的 SurfaceFlinger 图层，这是根本原因
 
