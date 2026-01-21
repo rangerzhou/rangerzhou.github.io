@@ -1883,6 +1883,10 @@ record_android_trace -o /h/Android/traces/$(date +%Y%m%d_%H%M%S)_trace_file.perf
 
 点击图标时的 down 和 up
 
+# 11 Shell Transition
+
+
+
 # 10 面试题
 
 ### Activity 启动流程
@@ -2044,6 +2048,38 @@ SF 层面可以直接创建一个 Layer 吗
 使用 dumpsys window windows 查看窗口信息，或者使用 dumpsys SurfaceFlinger 查看 HWC 信息
 
 APPLICATION_TYPE_OVERLAY 的窗口，dumpsys 信息查看到窗口之后，在 ViewRootImpl.setView() 中根据包名和 type 类型进行拦截（ActivityThread.currentPackageName() 接口直接获取包名信息）。
+
+
+
+黑屏
+
+黑屏本质上是**“有窗口，没内容”**或**“连窗口都没创建成功”**。
+
+- **启动黑屏：** 检查 `onCreate` 是否有耗时操作阻塞了第一帧；
+- **运行黑屏：** 确认 `setContentView` 是否被调用，或者 View 树是否因为异常逻辑被设置为 `INVISIBLE/GONE`。
+- **焦点检查：** 使用 `adb shell dumpsys window windows | grep mCurrentFocus`。如果焦点不在当前 Activity，说明被透明窗口挡住了。
+
+
+
+冻屏
+
+冻屏本质上是**“有内容，没响应”**。
+
+- **主线程死锁：** 典型的“子线程持 A 锁等主线程，主线程持 B 锁等子线程”。
+- **Binder 线程池耗尽：** App 无法响应系统的 `lifecycle` 指令。
+- **输入分发超时：** 使用 `dumpsys input` 检查事件是否堆积在 `InputDispatcher`。
+- **核心工具：** **`kill -3` (SIGQUIT)** 生成 Trace 文件。
+    - 通过 Trace 查看主线程状态：`MONITOR`（等锁）、`WAITING`（等 IO/信号量）。
+
+
+
+闪屏
+
+闪屏本质上是**“中间状态的错误展示”**。
+
+- **白闪/黑闪：** Activity 跳转时，由于两个 Activity 窗口动画不衔接，或者底层 Activity 销毁过快露出背景。
+
+
 
 [FWK 面经](https://bbs.csdn.net/topics/616075900)
 
@@ -2296,4 +2332,6 @@ Android 多线程
 - AsyncTask
 - Executor
 - IntentService
+
+### 渲染原理
 
