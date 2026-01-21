@@ -2083,6 +2083,42 @@ APPLICATION_TYPE_OVERLAY 的窗口，dumpsys 信息查看到窗口之后，在 V
 
 [FWK 面经](https://bbs.csdn.net/topics/616075900)
 
+### MVC/MVP/MVVM
+
+MVC
+
+- **View 持有 Controller：** 因为 Activity 本身就是 Controller，所以它们是强耦合的（同为一个类）。
+- **Controller 持有 View：** 同上。
+- **Controller 持有 Model：** Controller 需要直接调用 Model 进行数据获取或存储。
+- **Model 持有 View：** **这是 MVC 的痛点。** 在经典 MVC 中，Model 变化后会通过回调或观察者模式通知 View。在 Android 中，这常导致 Model 间接持有 Activity 引用，处理不当极易导致内存泄漏。
+
+MVP
+
+MVP 的核心是**通过接口隔离**，将 View 层与逻辑层彻底解耦。
+
+- **View 持有 Presenter：** Activity 持有 Presenter 的强引用。
+- **Presenter 持有 View：** **核心点。** Presenter 持有的是 View 的 **接口引用**（如 `IMyView`，P 对 V 的持有通常是**持久**的贯穿整个页面生命周期）。
+    - *注意：* 虽然是接口引用，但在运行时它指向的是具体的 Activity。如果 Presenter 内部有异步任务且没有在 `onDestroy` 中解绑，就会导致内存泄漏。
+- **Presenter 持有 Model：** Presenter 持有 Model 的接口，用于处理业务逻辑。
+- **Model：** 不持有任何人的引用（实际上持有 P 的引用，只不过这个持有是瞬时的，异步回调完就丢弃了），只负责提供数据。
+
+MVVM
+
+MVVM 的核心是**单向依赖**和**数据驱动**。
+
+- **View 持有 ViewModel：** Activity 持有 ViewModel 的强引用。
+- **ViewModel 持有 View：** **绝对不持有。**
+    - 这是 MVVM 与 MVP 的最大区别。ViewModel 绝对不能持有任何 `Context` 或 `View` 的引用。
+    - ViewModel 通过暴露 `LiveData` 或 `Flow` 让 View 订阅，实现“数据找人”而非“人找数据”。
+- **ViewModel 持有 Model：** 通过 Repository（仓库）持有数据层引用。
+- **Model：** 依然是孤立的，只负责数据生产。
+
+总结
+
+- 传统 MVC 中，V 和 C 互相持有，C 持有 M，M 持有 V，在 Android 中的 MVC，V 和 C 都是 Activity，C 也持有 M，M 也持有 V；
+- MVP 中，V 持有 P，P 持有 V 的接口引用，P 持有 M，M 瞬时持有 P 的接口引用（可以理解为不持有），解决了 MVC 中 M 持有 V 的问题；
+- MVVM 中，V 持有 VM，VM 持有 M，VM 通过暴露 Livedata 让 V 订阅，解决了 MVP 中 P 持有 V 的问题； 
+
 ### Lifecycle 总结
 
 > Lifecycle 是通过 Activity/Fragment 主动上报生命周期事件， 由 LifecycleRegistry 维护状态并通知 Observer 的一套生命周期感知机制。
@@ -2123,6 +2159,37 @@ Lifecycle/ViewModel/LiveData
 - 原理：调用 `observe(owner, observer)` 时，LiveData 将观察者包装成一个 `LifecycleBoundObserver`，它实现了 `LifecycleEventObserver` 接口，从而能挂载到宿主的生命周期上；每次数据更新，LiveData 会检查宿主状态，只有在 STARTED 或 RESUMED 时才会触发 Observer 的回调；当感知到生命周期变为 `DESTROYED` 时，LiveData 会自动调用 `removeObserver`；
 - LiveData 内部维护一个 `mVersion` 版本号。当新观察者订阅时，如果观察者的版本号小于 LiveData 的版本号，它会立即收到最后一次缓存的数据。
 - `postValue()` 可以在子线程调用，它内部通过 `Handler` 将任务抛到主线程执行，且在主线程处理前，多次调用 `postValue` 只会保留最后一次的值。
+
+### DataBinding 总结
+
+只有 LiveData（手动搬运）
+
+- **XML:** 普通写法。
+- **Activity:** 1. 找到 TextView。 2. 定义 Observer 闭包。 3. 调用 `observe` 方法。 4. 手动处理 null 判断或类型转换。
+
+LiveData + DataBinding（自动驾驶）
+
+- **XML:** 写上 `@={viewModel.name}`。
+
+- **Activity:** 1. 绑定布局。 2. 设置 `lifecycleOwner`。 3. 把 `viewModel` 传给 `binding`。
+
+    ``` java
+    // 绑定布局
+    val binding: ActivityMainBinding = DataBindingUtil.setContentView(this, R.layout.activity_main)
+    // 【关键步】：建立生命周期关联
+    binding.lifecycleOwner = this 
+    // 给变量赋值
+    binding.viewModel = myViewModel
+    ```
+
+    当设置了 `binding.lifecycleOwner = this` 之后，DataBinding 生成的代码（例如 `ActivityMainBindingImpl`）会执行以下逻辑：
+
+    1. **自动识别：** 它发现你在 XML 里引用了 `viewModel.name`。
+    2. **类型检查：** 它发现 `name` 是一个 `LiveData` 类型。
+    3. **替你代劳：** 它会自动在内部调用类似 `viewModel.name.observe(lifecycleOwner, ...)` 的方法。
+    4. **自动更新：** 当 `LiveData` 变化时，它生成的代码会自动调用 `textView.setText()`。
+
+- **结果：** 以后无论你修改了 `viewModel.name` 多少次，UI 都会自动跟着变，Activity 里的代码 **永远不需要改动**。
 
 ### Dagger2 总结
 
