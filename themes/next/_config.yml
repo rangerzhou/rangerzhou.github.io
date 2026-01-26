@@ -913,3 +913,9 @@ vendors:
 css: css
 js: js
 images: images
+
+# 添加 APlayer 播放器
+aplayer:
+  cdn: https://cdn.jsdelivr.net/npm/aplayer/dist/APlayer.min.js
+  style_cdn: https://cdn.jsdelivr.net/npm/aplayer/dist/APlayer.min.css
+  meting: true # 如果要使用 MetingJS
