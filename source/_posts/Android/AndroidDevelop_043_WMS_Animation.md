@@ -74,9 +74,15 @@ mLayoutParams.windowAnimations = R.style.MyWindow;
 
 常见 proto log：`WM_DEBUG_REMOTE_ANIMATIONS/WM_DEBUG_ANIM WM_DEBUG_APP_TRANSITIONS_ANIM/WM_DEBUG_APP_TRANSITIONS/WM_DEBUG_STARTING_WINDOW/WM_DEBUG_STATES/WM_SHOW_SURFACE_ALLOC`
 
-壁纸动画 window_animation，leash 挂到了 WallpaperWindowToken 的上面
 
-App 动画 app_transition，leash 挂到了 Task上面
+
+- window_animation
+    - 壁纸动画，leash 挂到了 `WallpaperWindowToken` 的上面
+- app_transition，挂在 `DefaultTaskDisplayArea` 下面
+    - Launcher 关闭动画：挂在 `ActivityRecord  的 Task 上面`
+    - APP 打开动画：展示 Splash Screen 的 Window 的时候，挂在 `ActivityRecord  的 Task 上面`
+    - 
+- 
 
 
 
