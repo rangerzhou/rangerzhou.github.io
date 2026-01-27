@@ -111,7 +111,7 @@ menu:
   archives: /archives/ || fa fa-archive
   #schedule: /schedule/ || fa fa-calendar
   #sitemap: /sitemap.xml || fa fa-sitemap
-  commonweal: /404/ || fa fa-heartbeat
+  commonweal: /404.html || fa fa-heartbeat
   official: /official || fa fa-user
   shop: http://rangerzhou.taobao.com/ || fa fa-user
   pansou: https://pansou.902519.xyz:8443 || fa fa-video
