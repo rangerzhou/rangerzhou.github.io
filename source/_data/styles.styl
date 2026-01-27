@@ -1,0 +1,40 @@
+// ======================================================
+// APlayer 播放器视觉样式调整
+// ======================================================
+
+// 1. 调整固定播放器的位置，避免遮挡 NexT 的 UI 元素
+.aplayer.aplayer-fixed {
+    z-index: 1050; // 确保在某些弹窗之下，但在正文之上
+    bottom: 10px;  // 距离底部距离
+    left: 10px;    // 距离左侧距离
+    box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+    border-radius: 0 4px 4px 0;
+    transition: all 0.3s ease;
+}
+
+// 2. 当播放器处于迷你模式（Mini）时的额外调整
+.aplayer.aplayer-fixed.aplayer-narrow {
+    width: 66px; // 稍微加宽一点，防止封面显示不全
+}
+
+// 3. 针对手机端（移动端）的适配
+@media (max-width: 767px) {
+    .aplayer.aplayer-fixed {
+        bottom: 5px;
+        left: 5px;
+        // 如果移动端也想隐藏，可以解开下面注释
+        // display: none; 
+    }
+}
+
+// 4. 这里的样式可以改变播放列表激活状态的颜色（可选）
+.aplayer .aplayer-list ol li.aplayer-list-light {
+    background: #e9e9e9;
+}
+
+// 5. 与 NexT 的“回到顶部”按钮和侧边栏开关错开
+// 如果你的侧边栏在左边，建议调整播放器左边距
+.sidebar-active .aplayer.aplayer-fixed {
+    margin-left: 320px; // 这里的数值需根据你主题设置的侧边栏宽度决定
+    transition: margin-left 0.2s ease-in-out;
+}

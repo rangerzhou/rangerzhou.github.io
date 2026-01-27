@@ -150,13 +150,15 @@ live2d:
     use: live2d-widget-model-haru
   display:
     position: left
-    width: 300
-    height: 800
+    width: 100
+    height: 266
+    vOffset: 64
   mobile:
     show: false
 
 aplayer:
   meting: true       # MetingJS 支持
+  asset_inject: true
 #  cdn: https://cdn.jsdelivr.net/npm/aplayer/dist/APlayer.min.js  # 引用 APlayer.js 外部 CDN 地址 (默认不开启)
 #  style_cdn: https://cdn.jsdelivr.net/npm/aplayer/dist/APlayer.min.css
 #  meting_cdn: https://cdn.jsdelivr.net/npm/meting/dist/Meting.min.js # 引用 Meting.js 外部 CDN 地址 (默认不开启)
