@@ -114,6 +114,7 @@ menu:
   commonweal: /404/ || fa fa-heartbeat
   official: /official || fa fa-user
   shop: http://rangerzhou.taobao.com/ || fa fa-user
+  pansou: https://pansou.902519.xyz:8443 || fa fa-video
 
 # Enable / Disable menu icons / item badges.
 menu_settings:
@@ -143,7 +144,7 @@ sidebar:
   #  - always  expand for all pages automatically.
   #  - hide    expand only when click on the sidebar toggle icon.
   #  - remove  totally remove sidebar including sidebar toggle.
-  display: hide
+  display: post
 
   # Sidebar padding in pixels.
   padding: 18
@@ -834,7 +835,7 @@ firestore:
 # Show Views / Visitors of the website / page with busuanzi.
 # For more information: http://ibruce.info/2015/04/04/busuanzi/
 busuanzi_count:
-  enable: false
+  enable: true
   total_visitors: true
   total_visitors_icon: fa fa-user
   total_views: true
@@ -864,7 +865,7 @@ local_search:
   # Unescape html strings to the readable one.
   unescape: false
   # Preload the search data when the page loads.
-  preload: false
+  preload: true
 
 
 # ---------------------------------------------------------------
@@ -892,7 +893,8 @@ chatra:
 # Dashboard: https://www.tidio.com/panel/dashboard
 tidio:
   enable: false
-  key: # Public Key, get it from dashboard. See: https://www.tidio.com/panel/settings/developer
+  # Public Key, get it from dashboard. See: https://www.tidio.com/panel/settings/developer
+  key: rhnla14zpypauc2imoy3sqjdawnzjywe
 
 
 # ---------------------------------------------------------------

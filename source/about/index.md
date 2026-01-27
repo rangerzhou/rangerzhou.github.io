@@ -20,11 +20,11 @@ categories: "Freedom"
 
 ##### 小哥哥微信
 
-![小哥哥微信](http://rangerzhou.top/images/wechat.jpg)
+![小哥哥微信](../images/wechat.jpg)
 
 
 
 ##### 公众号
 
-![公众号](http://rangerzhou.top/images/qrcode_official_15cm.jpg)
+![公众号](../images/qrcode_official_15cm.jpg)
 
