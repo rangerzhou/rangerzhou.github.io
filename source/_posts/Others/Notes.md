@@ -1401,3 +1401,11 @@ git push origin master
 git config --global gui.encoding utf-8
 ```
 
+#### 47 git status 中文转义
+
+关闭路径转义即可：
+
+```
+git config --global core.quotepath false
+```
+
