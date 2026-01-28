@@ -1394,3 +1394,10 @@ git push origin master
 - **WebDAV 账户**：登陆 WebDAV 的用户名（通常和 NAS 的用户名一样）
 - **WebDAV 密码**：登陆 WebDAV 的密码（通常和 NAS 的密码一样）
 - **远程文件夹名称**：备份文件想保存的目录，比如想把 v2rayN 备份到访问 WebDAV 服务器地址后的目录 `/backup/v2rayN`，那么这里就写 `/backup/v2rayN`
+
+#### 46 gitk 中文乱码
+
+``` shell
+git config --global gui.encoding utf-8
+```
+

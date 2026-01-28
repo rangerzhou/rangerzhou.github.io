@@ -86,6 +86,69 @@ mLayoutParams.windowAnimations = R.style.MyWindow;
 
 
 
+andrid 手机，从桌面点击图标打开短信应用，这个过程中抓取了 WinScope，显示有5个动画： 
+
+- 壁纸动画：挂载在 WallpaperWindowToken 之上的 Surface `animation-leash of window_animation`
+
+    ``` scss
+    Leaf:0:1#8
+    └── Surface leash-animation of window_animation
+      ├── WallpaperWindowToken
+        ├── ImageWallpaper
+          ├── ImageWallpaper
+            ├── Wallpaper BBQ wrapper
+    ```
+
+    
+
+- Launcher 动画：挂载在 DefaultTaskDisplayArea 之下，Launcher Task 之上的 Surface `animation-leash of app_transition`
+
+    ``` scss
+    DefaultTaskDisplayArea
+    └── Surface leash-animation of app_transition
+      ├── Task(Launcher)
+        ├── ActivityRecord
+          ├── SplashScreen WindowState
+    ```
+
+    
+
+- APP 打开动画：挂载在 DefaultTaskDisplayArea 之下，短信 Task（Task 的 ActivityRecord 的 WindowState 是短信的 SplashScreen 图层） 之上的 Surface `animation-leash of app_transition`
+
+    ``` scss
+    DefaultTaskDisplayArea
+    └── Surface leash-animation of app_transition
+      ├── Task(短信)
+        ├── ActivityRecord
+          ├── SplashScreen WindowState
+    ```
+
+    
+
+- 挂载在短信 ActivityRecord 和短信 Activity WindowState 之间的 Surface `animation-leash of starting_reveal` 图层，而且这个图层和 SplashScreen 所在 WindowState 的图层是同级的
+
+    ``` scss
+    Task
+    └── ActivityRecord（短信主页 Activity）
+      ├── Surface leash-animation of starting_reveal
+        ├── App 主 WindowState（短信主页）
+      ├── SplashScreen WindowState
+    ```
+
+    
+
+- 挂载在短信 ActivityRecord 和短信 SplashScreen WindowState 之间的 Surface `animation-leash of window_animation` 图层
+
+    ``` scss
+    Task 
+    └── ActivityRecord（短信主页 Activity）
+      ├── App 主 WindowState（短信主页）
+      ├── Surface leash-animation of window_animation
+        ├── SplashScreen WindowState
+    ```
+
+    
+
 
 
 
