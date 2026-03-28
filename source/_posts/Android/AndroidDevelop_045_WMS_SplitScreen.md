@@ -5,7 +5,7 @@ tags:
 categories: Android
 copyright: true
 password:
-published: false
+published: true
 ---
 
 > WMS 分屏。
@@ -204,3 +204,6 @@ sequenceDiagram
 
 ```
 
+分屏焦点判断
+
+获得焦点的应用，在层级结构树中靠上
