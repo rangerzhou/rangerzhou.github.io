@@ -25,6 +25,32 @@ FloatingTaskView：TaskView 的“可动画副本”，用于分屏动画，不�
 
 # Launcher 部分
 
+## 点击分屏按钮时序
+
+```mermaid
+sequenceDiagram
+autonumber
+TaskMenuView ->> TaskShortcutFactory:SplitSelectSystemShortcut.onClick()
+TaskShortcutFactory ->> TaskView:initiateSplitSelect()
+TaskView ->> LauncherRecentsView:initiateSplitSelect()
+LauncherRecentsView ->> StateManager:goToState()
+```
+
+RecentsView.createInitialSplitSelectAnimation() 打堆栈，[堆栈参考](https://blog.csdn.net/learnframework/article/details/130901312?ops_request_misc=%257B%2522request%255Fid%2522%253A%252267da93805f75def1de6f8f2ae3495483%2522%252C%2522scm%2522%253A%252220140713.130102334.pc%255Fblog.%2522%257D&request_id=67da93805f75def1de6f8f2ae3495483&biz_id=0&utm_medium=distribute.pc_search_result.none-task-blog-2~blog~first_rank_ecpm_v1~rank_v31_ecpm-17-130901312-null-null.nonecase&utm_term=%E5%88%86%E5%B1%8F&spm=1018.2226.3001.4450)
+
+## 点击第二个 Task 时序
+
+```mermaid
+sequenceDiagram
+autonumber
+TaskView ->> TaskView:onClick()
+TaskView ->> TaskView:confirmSecondSplitSelectApp()
+```
+
+
+
+## 总结
+
 Android T 的分屏流程被重构为 **Launcher 负责动画与选择，SystemUI/WM Shell 负责真正的分屏创建**。
 
 当用户在 Recents 中点击 “Split top” 时，Launcher 会：
@@ -56,7 +82,7 @@ sequenceDiagram
 
     User ->> TaskView: 点击 Split Top
     TaskView ->> RecentsView: initiateSplitSelect()
-    RecentsView ->> RecentsView: 创建 FloatingTaskView\n播放上屏动画
+    RecentsView ->> RecentsView: 创建 FloatingTaskView，播放上屏动画
     RecentsView ->> SplitSelectCtrl: enterSplitSelect()
 
     User ->> TaskView: 点击第二个 Task
@@ -150,7 +176,7 @@ sequenceDiagram
     StageCoordinator ->> SplitLayout: init() 创建分割线 Surface
     StageCoordinator ->> SplitLayout: setDivideRatio() / updateBounds()
 
-    StageCoordinator ->> WCT: 构建 WCT\n- setBounds\n- reorder\n- startTask
+    StageCoordinator ->> WCT: 构建 WCT- setBounds- reorder- startTask
     WCT ->> WM: applyTransaction()
 
     WM ->> WM: 执行 task reparent / bounds 设置
@@ -174,7 +200,7 @@ sequenceDiagram
         - 根据 launchOptions 找到分屏 RootTask，把分屏的 RootTask 放到最前台并展示出来
         - 将 Activity 的 Task **reparent** 到 MainStage / SideStage（挂载到上下分屏对应的 Task 下面）
 
-SystemUI 构建好 WindowContainerTransaction 后，会交给 system_server 的 WindowOrganizerController 处理。 system_server 首先解析所有 Change，通过 `applyWindowContainerChange()` 将分屏 bounds 写入 Task 的 override configuration。 然后解析 HierarchyOp：REORDER 会把分屏 RootTask 置顶；LAUNCH_TASK 会调用 `startActivityFromRecents()`。 在启动任务时，`anyTaskForId()` 会完成关键的 reparent，把两个任务挂到 MainStage 和 SideStage。 最后通过 `moveTaskToFrontLocked()` 启动 Activity，形成真正的分屏结构树。
+SystemUI 构建好 WindowContainerTransaction 后，会交给 system_server 的 WindowOrganizerController 处理。 system_server 首先解析所有 Change，通过 `applyWindowContainerChange()` 将分屏 bounds 写入 Task 的 override configuration。 然后解析 HierarchyOp：REORDER 会把分屏 RootTask 置顶；LAUNCH_TASK 会调用 `startActivityFromRecents()`。 在启动任务时，`anyTaskForId()` 会完成关键的 reparent，把两个 Activity 的 Task 挂载到 MainStage 和 SideStage。 最后通过 `moveTaskToFrontLocked()` 启动 Activity，形成真正的分屏结构树。
 
 一句话总结： **SystemUI 负责构建 WCT，system_server 负责执行 WCT，最终完成 reparent、bounds 设置和任务启动，形成真正的分屏。**
 
@@ -191,19 +217,28 @@ sequenceDiagram
 
     SystemUI ->> WOC: applyTransaction(WCT)
     WOC ->> WOC: 遍历 Changes
-    WOC ->> WC: applyWindowContainerChange()\n应用 bounds / config
+    WOC ->> WC: applyWindowContainerChange() 应用 bounds / config
 
     WOC ->> WOC: 遍历 HierarchyOps
-    WOC ->> WM: applyHierarchyOp(REORDER)\nRootTask 置顶
-    WOC ->> ATMS: applyHierarchyOp(LAUNCH_TASK)\nstartActivityFromRecents()
+    WOC ->> WM: applyHierarchyOp(REORDER) RootTask 置顶
+    WOC ->> ATMS: applyHierarchyOp(LAUNCH_TASK)，startActivityFromRecents()
 
-    ATMS ->> ATMS: anyTaskForId()\nreparent 到分屏 RootTask
-    ATMS ->> ATMS: moveTaskToFrontLocked()\nresume / focus
+    ATMS ->> ATMS: anyTaskForId() reparent 到分屏 RootTask
+    ATMS ->> ATMS: moveTaskToFrontLocked() resume / focus
 
-    ATMS ->> WM: 完成分屏结构树\n(MainStage / SideStage)
+    ATMS ->> WM: 完成分屏结构树 (MainStage / SideStage)
 
 ```
 
 分屏焦点判断
 
 获得焦点的应用，在层级结构树中靠上
+
+
+
+
+
+
+
+Shell：`frameworks/base/libs/WindowManager/Shell`
+
