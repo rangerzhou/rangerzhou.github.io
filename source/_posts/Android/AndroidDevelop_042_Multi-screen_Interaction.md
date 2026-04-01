@@ -445,7 +445,7 @@ void startAutoMove(int offsetX, boolean toOther) {
 
 ## 9 移动后下层 ActivityRecord 复位
 
-通过之前的源码，虽然显示都正常，但是记得我们之前设置了 `mLaunchTaskBehind`，所以在 winScope 其实可以看到设置了 `mLaunchTaskBehind = true` 的 Activity 的右侧顶部的`` Invisible due to` 信息是不正确的，显示是被遮挡，但是其实应该显示 `Hidden by parrent xxx`，所以我们应该在动画结束时恢复之前设置的 `mLaunchTaskBehind = false`
+通过之前的源码，虽然显示都正常，但是记得我们之前设置了 `mLaunchTaskBehind`，所以在 winScope 其实可以看到设置了 `mLaunchTaskBehind = true` 的 Activity 的右侧顶部的 `Invisible due to` 信息是不正确的，显示是被遮挡，但是其实应该显示 `Hidden by parrent xxx`，所以我们应该在动画结束时恢复之前设置的 `mLaunchTaskBehind = false`
 
 ``` java
 // DisplayContent.java

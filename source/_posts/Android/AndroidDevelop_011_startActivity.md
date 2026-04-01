@@ -176,7 +176,7 @@ getService() 返回的是 `IActivityTaskManager.Stub.asInterface(b);`，这是�
     }
 ```
 
-通过 obtailStarter() 获取 ActivityStarter 对象并设置一些参数，最终调用到 ActivityStarter.execute()
+通过 obtainStarter() 获取 ActivityStarter 对象并设置一些参数，最终调用到 ActivityStarter.execute()
 
 ### 3.2 ActivityStarter
 
