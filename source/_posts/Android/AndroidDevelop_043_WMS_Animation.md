@@ -178,7 +178,67 @@ andrid 手机，从桌面点击图标打开短信应用，这个过程中抓取�
         - 当 SplashScreen 还在上面盖着，而下面的 `App 主 WindowState` 准备好了，系统会通过这个 Leash 同步两者的状态。
         - 你看到的第 4 步正是起到了“承重墙”的作用：它确保在 SplashScreen 消失的过程中，底下的主界面能以正确的节奏显示出来。
 
+## Launcher 处理部分
 
+``` mermaid
+sequenceDiagram
+autonumber
+QuickstepTransitionManager ->> QuickstepTransitionManager:getActivityLaunchOptions()
+Note over QuickstepTransitionManager:内部类对象 AppLaunchAnimationRunner，实现 onAnimationStart/onAnimationCancelled
+QuickstepTransitionManager ->> QuickstepTransitionManager:delegateRunner=new AppLaunchAnimationRunner()
+Note over QuickstepTransitionManager,LauncherAnimationRunner:以 delegateRunner 为参构造 LauncherAnimationRunne
+QuickstepTransitionManager ->> LauncherAnimationRunner:runner=new LauncherAnimationRunner(delegateRunner)
+QuickstepTransitionManager ->> ActivityOptions:makeRemoteAnimation(RemoteAnimationAdapter)
+Note over QuickstepTransitionManager,RemoteAnimationAdapter:以runner为参构造 RemoteAnimationAdapter 对象
+Note over QuickstepTransitionManager,RemoteAnimationAdapter:这样Adapter 就持有了 AppLaunchAnimationRunner
+QuickstepTransitionManager ->> RemoteAnimationAdapter:new RemoteAnimationAdapter(runner)
+%%QuickstepTransitionManager ->> ActivityOptionsWrapper:new ActivityOptionsWrapper()
+```
+
+Launcher 进程在 `startActivitySafely()` 中调用上述 `getActivityLaunchOptions().toBundle()`，把 optsBundle 通过 `context.startActivity(intent, optsBundle)` 传给 system_server 进程，如此以来
+
+- ActivityOptionsWrapper 通过 `options` 持有 <font color=bule>**ActivityOptions**</font>，ActivityOptionsWrapper 被转为 Bundle 对象传递到 system_server 进程
+- QuickstepTransitionManager 通过 `makeRemoteAnimation()` 创建的 <font color=bule>**ActivityOptions(opts.mAnimationType = ANIM_REMOTE_ANIMATION)**</font> 持有 <font color=green>**RemoteAnimationAdapter**</font>
+- <font color=green>**RemoteAnimationAdapter**</font> 通过 `mRunner` 持有 <font color=blue>**LauncherAnimationRunner**</font>
+- <font color=blue>**LauncherAnimationRunner**</font> 通过 `mFactory` 持有 <font color=red>**AppLaunchAnimationRunner**</font>
+- 
+- <font color=red>**AppLaunchAnimationRunner**</font> 是 QuickstepTransitionManager 的内部类，实现了 RemoteAnimationFactory，RemoteAnimationFactory 是定义在 <font color=blue>**LauncherAnimationRunner**</font> 中的 interface，定义了 `onAnimationStart()/onAnimationCancelled()` 方法
+- <font color=blue>**LauncherAnimationRunner**</font> 继承自 RemoteAnimationRunnerCompat，RemoteAnimationRunnerCompat 继承自 `IRemoteAnimationRunner.Stub`
+- RemoteAnimationRunnerCompat 中的 `onAnimationStart()`通过调用子类的 `onAnimationStart()` 向子类（<font color=blue>**LauncherAnimationRunner**</font>）传入了一个 runnable，runnable 中调用了 `finishedCallback.onAnimationFinished()`，
+- <font color=blue>**LauncherAnimationRunner**</font> 中的 `onAnimationStart()` 又通过传入的 Runnable 创建了 AnimationResult 对象，并通过 getFactory() 获取到 <font color=red>**AppLaunchAnimationRunner**</font> 对象，再通过 `AppLaunchAnimationRunner.onAnimationStart()` 把 AnimationResult 传递到 <font color=red>**AppLaunchAnimationRunner**</font> 中，
+- `QuickstepTransitionManager.AppLaunchAnimationRunner.onAnimationStart()` 则调用 `AnimationResult.setAnimation()` 设置动画
+
+## system_server 处理部分
+
+在构造 ActivityRecord 时，调用了 `setOptions(ActivityOptions)`，
+
+``` java
+// ActivityRecord.java
+    private RemoteAnimationAdapter mPendingRemoteAnimation;
+
+    private void setOptions(@NonNull ActivityOptions options) {
+        mLaunchedFromBubble = options.getLaunchedFromBubble();
+        mPendingOptions = options;
+        // makeRemoteAnimation 时赋值 ANIM_REMOTE_ANIMATION
+        if (options.getAnimationType() == ANIM_REMOTE_ANIMATION) {
+            // 保存传入的 RemoteAnimationAdapter
+            mPendingRemoteAnimation = options.getRemoteAnimationAdapter();
+        }
+        mPendingRemoteTransition = options.getRemoteTransition();
+    }
+```
+
+这样 ActivityRecord 就通过 `mPendingRemoteAnimation` 持有了 RemoteAnimationAdapter，
+
+接下来在启动流程的 `TaskFragment.resumeTopActivity()` 中，调用了 `DisplayContent.prepareAppTransition()` 和 `DisplayContent.applyOptionsAnimation()`，并把 `mPendingRemoteAnimation` 传入 AppTransition 中用于构建 `RemoteAnimationController` 对象：
+
+``` scss
+ActivityRecord:applyOptionsAnimation()
+	AppTransition:overridePendingAppTransitionRemote(mPendingRemoteAnimation)
+		new RemoteAnimationController()
+```
+
+RemoteAnimationController 通过 `mRemoteAnimationAdapter` 持有了 RemoteAnimationAdapter 对象；
 
 
 
