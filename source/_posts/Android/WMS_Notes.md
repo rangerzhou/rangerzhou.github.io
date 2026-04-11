@@ -1,8 +1,16 @@
 ---
-title: 内部笔记：学习笔记
-date: 2026-01-05
-published: false
+title: Android - WMS Notes
+date: 2025-01-05 23:22:19
+tags:
+categories: Android
+copyright: true
+password: zr.
+published: true
 ---
+
+> WMS 学习笔记。
+
+<!--more-->
 
 # 2 Bootanimation
 
