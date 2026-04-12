@@ -247,6 +247,12 @@ Note over LauncherAnimationRunner,QuickstepTransitionManager:传递 AnimationRes
 LauncherAnimationRunner ->> QuickstepTransitionManager:AppLaunchAnimationRunner.onAnimationStart(AnimationResult)
 Note over QuickstepTransitionManager,AnimatorSet:创建 AnimatorSet
 QuickstepTransitionManager ->> AnimatorSet:new AnimatorSet()
+Note over QuickstepTransitionManager:play
+QuickstepTransitionManager ->> QuickstepTransitionManager:composeIconLaunchAnimator()
+Note over QuickstepTransitionManager:获取动画
+QuickstepTransitionManager ->> QuickstepTransitionManager:getOpeningWindowAnimators()
+Note over QuickstepTransitionManager,AnimatorSet:播放动画
+QuickstepTransitionManager ->> AnimatorSet:play()
 QuickstepTransitionManager -->> LauncherAnimationRunner:AnimationResult.setAnimation()
 LauncherAnimationRunner ->> AnimatorSet:start()
 AnimatorSet -->> LauncherAnimationRunner:AnimationResult.finish()
@@ -394,7 +400,7 @@ AppTransition ->> RemoteAnimationController:new RemoteAnimationController(Remote
 
 - DisplayContent::executeAppTransition 会调用： `AppTransition::setReady()`
 - 将状态置为： `APP_STATE_READY`
-- 触发一次 **requestTraversal()**，等待下一次 layout
+- <font color=red>触发一次 **requestTraversal()**，等待下一次 layout</font>
 
 触发 setReady 的两种典型路径：
 

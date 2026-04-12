@@ -1409,3 +1409,7 @@ git config --global gui.encoding utf-8
 git config --global core.quotepath false
 ```
 
+#### 48 trae.ai ZIP code
+
+填写 `51800` 即可。
+
