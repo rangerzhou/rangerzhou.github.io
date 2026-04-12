@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)"><meta name="generator" content="Hexo 8.1.1">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/desert.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/desert.jpg">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <meta name="google-site-verification" content="OJnYjbr3wdT22qLrZSzyD9lAyBcXiXlEQ7-5wAnaWoQ">
+  <meta name="baidu-site-verification" content="vr4n4JeXgB">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" integrity="sha256-VHqXKFhhMxcpubYf9xiWdCiojEbY9NexQ4jh8AxbvcM=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"852988.xyz","root":"/","images":"/images","scheme":"Mist","darkmode":true,"version":"8.27.0","exturl":false,"sidebar":{"position":"right","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":"gitalk","storage":true,"lazyload":true,"nav":null,"activeClass":"gitalk"},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":true}}</script><script src="/js/config.js" defer></script>
+
+    <meta name="description" content="Here&#39;s something encrypted, password is required to continue reading.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android - ShellTransition 学习">
+<meta property="og:url" content="https://852988.xyz/2026/04/02/Android/AndroidDevelop_049_WMS_ShellTransition/index.html">
+<meta property="og:site_name" content="RangerZhou">
+<meta property="og:description" content="Here&#39;s something encrypted, password is required to continue reading.">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2026-04-02T15:08:22.000Z">
+<meta property="article:modified_time" content="2026-04-12T18:22:15.335Z">
+<meta property="article:author" content="Ranger Zhou">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://852988.xyz/2026/04/02/Android/AndroidDevelop_049_WMS_ShellTransition/">
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://852988.xyz/2026/04/02/Android/AndroidDevelop_049_WMS_ShellTransition/","path":"2026/04/02/Android/AndroidDevelop_049_WMS_ShellTransition/","title":"Android - ShellTransition 学习"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>Android - ShellTransition 学习 | RangerZhou</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-138158952-1"></script>
+  <script class="next-config" data-name="google_analytics" type="application/json">{"tracking_id":"UA-138158952-1","only_pageview":false,"measure_protocol_api_secret":null}</script>
+  <script src="/js/third-party/analytics/google-analytics.js" defer></script>
+
+  <script src="/js/third-party/analytics/baidu-analytics.js" defer></script>
+  <script async src="https://hm.baidu.com/hm.js?8ad0c721b994ab05ee97bd41ba54e048"></script>
+
+
+
+
+
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/next-theme-pjax/0.6.0/pjax.min.js" integrity="sha256-vxLn1tSKWD4dqbMRyv940UYw4sXgMtYcK6reefzZrao=" crossorigin="anonymous" defer></script>
+<script src="/js/comments.js" defer></script><script src="/js/utils.js" defer></script><script src="/js/motion.js" defer></script><script src="/js/sidebar.js" defer></script><script src="/js/next-boot.js" defer></script><script src="/js/pjax.js" defer></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.5.0/search.js" integrity="sha256-xFC6PJ82SL9b3WkGjFavNiA9gm5z6UBxWPiu4CYjptg=" crossorigin="anonymous" defer></script>
+<script src="/js/third-party/search/local-search.js" defer></script>
+
+
+  <script class="next-config" data-name="mermaid" type="application/json">{"enable":true,"theme":{"light":"default","dark":"dark"},"js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mermaid/11.10.1/mermaid.min.js","integrity":"sha256-BmQmdWDS8X2OTbrwELWK366LV6escyWhHHe0XCTU/Hk="}}</script>
+  <script src="/js/third-party/tags/mermaid.js" defer></script>
+
+
+
+
+
+  
+  <script data-pjax async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">RangerZhou</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">Read the fucking source code</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-playlist"><a href="/playlist/" rel="section"><i class="fa fa-music fa-fw"></i>歌单</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li><li class="menu-item menu-item-commonweal"><a href="/404.html" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a></li><li class="menu-item menu-item-official"><a href="/official" rel="section"><i class="fa fa-user fa-fw"></i>official</a></li><li class="menu-item menu-item-shop"><a href="http://rangerzhou.taobao.com/" rel="section" target="_blank"><i class="fa fa-user fa-fw"></i>shop</a></li><li class="menu-item menu-item-pansou"><a href="https://pansou.902519.xyz:8443/" rel="section" target="_blank"><i class="fa fa-video fa-fw"></i>pansou</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+      <div class="search-header">
+        <span class="search-icon">
+          <i class="fa fa-search"></i>
+        </span>
+        <div class="search-input-container">
+          <input autocomplete="off" autocapitalize="off" maxlength="80"
+                placeholder="搜索..." spellcheck="false"
+                type="search" class="search-input">
+        </div>
+        <span class="popup-btn-close" role="button">
+          <i class="fa fa-times-circle"></i>
+        </span>
+      </div>
+      <div class="search-result-container">
+        <div class="search-result-icon">
+          <i class="fa fa-spinner fa-pulse fa-5x"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-overview-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Ranger Zhou</p>
+  <div class="site-description" itemprop="description">我是一个小流氓我从来也不浪，有一天我心血来潮耍了个流氓，我嘴里吹着小口哨我心里好得意，不知怎么哗啦啦啦啦我摔了一身泥</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">97</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">24</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/rangerzhou" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;rangerzhou" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:rangero_o@qq.com" title="E-Mail → mailto:rangero_o@qq.com" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://rangerzhou.taobao.com/" title="Taobao → http:&#x2F;&#x2F;rangerzhou.taobao.com&#x2F;" rel="noopener me" target="_blank"><i class="fab fa-youtube fa-fw"></i>Taobao</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="/images/wechat.jpg" title="WeChat → &#x2F;images&#x2F;wechat.jpg" rel="noopener me"><i class="fab fa-youtube fa-fw"></i>WeChat</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="http://blog.csdn.net/ranger0220?viewmode=contents" title="CSDN → http:&#x2F;&#x2F;blog.csdn.net&#x2F;ranger0220?viewmode&#x3D;contents" rel="noopener me" target="_blank"><i class="fab fa-youtube fa-fw"></i>CSDN</a>
+      </span>
+  </div>
+
+        </div>
+      </div>
+    </div>
+
+    
+    <div class="sidebar-inner sidebar-blogroll">
+      <div class="links-of-blogroll animated">
+        <div class="links-of-blogroll-title"><i class="fa fa-globe fa-fw"></i>
+          链接
+        </div>
+        <ul class="links-of-blogroll-list">
+            <li class="links-of-blogroll-item">
+              <a href="http://rangerzhou.taobao.com/" title="http:&#x2F;&#x2F;rangerzhou.taobao.com" rel="noopener" target="_blank">Taobao</a>
+            </li>
+        </ul>
+      </div>
+    </div>
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://852988.xyz/2026/04/02/Android/AndroidDevelop_049_WMS_ShellTransition/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Ranger Zhou">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="RangerZhou">
+      <meta itemprop="description" content="我是一个小流氓我从来也不浪，有一天我心血来潮耍了个流氓，我嘴里吹着小口哨我心里好得意，不知怎么哗啦啦啦啦我摔了一身泥">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="Android - ShellTransition 学习 | RangerZhou">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Android - ShellTransition 学习
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2026-04-02 23:08:22" itemprop="dateCreated datePublished" datetime="2026-04-02T23:08:22+08:00">2026-04-02</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2026-04-13 02:22:15" itemprop="dateModified" datetime="2026-04-13T02:22:15+08:00">2026-04-13</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/Android/" itemprop="url" rel="index"><span itemprop="name">Android</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span id="busuanzi_value_page_pv"></span>
+    </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus：</span>
+    
+    <a title="disqus" href="/2026/04/02/Android/AndroidDevelop_049_WMS_ShellTransition/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2026/04/02/Android/AndroidDevelop_049_WMS_ShellTransition/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><div class="hbe hbe-container" id="hexo-blog-encrypt" data-wpm="Oh, this is an invalid password. Check and try again, please." data-whm="OOPS, these decrypted content may changed, but you can still have a look.">
+  <script id="hbeData" type="hbeData" data-hmacdigest="f9a8a23304c99ac62fad37a5749acaea216479f596f36088eed25227538c2a3d">8a594f550020b2c4c53139d4c120877c670d47411eb78fc0c4abbfbe587bcfe2cb113c41bfd328c5065f6f2b39026d346a12ba8473dca30b30f240c25870a030489e615608fa9f6e76f98000ee177152e76d6a95c217e988b4d906c34b48bd06c561fecb61502376067f4deb2da17be1dcbae3e86c8e69f0e1e448dfd4040abf79f321fb32109ecc1343fcac9e185e6d4544677b561fc43351e23ea5518574b2139e272c97b707a613cb5296f5b3e348b5c8d88480ff605033b6598baa43b3225d7173fa010cb6f3d7f9524f0af91f4443071921465f954317130cef99ab094885d44414fa40e44effe17f7a3c69c8dbd50e8a7985ceed135d184c0f061dd66cdd5ce7c1470033e87b22bc8db3dfd0e4c4c5869bd579acfdfdad9db03e4d4fb5a835bdd8136c6d9044da70436e717515c6859270e62c159d431572012ae1625a1981514e9ca9117bec6bdbf4ab0f003ebf194148c5bd5862b5a585e451836bf2f8bf05d1b849c602a294665e5b8d845268e35d4a33eca24ba9c82c8cab45244b3bd94410fc7eab90bd771c1ea4d8600917250c3e07a0f28cdd29e79a8d269db027de2938c616f5bccb05b118b96412c316321baf36976a1909e741c1b16dabedd67d01949b295b1d243f335a959296dd3ba8853f0cecb034cf854d585f8f5e107703d5041432001ce3dbd34f39e84092757a4f55bd67a93005b485c6be635458cf2bade148e0edbace53dccca5b82ab710a9b598ab1a99e8e780db8f62dc318b31ab9ba673dd3b42690f48f245e28bdb75d08a3ca61441a021dced725492a99b027fd6daaf29c4250cf36d7da9b0871c262875685d06030911c209fa8314aca77968c4e206dcd0e66635eadeb4c07dec4d64d15da410b1cc5ea626ada38847a4018a99e8a9a00291991d8a68b2deed38afb62bedba9fe621c3ee9d2136f22eadba05a785c472eeb26a98d5a7c2679e2df007506f9ba0e10e0a117c5b462a40a7631bbf4c922c67ede2723b832bcc7d07522e9fa44b34835ed7abe27a95e36486710bb908da35e1beaca0727341b245a6bc075792facaf40d1608578e77140b6accde9759ad4a1ad4284a5f32815e35fc2736fd37f9cd965a5eb977fe468a56839669820a3cb70007672fdb095e677850942529e1d385dd973d9b2572a7d6ee3aef1293146e243ba28b0dec8f2615887ae305d0d0fe0877f66adb1e9f5a71a0c9d1d3db710768e282f74822abb0a1b7f279170f1fc1fe366363e6477c4e484a5b9fd953e0815aa01187e32285ca6322967d2794878a067d921a5f49474d8c25f55062d709dba3cf4b7fad69e9ad78101bf704a716898f3bda9b4be763b6874e15bbd9bd27f824c54d9fa2e622f3fa1854df14e64d99e2795e091ba3def2751618954aa572081fdf7b9aaa3199b3556893f7439b9f484617e58068b9795911346b528a071cfa30e780f13559de5e78671ffd1044b42db17f12915d2834ed3f7061fe5890c2c0f5cf0b8dc8ae4035f95115a9d4ab301ce88501a42f4f2989897ad000bdcb63707c59329c20603daed634b3211fcc308dfd1fe232a2e48a155acd84339aedf77a652d67ca8f2f5037665af26ab6060873f2dcbb3b0d965025153685299e625170622493aa7c586a555bd40f469dc4dafce6c9ff761231059b80c52b473c985e962d46ede1e5b22917e37c14fb38ddf1849af7ddfd27b1bd7ca788b1a1281951f302af484d9876cc0134c80a9a4ae690c05a987cb89c27e6b2a85f2ee4876cde81a8a965e20432be82bac003934caa77ee517247454697f0cd22cbbf4781eee3765f11566f97e4b068ad16cbb39cd2f8d1e5f0644c3af9504d865bdf43ecc43a85b02cb8dcda457783aa53bf0138e9627aa65fd94210a6f5aed55374c91dfd91abe8e17462e050d6a266449bbc11d3d847fed22d757d2484c7bdcfee07a3b6f83b60f4ad84ee6c2e9fbe7777619a2e8662a2650f5b7020f8e8c8c534a602b06040f651b2a6e52c79c51d93177346c1f7ca7988451f4a774e61b2c95c6e5d417e76b65ef43a6028084c1298adeb851c20b60e1abe2535ae1e42dfdbd73d231c9f00598816195649144f4c1480c619dd46eab138154fa411ef955d5a9b2d870bac38ea51a70b486c574b0f630152c90e03acb24f184e690f0dd1182cc6b009faeab52670440a5d17fdfde96a4351bb7bf1d223d433c7d6bd41bd3df7b5f1c7c68e7bb1ec8bcd38585aa5afe3cbe592f8f5e6e1ee89d30b88ee4d924babd4b206de14a98a86345882ffa8d21c3b92aa88eb651bd67e0757f18de5734420e10fac8723dbe802b51ef7425de353fea1d577943715c8218c4390dd3c9a17d639e78634f54d7da5ecce069d9d82c34e0a797bf772fa675ecc53d0b6873afd3ef20739bbdb15c2b98f3d4094f337ea3f4fe9530384fd63a5ae545a68b8e2014b242b0ae1cebc39370957a6ea21051a0ac6caac2b0d2c85d4985df25e418634fc380da0d27f37738f3fa3da6139a05dbcc56621817b56ba32a246f67380f0acec523afb2ff146bbd505b48f6385562208818b9d5a706eff4117cbb7c97a2affd392910cb7e3d9ad8b564a2c01aad545a33b374b44fb77ea89c2a9df9b3f1f407b11ec951223cb2d0e58d667ec1a7740b35ad38a5e1b3a358bad78ad483f01c94df9d289d3b3ca71724a4efbe6c5aec0bead88ab150aaac85a0ec6fdfafde915a6942c07ae3415a2a78bf2408f0d3600163eddf47e88a162247c11757f279fca9d5281dac064cac8cce2f9948e1b31389411f28db5e74ef324e822921678279c45c8baf852cdaf32d69c08fadab9bc91d2442917dd7b7429bde118dd2d24aa267cab69aa497525dc223c288beee1ea5dc92668670ebec71517a89c32bb52eadfa3e879376e475efe992411d4ed1ca7b5c464c62c9b3e1ce88433ba89c367b2bf3cee42dc280e1febb2e4de159f45f00cf04ab337f7695ddff2bd1a30537ad48ff052d9fc8194ea4920b5e7af9178de35861e5460c2b8c1fcf2740bafa4d2c7fb5f37d35cc6a1f22666e9ecb2e0a56820e619ebbc44387eb95d67ca387b3cef57cf34714ae6debbb2873f9d1a4a2cdfbc3277eec8d0100936f0ed8b0f7d8eda5b3f31373f27176d3149eb208fb5ac6bc535e33f287554fd2e1b13fa58db21870563835ba21ffa7c644d02df4a7e4d9db76ddfdebf7b6bbc535c14fd142052859491ac8466a362876da71c7ba6ab818647b4107f040fb2bf1bc3e1ab5928aa4def5efea2da08533876bd1a81264611d77be86be74dd87c34310efebcae98d903faff57344a9ce7011e456c4ea5f96271881c1d3d98c6964d4fef589b679386cf2108b58fe3853d1cc51d3af16d033439119da09795ce164f23ff5ef4ab5b08aaf0b3bb169a71d484abbcf398759709bb3cb413cf14156138ebbd5ff43cf21fd47103ef96a64b43a751350164fcb4945f97debcf64a4572f1cc8b42a72682accaee653c997da66e9950d4ac66ec73c3a37a113e91a2999a3e03065b890415b935f342aaa01ba0d1bfbeeb7181505e3a00e657535d1e0f82414969d15dea3d82ceee477ef6d8d14cb4f40ca4b400330fd78f957b4edc3eba4d293d11e095b91cdede592c3705fd198f338b7f93e9139613fbeb50d69fb6d47f5cf5fb007db465efad599b40ddd8cb6d154f1f8c19f964031796460b0b18ea41b8d774c9c695aba6cbf772249272210b39f15ecea4c2214a0ba9974ccd03c4b8e1c0660bcaccff58b6c2e34b072b78457692dd71d64eb760e174cdf805324f89e327a90d577c0790f6dc45e0e0d863fd5bd1739f74494a9b13c05b114c2c7d12d5b412677a2b089da3270ae5e253a222d791b31a78703063788adfd632ad3fde3e8f9f448c7b798057befa2e13508b3cfee7fc5b81b5427b0f71db9738f985a16cac77d0b4e41b91d1c63f2a396d5158a35aa9f97abef2a7ae8591b05c0e68224bfb5316ef6b2fa7b1d66d2a3a9fb1066212f8626f43790df6cb89597ddf5fc87c9f4caeb1669dd921a9e9605d44013867334f879024f87c2c46c03abf97d1d2742e3923258bae6e3b50efc10ced0730c2e8262793d7a1cd334b768e8babe443542aab78d2026ae4d7a05c72b696c19d8886f326e3f33bf0e76dd5012168248991a460d0efa0db227e89439533f34e882e307502cdb7d8444a5b943bf0675b3ac272e3b3952dc2cffccb60a91f09152b2dfc5dca18f8cea48d9c4a4a7c6d53e698b7ba52714e278cc99cbc84b16ddf79ffbd5d26389b002a5c8395b114ec9e96a92f5bc7528fdf758bd5e3f2fb828cf3a62c7b87fb93ef668523e606ad1c38092ba0974721ee2542ccffbc62d658bd0893e6cce9dc915b7a89c78c98b9ca55e3b8aee1fe4a6792a0f09d32b6ebe742079f6f33388105922e468c385f32dd8358ebb6aabc797042acc279c6bf8f3b581558e9d440c44dc8b270349046a245f2c22cc81c660a5af0843de752242b01c77b07dd10560afd980b5f77cead2e5ceec463ca888b462b9fbb85a93d36f877f7143990eeb502944290de1075fa6a9ef6767439d92a688e93faa2a55bcf5f046b6f7d38cc4b7eeb31e0c4b5efee473809cf859292ea708ec5f0bc117940a2afebc547f9053e8f3331f1159b</script>
+  <div class="hbe hbe-content">
+    <div class="hbe hbe-input hbe-input-default">
+      <input class="hbe hbe-input-field hbe-input-field-default" type="password" id="hbePass">
+      <label class="hbe hbe-input-label hbe-input-label-default" for="hbePass">
+        <span class="hbe hbe-input-label-content hbe-input-label-content-default">Hey, password is required here.</span>
+      </label>
+    </div>
+  </div>
+</div>
+<script data-pjax src="/lib/hbe.js"></script><link href="/css/hbe.style.css" rel="stylesheet" type="text/css">
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="reward-container">
+  <div>请我一杯咖啡吧！</div>
+  <button>
+    赞赏
+  </button>
+  <div class="post-reward">
+      <div>
+        <img src="/images/wechatpay.jpg" alt="Ranger Zhou 微信">
+        <span>微信</span>
+      </div>
+      <div>
+        <img src="/images/alipay.jpg" alt="Ranger Zhou 支付宝">
+        <span>支付宝</span>
+      </div>
+
+  </div>
+</div>
+
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2026/04/01/Android/AndroidDevelop_048_WMS_SnapshotStartingWindow/" rel="prev" title="Android - SnapshotStartingWindow">
+                  <i class="fa fa-angle-left"></i> Android - SnapshotStartingWindow
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+      <div class="tabs tabs-comment">
+        <ul class="nav-tabs">
+            <li class="tab"><a href="#comment-disqus">disqus</a></li>
+            <li class="tab"><a href="#comment-gitalk">gitalk</a></li>
+            <li class="tab"><a href="#comment-livere">livere</a></li>
+        </ul>
+        <div class="tab-content">
+            <div class="tab-pane disqus" id="comment-disqus">
+              
+  <div class="comments" id="disqus_thread">
+    <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+  </div>
+  
+            </div>
+            <div class="tab-pane gitalk" id="comment-gitalk">
+              <div class="comments gitalk-container"></div>
+            </div>
+            <div class="tab-pane livere" id="comment-livere">
+              <div class="comments" id="lv-container" data-id="city" data-uid="MTAyMC8yOTcyNS82Mjky"></div>
+            </div>
+        </div>
+      </div>
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 2016 – 
+    <span itemprop="copyrightYear">2026</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">Ranger Zhou</span>
+  </div>
+<div class="busuanzi-count">
+    <span class="post-meta-item" id="busuanzi_container_site_uv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/mist/" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aplayer/dist/APlayer.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/aplayer/dist/APlayer.min.js"></script>
+    
+    <div id="aplayer-fixed" class="aplayer"></div>
+
+    <script>
+      const ap = new APlayer({
+        container: document.getElementById('aplayer-fixed'),
+        fixed: true,          // 吸底模式
+        mini: true,           // 迷你模式
+        order: 'random',      // 随机播放
+        autoplay: true,       // 自动播放
+        audio: [
+        {
+          name: '成都',
+          artist: '赵雷',
+          url: '/music/成都.mp3',   // 这里的路径相对于 source 目录
+          cover: '/music-cover/成都.jpg'   // 封面图路径
+        },
+        {
+          name: 'AmysLullabyII',
+          artist: 'Mars Lasar',
+          url: '/music/AmysLullabyII.mp3',
+          cover: '/music-cover/AmysLullabyII.jpg'
+        },
+        {
+          name: 'Five Hundred Miles',
+          artist: 'Justin Timberlake; ',
+          url: '/music/FiveHundredMiles.mp3',
+          cover: '/music-cover/FiveHundredMiles.jpg'
+        },
+        {
+          name: 'On a Slow Boat To China',
+          artist: 'Luke Thompson',
+          url: '/music/OnaSlowBoatToChina.mp3',
+          cover: '/music-cover/OnaSlowBoatToChina.jpg'
+        },
+        {
+          name: '阿拉斯加海湾',
+          artist: '蓝心羽',
+          url: '/music/阿拉斯加海湾.mp3',
+          cover: '/music-cover/阿拉斯加海湾.jpg'
+        },
+        {
+          name: '安河桥',
+          artist: '宋冬野',
+          url: '/music/anheqiao.mp3',
+          cover: '/music-cover/安河桥.jpg'
+        },
+        {
+          name: '好久不见',
+          artist: '陈奕迅',
+          url: '/music/好久不见.mp3',
+          cover: '/music-cover/好久不见.jpg'
+        },
+        {
+          name: '麻雀',
+          artist: '李荣浩',
+          url: '/music/麻雀.mp3',
+          cover: '/music-cover/麻雀.jpg'
+        },
+        {
+          name: '平凡之路',
+          artist: '朴树',
+          url: '/music/平凡之路.mp3',
+          cover: '/music-cover/平凡之路.jpg'
+        },
+        {
+          name: '听闻远方有你',
+          artist: '刘艺雯',
+          url: '/music/听闻远方有你.mp3',
+          cover: '/music-cover/听闻远方有你.jpg'
+        },
+        {
+          name: '无赖',
+          artist: '郑中基',
+          url: '/music/无赖.mp3',
+          cover: '/music-cover/无赖.jpg'
+        },
+        {
+          name: '呓语',
+          artist: '蒋卓林',
+          url: '/music/呓语.mp3',
+          cover: '/music-cover/呓语.jpg'
+        },
+        {
+          name: '这些民谣一次听个够',
+          artist: '翁大涵',
+          url: '/music/这些民谣一次听个够.mp3',
+          cover: '/music-cover/这些民谣一次听个够.jpg'
+        }
+        ]
+      });
+    </script>
+  <script class="next-config" data-name="disqus" type="application/json">{"enable":true,"shortname":"rangerzhou","count":true,"i18n":{"disqus":"disqus"}}</script>
+<script src="/js/third-party/comments/disqus.js" defer></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/gitalk/1.8.0/gitalk.css" integrity="sha256-AJnUHL7dBv6PGaeyPQJcgQPDjt/Hn/PvYZde1iqfp8U=" crossorigin="anonymous">
+
+<script class="next-config" data-name="gitalk" type="application/json">{"enable":true,"github_id":"rangerzhou","repo":"rangerzhou.github.io","client_id":"b7bb504993135f5a2eab","client_secret":"6f83aec5c45d75e248e2914be90c4601e2e1dc44","admin_user":"rangerzhou","distraction_free_mode":true,"proxy":"https://cors-anywhere.azm.workers.dev/https://github.com/login/oauth/access_token","language":"zh-CN","body":null,"js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/gitalk/1.8.0/gitalk.min.js","integrity":"sha256-MVK9MGD/XJaGyIghSVrONSnoXoGh3IFxLw0zfvzpxR4="},"path_md5":"2daace0a4abb4481d9eae7e09ddaaacd"}</script>
+<script src="/js/third-party/comments/gitalk.js" defer></script>
+<script src="/js/third-party/comments/livere.js" defer></script>
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/haru01.model.json"},"display":{"position":"left","width":100,"height":266,"vOffset":64},"mobile":{"show":false},"log":false});</script></body>
+</html>
