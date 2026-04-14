@@ -1054,6 +1054,9 @@ Andrid 开启方式变更：https://blog.csdn.net/learnframework/article/details
 
 ```shell
 adb shell wm logging enable-text WM_DEBUG_REMOTE_ANIMATIONS WM_DEBUG_ANIM WM_DEBUG_APP_TRANSITIONS_ANIM WM_DEBUG_APP_TRANSITIONS WM_DEBUG_STARTING_WINDOW WM_DEBUG_STATES WM_DEBUG_ORIENTATION WM_DEBUG_FOCUS_LIGHT WM_DEBUG_FOCUS WM_DEBUG_WINDOW_TRANSITIONS WM_SHOW_SURFACE_ALLOC WM_SHOW_TRANSACTIONS
+
+# WMShell 端开启
+adb shell dumpsys activity service SystemUIService WMShell protolog enable-text WM_SHELL_TRANSITIONS
 ```
 
 
