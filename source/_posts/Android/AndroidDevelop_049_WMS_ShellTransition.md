@@ -59,7 +59,7 @@ Transition.startCollecting()
 
 - 设置 `mState = STATE_COLLECTING`
 
-- 通过 `startSyncSet()` 创建 `SyncGroup` 并返回其 ID，``startSyncSet()` 作用：
+- 通过 `startSyncSet()` 创建 `SyncGroup` 并返回其 ID，`startSyncSet()` 作用：
 
     - 通过 `prepareSyncSet()` 创建 `SyncGroup`
 
@@ -76,3 +76,85 @@ WMCore 与 WMShell 流程图
 WMCore 和 WMShell 启动流程
 
 ![WMCore 与 WMShell 流程图](../../images/2026/startActivityUnchecked.png)
+
+一次打开应用所要 Collect 的内容
+
+- 要启动的 ActivityRecord，通过 `ActivityStarter.startActivityUnchecked()` 中调用 `collec()`
+
+    ```scss
+    ActivityStarter.startActivityUnchecked()
+    	Transition.collect()
+    ```
+
+    
+
+- 手机 Task，创建 ActivityRecord 对应的 Task 阶段调用
+
+    ```scss
+    ActivityStarter.startActivityUnchecked()
+    	ActivityStarter.startActivityInner()
+    		ActivityStarter.setNewTask()
+    			TransitionController.collectExistenceChange()
+    				Transition.collectExistenceChange()
+    					Transition.collect()
+    ```
+
+    
+
+- 重复收集
+
+    ```scss
+    ActivityStarter.startActivityUnchecked()
+    	ActivityStarter.handleStartResult()
+    		TransitionController.collectExistenceChange()
+    			Transition.collect()
+    # 这里 return 了
+    if (mParticipants.contains(wc)) return;
+    ```
+
+    
+
+- 重复收集
+
+    ```scss
+    
+    ActivityRecord.setVisibility()
+    	TransitionController.collect()
+    		Transition.collect( )
+    ```
+
+    
+
+- 收集 QuickStepLauncher 
+
+    ```scss
+    ActivityClientController.activityPaused()
+    	ActivityRecord.activityPaused()
+    		TaskFragment.completePause()
+    			RootWindowContainer.ensureActivitiesVisible()
+    				DisplayContent.ensureActivitiesVisible()
+    					WindowContainer.forAllRootTasks()
+    						Task.forAllRootTasks()
+    							Task.ensureActivitiesVisible()
+    								Task.forAllLeafTasks()
+    									TaskFragment.updateActivityVisibilities()
+    										ActivityRecord.makeInvisible()
+    										ActivitySetVisibility()
+    										TransitionController.collect()
+    										Transition.collect()
+    ```
+
+    
+
+- ImageWallpaper（壁纸）
+
+    ```scss
+    ActivityRecord.makeInvisible()
+    	ActivityRecord.setVisibility()
+    		TransitionController.collect()
+    				Transition.collect()
+    					WallpaperController.collectTopWallpaper()
+    						Transition.collect()
+    ```
+
+    
