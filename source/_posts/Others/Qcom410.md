@@ -16,7 +16,7 @@ top:
 
 
 
-![image-20241115234900076](C:/Users/Ranger/AppData/Roaming/Typora/typora-user-images/image-20241115234900076.png)
+![miko_service_tool](../../images/2025/骁龙410_miko_service_tool.png)
 
 
 
